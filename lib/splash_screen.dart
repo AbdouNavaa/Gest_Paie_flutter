@@ -36,7 +36,7 @@ class _SplashScreenState extends State<SplashScreen> {
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
 
     return Scaffold(
-      backgroundColor: Colors.blue,
+      // backgroundColor: Colors.blue,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -49,7 +49,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   Text(
                     "Gestion",
                     style: GoogleFonts.italianno(
-                      color: Colors.white,
+                      color: Colors.black,
                       fontSize: 70.0,
                       fontStyle: FontStyle.italic,
                       fontWeight: FontWeight.bold,
@@ -60,7 +60,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   Text(
                     "Paiements",
                     style: GoogleFonts.italianno(
-                      color: Colors.white,
+                      color: Colors.black,
                       fontSize: 70.0,
                       fontStyle: FontStyle.italic,
                       fontWeight: FontWeight.bold,
@@ -72,7 +72,7 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
             SizedBox(height: 40),
             CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
             ),
           ],
         ),

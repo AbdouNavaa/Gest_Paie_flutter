@@ -22,6 +22,7 @@ class _UsersState extends State<Users> {
   Future<List<User>>? futureUser;
 
   List<User>? filteredItems;
+  bool _userIsActive = false; // Variable pour suivre l'état de l'utilisateur
 
   void DeleteUser(id) async{
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -159,13 +160,15 @@ class _UsersState extends State<Users> {
                                 horizontalMargin: 2,
                                 columnSpacing: 3,
                                 dataRowHeight: 50,
+                                // border: TableBorder.all(color: Colors.black12, width: 2),
                                 headingTextStyle: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.white, // Set header text color
+                                  color: Colors.black, // Set header text color
                                 ),
-                                headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xFF0C2FDA)), // Set row background color
+                                // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xFF0C2FDA)), // Set row background color
                                 columns: [
                                   DataColumn(label: Text('No')),
+                                  DataColumn(label: Text('Active')),
                                   DataColumn(label: Text('Nom')),
                                   DataColumn(label: Text('Email')),
                                   DataColumn(label: Text('Mobile')),
@@ -175,10 +178,31 @@ class _UsersState extends State<Users> {
                                 ],
                                 rows: [
                                   for (var index = 0; index < (filteredItems?.length ?? 0); index++)
+//                                    if(filteredItems?[index].role != 'admin')
                                     DataRow(
                                       cells: [
                                         DataCell(Text('${index + 1}',style: TextStyle(fontSize: 15),)), // Numbering cell
-                                        DataCell(Container(width: 70,
+                                        DataCell(
+                                            CupertinoSwitch(
+                                              activeColor: Colors.black,
+                                              value: filteredItems![index].isActive!,
+                                              onChanged: (value) async {
+                                                // Continue with the rest of your onChanged logic if the types string is in the expected format
+                                                setState(() {
+                                                  filteredItems![index].isActive = value;
+                                                });
+
+                                                Navigator.of(context).pop();
+
+
+                                                  ActiveUser(
+                                                    filteredItems![index].id,
+                                                    filteredItems![index].isActive!,
+                                                  );
+                                              },
+                                            )
+
+                                        ), DataCell(Container(width: 70,
                                             child: Text('${filteredItems?[index].name } ${filteredItems?[index].prenom}'))),
                                         DataCell(Container(width: 150,
                                             child: Text('${filteredItems?[index].email}',)),),
@@ -363,16 +387,18 @@ class _UsersState extends State<Users> {
           label: Row(
             children: [Icon(Icons.add,color: Colors.black,)],
           ),
-          onPressed: () => _displayTextInputDialog(context),
+          // onPressed: () => _displayTextInputDialog(context),
+          onPressed: () {},
 
         ),
 
 
       ),
-      bottomNavigationBar: BottomNav(),
+      // bottomNavigationBar: BottomNav(),
 
     );
   }
+
 
   Future<void> _displayTextInputDialog(BuildContext context) async {
     // TextEditingController _name = TextEditingController();
@@ -537,7 +563,7 @@ class User {
   final num mobile;
   final String email;
   final String role;
-  final bool isActive;
+   late final bool? isActive;
 
 
   User({
@@ -547,7 +573,7 @@ class User {
     required this.email,
     required this.mobile,
     required this.role,
-    required this.isActive,
+     this.isActive,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -595,6 +621,41 @@ Future<List<User>> fetchUser() async {
   }
 }
 
+Future<void> ActiveUser( id,bool isActive) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String token = prefs.getString("token")!;
+  final url = 'http://192.168.43.73:5000/user/'  + '/$id';
+  final headers = {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer $token',
+  };
+  Map<String, dynamic> body =({
+    'active':isActive
+  });
+
+
+  try {
+    final response = await http.patch(
+      Uri.parse(url),
+      headers: headers,
+      body: json.encode(body),
+    );
+
+    if (response.statusCode == 201) {
+      // Course creation was successful
+      print("Course created successfully!");
+      final responseData = json.decode(response.body);
+      print("Course ID: ${responseData['cours']['_id']}");
+      // You can handle the response data as needed
+    } else {
+      // Course creation failed
+      print("Failed to create course. Status code: ${response.statusCode}");
+      print("Error Message: ${response.body}");
+    }
+  } catch (error) {
+    print("Error: $error");
+  }
+}
 
 
 

@@ -82,8 +82,8 @@ class _SignUpSectionState extends State<SignUpSection> {
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          Color(0xFF0C2FDA),
-                          Color(0xFF0C2FDA)
+                          Color(0xFFFFFFFF),
+                          Color(0xFFFFFFFF)
                         ],
                       ),
                       borderRadius: BorderRadius.only(
@@ -101,7 +101,7 @@ class _SignUpSectionState extends State<SignUpSection> {
                           //   size: 90,
                           //   color: Colors.white,
                           // ),
-                          Text('SIGN IN', style: TextStyle(color: Colors.white,fontSize: 40),)),
+                          Text('SIGN IN', style: TextStyle(color: Colors.black,fontSize: 40),)),
                       Spacer(),
 
                       // Align(
@@ -312,7 +312,9 @@ class _SignUpSectionState extends State<SignUpSection> {
                                   ]
                               ),
                               child: TextField(
-                                  decoration: InputDecoration(icon: IconButton(
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    icon: IconButton(
                                       onPressed: () {
                                         setState(() {
                                           hidePassword = !hidePassword;
@@ -364,7 +366,9 @@ class _SignUpSectionState extends State<SignUpSection> {
                                   ]
                               ),
                               child: TextField(
-                                  decoration: InputDecoration(icon: IconButton(
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    icon: IconButton(
                                       onPressed: () {
                                         setState(() {
                                           hidePassword = !hidePassword;

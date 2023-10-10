@@ -311,32 +311,31 @@ class _UpdateCoursDialogState extends State<UpdateCoursDialog> {
                 ),
 
                 SizedBox(height: 16,),
-                // DropdownButtonFormField<bool>(
-                //   value: _selectedSigne,
-                //   items: [
-                //     DropdownMenuItem<bool>(
-                //       child: Text('True'),
-                //       value: true,
-                //     ),
-                //     DropdownMenuItem<bool>(
-                //       child: Text('False'),
-                //       value: false,
-                //     ),
-                //   ],
-                //   onChanged: (value) {
-                //     setState(() {
-                //       _selectedSigne = value!;
-                //     });
-                //   },
-                //   decoration: InputDecoration(
-                //     filled: true,
-                //     fillColor: Colors.white,
-                //     hintText: "taux",
-                //     border: OutlineInputBorder(
-                //       borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                //     ),
-                //   ),
-                // ),
+                DropdownButtonFormField<bool>(
+                  value: _selectedSigne,
+                  items: [
+                    DropdownMenuItem<bool>(
+                      child: Text('True'),
+                      value: true,
+                    ),
+                    DropdownMenuItem<bool>(
+                      child: Text('False'),
+                      value: false,
+                    ),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedSigne = value!;
+                    });
+                  },
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    ),
+                  ),
+                ),
 
               ],
             ),
@@ -472,7 +471,7 @@ Future<List<Matiere>> fetchMatieresByCategory(String categoryId) async {
   }
 }
 
-Future<void> updateCours( id,String professeurId,String matiereId, List<Map<String, dynamic>> types, DateTime? date, bool isSigne) async {
+Future<void> updateCours( id,String professeurId,String matiereId, List<Map<String, dynamic>> types, DateTime? date, bool isPaid) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String token = prefs.getString("token")!;
   final url = 'http://192.168.43.73:5000/cours/'  + '/$id';
@@ -485,7 +484,7 @@ Future<void> updateCours( id,String professeurId,String matiereId, List<Map<Stri
     'matiere': matiereId,
     'types': types,
     // 'date': date?.toIso8601String(),
-    'isSigne':isSigne
+    'isPaid':isPaid
   });
 
   if (date != null) {

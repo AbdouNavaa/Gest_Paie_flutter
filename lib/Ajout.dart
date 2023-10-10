@@ -139,7 +139,17 @@ class _AddCoursDialogState extends State<AddCoursDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(height: 110,
-              color: Color(0xA3B0AF1),
+              // color: Color(0xA3B0AF1),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 5,
+                  ),
+                ],
+              ),
+
               child: SingleChildScrollView(scrollDirection: Axis.vertical,
                 child: Column(
                   children: availableTypes.map((type) {
@@ -180,10 +190,11 @@ class _AddCoursDialogState extends State<AddCoursDialog> {
               },
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Color(0xA3B0AF1),
+                // fillColor: Color(0xA3B0AF1),
                 hintText: "selection d'une Categorie",
+
                 border: OutlineInputBorder(
-                  borderSide: BorderSide.none,
+                  borderSide: BorderSide.none,gapPadding: 3,
                   borderRadius: BorderRadius.all(Radius.circular(10.0)),
                 ),
               ),
@@ -207,10 +218,10 @@ class _AddCoursDialogState extends State<AddCoursDialog> {
               },
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Color(0xA3B0AF1),
+                // fillColor: Color(0xA3B0AF1),
                 hintText: "selection d'une Matiere",
                 border: OutlineInputBorder(
-                  borderSide: BorderSide.none,
+                  borderSide: BorderSide.none,gapPadding: 3,
                   borderRadius: BorderRadius.all(Radius.circular(10.0)),
                 ),
               ),
@@ -232,10 +243,10 @@ class _AddCoursDialogState extends State<AddCoursDialog> {
               },
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Color(0xA3B0AF1),
+                // fillColor: Color(0xA3B0AF1),
                 hintText: "selection d'un  Professeur", // Update the hintText
                 border: OutlineInputBorder(
-                  borderSide: BorderSide.none,
+                  borderSide: BorderSide.none,gapPadding: 3,
                   borderRadius: BorderRadius.all(Radius.circular(10.0)),
                 ),
               ),
@@ -246,10 +257,10 @@ class _AddCoursDialogState extends State<AddCoursDialog> {
               controller: _date,
               decoration: InputDecoration(
                   filled: true,
-                  fillColor: Color(0xA3B0AF1),
+                  // fillColor: Color(0xA3B0AF1),
                   hintText: "Date",
                   border: OutlineInputBorder(
-                      borderSide: BorderSide.none,
+                      borderSide: BorderSide.none,gapPadding: 3,
                       borderRadius: BorderRadius.all(Radius.circular(10.0)))),
               // readOnly: true,
               onTap: () => selectTime(_date),

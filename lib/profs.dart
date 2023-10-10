@@ -316,7 +316,7 @@ class _ProfsState extends State<Profs> {
         ),
 
       ),
-      bottomNavigationBar: BottomNav(),
+      // bottomNavigationBar: BottomNav(),
 
     );
   }

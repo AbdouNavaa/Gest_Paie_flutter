@@ -1,29 +1,23 @@
 import 'dart:convert';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:gestion_payements/prof_info.dart';
 import 'package:gestion_payements/update.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'Ajout.dart';
-import 'Dashboard.dart';
-import 'categories.dart';
-import 'main.dart';
-import 'matieres.dart';
-// import 'package:multi_select_flutter/multi_select_flutter.dart';
 
 
 class CoursesPage extends StatefulWidget {
   final List<dynamic> courses;
   final int coursNum;
   final num heuresTV;
+  final String role;
   final num sommeTV;
   DateTime? dateDeb;
   DateTime? dateFin;
 // Calculate the sums for filtered courses
 
-  CoursesPage({required this.courses, required this.coursNum, required this.heuresTV, required this.sommeTV}) {}
+  CoursesPage({required this.courses, required this.coursNum, required this.heuresTV, required this.sommeTV, required this.role}) {}
 
 
 
@@ -301,15 +295,16 @@ class _CoursesPageState extends State<CoursesPage> {
                       // sortColumnIndex: 1,
                       // sortAscending: true,
                       headingRowHeight: 50,
-                      columnSpacing: 10,
+                      border: TableBorder.all(color: Colors.black12, width: 2),
+                      columnSpacing: 20,
                       horizontalMargin: 3,
                       // border: TableBorder(verticalInside: BorderSide(width: 1.5)),
                       dataRowHeight: 50,
                       headingTextStyle: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: Colors.white, // Set header text color
+                        color: Colors.black, // Set header text color
                       ),
-                      headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xFF0C2FDA)), // Set row background color
+                      // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xFF0C2FDA)), // Set row background color
                       columns: [
                         DataColumn(label: Text('No')),
                         DataColumn(label: Text('Prof')),
@@ -317,7 +312,9 @@ class _CoursesPageState extends State<CoursesPage> {
                         DataColumn(label: Text('Date')),
                         DataColumn(label: Text('Eq.CM')),
                         DataColumn(label: Text('Prix')),
-                        DataColumn(label: Text('Signe')),
+                        DataColumn(label: Text('Signé')),
+                        if (widget.role == "admin")
+                        DataColumn(label: Text('Payé')),
                         DataColumn(label: Text('Action')),
                       ],
                       rows: [
@@ -352,6 +349,11 @@ class _CoursesPageState extends State<CoursesPage> {
                                 DataCell(
                                   Icon( widget.courses[index]['isSigne']? Icons.verified:Icons.cancel,
                                       color: widget.courses[index]['isSigne']? Colors.green: Colors.red),
+                                ),
+                                if (widget.role == "admin")
+                                DataCell(
+                                  Icon( widget.courses[index]['isPaid']? Icons.verified:Icons.cancel,
+                                      color: widget.courses[index]['isPaid']? Colors.green: Colors.red),
                                 ),
                                 DataCell(
                                   Row(
@@ -516,7 +518,7 @@ class _CoursesPageState extends State<CoursesPage> {
 
       ),
 
-      bottomNavigationBar: BottomNav(),
+      // bottomNavigationBar: BottomNav(),
     );
 
   }

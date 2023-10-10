@@ -162,11 +162,12 @@ class _CategoriesState extends State<Categories> {
                                   headingRowHeight: 50,
                                   columnSpacing: 15,
                                   dataRowHeight: 50,
+                                  // border: TableBorder.all(color: Colors.black12, width: 2),
                                   headingTextStyle: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.white, // Set header text color
+                                    color: Colors.black, // Set header text color
                                   ),
-                                  headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xFF0C2FDA)), // Set row background color
+                                  // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xFF0C2FDA)), // Set row background color
                                   columns: [
                                     // DataColumn(label: Text('Code')),
                                     DataColumn(label: Text('Nom')),
@@ -406,7 +407,7 @@ class _CategoriesState extends State<Categories> {
 
 
       ),
-      bottomNavigationBar: BottomNav(),
+      // bottomNavigationBar: BottomNav(),
 
     );
   }

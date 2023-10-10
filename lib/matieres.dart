@@ -297,11 +297,12 @@ class _MatieresState extends State<Matieres> {
                                 headingRowHeight: 50,
                                 columnSpacing: 8,
                                 dataRowHeight: 50,
+                                // border: TableBorder.all(color: Colors.black12, width: 2),
                                 headingTextStyle: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.white, // Set header text color
+                                  color: Colors.black, // Set header text color
                                 ),
-                                headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xFF0C2FDA)), // Set row background color
+                                // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xFF0C2FDA)), // Set row background color
                                 columns: [
                                   // DataColumn(label: Text('Semestre')),
                                   DataColumn(label: Text('Code EM')),
@@ -579,7 +580,7 @@ class _MatieresState extends State<Matieres> {
         ),
 
       ),
-      bottomNavigationBar: BottomNav(),
+      // bottomNavigationBar: BottomNav(),
 
     );
   }
@@ -705,7 +706,8 @@ class _MatieresState extends State<Matieres> {
 
                         SizedBox(height: 10),
 
-                        ElevatedButton(onPressed: (){
+                        ElevatedButton(
+                          onPressed: (){
                           Navigator.of(context).pop();
                           // fetchMatiere();
                           AddMatiere(_name.text,selectedType, _description.text,selectedCateg!.id!);

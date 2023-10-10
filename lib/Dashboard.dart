@@ -52,7 +52,7 @@ class _LogoutScreenState extends State<LogoutScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: BottomNav(),
+      // bottomNavigationBar: BottomNav(),
     );
   }
 }
@@ -220,7 +220,7 @@ setState(() {
                   CoursesPage(courses: courses,
                     coursNum: coursNum,
                     heuresTV: heuresTV,
-                    sommeTV: sommeTV,)),
+                    sommeTV: sommeTV, role: '',)),
             );
           } else {
             // Handle error
@@ -280,7 +280,7 @@ setState(() {
                 CoursesPage(courses: courses,
                   coursNum: coursNum,
                   heuresTV: heuresTV,
-                  sommeTV: sommeTV,)),
+                  sommeTV: sommeTV, role: '',)),
           );
         } else {
           // Handle error

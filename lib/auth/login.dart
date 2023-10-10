@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:gestion_payements/auth/users.dart';
+import 'package:gestion_payements/home_screen.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:flutter/cupertino.dart';
@@ -65,8 +66,8 @@ class _LoginSectionState extends State<LoginSection> {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Color(0xFF0C2FDA),
-                        Color(0xFF0C2FDA)
+                        Color(0xFFFFFFFF),
+                        Color(0xFFFFFFFF)
                       ],
                     ),
                     borderRadius: BorderRadius.only(
@@ -84,7 +85,7 @@ class _LoginSectionState extends State<LoginSection> {
                       //   size: 90,
                       //   color: Colors.white,
                       // ),
-                    Text('LOGIN', style: TextStyle(color: Colors.white,fontSize: 40),)),
+                    Text('LOGIN', style: TextStyle(color: Colors.black,fontSize: 40),)),
                     Spacer(),
 
                     // Align(
@@ -195,6 +196,7 @@ class _LoginSectionState extends State<LoginSection> {
                             ),
                             child: TextField(
                               decoration: InputDecoration(
+                                border: InputBorder.none,
                                 icon: IconButton(
                                   onPressed: () {
                                     setState(() {
@@ -262,6 +264,7 @@ class _LoginSectionState extends State<LoginSection> {
                                   String email1 = prefs.getString("email")!;
                                   String id = prefs.getString("id")!;
                                   String name = prefs.getString("nom")!;
+                                  // String lastname = prefs.getString("prenom")!;
                                   print(name);
                                   print(email1);
 
@@ -269,20 +272,34 @@ class _LoginSectionState extends State<LoginSection> {
                                     if (token != null && role == "professeur") {
                                       Navigator.push(context, MaterialPageRoute(
                                         builder: (context) =>
-                                            ProfesseurInfoPage(
-                                                id: id, email: email, role: role),
+                                            // ProfesseurInfoPage(
+                                            //     id: id, email: email, role: role),
                                         // builder: (context) => LandingScreen(role: role,name: nom,), // Passer le rôle ici
-                                      ),);
+                                      HomeScreen(role: role,name: name,email: email1,)),);
                                     }
                                     else if (token != null && role == "responsable") {
-                                      Navigator.push(
-                                          context, MaterialPageRoute(
-                                          builder: (context) => Categories()));
+                                      // Navigator.push(
+                                      //     context, MaterialPageRoute(
+                                      //     builder: (context) => Categories()));
+
+                                      Navigator.push(context, MaterialPageRoute(
+                                          builder: (context) =>
+                                          // ProfesseurInfoPage(
+                                          //     id: id, email: email, role: role),
+                                          // builder: (context) => LandingScreen(role: role,name: nom,), // Passer le rôle ici
+                                          HomeScreen(role: role,name: name,email: email1,)),);
+
                                     }
                                     else if (token != null && role == "admin") {
-                                      Navigator.push(
-                                          context, MaterialPageRoute(
-                                          builder: (context) => Users()));
+                                      // Navigator.push(
+                                      //     context, MaterialPageRoute(
+                                      //     builder: (context) => Users()));
+                                      Navigator.push(context, MaterialPageRoute(
+                                          builder: (context) =>
+                                          // ProfesseurInfoPage(
+                                          //     id: id, email: email, role: role),
+                                          // builder: (context) => LandingScreen(role: role,name: nom,), // Passer le rôle ici
+                                          HomeScreen(role: role,name: name,email: email1,)),);
                                     }
                                   }else{
                                     ScaffoldMessenger.of(context).showSnackBar(
@@ -296,7 +313,8 @@ class _LoginSectionState extends State<LoginSection> {
                                         borderRadius: BorderRadius.circular(15)),
                                     padding: EdgeInsets.only(left: 117, right: 117),
                                     // backgroundColor:  Color(0xFFf5851f)),
-                                    backgroundColor: Color(0xFF0C2FDA)),
+                                    backgroundColor: Color(0xFF0C2FDA)
+                                ),
                                 // icon: Icon(Icons.save),
                                 child: Center(
                                   child: Text('Login'.toUpperCase(),

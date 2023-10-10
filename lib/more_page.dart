@@ -339,7 +339,7 @@ class _MoreOptionsPageState extends State<MoreOptionsPage> {
            )
         ],
       ),
-      bottomNavigationBar: BottomNav(),
+      // bottomNavigationBar: BottomNav(),
     );
   }
 }

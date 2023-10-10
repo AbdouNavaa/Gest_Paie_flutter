@@ -84,7 +84,7 @@ class _ProfesseurInfoPageState extends State<ProfesseurInfoPage> {
       //   ),
       // ),
 
-    bottomNavigationBar: BottomNav(),
+    //bottomNavigationBar: BottomNav(),
     );
 
 

@@ -298,10 +298,9 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                 dataRowHeight: 50,
                 headingTextStyle: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: Colors.white, // Set header text color
+                  color: Colors.black, // Set header text color
                 ),
-                headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xFF0C2FDA)), // Set row background color
-
+                // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xFF0C2FDA)), // Set row background color
                 columns: [
                   DataColumn(label: Text('Signe')),
                   DataColumn(label: Text('Matiere')),
@@ -379,7 +378,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                                   final matiereId = getMatiereIdFromName(matiereName);
 
                                   if (matiereId != null) {
-                                    updateCours(
+                                    updateProfCours(
                                       widget.courses[index]['_id'],
                                       widget.ProfId,
                                       matiereId,
@@ -528,7 +527,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
       // ),
 
 
-      bottomNavigationBar: BottomNav(),
+     // bottomNavigationBar: BottomNav(),
 
     );
 
@@ -1291,12 +1290,12 @@ late String mat;
 
               if (showMatDropdown) {
                 // No changes, directly use the selected IDs
-                updateCours(widget.courses['_id'],widget.ProfId,selectedMat!['_id']!, selectedTypes, date,bool.parse(_isSigne.text));
+                updateProfCours(widget.courses['_id'],widget.ProfId,selectedMat!['_id']!, selectedTypes, date,bool.parse(_isSigne.text));
               } else {
                 // Changes made, get the updated IDs
                 String updatedMatId = await getMatiereIdFromName(mat); // Get updated matière ID
                 print('updatedMatId: $updatedMatId');
-                updateCours(widget.courses['_id'], widget.ProfId, updatedMatId, selectedTypes, date, bool.parse(_isSigne.text));
+                updateProfCours(widget.courses['_id'], widget.ProfId, updatedMatId, selectedTypes, date, bool.parse(_isSigne.text));
               }
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Le Type est  Update avec succès.')),
@@ -1314,4 +1313,47 @@ late String mat;
   }
 
 
+}
+
+Future<void> updateProfCours( id,String professeurId,String matiereId, List<Map<String, dynamic>> types, DateTime? date, bool isSigne) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String token = prefs.getString("token")!;
+  final url = 'http://192.168.43.73:5000/cours/'  + '/$id';
+  final headers = {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer $token',
+  };
+  Map<String, dynamic> body =({
+    'professeur': professeurId,
+    'matiere': matiereId,
+    'types': types,
+    // 'date': date?.toIso8601String(),
+    'isSigne':isSigne
+  });
+
+  if (date != null) {
+    body['date'] = date.toIso8601String();
+  }
+
+  try {
+    final response = await http.patch(
+      Uri.parse(url),
+      headers: headers,
+      body: json.encode(body),
+    );
+
+    if (response.statusCode == 201) {
+      // Course creation was successful
+      print("Course created successfully!");
+      final responseData = json.decode(response.body);
+      print("Course ID: ${responseData['cours']['_id']}");
+      // You can handle the response data as needed
+    } else {
+      // Course creation failed
+      print("Failed to create course. Status code: ${response.statusCode}");
+      print("Error Message: ${response.body}");
+    }
+  } catch (error) {
+    print("Error: $error");
+  }
 }

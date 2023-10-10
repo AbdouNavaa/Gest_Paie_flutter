@@ -210,11 +210,12 @@ class _ProfesseuresState extends State<Professeures> {
                                 horizontalMargin: 2,
                                 columnSpacing: 3,
                                 dataRowHeight: 50,
+                                // border: TableBorder.all(color: Colors.black12, width: 2),
                                 headingTextStyle: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.white, // Set header text color
+                                  color: Colors.black, // Set header text color
                                 ),
-                                headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xFF0C2FDA)), // Set row background color
+                                // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xFF0C2FDA)), // Set row background color
                                 columns: [
                                   DataColumn(label: Text('#')),
                                   DataColumn(label: Text('Nom')),
@@ -235,47 +236,65 @@ class _ProfesseuresState extends State<Professeures> {
                                         DataCell(Container(width: 68,
                                             child: Text('${filteredItems?[index].mobile}',)),),
                                         DataCell(
-                                          Container(
-                                            width: 80,
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                          SingleChildScrollView(
+                                            child: Row(
                                               children: [
-                                                for (var matiere in items![index].matieres) // Assuming items![index].matieres is a list of matieres for the professor
-                                                  Center(child: InkWell(
-                                                    onTap: (){
-                                                      showDialog(
-                                                        context: context,
-                                                        builder: (context) {
-                                                          return AlertDialog(
-                                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
-                                                            title: Text('Supprimer Matiere'),
-                                                            content: Text('Voulez vous supprimer: ${matiere['name']}?'),
-                                                            actions: [
-                                                              TextButton(
-                                                                onPressed: () {
-                                                                  Navigator.of(context).pop(); // Close the dialog
-                                                                },
-                                                                child: Text('Cancel'),
-                                                              ),
-                                                              TextButton(
-                                                                onPressed: () {
-                                                                  Navigator.of(context).pop(); // Close the dialog
-                                                                  String profId = items![index].id!;
-                                                                  String matiereId = matiere['_id']; // Replace 'matiere' with the actual matiere data
-                                                                  deleteMatiereFromProfesseur(profId, matiereId);
-                                                                  ScaffoldMessenger.of(context).showSnackBar(
-                                                                    SnackBar(
-                                                                        content: Text('La matiere est Supprimer avec succès.',)),);
+                                                Container(
+                                                  width: 80,
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      for (var matiere in items![index].matieres) // Assuming items![index].matieres is a list of matieres for the professor
+                                                        Center(child: InkWell(
+                                                          onTap: (){
+                                                            showDialog(
+                                                              context: context,
+                                                              builder: (context) {
+                                                                return AlertDialog(
+                                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
+                                                                  title: Text('Supprimer Matiere'),
+                                                                  content: Text('Voulez vous supprimer: ${matiere['name']}?'),
+                                                                  actions: [
+                                                                    TextButton(
+                                                                      onPressed: () {
+                                                                        Navigator.of(context).pop(); // Close the dialog
+                                                                      },
+                                                                      child: Text('Cancel'),
+                                                                    ),
+                                                                    TextButton(
+                                                                      onPressed: () {
+                                                                        Navigator.of(context).pop(); // Close the dialog
+                                                                        String profId = items![index].id!;
+                                                                        String matiereId = matiere['_id']; // Replace 'matiere' with the actual matiere data
+                                                                        deleteMatiereFromProfesseur(profId, matiereId);
+                                                                        ScaffoldMessenger.of(context).showSnackBar(
+                                                                          SnackBar(
+                                                                              content: Text('La matiere est Supprimer avec succès.',)),);
 
-                                                                },
-                                                                child: Text('Supprimer'),
-                                                              ),
-                                                            ],
-                                                          );
-                                                        },
-                                                      );
-                                                    },hoverColor: Colors.redAccent,
-                                                      child: Text(matiere['name'] ?? ''))),
+                                                                      },
+                                                                      child: Text('Supprimer'),
+                                                                    ),
+                                                                  ],
+                                                                );
+                                                              },
+                                                            );
+                                                          },hoverColor: Colors.redAccent,
+                                                            child: Text(matiere['name'] ?? ''))),
+                                                    ],
+                                                  ),
+                                                ),
+                                                Container(
+                                                  width: 35,
+                                                  child: TextButton(
+                                                    onPressed:() =>_AddProfMatriere(context,items![index].id!),
+                                                    child: Icon(Icons.add, color: Colors.blue),
+                                                    style: TextButton.styleFrom(
+                                                      primary: Colors.white,
+                                                      elevation: 0,
+                                                      // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                                                    ),
+                                                  ),
+                                                ),
                                               ],
                                             ),
                                           ),
@@ -286,18 +305,6 @@ class _ProfesseuresState extends State<Professeures> {
                                         DataCell(
                                           Row(
                                             children: [
-                                              Container(
-                                                width: 35,
-                                                child: TextButton(
-                                                  onPressed:() =>_AddProfMatriere(context,items![index].id!),
-                                                  child: Icon(Icons.add, color: Colors.blue),
-                                                  style: TextButton.styleFrom(
-                                                    primary: Colors.white,
-                                                    elevation: 0,
-                                                    // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
-                                                  ),
-                                                ),
-                                              ),
                                               Container(
                                                 width: 35,
                                                 child: TextButton(
@@ -334,64 +341,66 @@ class _ProfesseuresState extends State<Professeures> {
                                                                     controller: _email,
                                                                     decoration: InputDecoration(labelText: 'Email'),
                                                                   ),
-                                                                  SizedBox(height: 16),
-                                                                  Text(
-                                                                    "selection d'une Categorie:",
-                                                                    style: TextStyle(fontWeight: FontWeight.bold),
-                                                                  ),
-                                                                  DropdownButtonFormField<Category>(
-                                                                    value: selectedCategory,
-                                                                    items: categories.map((category) {
-                                                                      return DropdownMenuItem<Category>(
-                                                                        value: category,
-                                                                        child: Text(category.name ?? ''),
-                                                                      );
-                                                                    }).toList(),
-                                                                    onChanged: (value) async{
-                                                                      setState(() {
-                                                                        selectedCategory = value;
-                                                                        selectedMat = null; // Reset the selected matière
-                                                                        // matieres = []; // Clear the matieres list when a category is selected
-                                                                        updateMatiereList(); // Update the list of matières based on the selected category
-                                                                      });
-                                                                    },
-                                                                    decoration: InputDecoration(
-                                                                      filled: true,
-                                                                      fillColor: Colors.white,
-                                                                      hintText: "selection d'une Categorie",
-                                                                      border: OutlineInputBorder(
-                                                                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                  SizedBox(height: 16),
-                                                                  Text(
-                                                                    "selection d'une Matiere",
-                                                                    style: TextStyle(fontWeight: FontWeight.bold),
-                                                                  ),
-                                                                  DropdownButtonFormField<Matiere>(
-                                                                    value: selectedMat,
-                                                                    items: matieres.map((matiere) {
-                                                                      return DropdownMenuItem<Matiere>(
-                                                                        value: matiere,
-                                                                        child: Text(matiere.name ?? ''),
-                                                                      );
-                                                                    }).toList(),
-                                                                    onChanged: (value)async {
-                                                                      setState(()  {
-                                                                        selectedMat = value;
-                                                                        // professeurs = await fetchProfesseursByMatiere(selectedMat!.id); // Clear the professeurs list when a matière is selected
-                                                                      });
-                                                                    },
-                                                                    decoration: InputDecoration(
-                                                                      filled: true,
-                                                                      fillColor: Colors.white,
-                                                                      hintText: "selection d'une Matiere",
-                                                                      border: OutlineInputBorder(
-                                                                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                                                                      ),
-                                                                    ),
-                                                                  ),
+                                                                  // SizedBox(height: 16),
+                                                          //         Text(
+                                                          //           "selection d'une Categorie:",
+                                                          //           style: TextStyle(fontWeight: FontWeight.bold),
+                                                          //         ),
+                                                          //         DropdownButtonFormField<Category>(
+                                                          //           value: selectedCategory,
+                                                          //           items: categories.map((category) {
+                                                          //             return DropdownMenuItem<Category>(
+                                                          //               value: category,
+                                                          //               child: Text(category.name ?? ''),
+                                                          //             );
+                                                          //           }).toList(),
+                                                          //           onChanged: (value) async{
+                                                          //             setState(() {
+                                                          //               selectedCategory = value;
+                                                          //               selectedMat = null; // Reset the selected matière
+                                                          //               // matieres = []; // Clear the matieres list when a category is selected
+                                                          //               updateMatiereList(); // Update the list of matières based on the selected category
+                                                          //             });
+                                                          //           },
+                                                          //           decoration: InputDecoration(
+                                                          //             filled: true,
+                                                          //             // fillColor: Color(0xA3B0AF1),
+                                                          // //            fillColor: Colors.white,
+                                                          //             hintText: "selection d'une Categorie",
+                                                          //             border: OutlineInputBorder(gapPadding: 1,borderSide: BorderSide.none,
+                                                          //               borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                                                          //             ),
+                                                          //           ),
+                                                          //         ),
+                                                          //         SizedBox(height: 16),
+                                                          //         Text(
+                                                          //           "selection d'une Matiere",
+                                                          //           style: TextStyle(fontWeight: FontWeight.bold),
+                                                          //         ),
+                                                          //         DropdownButtonFormField<Matiere>(
+                                                          //           value: selectedMat,
+                                                          //           items: matieres.map((matiere) {
+                                                          //             return DropdownMenuItem<Matiere>(
+                                                          //               value: matiere,
+                                                          //               child: Text(matiere.name ?? ''),
+                                                          //             );
+                                                          //           }).toList(),
+                                                          //           onChanged: (value)async {
+                                                          //             setState(()  {
+                                                          //               selectedMat = value;
+                                                          //               // professeurs = await fetchProfesseursByMatiere(selectedMat!.id); // Clear the professeurs list when a matière is selected
+                                                          //             });
+                                                          //           },
+                                                          //           decoration: InputDecoration(
+                                                          //             filled: true,
+                                                          //             // fillColor: Color(0xA3B0AF1),
+                                                          //             // fillColor: Colors.white,
+                                                          //             hintText: "selection d'une Matiere",
+                                                          //             border: OutlineInputBorder(borderSide: BorderSide.none,gapPadding: 1,
+                                                          //               borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                                                          //             ),
+                                                          //           ),
+                                                          //         ),
                                                                 ],
                                                               ),
                                                             ),
@@ -414,7 +423,7 @@ class _ProfesseuresState extends State<Professeures> {
                                                                 fetchProfs();
                                                                 // AddProfesseur(_name.text, _desc.text);
                                                                 print(items![index].id!);
-                                                                UpdateCateg(items![index].id!, _name.text, _prenom.text, _email.text,num.parse(_mobile.text));
+                                                                updateProf(items![index].id!, _name.text, _prenom.text, _email.text,num.parse(_mobile.text));
                                                                 ScaffoldMessenger.of(context).showSnackBar(
                                                                   SnackBar(content: Text('Le Type est mis à jour avec succès.')),
                                                                 );
@@ -516,7 +525,7 @@ class _ProfesseuresState extends State<Professeures> {
 
 
       ),
-      bottomNavigationBar: BottomNav(),
+      // bottomNavigationBar: BottomNav(),
 
     );
   }
@@ -527,81 +536,125 @@ class _ProfesseuresState extends State<Professeures> {
     // TextEditingController _prix = TextEditingController();
     // num _selectedTaux = 500;
 
+    return showModalBottomSheet(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
+              isScrollControlled: true, // Rendre le contenu déroulable
 
-    return showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-              title: Text('Ajouter un Professeur'),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: _name,
-                      keyboardType: TextInputType.text,
-                      decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          hintText: "name",
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                    ),
-                    TextField(
-                      controller: _prenom,
-                      keyboardType: TextInputType.text,
-                      decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          hintText: "Prenom",
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                    ),
-                    TextField(
-                      controller: _mobile,
-                      keyboardType: TextInputType.text,
-                      decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          hintText: "Mobile",
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                    ),
-                    TextField(
-                      controller: _email,
-                      keyboardType: TextInputType.text,
-                      decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          hintText: "Email",
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                    ),
-                    ElevatedButton(onPressed: (){
-                      Navigator.of(context).pop();
-                      fetchProfs();
-                      AddProfesseur(_name.text,_prenom.text,_email.text,num.parse(_mobile.text));
-                      // AddProfesseur(_name.text, _desc.text);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Le Professeur a été ajouter avec succès.')),
-                      );
-                      setState(() {
-                        Navigator.of(context).pop();
-                      });
-                    }, child: Text("Ajouter"),
 
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF0C2FDA),
-                        foregroundColor: Colors.white,
-                        elevation: 10,
-                        padding: EdgeInsets.only(left: 90, right: 90),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                      ),)
-                  ],
-                ),
-              )
-          );
-        });
+              context: context,
+              builder: (BuildContext context) {
+                return SingleChildScrollView(
+                  child: Container(
+                    height: 650,
+                    padding: const EdgeInsets.all(25.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          // mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Text("Ajouter un Professeur", style: TextStyle(fontSize: 25),),
+                            Spacer(),
+                            InkWell(
+                              child: Icon(Icons.close),
+                              onTap: (){
+                                Navigator.pop(context);
+                              },
+                            )
+                          ],
+                        ),
+                        SizedBox(height: 40),
+                        TextField(
+                          controller: _name,
+                          keyboardType: TextInputType.text,
+                          decoration: InputDecoration(
+                              filled: true,
+                              // fillColor: Color(0xA3B0AF1),
+                              // fillColor: Colors.white,
+                              hintText: "name",
+                              border: OutlineInputBorder(
+                                  borderSide: BorderSide.none,gapPadding: 1,
+                                  borderRadius: BorderRadius.all(
+                                      Radius.circular(10.0)))),
+                        ),
+
+                        SizedBox(height: 10),
+                        TextField(
+                          controller: _prenom,
+                          keyboardType: TextInputType.text,
+                          decoration: InputDecoration(
+                              filled: true,
+                              // fillColor: Color(0xA3B0AF1),
+                              // fillColor: Colors.white,
+                              hintText: "Prenom",
+                              border: OutlineInputBorder(
+                                  borderSide: BorderSide.none,gapPadding: 1,
+                                  borderRadius: BorderRadius.all(
+                                      Radius.circular(10.0)))),
+                        ),
+
+                        SizedBox(height: 10),
+                        TextField(
+                          controller: _mobile,
+                          keyboardType: TextInputType.text,
+                          decoration: InputDecoration(
+                              filled: true,
+                              // fillColor: Color(0xA3B0AF1),
+                              // fillColor: Colors.white,
+                              hintText: "Mobile",
+                              border: OutlineInputBorder(
+                                  borderSide: BorderSide.none,gapPadding: 1,
+                                  borderRadius: BorderRadius.all(
+                                      Radius.circular(10.0)))),
+                        ),
+
+                        SizedBox(height: 10),
+                        TextField(
+                          controller: _email,
+                          keyboardType: TextInputType.text,
+                          decoration: InputDecoration(
+                              filled: true,
+                              // fillColor: Color(0xA3B0AF1),
+                              // fillColor: Colors.white,
+                              hintText: "Email",
+                              border: OutlineInputBorder(
+                                  borderSide: BorderSide.none,gapPadding: 1,
+                                  borderRadius: BorderRadius.all(
+                                      Radius.circular(10.0)))),
+                        ),
+                        SizedBox(height: 30),
+                        ElevatedButton(onPressed: () {
+                          Navigator.of(context).pop();
+                          fetchProfs();
+                          AddProfesseur(_name.text, _prenom.text, _email.text,
+                              num.parse(_mobile.text));
+                          // AddProfesseur(_name.text, _desc.text);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(
+                                'Le Professeur a été ajouter avec succès.')),
+                          );
+                          setState(() {
+                            Navigator.of(context).pop();
+                          });
+                        }, child: Text("Ajouter"),
+
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFF0C2FDA),
+                            foregroundColor: Colors.white,
+                            elevation: 10,
+                            minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
+                            // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
+                            //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                );
+              });
   }
 
   Future<void> _AddProfMatriere(BuildContext context,String Id) async {
@@ -639,13 +692,13 @@ class _ProfesseuresState extends State<Professeures> {
     }
   }
 
-  void UpdateCateg( id,String name,String prenom, String email,[num? mobile]) async {
+  void updateProf( id,String name,String prenom, String email,[num? mobile]) async {
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token")!;
     print(token);
     final response = await http.patch(
-      Uri.parse("http://192.168.43.73:5000/categorie" + "/$id"),
+      Uri.parse("http://192.168.43.73:5000/professeur" + "/$id"),
       headers: <String, String>{
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -749,98 +802,133 @@ class _AddProfMatState extends State<AddProfMat> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-        title: Text('Ajouter une Matiere'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
+        insetPadding: EdgeInsets.only(top: 80,),
+// backgroundColor: Color(0xB0AFAFA3),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            topRight: Radius.circular(20),
+            topLeft: Radius.circular(20),
+          ),
+        ),
+        title: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          // mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            SizedBox(height: 16),
-            Text(
-              "Selection d'une Categorie:",
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            DropdownButtonFormField<Category>(
-              value: selectedCategory,
-              items: categories.map((category) {
-                return DropdownMenuItem<Category>(
-                  value: category,
-                  child: Text(category.name ?? ''),
-                );
-              }).toList(),
-              onChanged: (value) async{
-                setState(() {
-                  selectedCategory = value;
-                  selectedMat = null; // Reset the selected matière
-                  // matieres = []; // Clear the matieres list when a category is selected
-                  updateMatiereList(); // Update the list of matières based on the selected category
-                });
+            Text("Ajouter une Matiere", style: TextStyle(fontSize: 20),),
+            Spacer(),
+            InkWell(
+              child: Icon(Icons.close),
+              onTap: (){
+                Navigator.pop(context);
               },
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.white,
-                hintText: "....",hintStyle: TextStyle(fontSize: 20),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                ),
-              ),
-            ),
-            SizedBox(height: 16),
-            Text(
-              "Selection d'une Matiere",
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            DropdownButtonFormField<Matiere>(
-              value: selectedMat,
-              items: matieres.map((matiere) {
-                return DropdownMenuItem<Matiere>(
-                  value: matiere,
-                  child: Text(matiere.name ?? ''),
-                );
-              }).toList(),
-              onChanged: (value)async {
-                setState(()  {
-                  selectedMat = value;
-                  // professeurs = await fetchProfesseursByMatiere(selectedMat!.id); // Clear the professeurs list when a matière is selected
-                });
-              },
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.white,
-                hintText: "....",hintStyle: TextStyle(fontSize: 20),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                ),
-              ),
-            ),
-
-
-            ElevatedButton(
-              onPressed: () async {
-                Navigator.of(context).pop();
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                String token = prefs.getString("token")!;
-
-                print(widget.profId); // Use the professor's ID in the addMatiereToProfesseus method
-                print(selectedMat!.id!);
-
-                addMatiereToProfesseus(widget.profId, selectedMat!.id!);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Matiere has been added to professor successfully.')),
-                );
-
-                setState(() {
-                  fetchProfs();
-                });
-              },
-              child: Text("Ajouter"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF0C2FDA),
-                foregroundColor: Colors.white,
-                elevation: 10,
-                padding: EdgeInsets.only(left: 90, right: 90),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-              ),
             )
           ],
+        ),
+        content: Container(
+width: MediaQuery.of(context).size.width,
+          height: 700,
+          // color: Color(0xA3B0AF1),
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              SizedBox(height: 16),
+              Text(
+                "Selection d'une Categorie:",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 20),
+              DropdownButtonFormField<Category>(
+                value: selectedCategory,
+                items: categories.map((category) {
+                  return DropdownMenuItem<Category>(
+                    value: category,
+                    child: Text(category.name ?? ''),
+                  );
+                }).toList(),
+                onChanged: (value) async{
+                  setState(() {
+                    selectedCategory = value;
+                    selectedMat = null; // Reset the selected matière
+                    // matieres = []; // Clear the matieres list when a category is selected
+                    updateMatiereList(); // Update the list of matières based on the selected category
+                  });
+                },
+                decoration: InputDecoration(
+                  filled: true,
+                  // fillColor: Colors.white,
+                  // fillColor: Color(0xA3B0AF1),
+                  hintText: "....",hintStyle: TextStyle(fontSize: 20),
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide.none,gapPadding: 1,
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+              Text(
+                "Selection d'une Matiere",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 20),
+              DropdownButtonFormField<Matiere>(
+                value: selectedMat,
+                items: matieres.map((matiere) {
+                  return DropdownMenuItem<Matiere>(
+                    value: matiere,
+                    child: Text(matiere.name ?? ''),
+                  );
+                }).toList(),
+                onChanged: (value)async {
+                  setState(()  {
+                    selectedMat = value;
+                    // professeurs = await fetchProfesseursByMatiere(selectedMat!.id); // Clear the professeurs list when a matière is selected
+                  });
+                },
+                decoration: InputDecoration(
+                  filled: true,
+                  hintText: "....",hintStyle: TextStyle(fontSize: 20),
+                  // fillColor: Color(0xA3B0AF1),
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide.none,gapPadding: 1,
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                  ),
+                ),
+              ),
+
+              SizedBox(height: 20),
+
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  SharedPreferences prefs = await SharedPreferences.getInstance();
+                  String token = prefs.getString("token")!;
+
+                  print(widget.profId); // Use the professor's ID in the addMatiereToProfesseus method
+                  print(selectedMat!.id!);
+
+                  addMatiereToProfesseus(widget.profId, selectedMat!.id!);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Matiere has been added to professor successfully.')),
+                  );
+
+                  setState(() {
+                    fetchProfs();
+                  });
+                },
+                child: Text("Ajouter"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF0C2FDA),
+                  foregroundColor: Colors.white,
+                  elevation: 10,
+                  minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
+                  // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
+                  //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                ),
+              )
+            ],
+          ),
         )
     );
 
