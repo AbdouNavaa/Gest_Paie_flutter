@@ -214,6 +214,25 @@ class _MatieresState extends State<Matieres> {
           children: [
             SizedBox(height: 40,),
             Container(
+              height: 50,
+              child: Row(
+                children: [
+                  TextButton(onPressed: (){
+                    Navigator.pop(context);
+                  }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,),
+                    style: TextButton.styleFrom(
+                      backgroundColor:Colors.white ,
+                      foregroundColor:Colors.black ,
+                      // elevation: 10,
+                      // shape: RoundedRectangleBorder(side: BorderSide(color: Colors.black26)),
+                    ),
+                  ),
+                  SizedBox(width: 30,),
+                  Text("Liste de Matieres",style: TextStyle(fontSize: 25),)
+                ],
+              ),
+            ),
+            Container(
               margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
@@ -363,7 +382,7 @@ class _MatieresState extends State<Matieres> {
                                                                     crossAxisAlignment: CrossAxisAlignment.start,
                                                                     // mainAxisAlignment: MainAxisAlignment.start,
                                                                     children: [
-                                                                      Text("Mise à jour du ${_name.text}", style: TextStyle(fontSize: 20),),
+                                                                      Text("Modifier une Matiere", style: TextStyle(fontSize: 20),),
                                                                       Spacer(),
                                                                       InkWell(
                                                                         child: Icon(Icons.close),
@@ -379,9 +398,9 @@ class _MatieresState extends State<Matieres> {
                                                                     keyboardType: TextInputType.text,
                                                                     decoration: InputDecoration(
                                                                         filled: true,
-                                                                        fillColor: Colors.white,
+                                                                        // fillColor: Colors.white,
                                                                         border: OutlineInputBorder(
-                                                                            borderSide: BorderSide.none,
+                                                                            borderSide: BorderSide.none,gapPadding: 1,
                                                                             borderRadius: BorderRadius.all(Radius.circular(10.0)))),
                                                                   ),
                                                                   SizedBox(height: 10),
@@ -403,9 +422,9 @@ class _MatieresState extends State<Matieres> {
                                                                     },
                                                                     decoration: InputDecoration(
                                                                       filled: true,
-                                                                      fillColor: Colors.white,
+                                                                      // fillColor: Colors.white,
                                                                       border: OutlineInputBorder(
-                                                                        borderSide: BorderSide.none,
+                                                                        borderSide: BorderSide.none,gapPadding: 1,
                                                                         borderRadius: BorderRadius.all(Radius.circular(10.0)),
                                                                       ),
                                                                     ),
@@ -429,9 +448,9 @@ class _MatieresState extends State<Matieres> {
                                                                     }).toList(),
                                                                         decoration: InputDecoration(
                                                                       filled: true,
-                                                                      fillColor: Colors.white,
+                                                                      // fillColor: Colors.white,
                                                                       border: OutlineInputBorder(
-                                                                        borderSide: BorderSide.none,
+                                                                        borderSide: BorderSide.none,gapPadding: 1,
                                                                         borderRadius: BorderRadius.all(Radius.circular(10.0)),
                                                                       ),
                                                                     ),
@@ -445,10 +464,10 @@ class _MatieresState extends State<Matieres> {
                                                                     decoration: InputDecoration(
                                                                         filled: true,
 
-                                                                        fillColor: Colors.white,
+                                                                        // fillColor: Colors.white,
                                                                         hintText: "description",
                                                                         border: OutlineInputBorder(
-                                                                            borderSide: BorderSide.none,
+                                                                            borderSide: BorderSide.none,gapPadding: 1,
                                                                             borderRadius: BorderRadius.all(Radius.circular(10.0)))),
                                                                   ),
 
@@ -495,7 +514,7 @@ class _MatieresState extends State<Matieres> {
                                                         }
                                                     );
                                                   },
-                                                  child: Icon(Icons.edit, color: Colors.blue),
+                                                  child: Icon(Icons.edit, color: Colors.green),
                                                   style: TextButton.styleFrom(
                                                     primary: Colors.white,
                                                     elevation: 0,
@@ -629,10 +648,10 @@ class _MatieresState extends State<Matieres> {
                           keyboardType: TextInputType.text,
                           decoration: InputDecoration(
                               filled: true,
-                              fillColor: Colors.white,
+                              // fillColor: Colors.white,
                               hintText: "Nom",
                               border: OutlineInputBorder(
-                                  borderSide: BorderSide.none,
+                                  borderSide: BorderSide.none,gapPadding: 1,
                                   borderRadius: BorderRadius.all(Radius.circular(10.0)))),
                         ),
                         SizedBox(height: 10),
@@ -651,10 +670,10 @@ class _MatieresState extends State<Matieres> {
                           },
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: Colors.white,
+                            // fillColor: Colors.white,
                             hintText: "Categorie",
                             border: OutlineInputBorder(
-                              borderSide: BorderSide.none,
+                              borderSide: BorderSide.none,gapPadding: 1,
                               borderRadius: BorderRadius.all(Radius.circular(10.0)),
                             ),
                           ),
@@ -678,10 +697,10 @@ class _MatieresState extends State<Matieres> {
                           }).toList(),
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: Colors.white,
+                            // fillColor: Colors.white,
                             hintText: "Semestre",
                             border: OutlineInputBorder(
-                              borderSide: BorderSide.none,
+                              borderSide: BorderSide.none,gapPadding: 1,
                               borderRadius: BorderRadius.all(Radius.circular(10.0)),
                             ),
                           ),
@@ -695,10 +714,10 @@ class _MatieresState extends State<Matieres> {
                           decoration: InputDecoration(
                               filled: true,
 
-                              fillColor: Colors.white,
+                              // fillColor: Colors.white,
                               hintText: "description",
                               border: OutlineInputBorder(
-                                  borderSide: BorderSide.none,
+                                  borderSide: BorderSide.none,gapPadding: 1,
                                   borderRadius: BorderRadius.all(Radius.circular(10.0)))),
                         ),
 

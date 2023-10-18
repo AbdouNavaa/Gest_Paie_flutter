@@ -78,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       // UserRole(userRole: 'Role: ${widget.role!}'),
 
                       kHalfsizedBox,
-                      BookingYear(bookingYear: '2022-2023')
+                      BookingYear(bookingYear: DateTime.now().toString())
                     ],
                   ),
                   kHalfsizedBox,
@@ -558,7 +558,7 @@ class UserPicture extends StatelessWidget {
         maxRadius: 50.0,
         backgroundColor: kSecondaryColor,
         // child:Icon(picAdderess, size: 70, color: Colors.white,),
-        backgroundImage: AssetImage(picAdderess),
+        backgroundImage: AssetImage(picAdderess,),
 
       ),
     )

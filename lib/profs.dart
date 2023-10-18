@@ -152,8 +152,7 @@ class _ProfsState extends State<Profs> {
                         } else {
                           List<Prof>? items = snapshot.data;
 
-                          return
-                            ListView.builder(
+                          return ListView.builder(
                               itemCount: filteredItems!.length,
                               itemBuilder: (context, int index) {
                                 return Container(

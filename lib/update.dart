@@ -155,234 +155,279 @@ class _UpdateCoursDialogState extends State<UpdateCoursDialog> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: AlertDialog(
-        title: Text("Mise à jour de la tâche"),
+        insetPadding: EdgeInsets.only(top: MediaQuery.of(context).size.height - 670,),
+// backgroundColor: Color(0xB0AFAFA3),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            topRight: Radius.circular(20),
+            topLeft: Radius.circular(20),
+          ),
+        ),
+        title: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          // mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Text("Modifier un Cours", style: TextStyle(fontSize: 20),),
+            Spacer(),
+            InkWell(
+              child: Icon(Icons.close),
+              onTap: (){
+                Navigator.pop(context);
+              },
+            )
+          ],
+        ),
         content: Form(
           child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(height: 110,
-                  child: SingleChildScrollView(scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: availableTypes.map((type) {
-                        return CheckboxMenuButton(
-                          value: selectedTypes.contains(type),
-                          onChanged: (value) {
-                            setState(() {
-                              if (selectedTypes.contains(type)) {
-                                selectedTypes.remove(type);
-                              } else {
-                                selectedTypes.add(type);
-                              }
-                            });
-                          },child: Text(type['name'] + ' - ' + type['nbh'].toString()),
-                        );
-                      }).toList(),
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(height: 110,
+                    // color: Color(0xA3B0AF1),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 5,
+                        ),
+                      ],
+                    ),
+
+                    child: SingleChildScrollView(scrollDirection: Axis.vertical,
+                      child: Column(
+                        children: availableTypes.map((type) {
+                          return CheckboxMenuButton(
+                            value: selectedTypes.contains(type),
+                            onChanged: (value) {
+                              print('hello');
+                              setState(() {
+                                if (selectedTypes.contains(type)) {
+                                  selectedTypes.remove(type);
+                                } else {
+                                  selectedTypes.add(type);
+                                }
+                              });
+                            },child: Text(type['name'] + ' - ' + type['nbh'].toString()),
+                          );
+                        }).toList(),
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(height: 16),
-                Text(
-                  "Selection d'une Categorie:",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                DropdownButtonFormField<Category>(
-                  value: selectedCategory,
-                  items: categories.map((category) {
-                    return DropdownMenuItem<Category>(
-                      value: category,
-                      child: Text(category.name ?? ''),
-                    );
-                  }).toList(),
-                  onChanged: (value) async {
-                    setState(() {
-                      selectedCategory = value;
-                      selectedMat = null; // Reset the selected matière
-                      // matieres = []; // Clear the matieres list when a category is selected
-                      updateMatiereList(); // Update the list of matières based on the selected category
-                    });
-                  },
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    hintText: "....",hintStyle: TextStyle(fontSize: 15),
+                  SizedBox(height: 16),
+                  DropdownButtonFormField<Category>(
+                    value: selectedCategory,
+                    items: categories.map((category) {
+                      return DropdownMenuItem<Category>(
+                        value: category,
+                        child: Text(category.name ?? ''),
+                      );
+                    }).toList(),
+                    onChanged: (value) async {
+                      setState(() {
+                        selectedCategory = value;
+                        selectedMat = null; // Reset the selected matière
+                        // matieres = []; // Clear the matieres list when a category is selected
+                        updateMatiereList(); // Update the list of matières based on the selected category
+                      });
+                    },
+                    decoration: InputDecoration(
+                      filled: true,
+                      // fillColor: Colors.white,
+                      hintText: "....",hintStyle: TextStyle(fontSize: 15),
 //                    hintText: "selection d'une Categorie",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      border: OutlineInputBorder(gapPadding: 1,borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(height: 16),
-                Text(
-                 "selection d'une Matiere",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
+                  SizedBox(height: 16),
 
-                showMatDropdown ?
-                DropdownButtonFormField<Matiere>(
-                  value: selectedMat,
-                  items: matieres.map((matiere) {
-                    return DropdownMenuItem<Matiere>(
-                      value: matiere,
-                      child: Text(matiere.name ?? ''),
-                    );
-                  }).toList(),
-                  onChanged: (value)async {
-                    setState(()  {
-                      selectedMat = value;
-                      selectedProfesseur = null; // Reset the selected professor
-                      // professeurs = await fetchProfesseursByMatiere(selectedMat!.id); // Clear the professeurs list when a matière is selected
-                      updateProfesseurList(); // Update the list of professeurs based on the selected matière
-                    });
-                  },
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    hintText: "....",hintStyle: TextStyle(fontSize: 15),
+                  showMatDropdown ?
+                  DropdownButtonFormField<Matiere>(
+                    value: selectedMat,
+                    items: matieres.map((matiere) {
+                      return DropdownMenuItem<Matiere>(
+                        value: matiere,
+                        child: Text(matiere.name ?? ''),
+                      );
+                    }).toList(),
+                    onChanged: (value)async {
+                      setState(()  {
+                        selectedMat = value;
+                        selectedProfesseur = null; // Reset the selected professor
+                        // professeurs = await fetchProfesseursByMatiere(selectedMat!.id); // Clear the professeurs list when a matière is selected
+                        updateProfesseurList(); // Update the list of professeurs based on the selected matière
+                      });
+                    },
+                    decoration: InputDecoration(
+                      filled: true,
+               //       fillColor: Colors.white,
+                      hintText: "....",hintStyle: TextStyle(fontSize: 15),
 //                    hintText: "selection d'une Matiere",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      border: OutlineInputBorder(gapPadding: 1,borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      ),
+                    ),
+                  )
+                : TextFormField(
+                    initialValue: mat,
+                    decoration: InputDecoration(
+                      filled: true,
+                      //       fillColor: Colors.white,
+                      hintText: "Nom du Matiere",hintStyle: TextStyle(fontSize: 15),
+//                    hintText: "selection d'une Matiere",
+                      border: OutlineInputBorder(gapPadding: 1,borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      ),
+                    ),
+
+                    readOnly: true,
+                    onTap: () {
+                      setState(() {
+                        showMatDropdown = true;
+                      });
+                    },
+                  ),
+                  SizedBox(height: 16),
+
+                  showProfDropdown ?
+                  DropdownButtonFormField<Professeur>(
+                    value: selectedProfesseur,
+                    items: professeurs.map((professeur) {
+                      return DropdownMenuItem<Professeur>(
+                        value: professeur,
+                        child: Text(professeur.nom ?? ''),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        selectedProfesseur = value;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      filled: true,
+               //       fillColor: Colors.white,
+                      hintText: "....",hintStyle: TextStyle(fontSize: 15),
+                      // hintText: "selection d'un Professeur", // Update the hintText
+                      border: OutlineInputBorder(gapPadding: 1,borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      ),
+                    ),
+                  )
+                      : TextFormField(
+                    initialValue: prof,
+                    decoration: InputDecoration(
+                      filled: true,
+                      //       fillColor: Colors.white,
+                      hintText: "Prof",hintStyle: TextStyle(fontSize: 15),
+//                    hintText: "selection d'une Matiere",
+                      border: OutlineInputBorder(gapPadding: 1,borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      ),
+                    ),
+
+                    readOnly: true,
+                    onTap: () {
+                      setState(() {
+                        showProfDropdown = true;
+                      });
+                    },
+                  ),
+
+
+                  SizedBox(height: 16),
+                  TextFormField(
+                    controller: _date,
+                    decoration: InputDecoration(
+                      filled: true,
+                      //       fillColor: Colors.white,
+                      hintText: "Date",hintStyle: TextStyle(fontSize: 15),
+//                    hintText: "selection d'une Matiere",
+                      border: OutlineInputBorder(gapPadding: 1,borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      ),
+                    ),
+
+                    // readOnly: true,
+                    onTap: () => selectTime(_date),
+                  ),
+
+                  SizedBox(height: 16,),
+                  DropdownButtonFormField<bool>(
+                    value: _selectedSigne,
+                    items: [
+                      DropdownMenuItem<bool>(
+                        child: Text('True'),
+                        value: true,
+                      ),
+                      DropdownMenuItem<bool>(
+                        child: Text('False'),
+                        value: false,
+                      ),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedSigne = value!;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      filled: true,
+               //       fillColor: Colors.white,
+                      border: OutlineInputBorder(gapPadding: 1,borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      ),
                     ),
                   ),
-                )
-              : TextFormField(
-                  initialValue: mat,
-                  decoration: InputDecoration(labelText: 'Nom du Catégorie'),
-                  readOnly: true,
-                  onTap: () {
-                    setState(() {
-                      showMatDropdown = true;
-                    });
-                  },
-                ),
-                SizedBox(height: 16),
-                Text(
-                  "selection d'un Professeur:",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
 
-                showProfDropdown ?
-                DropdownButtonFormField<Professeur>(
-                  value: selectedProfesseur,
-                  items: professeurs.map((professeur) {
-                    return DropdownMenuItem<Professeur>(
-                      value: professeur,
-                      child: Text(professeur.nom ?? ''),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedProfesseur = value;
-                    });
-                  },
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    hintText: "....",hintStyle: TextStyle(fontSize: 15),
-                    // hintText: "selection d'un Professeur", // Update the hintText
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                  SizedBox(height: 16,),
+                  ElevatedButton(
+                    onPressed: () async {
+                      Navigator.of(context).pop(true);
+
+                      _isSigne.text = _selectedSigne.toString();
+
+                      DateTime date = DateFormat('yyyy/MM/dd HH:mm').parse(_date.text).toUtc();
+                      Navigator.of(context).pop();
+
+                      if (showMatDropdown && showProfDropdown) {
+                        // No changes, directly use the selected IDs
+                        updateCours(widget.courses['_id'], selectedProfesseur!.id, selectedMat!.id!, selectedTypes, date, bool.parse(_isSigne.text));
+                      } else {
+                        // Changes made, get the updated IDs
+                        String updatedProfId = await getProfesseurIdFromName(prof); // Get updated prof ID
+                        String updatedMatId = await getMatiereIdFromName(mat); // Get updated matière ID
+                        print('updatedProfId: $updatedProfId');
+                        print('updatedMatId: $updatedMatId');
+                        updateCours(widget.courses['_id'], updatedProfId, updatedMatId, selectedTypes, date, bool.parse(_isSigne.text));
+                      }
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Le Type est mis à jour avec succès.')),
+                      );
+
+                      setState(() {
+                        widget.courses;
+                      });
+                    },
+                    child: Text("Modifier"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF0C2FDA),
+                      foregroundColor: Colors.white,
+                      elevation: 10,
+                      minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
+                      // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
+                      //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                     ),
                   ),
-                )
-                    : TextFormField(
-                  initialValue: prof,
-                  decoration: InputDecoration(labelText: 'Nom du Catégorie'),
-                  readOnly: true,
-                  onTap: () {
-                    setState(() {
-                      showProfDropdown = true;
-                    });
-                  },
-                ),
-
-
-                SizedBox(height: 16),
-
-                SizedBox(height: 16),
-                TextFormField(
-                  controller: _date,
-                  decoration: InputDecoration(
-                    labelText: 'Date',
-                    border: OutlineInputBorder(),
-                  ),
-                  // readOnly: true,
-                  onTap: () => selectTime(_date),
-                ),
-
-                SizedBox(height: 16,),
-                DropdownButtonFormField<bool>(
-                  value: _selectedSigne,
-                  items: [
-                    DropdownMenuItem<bool>(
-                      child: Text('True'),
-                      value: true,
-                    ),
-                    DropdownMenuItem<bool>(
-                      child: Text('False'),
-                      value: false,
-                    ),
-                  ],
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedSigne = value!;
-                    });
-                  },
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    ),
-                  ),
-                ),
-
-              ],
+                ],
+              ),
             ),
           ),
         ),
-        actions: [
-          TextButton(
-            child: Text("ANNULER"),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-          TextButton(
-            child: Text(
-              "MISE À JOUR",
-              style: TextStyle(color: Colors.blue),
-            ),
-            onPressed: () async {
-              Navigator.of(context).pop(true);
-
-              _isSigne.text = _selectedSigne.toString();
-
-              DateTime date = DateFormat('yyyy/MM/dd HH:mm').parse(_date.text).toUtc();
-              Navigator.of(context).pop();
-
-              if (showMatDropdown && showProfDropdown) {
-                // No changes, directly use the selected IDs
-                updateCours(widget.courses['_id'], selectedProfesseur!.id, selectedMat!.id!, selectedTypes, date, bool.parse(_isSigne.text));
-              } else {
-                // Changes made, get the updated IDs
-                String updatedProfId = await getProfesseurIdFromName(prof); // Get updated prof ID
-                String updatedMatId = await getMatiereIdFromName(mat); // Get updated matière ID
-                print('updatedProfId: $updatedProfId');
-                print('updatedMatId: $updatedMatId');
-                updateCours(widget.courses['_id'], updatedProfId, updatedMatId, selectedTypes, date, bool.parse(_isSigne.text));
-              }
-
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Le Type est mis à jour avec succès.')),
-              );
-
-              setState(() {
-                widget.courses;
-              });
-            },
-          ),
-        ],
       ),
 
     );

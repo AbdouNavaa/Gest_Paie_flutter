@@ -127,6 +127,25 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
         children: [
           SizedBox(height: 30,),
           Container(
+            height: 50,
+            child: Row(
+              children: [
+                TextButton(onPressed: (){
+                  Navigator.pop(context);
+                }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,),
+                  style: TextButton.styleFrom(
+                    backgroundColor:Colors.white ,
+                    foregroundColor:Colors.black ,
+                    // elevation: 10,
+                    // shape: RoundedRectangleBorder(side: BorderSide(color: Colors.black26)),
+                  ),
+                ),
+                SizedBox(width: 30,),
+                Text("Mes Cours",style: TextStyle(fontSize: 25),)
+              ],
+            ),
+          ),
+          Container(
             margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
@@ -533,238 +552,279 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
 
   }
 
-  void _showCourseDetails(BuildContext context, Map<String, dynamic> course) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25),),elevation: 1,
-          title: Text(course['matiere'].toUpperCase(),
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              fontStyle: FontStyle.italic,
-              // color: Colors.lightBlue
-            ),),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            // mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Divider(color: Colors.black87),
-              Row(
-                children: [
-                  Text('Date:',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w400,
-                      fontStyle: FontStyle.italic,
-                      // color: Colors.lightBlue
-                    ),),
-                  SizedBox(width: 10,),
-                  Text('${DateFormat('dd/M/yyyy ').format(DateTime.parse(course['date'].toString()).toLocal())}',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w400,
-                      fontStyle: FontStyle.italic,
-                      // color: Colors.lightBlue
-                    ),),
-                ],
-              ),
-              SizedBox(height: 8),
-              Row(
-                children: [
-                  Text('Deb:',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w400,
-                      fontStyle: FontStyle.italic,
-                      // color: Colors.lightBlue
-                    ),),
-                  SizedBox(width: 10,),
-                  Text('${DateFormat(' HH:mm').format(DateTime.parse(course['date'].toString()).toLocal())}',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w400,
-                      fontStyle: FontStyle.italic,
-                      // color: Colors.lightBlue
-                    ),),
-                ],
-              ),
-              SizedBox(height: 8),
-              Row(
-                children: [
-                  Text('Fin:',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w400,
-                      fontStyle: FontStyle.italic,
-                      // color: Colors.lightBlue
-                    ),),
-                  SizedBox(width: 10,),
-                  Text('${DateFormat(' HH:mm').format(DateTime.parse(course['date'].toString()).toLocal().add(Duration(minutes: (( course['CM']+course['TP']+course['TD'] )* 60).toInt())))}',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w400,
-                      fontStyle: FontStyle.italic,
-                      // color: Colors.lightBlue
-                    ),),
-                ],
-              ),
-              SizedBox(height: 8),
+  Future<void> _showCourseDetails(BuildContext context, Map<String, dynamic> course) {
+    return showModalBottomSheet(
+        context: context,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
+            topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
+        isScrollControlled: true, // Rendre le contenu déroulable
 
-              Row(
-                children: [
-                  Text('CM:',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w400,
-                      fontStyle: FontStyle.italic,
-                      // color: Colors.lightBlue
-                    ),),
-                  SizedBox(width: 10,),
-                  Text('${course['CM']}',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w400,
-                      fontStyle: FontStyle.italic,
-                      // color: Colors.lightBlue
-                    ),),
-                ],
-              ),
-              SizedBox(height: 8),
-              Row(
-                children: [
-                  Text('TP:',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w400,
-                      fontStyle: FontStyle.italic,
-                      // color: Colors.lightBlue
-                    ),),
-                  SizedBox(width: 10,),
-                  Text('${course['TP']}',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w400,
-                      fontStyle: FontStyle.italic,
-                      // color: Colors.lightBlue
-                    ),),
-                ],
-              ),
-              SizedBox(height: 8),
-              Row(
-                children: [
-                  Text('TD:',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w400,
-                      fontStyle: FontStyle.italic,
-                      // color: Colors.lightBlue
-                    ),),
-                  SizedBox(width: 10,),
-                  Text('${course['TD']}',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w400,
-                      fontStyle: FontStyle.italic,
-                      // color: Colors.lightBlue
-                    ),),
-                ],
-              ),
-              SizedBox(height: 8),
-              Row(
-                children: [
-                  Text('Taux:',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w400,
-                      fontStyle: FontStyle.italic,
-                      // color: Colors.lightBlue
-                    ),),
-                  SizedBox(width: 10,),
-                  Text('${course['prix']}',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w400,
-                      fontStyle: FontStyle.italic,
-                      // color: Colors.lightBlue
-                    ),),
-                ],
-              ),
-              SizedBox(height: 8),
-              Row(
-                children: [
-                  Text('Eq.CM:',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w400,
-                      fontStyle: FontStyle.italic,
-                      // color: Colors.lightBlue
-                    ),),
-                  SizedBox(width: 10,),
-                  Text('${course['TH']}',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w400,
-                      fontStyle: FontStyle.italic,
-                      // color: Colors.lightBlue
-                    ),),
-                ],
-              ),
-              SizedBox(height: 8),
-              Row(
-                children: [
-                  Text('Montant Total:',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w400,
-                      fontStyle: FontStyle.italic,
-                      // color: Colors.lightBlue
-                    ),),
-                  SizedBox(width: 10,),
-                  Text('${course['prix']* course['TH']}',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w400,
-                      fontStyle: FontStyle.italic,
-                      // color: Colors.lightBlue
-                    ),),
-                ],
-              ),
-              SizedBox(height: 8),
-              Row(
-                children: [
-                  Text('Signed:',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w400,
-                      fontStyle: FontStyle.italic,
-                      // color: Colors.lightBlue
-                    ),),
-                  SizedBox(width: 10,),
-                  Text(
-                    '${course['isSigne']}',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w400,
-                      fontStyle: FontStyle.italic,
-                      // color: Colors.lightBlue
-                    ),),
-                ],
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('Fermer'),
+        builder: (BuildContext context){
+          return Container(
+            height: 600,
+            padding: const EdgeInsets.all(25.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              // mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Cours Infos',style: TextStyle(fontSize: 30),),
+                SizedBox(height: 50),
+                Row(
+                  children: [
+                    Text('Matiere:',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+
+                    SizedBox(width: 10,),
+                    Text('${course['matiere']}',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+
+                  ],
+                ),
+                SizedBox(height: 25),
+                Row(
+                  children: [
+                    Text('Date:',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+
+                    SizedBox(width: 10,),
+                    Text('${DateFormat('dd/M/yyyy ').format(DateTime.parse(course['date'].toString()).toLocal())}',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+
+                  ],
+                ),
+                SizedBox(height: 25),
+                Row(children: [
+                  Row(
+                    children: [
+                      Text('Deb:',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                          // color: Colors.lightBlue
+                        ),),
+
+                      SizedBox(width: 10,),
+                      Text('${DateFormat(' HH:mm').format(DateTime.parse(course['date'].toString()).toLocal())}',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                          // color: Colors.lightBlue
+                        ),),
+
+                    ],
+                  ),
+                  SizedBox(width: 15),
+                  Row(
+                    children: [
+                      Text('Fin:',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                          // color: Colors.lightBlue
+                        ),),
+
+                      SizedBox(width: 10,),
+                      Text('${DateFormat(' HH:mm').format(DateTime.parse(course['date'].toString()).toLocal().add(Duration(minutes: (( course['CM']+course['TP']+course['TD'] )* 60).toInt())))}',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                          // color: Colors.lightBlue
+                        ),),
+
+                    ],
+                  ),
+                ],),
+                SizedBox(height: 25),
+
+                Row(
+                  children: [
+                    Row(
+                      children: [
+                        Text('CM:',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w400,
+                            fontStyle: FontStyle.italic,
+                            // color: Colors.lightBlue
+                          ),),
+
+                        SizedBox(width: 10,),
+                        Text('${course['CM']}',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w400,
+                            fontStyle: FontStyle.italic,
+                            // color: Colors.lightBlue
+                          ),),
+
+                      ],
+                    ),
+                    SizedBox(width: 20),
+                    Row(
+                      children: [
+                        Text('TP:',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w400,
+                            fontStyle: FontStyle.italic,
+                            // color: Colors.lightBlue
+                          ),),
+
+                        SizedBox(width: 10,),
+                        Text('${course['TP']}',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w400,
+                            fontStyle: FontStyle.italic,
+                            // color: Colors.lightBlue
+                          ),),
+
+                      ],
+                    ),
+                    SizedBox(width: 20),
+                    Row(
+                      children: [
+                        Text('TD:',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w400,
+                            fontStyle: FontStyle.italic,
+                            // color: Colors.lightBlue
+                          ),),
+
+                        SizedBox(width: 10,),
+                        Text('${course['TD']}',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w400,
+                            fontStyle: FontStyle.italic,
+                            // color: Colors.lightBlue
+                          ),),
+
+                      ],
+                    ),
+                  ],
+                ),
+                SizedBox(height: 25),
+                Row(
+                  children: [
+                    Text('Taux:',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+
+                    SizedBox(width: 10,),
+                    Text('${course['prix']}',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+
+                  ],
+                ),
+                SizedBox(height: 25),
+                Row(
+                  children: [
+                    Text('Eq.CM:',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+
+                    SizedBox(width: 10,),
+                    Text('${course['TH']}',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+
+                  ],
+                ),
+                SizedBox(height: 25),
+                Row(
+                  children: [
+                    Text('Montant Total:',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+
+                    SizedBox(width: 10,),
+                    Text('${course['prix']* course['TH']}',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+
+                  ],
+                ),
+                SizedBox(height: 25),
+                Row(
+                  children: [
+                    Text('Signed:',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+
+                    SizedBox(width: 10,),
+                    Text(
+                      '${course['isSigne']}',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+
+                  ],
+                ),
+              ],
             ),
-          ],
-        );
-      },
+          );
+        }
+
+
     );
   }
 

@@ -77,6 +77,25 @@ class _CategoriesState extends State<Categories> {
           children: [
             SizedBox(height: 40,),
             Container(
+              height: 50,
+              child: Row(
+                children: [
+                  TextButton(onPressed: (){
+                    Navigator.pop(context);
+                  }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,),
+                    style: TextButton.styleFrom(
+                      backgroundColor:Colors.white ,
+                      foregroundColor:Colors.black ,
+                      // elevation: 10,
+                      // shape: RoundedRectangleBorder(side: BorderSide(color: Colors.black26)),
+                    ),
+                  ),
+                  SizedBox(width: 30,),
+                  Text("Liste de Categories",style: TextStyle(fontSize: 25),)
+                ],
+              ),
+            ),
+            Container(
               margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
@@ -218,7 +237,7 @@ class _CategoriesState extends State<Categories> {
                                                                           crossAxisAlignment: CrossAxisAlignment.start,
                                                                           // mainAxisAlignment: MainAxisAlignment.start,
                                                                           children: [
-                                                                            Text("Mise à jour de la tâche", style: TextStyle(fontSize: 25),),
+                                                                            Text("Modifier une categorie", style: TextStyle(fontSize: 25),),
                                                                             Spacer(),
                                                                             InkWell(
                                                                               child: Icon(Icons.close),
@@ -235,9 +254,9 @@ class _CategoriesState extends State<Categories> {
                                                                           keyboardType: TextInputType.text,
                                                                           decoration: InputDecoration(
                                                                               filled: true,
-                                                                              fillColor: Colors.white,
+                                                                              // fillColor: Colors.white,
                                                                               border: OutlineInputBorder(
-                                                                                  borderSide: BorderSide.none,
+                                                                                  borderSide: BorderSide.none,gapPadding: 1,
                                                                                   borderRadius: BorderRadius.all(Radius.circular(10.0)))),
                                                                         ),
 
@@ -249,10 +268,10 @@ class _CategoriesState extends State<Categories> {
                                                                           decoration: InputDecoration(
                                                                               filled: true,
 
-                                                                              fillColor: Colors.white,
+                                                                              // fillColor: Colors.white,
                                                                               hintText: "description",
                                                                               border: OutlineInputBorder(
-                                                                                  borderSide: BorderSide.none,
+                                                                                  borderSide: BorderSide.none,gapPadding: 1,
                                                                                   borderRadius: BorderRadius.all(Radius.circular(10.0)))),
                                                                         ),
 
@@ -276,9 +295,9 @@ class _CategoriesState extends State<Categories> {
                                                                           },
                                                                           decoration: InputDecoration(
                                                                             filled: true,
-                                                                            fillColor: Colors.white,
+                                                                            // fillColor: Colors.white,
                                                                             border: OutlineInputBorder(
-                                                                              borderSide: BorderSide.none,
+                                                                              borderSide: BorderSide.none,gapPadding: 1,
                                                                               borderRadius: BorderRadius.all(Radius.circular(10.0)),
                                                                             ),
                                                                           ),
@@ -454,10 +473,10 @@ class _CategoriesState extends State<Categories> {
                     keyboardType: TextInputType.text,
                     decoration: InputDecoration(
                         filled: true,
-                        fillColor: Colors.white,
+                        // fillColor: Colors.white,
                         hintText: "Nom",
                         border: OutlineInputBorder(
-                            borderSide: BorderSide.none,
+                            borderSide: BorderSide.none,gapPadding: 1,
                             borderRadius: BorderRadius.all(Radius.circular(10.0)))),
                   ),
 
@@ -469,10 +488,10 @@ class _CategoriesState extends State<Categories> {
                     decoration: InputDecoration(
                         filled: true,
 
-                        fillColor: Colors.white,
+                        // fillColor: Colors.white,
                         hintText: "description",
                         border: OutlineInputBorder(
-                            borderSide: BorderSide.none,
+                            borderSide: BorderSide.none,gapPadding: 1,
                             borderRadius: BorderRadius.all(Radius.circular(10.0)))),
                   ),
 
@@ -496,10 +515,10 @@ class _CategoriesState extends State<Categories> {
                     },
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: Colors.white,
+                      // fillColor: Colors.white,
                       hintText: "taux",
                       border: OutlineInputBorder(
-                        borderSide: BorderSide.none,
+                        borderSide: BorderSide.none,gapPadding: 1,
                         borderRadius: BorderRadius.all(Radius.circular(10.0)),
                       ),
                     ),

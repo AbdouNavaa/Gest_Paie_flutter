@@ -76,6 +76,25 @@ class _UsersState extends State<Users> {
           children: [
             SizedBox(height: 40,),
             Container(
+              height: 50,
+              child: Row(
+                children: [
+                  TextButton(onPressed: (){
+                    Navigator.pop(context);
+                  }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,),
+                    style: TextButton.styleFrom(
+                      backgroundColor:Colors.white ,
+                      foregroundColor:Colors.black ,
+                      // elevation: 10,
+                      // shape: RoundedRectangleBorder(side: BorderSide(color: Colors.black26)),
+                    ),
+                  ),
+                  SizedBox(width: 30,),
+                  Text("Liste de Utlisateurs",style: TextStyle(fontSize: 25),)
+                ],
+              ),
+            ),
+            Container(
               margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
@@ -189,15 +208,19 @@ class _UsersState extends State<Users> {
                                               onChanged: (value) async {
                                                 // Continue with the rest of your onChanged logic if the types string is in the expected format
                                                 setState(() {
-                                                  filteredItems![index].isActive = value;
+                                                  // filteredItems![index].isActive = value;
+                                                  // fetchUser();
                                                 });
 
-                                                Navigator.of(context).pop();
+                                                // Navigator.of(context).pop();
 
+                      fetchUser().then((data) {
+                      setState(() {
+                      filteredItems = data; // Assigner la liste renvoyée par Useresseur à items
+                      });});
 
                                                   ActiveUser(
                                                     filteredItems![index].id,
-                                                    filteredItems![index].isActive!,
                                                   );
                                               },
                                             )
@@ -306,7 +329,7 @@ class _UsersState extends State<Users> {
                                                       },
                                                     );
                                                   },
-                                                  child: Icon(Icons.edit, color: Colors.blue),
+                                                  child: Icon(Icons.edit, color: Colors.green),
                                                   style: TextButton.styleFrom(
                                                     primary: Colors.white,
                                                     elevation: 0,
@@ -621,31 +644,25 @@ Future<List<User>> fetchUser() async {
   }
 }
 
-Future<void> ActiveUser( id,bool isActive) async {
+Future<void> ActiveUser( id) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String token = prefs.getString("token")!;
-  final url = 'http://192.168.43.73:5000/user/'  + '/$id';
+  final url = 'http://192.168.43.73:5000/user/'  + '/$id'+'/active';
   final headers = {
     'Content-Type': 'application/json',
     'Authorization': 'Bearer $token',
   };
-  Map<String, dynamic> body =({
-    'active':isActive
-  });
 
 
   try {
     final response = await http.patch(
       Uri.parse(url),
       headers: headers,
-      body: json.encode(body),
     );
 
     if (response.statusCode == 201) {
       // Course creation was successful
-      print("Course created successfully!");
-      final responseData = json.decode(response.body);
-      print("Course ID: ${responseData['cours']['_id']}");
+      print("OK!");
       // You can handle the response data as needed
     } else {
       // Course creation failed

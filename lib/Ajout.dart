@@ -114,6 +114,7 @@ class _AddCoursDialogState extends State<AddCoursDialog> {
     return SingleChildScrollView(
       child: AlertDialog(
         insetPadding: EdgeInsets.only(top: MediaQuery.of(context).size.height - 610,),
+
 // backgroundColor: Color(0xB0AFAFA3),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
@@ -194,7 +195,7 @@ class _AddCoursDialogState extends State<AddCoursDialog> {
                 hintText: "selection d'une Categorie",
 
                 border: OutlineInputBorder(
-                  borderSide: BorderSide.none,gapPadding: 3,
+                  borderSide: BorderSide.none,gapPadding: 1,
                   borderRadius: BorderRadius.all(Radius.circular(10.0)),
                 ),
               ),
@@ -221,7 +222,7 @@ class _AddCoursDialogState extends State<AddCoursDialog> {
                 // fillColor: Color(0xA3B0AF1),
                 hintText: "selection d'une Matiere",
                 border: OutlineInputBorder(
-                  borderSide: BorderSide.none,gapPadding: 3,
+                  borderSide: BorderSide.none,gapPadding: 1,
                   borderRadius: BorderRadius.all(Radius.circular(10.0)),
                 ),
               ),
@@ -246,7 +247,7 @@ class _AddCoursDialogState extends State<AddCoursDialog> {
                 // fillColor: Color(0xA3B0AF1),
                 hintText: "selection d'un  Professeur", // Update the hintText
                 border: OutlineInputBorder(
-                  borderSide: BorderSide.none,gapPadding: 3,
+                  borderSide: BorderSide.none,gapPadding: 1,
                   borderRadius: BorderRadius.all(Radius.circular(10.0)),
                 ),
               ),
@@ -260,7 +261,7 @@ class _AddCoursDialogState extends State<AddCoursDialog> {
                   // fillColor: Color(0xA3B0AF1),
                   hintText: "Date",
                   border: OutlineInputBorder(
-                      borderSide: BorderSide.none,gapPadding: 3,
+                      borderSide: BorderSide.none,gapPadding: 1,
                       borderRadius: BorderRadius.all(Radius.circular(10.0)))),
               // readOnly: true,
               onTap: () => selectTime(_date),
