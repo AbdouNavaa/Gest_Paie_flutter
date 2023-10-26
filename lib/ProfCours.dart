@@ -80,7 +80,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
       matieresList = matieres;
     });
   }
-@override
+  @override
   void initState() {
     // TODO: implement initState
     super.initState();
@@ -202,8 +202,8 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
 
               ),
               Container(width: 50,
-                  child:Text('total: ${totalType.toStringAsFixed(2)}'),
-                  ),
+                child:Text('total: ${totalType.toStringAsFixed(2)}'),
+              ),
               ElevatedButton(
                 onPressed: () async {
                   DateTime? selectedDateFin = await showDatePicker(
@@ -287,196 +287,196 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
 
 // Determine the total number of pages
 
-    Expanded(
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(1.0),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
+          Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white12,
-                borderRadius: BorderRadius.all(
-                  Radius.circular(20.0),
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
                 ),
               ),
-              margin: EdgeInsets.only(left: 10),
-              child: DataTable(
-                showCheckboxColumn: true,
-                showBottomBorder: true,
-                horizontalMargin: 1,
-                headingRowHeight: 50,
-                columnSpacing: 18,
-                dataRowHeight: 50,
-                headingTextStyle: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black, // Set header text color
-                ),
-                // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xFF0C2FDA)), // Set row background color
-                columns: [
-                  DataColumn(label: Text('Signe')),
-                  DataColumn(label: Text('Matiere')),
-                  DataColumn(label: Text('Date')),
-                  DataColumn(label: Text('Eq.CM')),
-                  DataColumn(label: Text('Prix')),
-                  DataColumn(label: Text('Action')),
-                ],
-                rows: [
-                  for (var index = (currentPage - 1) * coursesPerPage;
-                  index < widget.courses.length && index < currentPage * coursesPerPage;
-                  index++)
-                    if (courseFitsCriteria(widget.courses[index]))
-                      DataRow(
-                        onLongPress: () =>
-                            _showCourseDetails(context, widget.courses[index]),
-                        cells: [
-                          DataCell(
-                              CupertinoSwitch(
-                                activeColor: Colors.black,
-                                value: widget.courses[index]['isSigne'],
-                                onChanged: (value) async {
-                                  final typesString = widget.courses[index]['types'];
-                                  final typeParts = typesString.split(':');
+              child: Padding(
+                padding: const EdgeInsets.all(1.0),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white12,
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(20.0),
+                      ),
+                    ),
+                    margin: EdgeInsets.only(left: 10),
+                    child: DataTable(
+                      showCheckboxColumn: true,
+                      showBottomBorder: true,
+                      horizontalMargin: 1,
+                      headingRowHeight: 50,
+                      columnSpacing: 18,
+                      dataRowHeight: 50,
+                      headingTextStyle: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black, // Set header text color
+                      ),
+                      // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xFF0C2FDA)), // Set row background color
+                      columns: [
+                        DataColumn(label: Text('Signe')),
+                        DataColumn(label: Text('Matiere')),
+                        DataColumn(label: Text('Date')),
+                        DataColumn(label: Text('Eq.CM')),
+                        DataColumn(label: Text('Prix')),
+                        DataColumn(label: Text('Action')),
+                      ],
+                      rows: [
+                        for (var index = (currentPage - 1) * coursesPerPage;
+                        index < widget.courses.length && index < currentPage * coursesPerPage;
+                        index++)
+                          if (courseFitsCriteria(widget.courses[index]))
+                            DataRow(
+                              onLongPress: () =>
+                                  _showCourseDetails(context, widget.courses[index]),
+                              cells: [
+                                DataCell(
+                                    CupertinoSwitch(
+                                      activeColor: Colors.black,
+                                      value: widget.courses[index]['isSigne'],
+                                      onChanged: (value) async {
+                                        final typesString = widget.courses[index]['types'];
+                                        final typeParts = typesString.split(':');
 
-                                  print(typeParts);
-                                  print(typeParts.length);
-                                  // Check if the "types" string is in the expected format
-                                  if (typeParts.length > 2) {
-                                    // Display an alert or notification here
-                                    showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return AlertDialog(
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25),),elevation: 1,
-                                          title: Text('Impossible'),
-                                          content: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text("Il y en a plus d'un type"),
-                                              Text("Cours Type [${widget.courses[index]['types']}]"),
-                                             SizedBox(height: 10,),
-                                              Text("Il faut cliquer sur button de Modification",style: TextStyle(color: Colors.blueGrey),),
-                                            ],
-                                          ),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () {
-                                                Navigator.of(context).pop();
-                                              },
-                                              child: Text('OK'),
-                                            ),
-                                          ],
-                                        );
+                                        print(typeParts);
+                                        print(typeParts.length);
+                                        // Check if the "types" string is in the expected format
+                                        if (typeParts.length > 2) {
+                                          // Display an alert or notification here
+                                          showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return AlertDialog(
+                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25),),elevation: 1,
+                                                title: Text('Impossible'),
+                                                content: Column(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text("Il y en a plus d'un type"),
+                                                    Text("Cours Type [${widget.courses[index]['types']}]"),
+                                                    SizedBox(height: 10,),
+                                                    Text("Il faut cliquer sur button de Modification",style: TextStyle(color: Colors.blueGrey),),
+                                                  ],
+                                                ),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      Navigator.of(context).pop();
+                                                    },
+                                                    child: Text('OK'),
+                                                  ),
+                                                ],
+                                              );
+                                            },
+                                          );
+                                          return;
+                                        }
+
+                                        // Continue with the rest of your onChanged logic if the types string is in the expected format
+                                        setState(() {
+                                          widget.courses[index]['isSigne'] = value;
+                                        });
+
+                                        Navigator.of(context).pop();
+
+                                        final updatedDate = DateFormat('yyyy-MM-ddTHH:mm').parse(widget.courses[index]['date']).toUtc();
+                                        final typeName = typeParts[0].trim();
+                                        final typeNbhString = typeParts[1].replaceAll(',', '').trim();
+
+                                        final updatedTypes = [{'name': typeName, 'nbh': typeNbhString}];
+
+                                        final matiereName = widget.courses[index]['matiere'];
+                                        final matiereId = getMatiereIdFromName(matiereName);
+
+                                        if (matiereId != null) {
+                                          updateProfCours(
+                                            widget.courses[index]['_id'],
+                                            widget.ProfId,
+                                            matiereId,
+                                            updatedTypes,
+                                            updatedDate,
+                                            value,
+                                          );
+                                        } else {
+                                          print("Matiere not found with name: $matiereName");
+                                        }
                                       },
-                                    );
-                                    return;
-                                  }
-
-                                  // Continue with the rest of your onChanged logic if the types string is in the expected format
-                                  setState(() {
-                                    widget.courses[index]['isSigne'] = value;
-                                  });
-
-                                  Navigator.of(context).pop();
-
-                                  final updatedDate = DateFormat('yyyy-MM-ddTHH:mm').parse(widget.courses[index]['date']).toUtc();
-                                  final typeName = typeParts[0].trim();
-                                  final typeNbhString = typeParts[1].replaceAll(',', '').trim();
-
-                                  final updatedTypes = [{'name': typeName, 'nbh': typeNbhString}];
-
-                                  final matiereName = widget.courses[index]['matiere'];
-                                  final matiereId = getMatiereIdFromName(matiereName);
-
-                                  if (matiereId != null) {
-                                    updateProfCours(
-                                      widget.courses[index]['_id'],
-                                      widget.ProfId,
-                                      matiereId,
-                                      updatedTypes,
-                                      updatedDate,
-                                      value,
-                                    );
-                                  } else {
-                                    print("Matiere not found with name: $matiereName");
-                                  }
-                                },
-                              )
-                          ),
-                          DataCell(Text('${widget.courses[index]['matiere']}'),
-                              onTap: () =>
-                                  _showCourseDetails(context, widget.courses[index])),
-                          DataCell(
-                            Text(
-                              '${DateFormat('dd/M ').format(
-                                DateTime.parse(widget.courses[index]['date'].toString()).toLocal(),
-                              )}',
-                            ),
-                          ),
-                          DataCell(
-                            Text('${widget.courses[index]['TH']}'),
-                          ),
-                          DataCell(
-                            Text('${widget.courses[index]['somme']}'),
-                          ),
-                          DataCell(
-
-                            Row(
-                              children: [
-                                Container(
-                                  width: 35,
-                                  child: TextButton(
-                                    onPressed: () =>_showCourseDetails(context, widget.courses[index]),// Disable button functionality
-
-                                    child: Icon(Icons.more_vert, color: Colors.blue),
-                                    style: TextButton.styleFrom(
-                                      primary: Colors.white,
-                                      elevation: 0,
-                                      // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
-                                    ),
-                                  ),
-
+                                    )
                                 ),
-                                Container(
-                                  width: 35,
-                                  child: TextButton(
-                                    onPressed: () async{
-                                      return showDialog(
-                                        context: context,
-                                        builder: (context) {
-                                          return UpdateProfCoursDialog(courses: widget.courses[index], ProfId: widget.ProfId,);
-                                        },
-                                      );
-                                    },// Disable button functionality
-
-                                    child: Icon(Icons.edit, color: Colors.green),
-                                    style: TextButton.styleFrom(
-                                      primary: Colors.white,
-                                      elevation: 0,
-                                      // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
-                                    ),
+                                DataCell(Text('${widget.courses[index]['matiere']}'),
+                                    onTap: () =>
+                                        _showCourseDetails(context, widget.courses[index])),
+                                DataCell(
+                                  Text(
+                                    '${DateFormat('dd/M ').format(
+                                      DateTime.parse(widget.courses[index]['date'].toString()).toLocal(),
+                                    )}',
                                   ),
+                                ),
+                                DataCell(
+                                  Text('${widget.courses[index]['TH']}'),
+                                ),
+                                DataCell(
+                                  Text('${widget.courses[index]['somme']}'),
+                                ),
+                                DataCell(
+
+                                    Row(
+                                      children: [
+                                        Container(
+                                          width: 35,
+                                          child: TextButton(
+                                            onPressed: () =>_showCourseDetails(context, widget.courses[index]),// Disable button functionality
+
+                                            child: Icon(Icons.more_vert, color: Colors.blue),
+                                            style: TextButton.styleFrom(
+                                              primary: Colors.white,
+                                              elevation: 0,
+                                              // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                                            ),
+                                          ),
+
+                                        ),
+                                        Container(
+                                          width: 35,
+                                          child: TextButton(
+                                            onPressed: () async{
+                                              return showDialog(
+                                                context: context,
+                                                builder: (context) {
+                                                  return UpdateProfCoursDialog(courses: widget.courses[index], ProfId: widget.ProfId,);
+                                                },
+                                              );
+                                            },// Disable button functionality
+
+                                            child: Icon(Icons.edit, color: Colors.green),
+                                            style: TextButton.styleFrom(
+                                              primary: Colors.white,
+                                              elevation: 0,
+                                              // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    )
                                 ),
                               ],
-                            )
-                          ),
-                        ],
-                      ),
-                ],
+                            ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
-        ),
-      ),
-    ),
 
 
           Visibility(
@@ -546,7 +546,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
       // ),
 
 
-     // bottomNavigationBar: BottomNav(),
+      // bottomNavigationBar: BottomNav(),
 
     );
 
@@ -1032,7 +1032,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
     });
 
     final response = await http.post(Uri.parse(url), headers: headers, body: body);
-print(response.statusCode);
+    print(response.statusCode);
     if (response.statusCode == 201) {
       final responseData = json.decode(response.body);
       Navigator.of(context).pop(true);
@@ -1149,7 +1149,7 @@ class _UpdateProfCoursDialogState extends State<UpdateProfCoursDialog> {
   TextEditingController _isSigne = TextEditingController();
 
   bool showMatDropdown = false;
-late String mat;
+  late String mat;
   @override
   void initState()  {
     super.initState();
@@ -1192,13 +1192,13 @@ late String mat;
   }
 
   Future<void> fetchProfMat() async {
-      Map<String, dynamic> professorData = await fetchProfessorInfo();
+    Map<String, dynamic> professorData = await fetchProfessorInfo();
 
-      List<dynamic> professorMatieres = professorData['professeur']['matieres'];
-      setState(() {
-        matieres = professorMatieres;
-      });
-    }
+    List<dynamic> professorMatieres = professorData['professeur']['matieres'];
+    setState(() {
+      matieres = professorMatieres;
+    });
+  }
   Future<void> fetchMats() async {
     List<Matiere> fetchedMats = await fetchMatiere();
     setState(() {
@@ -1273,7 +1273,7 @@ late String mat;
                     ),
                   ),
                 )
-              : TextFormField(
+                    : TextFormField(
                   initialValue: mat,
                   decoration: InputDecoration(labelText: 'Nom du Catégorie'),
                   readOnly: true,

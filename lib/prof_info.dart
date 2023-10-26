@@ -30,18 +30,38 @@ class _ProfesseurInfoPageState extends State<ProfesseurInfoPage> {
     return Scaffold(
       body: Column(
         children: [
-        Container(
-        height: 120,
-        color: Colors.blue, // Choisissez une couleur appropriée
-        alignment: Alignment.center,
-        child: Text(
-          'Détails du Professeur',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+          SizedBox(height: 40,),
+          Container(
+            height: 50,
+
+            child: Row(
+              children: [
+                Container(
+                  height: 45,
+                  width: 45,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.all(Radius.circular(50)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 5,
+                      ),
+                    ],
+                  ),
+                  child: InkWell(
+                    onTap: (){
+                    Navigator.pop(context);
+                  }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,),
+
+                  ),
+                ),
+                SizedBox(width: 50,),
+                Text("Mon Profile",style: TextStyle(fontSize: 25),)
+              ],
+            ),
           ),
-        ),),
+
           Expanded(
             child: Container(
               child: Padding(
@@ -141,11 +161,24 @@ class _ProfessorDetailsWidgetState extends State<ProfessorDetailsWidget> {
               //   backgroundImage: NetworkImage(
               //       'https://th.bing.com/th/id/R.8b167af653c2399dd93b952a48740620?rik=%2fIwzk0n3LnH7dA&pid=ImgRaw&r=0'),
               // ),
-              SizedBox(child: Container(child: Center(
-                child: Text("Mes Iformations", style: TextStyle(fontStyle: FontStyle.italic, fontWeight: FontWeight.bold ,color: Colors.white,
+              SizedBox(child: Container(
+                child: Center(
+                child: Text("Mes Iformations", style: TextStyle(fontStyle: FontStyle.italic, fontWeight: FontWeight.bold ,color: Colors.black,
                   fontSize: 20,),),
               ),
-                color: Colors.blue, width: 370, height: 50,)),
+                // color: Colors.blue,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 5,
+                    ),
+                  ],
+                ),
+
+                width: 370, height: 50,)
+              ),
 
               SizedBox(
                 height: 12.0,
@@ -199,16 +232,34 @@ class _ProfessorDetailsWidgetState extends State<ProfessorDetailsWidget> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             SizedBox(child: Container(child: Center(
-              child: Text("Mes Matieres", style: TextStyle(fontStyle: FontStyle.italic, fontWeight: FontWeight.bold ,color: Colors.white,
+              child: Text("Mes Matieres", style: TextStyle(fontStyle: FontStyle.italic, fontWeight: FontWeight.bold ,color: Colors.black,
                 fontSize: 20,),),
             ),
-              color: Colors.blue, width: 370, height: 50,)),
+              // color: Colors.blue,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 5,
+                  ),
+                ],
+              ),
+
+              width: 370, height: 50,)),
 
 
             SingleChildScrollView(scrollDirection: Axis.horizontal,
               child: Container(     width: MediaQuery.of(context).size.width,
                 decoration: BoxDecoration(
                 color: Colors.white12,
+                  // boxShadow: [
+                  //   BoxShadow(
+                  //     color: Colors.black12,
+                  //     blurRadius: 5,
+                  //   ),
+                  // ],
+
                 borderRadius: BorderRadius.all(
                   Radius.circular(20.0),
                 ),
@@ -257,15 +308,15 @@ class _ProfessorDetailsWidgetState extends State<ProfessorDetailsWidget> {
         ),
 
         SizedBox(height: 20), // Add a divider between professor info and matieres
-        Container(margin:EdgeInsets.only(left: 10,right: 10,bottom: 20),height: 40,
+        Container(margin:EdgeInsets.only(left: 10,right: 10,bottom: 20),height: 55,
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20))),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),backgroundColor: Colors.white,elevation: 10),
             onPressed: () => _displayTextInputDialog(context),
             child: Row(mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.add,size: 28,color: Colors.white,),
-                Text(' Matiere', style: TextStyle(fontSize: 17,fontStyle: FontStyle.italic,color: Colors.white),)
+                Icon(Icons.add,size: 28,color: Colors.black,),
+                Text(' Matiere', style: TextStyle(fontSize: 17,fontStyle: FontStyle.italic,color: Colors.black),)
               ],
             ),
             // tooltip: 'Add Category',

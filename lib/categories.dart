@@ -80,17 +80,27 @@ class _CategoriesState extends State<Categories> {
               height: 50,
               child: Row(
                 children: [
-                  TextButton(onPressed: (){
-                    Navigator.pop(context);
-                  }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,),
-                    style: TextButton.styleFrom(
-                      backgroundColor:Colors.white ,
-                      foregroundColor:Colors.black ,
-                      // elevation: 10,
-                      // shape: RoundedRectangleBorder(side: BorderSide(color: Colors.black26)),
+                  Container(
+                    height: 45,
+                    width: 45,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.all(Radius.circular(50)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 5,
+                        ),
+                      ],
+                    ),
+                    child: InkWell(
+                      onTap: (){
+                        Navigator.pop(context);
+                      }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,),
+
                     ),
                   ),
-                  SizedBox(width: 30,),
+                  SizedBox(width: 50,),
                   Text("Liste de Categories",style: TextStyle(fontSize: 25),)
                 ],
               ),

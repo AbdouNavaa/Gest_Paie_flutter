@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:gestion_payements/update.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'Ajout.dart';
+import 'constants.dart';
 
 
 class CoursesPage extends StatefulWidget {
@@ -95,7 +96,7 @@ class _CoursesPageState extends State<CoursesPage> {
 
   TextEditingController _searchController = TextEditingController();
   int currentPage = 1;
-  int coursesPerPage = 7;
+  int coursesPerPage = 4;
   String searchQuery = '';
   bool sortByDateAscending = true;
 
@@ -130,17 +131,27 @@ class _CoursesPageState extends State<CoursesPage> {
             height: 50,
             child: Row(
               children: [
-                TextButton(onPressed: (){
-                  Navigator.pop(context);
-                }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,),
-                  style: TextButton.styleFrom(
-                    backgroundColor:Colors.white ,
-                    foregroundColor:Colors.black ,
-                    // elevation: 10,
-                    // shape: RoundedRectangleBorder(side: BorderSide(color: Colors.black26)),
+                Container(
+                  height: 45,
+                  width: 45,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.all(Radius.circular(50)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 5,
+                      ),
+                    ],
+                  ),
+                  child: InkWell(
+                    onTap: (){
+                      Navigator.pop(context);
+                    }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,),
+
                   ),
                 ),
-                SizedBox(width: 30,),
+                SizedBox(width: 50,),
                 Text("Liste de Cours",style: TextStyle(fontSize: 25),)
               ],
             ),
@@ -308,163 +319,357 @@ class _CoursesPageState extends State<CoursesPage> {
                       ),
                     ),
                     // margin: EdgeInsets.only(left: 10),
-                    child: DataTable(
-                      showCheckboxColumn: true,
-                      showBottomBorder: true,
-                      // sortColumnIndex: 1,
-                      // sortAscending: true,
-                      headingRowHeight: 50,
-                      border: TableBorder.all(color: Colors.black12, width: 2),
-                      columnSpacing: 20,
-                      horizontalMargin: 3,
-                      // border: TableBorder(verticalInside: BorderSide(width: 1.5)),
-                      dataRowHeight: 50,
-                      headingTextStyle: TextStyle(
-                        fontWeight: FontWeight.w400,
-                        color: Colors.black, // Set header text color
-                      ),
-                      // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xFF0C2FDA)), // Set row background color
-                      columns: [
-                        DataColumn(label: Text('No')),
-                        DataColumn(label: Text('Prof')),
-                        DataColumn(label: Text('Matiere')),
-                        DataColumn(label: Text('Date')),
-                        DataColumn(label: Text('Eq.CM')),
-                        DataColumn(label: Text('Prix')),
-                        DataColumn(label: Text('Signé')),
-                        if (widget.role == "admin")
-                        DataColumn(label: Text('Payé')),
-                        DataColumn(label: Text('Action')),
-                      ],
-                      rows: [
-                        for (var index = (currentPage - 1) * coursesPerPage;
-                        index < widget.courses.length && index < currentPage * coursesPerPage;
-                        index++)
-                          if (courseFitsCriteria(widget.courses[index]))
-                            DataRow(
-                              onLongPress: () =>
-                                  _showCourseDetails(context, widget.courses[index]),
+                    child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white12,
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(20.0),
+                          ),
+                        ),
+                        margin: EdgeInsets.only(left: 10,),
+                        child:
+                        SingleChildScrollView(scrollDirection: Axis.vertical,
+                          child: Column(
+                            children: [
+                              for (var index = (currentPage - 1) * coursesPerPage;
+                              index < widget.courses.length && index < currentPage * coursesPerPage;
+                              index++)
+                                if (courseFitsCriteria(widget.courses[index]))
+                                  Container(
+                                    // padding: EdgeInsets.only(bottom: 10),
+                                    height: 105,
+                                    child: Row(
 
-                              cells: [
-                                DataCell(Text('${index + 1}',style: TextStyle(fontSize: 18),)), // Numbering cell
-                                DataCell(Container(width: 50,child: Text('${widget.courses[index]['professeur']}')),),
-                                DataCell(Container(width: 50,child: Text('${widget.courses[index]['matiere']}')),
-                                  // onTap: () =>
-                                  //     _showCourseDetails(context, widget.courses[index])
-                                ),
-                                DataCell(
-                                  Text(
-                                    '${DateFormat('dd/M ').format(
-                                      DateTime.parse(widget.courses[index]['date'].toString()).toLocal(),
-                                    )}',
-                                  ),
-                                ),
-                                DataCell(
-                                  Center(child: Text('${widget.courses[index]['TH']}')),
-                                ),
-                                DataCell(
-                                  Text('${widget.courses[index]['somme']}'),
-                                ),
-                                DataCell(
-                                  Icon( widget.courses[index]['isSigne']? Icons.verified:Icons.cancel,
-                                      color: widget.courses[index]['isSigne']? Colors.green: Colors.red),
-                                ),
-                                if (widget.role == "admin")
-                                DataCell(
-                                  Icon( widget.courses[index]['isPaid']? Icons.verified:Icons.cancel,
-                                      color: widget.courses[index]['isPaid']? Colors.green: Colors.red),
-                                ),
-                                DataCell(
-                                  Row(
-                                    // mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Container(
-                                        width: 35,
-                                        child: TextButton(
-                                          onPressed: () =>_showCourseDetails(context, widget.courses[index]),// Disable button functionality
-
-                                          child: Icon(Icons.more_vert, color: Colors.blue),
-                                          style: TextButton.styleFrom(
-                                            primary: Colors.white,
-                                            elevation: 0,
-                                            // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                                      children: [
+                                        // Petit calendrier pour la date de début
+                                        Container(
+                                          width: 70,
+                                          height: 100,// Ajustez la largeur selon vos besoins
+                                          decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius: BorderRadius.circular(kDefaultPadding),
+                                              border: Border.all(color: Colors.black12)
                                           ),
-                                        ),
+                                          child:
+                                          Column(mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                '${DateFormat('dd / MM').format(
+                                                  DateTime.parse(widget.courses[index]['date'].toString()).toLocal(),
+                                                )}',
+                                                style: TextStyle(fontSize: 20,
+                                                    // fontWeight: FontWeight.bold,
+                                                    fontStyle: FontStyle.italic),
+                                              ),
 
-                                      ),
-                                      Container(
-                                        width: 35,
-                                        child: TextButton(
-                                          onPressed: () async{
-                                            return showDialog(
-                                              context: context,
-                                              builder: (context) {
-                                                return UpdateCoursDialog(courses: widget.courses[index],);
-                                              },
-                                            );
-                                          },// Disable button functionality
+                                              Container(width: 100,
+                                                child: Divider(thickness: 1.8,
+                                                  color: Colors.grey.shade900,
+                                                  height: 1,
+                                                ),
+                                              ),
 
-                                          child: Icon(Icons.edit, color: Colors.green),
-                                          style: TextButton.styleFrom(
-                                            primary: Colors.white,
-                                            elevation: 0,
-                                            // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                                              Column(children: [
+                                                Text('${DateFormat(' HH:mm').format(DateTime.parse(widget.courses[index]['date'].toString()).toLocal())}',
+                                                  style: TextStyle(
+                                                    fontSize: 20,
+                                                    fontWeight: FontWeight.w400,
+                                                    fontStyle: FontStyle.italic,
+                                                    // color: Colors.lightBlue
+                                                  ),),
+                                                SizedBox(width: 15),
+                                                Text('${DateFormat(' HH:mm').format(DateTime.parse(widget.courses[index]['date'].toString()).toLocal().add(
+                                                    Duration(minutes: (( widget.courses[index]['CM']+widget.courses[index]['TP']+widget.courses[index]['TD'] )* 60).toInt())))}',
+                                                  style: TextStyle(
+                                                    fontSize: 20,
+                                                    fontWeight: FontWeight.w400,
+                                                    fontStyle: FontStyle.italic,
+                                                    // color: Colors.lightBlue
+                                                  ),),
+                                              ],),
+
+                                            ],
                                           ),
+
                                         ),
-                                      ),
-                                      Container(
-                                        width: 35,
-                                        child: TextButton(
-                                          onPressed: () {
-                                            showDialog(
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return AlertDialog(
-                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
-                                                  title: Text("Confirmer la suppression"),
-                                                  content: Text(
-                                                      "Êtes-vous sûr de vouloir supprimer cet élément ?"),
-                                                  actions: <Widget>[
-                                                    TextButton(
-                                                      child: Text("ANNULER"),
-                                                      onPressed: () {
-                                                        Navigator.of(context).pop();
-                                                      },
+                                        // Conteneur pour d'autres détails du cours
+                                        SizedBox(width: 10,),
+                                        InkWell(
+                                          onTap: (){
+                                            _showCourseDetails(context, widget.courses[index]);
+                                          },
+                                          child: Container(
+                                            width: 250,
+                                            height: 100,// Ajustez la largeur selon vos besoins
+                                            decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                borderRadius: BorderRadius.circular(kDefaultPadding),
+                                                border: Border.all(color: Colors.black12)
+                                            ),
+                                            // width: MediaQuery.of(context).size.width - 120, // Ajustez la largeur selon vos besoins
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Column(
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  children: [
+                                                    Row(
+                                                      mainAxisAlignment: MainAxisAlignment.center,
+                                                      children: [
+                                                        Text('Prof:',
+                                                          style: TextStyle(
+                                                            fontSize: 15,
+                                                            fontWeight: FontWeight.w400,
+                                                            fontStyle: FontStyle.italic,
+                                                            // color: Colors.lightBlue
+                                                          ),),
+                                                        SizedBox(width: 10,),
+                                                        Text(widget.courses[index]['professeur'].toUpperCase(),
+                                                          style: TextStyle(
+                                                            fontSize: 15,
+                                                            fontWeight: FontWeight.w400,
+                                                            fontStyle: FontStyle.italic,
+                                                            // color: Colors.lightBlue
+                                                          ),),
+                                                        SizedBox(width: 40,),
+                                                      ],
                                                     ),
-                                                    TextButton(
-                                                      child: Text(
-                                                        "SUPPRIMER",
-                                                        // style: TextStyle(color: Colors.red),
+
+                                                    Row(
+                                                      mainAxisAlignment: MainAxisAlignment.center,
+
+                                                      children: [
+
+                                                        Column(
+                                                          // mainAxisAlignment: MainAxisAlignment.center,
+                                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                                          children: [
+                                                            Row(
+                                                              children: [
+                                                                Text('Matiere:',
+                                                                  style: TextStyle(
+                                                                    fontSize: 15,
+                                                                    fontWeight: FontWeight.w400,
+                                                                    fontStyle: FontStyle.italic,
+                                                                    // color: Colors.lightBlue
+                                                                  ),),
+
+                                                                SizedBox(width: 10,),
+                                                                Text('${widget.courses[index]['matiere']}',
+                                                                  style: TextStyle(
+                                                                    fontSize: 15,
+                                                                    fontWeight: FontWeight.w400,
+                                                                    fontStyle: FontStyle.italic,
+                                                                    // color: Colors.lightBlue
+                                                                  ),),
+
+                                                              ],
+                                                            ),
+                                                            SizedBox(height: 5),
+                                                            Row(
+                                                              children: [
+                                                                Text('MT:',
+                                                                  style: TextStyle(
+                                                                    fontSize: 15,
+                                                                    fontWeight: FontWeight.w400,
+                                                                    fontStyle: FontStyle.italic,
+                                                                    // color: Colors.lightBlue
+                                                                  ),),
+
+                                                                SizedBox(width: 10,),
+                                                                Text('${widget.courses[index]['prix']* widget.courses[index]['TH']}',
+                                                                  style: TextStyle(
+                                                                    fontSize: 15,
+                                                                    fontWeight: FontWeight.w400,
+                                                                    fontStyle: FontStyle.italic,
+                                                                    // color: Colors.lightBlue
+                                                                  ),),
+
+                                                              ],
+                                                            ),
+
+
+                                                          ],
+
+                                                        ),
+                                                        SizedBox(width: 15,),
+                                                        Column(
+                                                          // mainAxisAlignment: MainAxisAlignment.start,
+                                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                                          children: [
+                                                            Row(
+                                                              children: [
+                                                                Text('Signé:',
+                                                                  style: TextStyle(
+                                                                    fontSize: 15,
+                                                                    fontWeight: FontWeight.w400,
+                                                                    fontStyle: FontStyle.italic,
+                                                                    // color: Colors.lightBlue
+                                                                  ),),
+
+                                                                SizedBox(width: 10,),
+                                                                Text(widget.courses[index]['isSigne']?
+                                                                  'Oui':'Non',
+                                                                  style: TextStyle(
+                                                                    fontSize: 15,
+                                                                    fontWeight: FontWeight.w400,
+                                                                    fontStyle: FontStyle.italic,
+                                                                    color: widget.courses[index]['isSigne']? Colors.green: Colors.red
+                                                                    // color: Colors.lightBlue
+                                                                  ),),
+
+                                                              ],
+                                                            ),
+                                                            SizedBox(height: 5),
+                                                            Row(
+                                                              children: [
+                                                                Text('Eq.CM:',
+                                                                  style: TextStyle(
+                                                                    fontSize: 15,
+                                                                    fontWeight: FontWeight.w400,
+                                                                    fontStyle: FontStyle.italic,
+                                                                    // color: Colors.lightBlue
+                                                                  ),),
+
+                                                                SizedBox(width: 10,),
+                                                                Text('${widget.courses[index]['TH']}',
+                                                                  style: TextStyle(
+                                                                    fontSize: 15,
+                                                                    fontWeight: FontWeight.w400,
+                                                                    fontStyle: FontStyle.italic,
+                                                                    // color: Colors.lightBlue
+                                                                  ),),
+
+                                                              ],
+                                                            ),
+
+                                                          ],
+
+                                                        ),
+                                                        // SizedBox(width: 15,),
+
+                                                      ],
+                                                    ),
+                                                    if (widget.role == "admin")
+                                                      Row(
+                                                        mainAxisAlignment: MainAxisAlignment.center,
+                                                        children: [
+                                                          Text('Payé:',
+                                                            style: TextStyle(
+                                                              fontSize: 15,
+                                                              fontWeight: FontWeight.w400,
+                                                              fontStyle: FontStyle.italic,
+                                                              // color: Colors.lightBlue
+                                                            ),),
+
+                                                          SizedBox(width: 10,),
+                                                          Text(widget.courses[index]['isPaid']?
+                                                          'Oui':'Non',
+                                                            style: TextStyle(
+                                                                fontSize: 15,
+                                                                fontWeight: FontWeight.w400,
+                                                                fontStyle: FontStyle.italic,
+                                                                color: widget.courses[index]['isPaid']? Colors.green: Colors.red
+                                                              // color: Colors.lightBlue
+                                                            ),),
+
+                                                        ],
                                                       ),
-                                                      onPressed: () {
-                                                        Navigator.of(context).pop();
-                                                        DeleteCours(widget.courses[index]['_id']);
-                                                        ScaffoldMessenger.of(context).showSnackBar(
-                                                          SnackBar(content: Text('Le Category a été Supprimer avec succès.')),
-                                                        );
-                                                      },
-                                                    ),
+
                                                   ],
-                                                );
-                                              },
-                                            );
-                                          }, // Disable button functionality
+                                                ),
+                                                SizedBox(width: 10),
+                                                Column(
+                                                  // mainAxisAlignment: MainAxisAlignment.start,
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Container(height: 15,),
+                                                    Container(
+                                                      width: 35,
+                                                      height: 30,
+                                                      // color: Colors.black,
+                                                      child: TextButton(
+                                                        onPressed: () async{
+                                                          return showDialog(
+                                                            context: context,
+                                                            builder: (context) {
+                                                              return UpdateCoursDialog(courses: widget.courses[index],);
+                                                            },
+                                                          );
+                                                        },// Disable button functionality
 
-                                          child: Icon(Icons.delete, color: Colors.red),
-                                          style: TextButton.styleFrom(
-                                            primary: Colors.white,
+                                                        child: Icon(Icons.edit_note_sharp, color: Colors.black),
+                                                        style: TextButton.styleFrom(
+                                                          primary: Colors.white,
+                                                          elevation: 0,
+                                                          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    Container(
+                                                      width: 35,
+                                                      height: 30,
+                                                      // color: Colors.black,
+                                                      child: TextButton(
+                                                        onPressed: () {
+                                                          showDialog(
+                                                            context: context,
+                                                            builder: (BuildContext context) {
+                                                              return AlertDialog(
+                                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
+                                                                title: Text("Confirmer la suppression"),
+                                                                content: Text(
+                                                                    "Êtes-vous sûr de vouloir supprimer cet élément ?"),
+                                                                actions: <Widget>[
+                                                                  TextButton(
+                                                                    child: Text("ANNULER"),
+                                                                    onPressed: () {
+                                                                      Navigator.of(context).pop();
+                                                                    },
+                                                                  ),
+                                                                  TextButton(
+                                                                    child: Text(
+                                                                      "SUPPRIMER",
+                                                                      // style: TextStyle(color: Colors.red),
+                                                                    ),
+                                                                    onPressed: () {
+                                                                      Navigator.of(context).pop();
+                                                                      DeleteCours(widget.courses[index]['_id']);
+                                                                      ScaffoldMessenger.of(context).showSnackBar(
+                                                                        SnackBar(content: Text('Le Category a été Supprimer avec succès.')),
+                                                                      );
+                                                                    },
+                                                                  ),
+                                                                ],
+                                                              );
+                                                            },
+                                                          );
+                                                        }, // Disable button functionality
 
-                                            elevation: 0,
-                                            // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                                                        child: Icon(Icons.delete_outline,color: Colors.black,),
+                                                        style: TextButton.styleFrom(
+                                                          primary: Colors.white,
+
+                                                          elevation: 0,
+                                                          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                                                        ),
+                                                      ),
+                                                    ),
+
+                                                  ],
+
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                      ],
+                            ],
+                          ),
+                        )
+
                     ),
                   ),
                 ),
@@ -809,7 +1014,7 @@ class _CoursesPageState extends State<CoursesPage> {
                 SizedBox(height: 25),
                 Row(
                   children: [
-                    Text('Signed:',
+                    Text('Signé:',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,
@@ -819,7 +1024,33 @@ class _CoursesPageState extends State<CoursesPage> {
 
                     SizedBox(width: 10,),
                     Text(
-                      '${course['isSigne']}',
+                      course['isSigne']?
+                      'Oui':'Non',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+
+                  ],
+                ),
+                if (widget.role == "admin")
+                  SizedBox(height: 25),
+                Row(
+                  children: [
+                    Text('Payé:',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+
+                    SizedBox(width: 10,),
+                    Text(
+                      course['isPaid']?
+                      'Oui':'Non',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,
