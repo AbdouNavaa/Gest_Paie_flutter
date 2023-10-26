@@ -103,8 +103,9 @@ class _CoursesPageState extends State<CoursesPage> {
   bool courseFitsCriteria(Map<String, dynamic> course) {
     // Apply your filtering criteria here
     DateTime courseDate = DateTime.parse(course['date'].toString());
-    bool isMatch = (course['matiere'].toLowerCase().contains(searchQuery.toLowerCase()) || course['professeur'].toLowerCase().contains(searchQuery.toLowerCase()));
-    // || course['isSigne'].contains(searchQuery.toLowerCase()));
+    bool isMatch = (course['matiere'].toLowerCase().contains(searchQuery.toLowerCase()) || course['professeur'].toLowerCase().contains(searchQuery.toLowerCase())
+    || course['isSigne'].toString().contains(searchQuery.toLowerCase()));
+        // || course['isPaid'].toString().contains(searchQuery.toLowerCase()));
 
     // Check if the course date falls within the selected date range
     if ((widget.dateDeb == null || courseDate.isAtSameMomentAs(widget.dateDeb!.toLocal()) ||
