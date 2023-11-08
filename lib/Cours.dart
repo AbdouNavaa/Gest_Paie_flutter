@@ -88,6 +88,9 @@ class _CoursesPageState extends State<CoursesPage> {
     print(response.statusCode);
     if(response.statusCode ==200){
       // fetchCategory();
+      setState(() {
+        Navigator.pop(context);
+      });
     }
 
   }
@@ -208,7 +211,7 @@ class _CoursesPageState extends State<CoursesPage> {
                   }
                 },
                 child: Text(widget.dateDeb != null ? DateFormat('yyyy/MM/dd').format(widget.dateDeb!) : 'Date Deb'),
-                style: ElevatedButton.styleFrom(backgroundColor: Color(0xFF0C2FDA)
+                style: ElevatedButton.styleFrom(backgroundColor: Color(0xff0fb2ea)
                     ,foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
 
@@ -233,7 +236,7 @@ class _CoursesPageState extends State<CoursesPage> {
                   }
                 },
                 child: Text(widget.dateFin != null ? DateFormat('yyyy/MM/dd').format(widget.dateFin!) : 'Date Fin'),
-                style: ElevatedButton.styleFrom(backgroundColor: Color(0xFF0C2FDA),foregroundColor: Colors.white,
+                style: ElevatedButton.styleFrom(backgroundColor: Color(0xff0fb2ea),foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
               ),
             ],          ),
@@ -269,7 +272,7 @@ class _CoursesPageState extends State<CoursesPage> {
                     ),
                   ),
                 ),
-                Container(width: MediaQuery.of(context).size.width /10,height: 40,color: sortByDateAscending ? Color(0xFF0C2FDA): Color(
+                Container(width: MediaQuery.of(context).size.width /10,height: 40,color: sortByDateAscending ? Color(0xff0fb2ea): Color(
                     0x10000000),
                   child: TextButton(
                     onPressed: () {
@@ -354,40 +357,52 @@ class _CoursesPageState extends State<CoursesPage> {
                                           child:
                                           Column(mainAxisAlignment: MainAxisAlignment.center,
                                             children: [
-                                              Text(
-                                                '${DateFormat('dd / MM').format(
-                                                  DateTime.parse(widget.courses[index]['date'].toString()).toLocal(),
-                                                )}',
-                                                style: TextStyle(fontSize: 20,
-                                                    // fontWeight: FontWeight.bold,
-                                                    fontStyle: FontStyle.italic),
-                                              ),
+                                              Container(
+                                                width:100,
+                                                height: 50,
+                                                decoration: BoxDecoration(
+                                                    color: Color(0xff0fb2ea),
+                                                  // colors: [Color(0xff40dedf), Color(0xff0fb2ea)],
+                                                  borderRadius: BorderRadius.only(topLeft: Radius.circular(15),topRight: Radius.circular(15)),
+                                                    // border: Border.all(color: Colors.black12)
+                                                ),
 
-                                              Container(width: 100,
-                                                child: Divider(thickness: 1.8,
-                                                  color: Colors.grey.shade900,
-                                                  height: 1,
+                                                child: Center(
+                                                  child: Text(
+                                                    '${DateFormat('dd / MM').format(
+                                                      DateTime.parse(widget.courses[index]['date'].toString()).toLocal(),
+                                                    )}',
+                                                    style: TextStyle(fontSize: 20,
+                                                        color: Colors.white,
+                                                        // fontWeight: FontWeight.bold,
+                                                        fontStyle: FontStyle.italic),
+                                                  ),
                                                 ),
                                               ),
 
-                                              Column(children: [
-                                                Text('${DateFormat(' HH:mm').format(DateTime.parse(widget.courses[index]['date'].toString()).toLocal())}',
-                                                  style: TextStyle(
-                                                    fontSize: 20,
-                                                    fontWeight: FontWeight.w400,
-                                                    fontStyle: FontStyle.italic,
-                                                    // color: Colors.lightBlue
-                                                  ),),
-                                                SizedBox(width: 15),
-                                                Text('${DateFormat(' HH:mm').format(DateTime.parse(widget.courses[index]['date'].toString()).toLocal().add(
-                                                    Duration(minutes: (( widget.courses[index]['CM']+widget.courses[index]['TP']+widget.courses[index]['TD'] )* 60).toInt())))}',
-                                                  style: TextStyle(
-                                                    fontSize: 20,
-                                                    fontWeight: FontWeight.w400,
-                                                    fontStyle: FontStyle.italic,
-                                                    // color: Colors.lightBlue
-                                                  ),),
-                                              ],),
+
+                                              Container(
+                                                width:100,
+                                                height: 48,
+                                                child: Column(children: [
+                                                  Text('${DateFormat(' HH:mm').format(DateTime.parse(widget.courses[index]['date'].toString()).toLocal())}',
+                                                    style: TextStyle(
+                                                      fontSize: 17,
+                                                      fontWeight: FontWeight.w400,
+                                                      fontStyle: FontStyle.italic,
+                                                      // color: Colors.lightBlue
+                                                    ),),
+                                                  SizedBox(width: 10),
+                                                  Text('${DateFormat(' HH:mm').format(DateTime.parse(widget.courses[index]['date'].toString()).toLocal().add(
+                                                      Duration(minutes: (( widget.courses[index]['CM']+widget.courses[index]['TP']+widget.courses[index]['TD'] )* 60).toInt())))}',
+                                                    style: TextStyle(
+                                                      fontSize: 17,
+                                                      fontWeight: FontWeight.w400,
+                                                      fontStyle: FontStyle.italic,
+                                                      // color: Colors.lightBlue
+                                                    ),),
+                                                ],),
+                                              ),
 
                                             ],
                                           ),
@@ -579,87 +594,6 @@ class _CoursesPageState extends State<CoursesPage> {
 
                                                   ],
                                                 ),
-                                                SizedBox(width: 10),
-                                                Column(
-                                                  // mainAxisAlignment: MainAxisAlignment.start,
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    Container(height: 15,),
-                                                    Container(
-                                                      width: 35,
-                                                      height: 30,
-                                                      // color: Colors.black,
-                                                      child: TextButton(
-                                                        onPressed: () async{
-                                                          return showDialog(
-                                                            context: context,
-                                                            builder: (context) {
-                                                              return UpdateCoursDialog(courses: widget.courses[index],);
-                                                            },
-                                                          );
-                                                        },// Disable button functionality
-
-                                                        child: Icon(Icons.edit_note_sharp, color: Colors.black),
-                                                        style: TextButton.styleFrom(
-                                                          primary: Colors.white,
-                                                          elevation: 0,
-                                                          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    Container(
-                                                      width: 35,
-                                                      height: 30,
-                                                      // color: Colors.black,
-                                                      child: TextButton(
-                                                        onPressed: () {
-                                                          showDialog(
-                                                            context: context,
-                                                            builder: (BuildContext context) {
-                                                              return AlertDialog(
-                                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
-                                                                title: Text("Confirmer la suppression"),
-                                                                content: Text(
-                                                                    "Êtes-vous sûr de vouloir supprimer cet élément ?"),
-                                                                actions: <Widget>[
-                                                                  TextButton(
-                                                                    child: Text("ANNULER"),
-                                                                    onPressed: () {
-                                                                      Navigator.of(context).pop();
-                                                                    },
-                                                                  ),
-                                                                  TextButton(
-                                                                    child: Text(
-                                                                      "SUPPRIMER",
-                                                                      // style: TextStyle(color: Colors.red),
-                                                                    ),
-                                                                    onPressed: () {
-                                                                      Navigator.of(context).pop();
-                                                                      DeleteCours(widget.courses[index]['_id']);
-                                                                      ScaffoldMessenger.of(context).showSnackBar(
-                                                                        SnackBar(content: Text('Le Category a été Supprimer avec succès.')),
-                                                                      );
-                                                                    },
-                                                                  ),
-                                                                ],
-                                                              );
-                                                            },
-                                                          );
-                                                        }, // Disable button functionality
-
-                                                        child: Icon(Icons.delete_outline,color: Colors.black,),
-                                                        style: TextButton.styleFrom(
-                                                          primary: Colors.white,
-
-                                                          elevation: 0,
-                                                          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
-                                                        ),
-                                                      ),
-                                                    ),
-
-                                                  ],
-
-                                                ),
                                               ],
                                             ),
                                           ),
@@ -757,7 +691,7 @@ class _CoursesPageState extends State<CoursesPage> {
 
         builder: (BuildContext context){
           return Container(
-            height: 600,
+            height: 650,
             padding: const EdgeInsets.all(25.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -1036,31 +970,117 @@ class _CoursesPageState extends State<CoursesPage> {
 
                   ],
                 ),
-                if (widget.role == "admin")
                   SizedBox(height: 25),
-                Row(
+                if (widget.role == "admin")
+                Column(
                   children: [
-                    Text('Payé:',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
+                    Row(
+                      children: [
+                        Text('Payé:',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w400,
+                            fontStyle: FontStyle.italic,
+                            // color: Colors.lightBlue
+                          ),),
 
-                    SizedBox(width: 10,),
-                    Text(
-                      course['isPaid']?
-                      'Oui':'Non',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
+                        SizedBox(width: 10,),
+                        Text(
+                          course['isPaid']?
+                          'Oui':'Non',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w400,
+                            fontStyle: FontStyle.italic,
+                            // color: Colors.lightBlue
+                          ),),
 
+                      ],
+                    ),
                   ],
                 ),
+                SizedBox(height: 25,),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () async{
+                        setState(() {
+                          Navigator.pop(context);
+                        });
+                        return showDialog(
+                          context: context,
+                          builder: (context) {
+                            return UpdateCoursDialog(courses: course,);
+                          },
+                        );
+
+                      },// Disable button functionality
+
+                      child: Text('Modifier'),
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.only(left: 20,right: 20),
+                        foregroundColor: Colors.lightGreen,
+                        backgroundColor: Colors.white,
+                        // side: BorderSide(color: Colors.black,),
+                        elevation: 3,
+                        // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                      ),
+
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
+                              title: Text("Confirmer la suppression"),
+                              content: Text(
+                                  "Êtes-vous sûr de vouloir supprimer cet élément ?"),
+                              actions: <Widget>[
+                                TextButton(
+                                  child: Text("ANNULER"),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                                TextButton(
+                                  child: Text(
+                                    "SUPPRIMER",
+                                    // style: TextStyle(color: Colors.red),
+                                  ),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                    DeleteCours(course['_id']);
+                                    setState(() {
+                                      Navigator.pop(context);
+                                    });
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Le Category a été Supprimer avec succès.')),
+                                    );
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }, // Disable button functionality
+
+                      child: Text('Supprimer'),
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.only(left: 20,right: 20),
+                        foregroundColor: Colors.redAccent,
+                        backgroundColor: Colors.white,
+                        // side: BorderSide(color: Colors.black,),
+                        elevation: 3,
+                        // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                      ),
+
+                    ),
+                  ],
+                ),
+
               ],
             ),
           );

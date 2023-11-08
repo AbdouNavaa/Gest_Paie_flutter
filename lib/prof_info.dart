@@ -389,6 +389,7 @@ Future<void> deleteMatiereFromProfesseur(String profId, String matiereId) async 
     final responseData = json.decode(response.body);
     // You can handle the response data here if needed
     print('Ok le matiere est supprimer');
+
     print(responseData);
   } else {
     // Handle errors
@@ -559,7 +560,7 @@ class _AddMatState extends State<AddMat> {
               },
               child: Text("Ajouter"),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF0C2FDA),
+                backgroundColor: Color(0xff0fb2ea),
                 foregroundColor: Colors.white,
                 elevation: 10,
                 padding: EdgeInsets.only(left: 90, right: 90),

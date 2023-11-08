@@ -142,16 +142,6 @@ class _CategoriesState extends State<Categories> {
               )
               ,
             ),
-            Container(width: 200,height: 50,
-                // color: Colors.black87,
-                // margin: EdgeInsets.all(8),
-                child: Card(
-                    elevation: 5,
-                    // margin: EdgeInsets.only(top: 10),
-                    shadowColor: Colors.blue,
-                    // color: Colors.black87,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    child: Center(child: Text(' ${filteredItems?.length} Categories',style: TextStyle(fontSize: 18, fontStyle: FontStyle.italic,fontWeight: FontWeight.bold),)))),
 
             Expanded(
               child: Container(
@@ -196,7 +186,7 @@ class _CategoriesState extends State<Categories> {
                                     fontWeight: FontWeight.bold,
                                     color: Colors.black, // Set header text color
                                   ),
-                                  // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xFF0C2FDA)), // Set row background color
+                                  // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
                                   columns: [
                                     // DataColumn(label: Text('Code')),
                                     DataColumn(label: Text('Nom')),
@@ -337,7 +327,7 @@ class _CategoriesState extends State<Categories> {
                                                                           child: Text("Modifier"),
 
                                                                           style: ElevatedButton.styleFrom(
-                                                                            backgroundColor: Color(0xFF0C2FDA),
+                                                                            backgroundColor: Color(0xff0fb2ea),
                                                                             foregroundColor: Colors.white,
                                                                             elevation: 10,
                                                                             minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
@@ -356,7 +346,7 @@ class _CategoriesState extends State<Categories> {
 
                                                           );
                                                         }, // Disable button functionality
-                                                        child: Icon(Icons.edit, color: Colors.green,),
+                                                        child: Icon(Icons.edit, color: Colors.black,),
 
                                                       ),
                                                     ),
@@ -397,7 +387,7 @@ class _CategoriesState extends State<Categories> {
                                                             },
                                                           );
                                                         }, // Disable button functionality
-                                                        child: Icon(Icons.delete_outline, color: Colors.red,),
+                                                        child: Icon(Icons.delete_outline, color: Colors.black,),
 
                                                       ),
                                                     ),
@@ -555,7 +545,7 @@ class _CategoriesState extends State<Categories> {
                     child: Text("Ajouter"),
 
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF0C2FDA),
+                      backgroundColor: Color(0xff0fb2ea),
                       foregroundColor: Colors.white,
                       elevation: 10,
                       minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),

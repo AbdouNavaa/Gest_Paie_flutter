@@ -35,7 +35,7 @@ class _LogoutScreenState extends State<LogoutScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.sync_lock,size: 370,color: Color(0xFF0C2FDA),),
+            Icon(Icons.sync_lock,size: 370,color: Color(0xff0fb2ea),),
             Text("You must sign-in to access to this section", style: TextStyle(fontSize: 15,fontWeight: FontWeight.w500,fontStyle: FontStyle.italic),),
             SizedBox(height: 15,),
             ElevatedButton(
@@ -46,7 +46,7 @@ class _LogoutScreenState extends State<LogoutScreen> {
               },
               child: Text("Logout", style: TextStyle(fontSize: 20, fontStyle: FontStyle.italic,fontWeight: FontWeight.w400),),
               style: ElevatedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15) ),
-                  padding: EdgeInsets.only(left: 117,right: 117,top: 15,bottom: 15),foregroundColor: Colors.white,backgroundColor: Color(0xFF0C2FDA)),
+                  padding: EdgeInsets.only(left: 117,right: 117,top: 15,bottom: 15),foregroundColor: Colors.white,backgroundColor: Color(0xff0fb2ea)),
             ),
 
           ],

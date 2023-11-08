@@ -141,16 +141,6 @@ class _UsersState extends State<Users> {
               )
               ,
             ),
-            Container(width: 200,height: 50,
-                // color: Colors.black87,
-                // margin: EdgeInsets.all(8),
-                child: Card(
-                    elevation: 5,
-                    // margin: EdgeInsets.only(top: 10),
-                    shadowColor: Colors.blue,
-                    // color: Colors.black87,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    child: Center(child: Text(' ${filteredItems?.length} Users',style: TextStyle(fontSize: 18, fontStyle: FontStyle.italic,fontWeight: FontWeight.bold),)))),
 
             Expanded(
               child: Container(
@@ -194,9 +184,8 @@ class _UsersState extends State<Users> {
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black, // Set header text color
                                 ),
-                                // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xFF0C2FDA)), // Set row background color
+                                // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
                                 columns: [
-                                  DataColumn(label: Text('No')),
                                   DataColumn(label: Text('Active')),
                                   DataColumn(label: Text('Nom')),
                                   DataColumn(label: Text('Email')),
@@ -210,7 +199,7 @@ class _UsersState extends State<Users> {
 //                                    if(filteredItems?[index].role != 'admin')
                                     DataRow(
                                       cells: [
-                                        DataCell(Text('${index + 1}',style: TextStyle(fontSize: 15),)), // Numbering cell
+                                        // DataCell(Text('${index + 1}',style: TextStyle(fontSize: 15),)), // Numbering cell
                                         DataCell(
                                             CupertinoSwitch(
                                               activeColor: Colors.black,
@@ -339,7 +328,7 @@ class _UsersState extends State<Users> {
                                                       },
                                                     );
                                                   },
-                                                  child: Icon(Icons.edit, color: Colors.green),
+                                                  child: Icon(Icons.edit, color: Colors.black),
                                                   style: TextButton.styleFrom(
                                                     primary: Colors.white,
                                                     elevation: 0,
@@ -385,7 +374,7 @@ class _UsersState extends State<Users> {
                                                     );
                                                   },
 
-                                                  child: Icon(Icons.delete, color: Colors.red),
+                                                  child: Icon(Icons.delete, color: Colors.black),
                                                   style: TextButton.styleFrom(
                                                     primary: Colors.white,
                                                     elevation: 0,
@@ -512,7 +501,7 @@ class _UsersState extends State<Users> {
                     }, child: Text("Ajouter"),
 
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF0C2FDA),
+                        backgroundColor: Color(0xff0fb2ea),
                         foregroundColor: Colors.white,
                         elevation: 10,
                         padding: EdgeInsets.only(left: 90, right: 90),

@@ -313,7 +313,7 @@ class _LoginSectionState extends State<LoginSection> {
                                         borderRadius: BorderRadius.circular(15)),
                                     padding: EdgeInsets.only(left: 117, right: 117),
                                     // backgroundColor:  Color(0xFFf5851f)),
-                                    backgroundColor: Color(0xFF0C2FDA)
+                                    backgroundColor: Color(0xff0fb2ea)
                                 ),
                                 // icon: Icon(Icons.save),
                                 child: Center(

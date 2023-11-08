@@ -322,7 +322,7 @@ class _AddCoursDialogState extends State<AddCoursDialog> {
               },
               child: Text("Ajouter"),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF0C2FDA),
+                backgroundColor: Color(0xff0fb2ea),
                 foregroundColor: Colors.white,
                 elevation: 10,
                 minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),

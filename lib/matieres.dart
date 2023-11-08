@@ -278,16 +278,6 @@ class _MatieresState extends State<Matieres> {
               )
               ,
             ),
-            Container(width: 200,height: 50,
-                // color: Colors.black87,
-                // margin: EdgeInsets.all(8),
-                child: Card(
-                    elevation: 5,
-                    // margin: EdgeInsets.only(top: 10),
-                    shadowColor: Colors.blue,
-                    // color: Colors.black87,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    child: Center(child: Text(' ${filteredItems?.length} Matieres',style: TextStyle(fontSize: 18, fontStyle: FontStyle.italic,fontWeight: FontWeight.bold),)))),
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
@@ -331,7 +321,7 @@ class _MatieresState extends State<Matieres> {
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black, // Set header text color
                                 ),
-                                // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xFF0C2FDA)), // Set row background color
+                                // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
                                 columns: [
                                   // DataColumn(label: Text('Semestre')),
                                   DataColumn(label: Text('Code EM')),
@@ -507,7 +497,7 @@ class _MatieresState extends State<Matieres> {
                                                                     child: Text("Modifier"),
 
                                                                     style: ElevatedButton.styleFrom(
-                                                                      backgroundColor: Color(0xFF0C2FDA),
+                                                                      backgroundColor: Color(0xff0fb2ea),
                                                                       foregroundColor: Colors.white,
                                                                       elevation: 10,
                                                                       minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
@@ -524,7 +514,7 @@ class _MatieresState extends State<Matieres> {
                                                         }
                                                     );
                                                   },
-                                                  child: Icon(Icons.edit, color: Colors.green),
+                                                  child: Icon(Icons.edit, color: Colors.black),
                                                   style: TextButton.styleFrom(
                                                     primary: Colors.white,
                                                     elevation: 0,
@@ -570,7 +560,7 @@ class _MatieresState extends State<Matieres> {
                                                     );
                                                   }, // Disable button functionality
 
-                                                  child: Icon(Icons.delete, color: Colors.red),
+                                                  child: Icon(Icons.delete, color: Colors.black),
                                                   style: TextButton.styleFrom(
                                                     primary: Colors.white,
                                                     elevation: 0,
@@ -746,7 +736,7 @@ class _MatieresState extends State<Matieres> {
                         }, child: Text("Ajouter"),
 
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF0C2FDA),
+                            backgroundColor: Color(0xff0fb2ea),
                             foregroundColor: Colors.white,
                             elevation: 10,
                             minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),

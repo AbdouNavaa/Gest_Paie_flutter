@@ -462,7 +462,7 @@ Future<void> _displayTextInputDialog(BuildContext context) async {
                   }, child: Text("Ajouter"),
 
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF0C2FDA),
+                      backgroundColor: Color(0xff0fb2ea),
                       foregroundColor: Colors.white,
                       elevation: 10,
                       padding: EdgeInsets.only(left: 90, right: 90),

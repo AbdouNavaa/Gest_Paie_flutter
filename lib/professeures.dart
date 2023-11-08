@@ -68,7 +68,9 @@ class _ProfesseuresState extends State<Professeures> {
     var jsonResponse = jsonDecode(response.body);
     print(response.statusCode);
     if(response.statusCode ==200){
-      fetchProfs();
+      setState(() {
+        Navigator.pop(context);
+      });
     }
 
   }
@@ -187,16 +189,6 @@ class _ProfesseuresState extends State<Professeures> {
             )
             ,
           ),
-          Container(width: 200,height: 50,
-              // color: Colors.black87,
-              // margin: EdgeInsets.all(8),
-              child: Card(
-                  elevation: 5,
-                  // margin: EdgeInsets.only(top: 10),
-                  shadowColor: Colors.blue,
-                  // color: Colors.black87,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  child: Center(child: Text(' ${filteredItems?.length} Professeurs',style: TextStyle(fontSize: 18, fontStyle: FontStyle.italic,fontWeight: FontWeight.bold),)))),
 
           Expanded(
             child: Container(
@@ -229,81 +221,37 @@ class _ProfesseuresState extends State<Professeures> {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Column(
-                                      children: [
-                                        InkWell(
-                                          onTap: () =>_showDetails(context, filteredItems?[index]),// Disable button functionality
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Column(
+                                        children: [
+                                          InkWell(
+                                            onTap: () =>_showDetails(context, filteredItems?[index]),// Disable button functionality
 
-                                          child: CircleAvatar(
-                                            minRadius: 35.0,
-                                            maxRadius: 35.0,
-                                            backgroundColor: Colors.black26,
-                                            child: Icon(Icons.person,color: Colors.white,size: 50),
+                                            child: CircleAvatar(
+                                              minRadius: 35.0,
+                                              maxRadius: 35.0,
+                                              backgroundColor: Colors.black26,
+                                              child: Icon(Icons.person,color: Colors.white,size: 50),
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                    Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text('${filteredItems?[index].nom} ${filteredItems?[index].prenom}'),
-                                        SizedBox(height: 10),
-                                        Text(' ${filteredItems?[index].mobile}',style: TextStyle(color: Colors.black38),),
-                                      ],
-                                    ),
-                                    Column(
-                                      children: [
-                                        TextButton(
-                                          onPressed: () {
-                                            // Modifier les informations du professeur
-                                          },
-                                          child: Icon(Icons.edit, color: Colors.lightGreen),
-                                          style: TextButton.styleFrom(
-                                            primary: Colors.white,
-                                            elevation: 0,
-                                          ),
-                                        ),
-                                        TextButton(
-                                          onPressed: () {
-                                            showDialog(
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return AlertDialog(
-                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                                                  elevation: 1,
-                                                  title: Text("Confirmer la suppression"),
-                                                  content: Text("Êtes-vous sûr de vouloir supprimer cet élément ?"),
-                                                  actions: <Widget>[
-                                                    TextButton(
-                                                      child: Text("ANNULER"),
-                                                      onPressed: () {
-                                                        Navigator.of(context).pop();
-                                                      },
-                                                    ),
-                                                    TextButton(
-                                                      child: Text("SUPPRIMER"),
-                                                      onPressed: () {
-                                                        Navigator.of(context).pop();
-                                                        DeleteProfesseur(snapshot.data![index].id);
-                                                        ScaffoldMessenger.of(context).showSnackBar(
-                                                          SnackBar(content: Text('Le Professeur a été Supprimer avec succès.')),
-                                                        );
-                                                      },
-                                                    ),
-                                                  ],
-                                                );
-                                              },
-                                            );
-                                          },
-                                          child: Icon(Icons.delete, color: Colors.red),
-                                          style: TextButton.styleFrom(
-                                            primary: Colors.white,
-                                            elevation: 0,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                        ],
+                                      ),
+                                      SizedBox(width: 10,),
+                                      Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text('${filteredItems?[index].nom} ${filteredItems?[index].prenom}'),
+                                          SizedBox(height: 10),
+                                          Text(' ${filteredItems?[index].mobile}',style: TextStyle(color: Colors.black38),),
+                                         SizedBox(height: 10),
+                                          Text(' ${filteredItems?[index].email}',style: TextStyle(color: Colors.black38),),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                   ],
                                 ),
                               );
@@ -439,6 +387,9 @@ class _ProfesseuresState extends State<Professeures> {
                           AddProfesseur(_name.text, _prenom.text, _email.text,
                               num.parse(_mobile.text));
                           // AddProfesseur(_name.text, _desc.text);
+                          setState(() {
+                            Navigator.pop(context);
+                          });
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text(
                                 'Le Professeur a été ajouter avec succès.')),
@@ -449,7 +400,7 @@ class _ProfesseuresState extends State<Professeures> {
                         }, child: Text("Ajouter"),
 
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF0C2FDA),
+                            backgroundColor: Color(0xff0fb2ea),
                             foregroundColor: Colors.white,
                             elevation: 10,
                             minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
@@ -581,7 +532,9 @@ class _ProfesseuresState extends State<Professeures> {
                                                   String profId = prof!.id!;
                                                   String matiereId = matiere['_id']; // Replace 'matiere' with the actual matiere data
                                                   deleteMatiereFromProfesseur(profId, matiereId);
-                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                  setState(() {
+                                                    Navigator.pop(context);
+                                                  });ScaffoldMessenger.of(context).showSnackBar(
                                                     SnackBar(
                                                         content: Text('La matiere est Supprimer avec succès.',)),);
 
@@ -601,22 +554,109 @@ class _ProfesseuresState extends State<Professeures> {
 
                     ],
                   ),
-                  SizedBox(height: 50,),
-                  ElevatedButton(
-                    onPressed:() =>_AddProfMatriere(context,prof.id!),
-                    child:Text('Ajouter une Matiere au Prof',style: TextStyle(fontSize: 18)),
+                  // SizedBox(height: 40,),
+                  // ElevatedButton(
+                  //   onPressed:() =>_AddProfMatriere(context,prof.id!),
+                  //   child:Text('Ajouter une Matiere au Prof',style: TextStyle(fontSize: 18)),
+                  //
+                  //   style: ElevatedButton.styleFrom(
+                  //     backgroundColor: Color(0xff0fb2ea),
+                  //     foregroundColor: Colors.white,
+                  //     elevation: 10,
+                  //     minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
+                  //     // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
+                  //     //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
+                  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                  //   ),
+                  //
+                  // ),
+                  SizedBox(height: 20,),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          // Modifier les informations du professeur
+                        },
+                        child: Text('Modifier'),
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.only(left: 20,right: 20),
+                          foregroundColor: Colors.lightGreen,
+                          backgroundColor: Colors.white,
+                          // side: BorderSide(color: Colors.black,),
+                          elevation: 3,
+                          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                        ),
 
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF0C2FDA),
-                      foregroundColor: Colors.white,
-                      elevation: 10,
-                      minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
-                      // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
-                      //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                    ),
+                      ),
+                      ElevatedButton(
+                        onPressed:() {
+                          setState(() {
+                            Navigator.pop(context);
+                          });
+                          _AddProfMatriere(context,prof.id!);
+                          },
 
+                        child: Text('Ajout Mat'),
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.only(left: 20,right: 20),
+                          foregroundColor: Colors.blue,
+                          backgroundColor: Colors.white,
+                          // side: BorderSide(color: Colors.black,),
+                          elevation: 3,
+                          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                        ),
+
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                                elevation: 1,
+                                title: Text("Confirmer la suppression"),
+                                content: Text("Êtes-vous sûr de vouloir supprimer cet élément ?"),
+                                actions: <Widget>[
+                                  TextButton(
+                                    child: Text("ANNULER"),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                  TextButton(
+                                    child: Text("SUPPRIMER"),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+
+                                      DeleteProfesseur(prof.id!);
+                                      setState(() {
+                                        Navigator.pop(context);
+                                      });
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('Le Professeur a été Supprimer avec succès.')),
+                                      );
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        child: Text('Supprimer'),
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.only(left: 20,right: 20),
+                          foregroundColor: Colors.redAccent,
+                          backgroundColor: Colors.white,
+                          // side: BorderSide(color: Colors.black,),
+                          elevation: 3,
+                          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                        ),
+                      ),
+                    ],
                   ),
+
                 ],
               ),
             ),
@@ -628,6 +668,9 @@ class _ProfesseuresState extends State<Professeures> {
   }
 
   Future<void> _AddProfMatriere(BuildContext context,String Id) async {
+    setState(() {
+      Navigator.pop(context);
+    });
     return showDialog(
       context: context,
       builder: (context) {
@@ -657,6 +700,9 @@ class _ProfesseuresState extends State<Professeures> {
     );
     if (response.statusCode == 200) {
       print('Professeur ajouter avec succes');
+      setState(() {
+        Navigator.pop(context);
+      });
     } else {
       print("SomeThing Went Wrong");
     }
@@ -696,6 +742,41 @@ class _ProfesseuresState extends State<Professeures> {
           '4e 5asser sa77bi mad5al======================================');
     }
   }
+  void UpdateProf( id,String name,String description,[num? prix]) async {
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString("token")!;
+    print(token);
+    final response = await http.patch(
+      Uri.parse("http://192.168.43.73:5000/categorie" + "/$id"),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(<String, dynamic>{
+        "name":name,
+        // "code":code ,
+        "description":description ,
+        "prix": prix ,
+      }),
+    );
+    print(response.statusCode);
+    if (response.statusCode == 201) {
+      // Fetch the updated list of Matieres and update the UI
+      fetchProfs().then((data) {
+        setState(() {
+          filteredItems = data;
+        });
+      }).catchError((error) {
+        print('Erreur lors de la récupération des Matieres: $error');
+      });
+    } else {
+      return Future.error('Server Error');
+      print(
+          '4e 5asser sa77bi mad5al======================================');
+    }
+  }
+
 }
 
 class Professeur {
@@ -888,7 +969,7 @@ width: MediaQuery.of(context).size.width,
                 },
                 child: Text("Ajouter"),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF0C2FDA),
+                  backgroundColor: Color(0xff0fb2ea),
                   foregroundColor: Colors.white,
                   elevation: 10,
                   minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),

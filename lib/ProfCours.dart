@@ -198,7 +198,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                 },
                 child: Text(widget.dateDeb != null ? DateFormat('yyyy/MM/dd').format(widget.dateDeb!) : 'Date Deb'),
                 style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF0C2FDA),foregroundColor: Colors.white,
+                    backgroundColor: Color(0xff0fb2ea),foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
 
               ),
@@ -223,7 +223,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                 },
                 child: Text(widget.dateFin != null ? DateFormat('yyyy/MM/dd').format(widget.dateFin!) : 'Date Fin'),
                 style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF0C2FDA),foregroundColor: Colors.white,
+                    backgroundColor: Color(0xff0fb2ea),foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
               ),
             ],          ),
@@ -259,7 +259,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                   ),
                 ),
                 Container(width: 40,height: 40,
-                  color: Color(0xFF0C2FDA),
+                  color: Color(0xff0fb2ea),
                   child: TextButton(
                     onPressed: () {
                       setState(() {
@@ -320,7 +320,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                         fontWeight: FontWeight.bold,
                         color: Colors.black, // Set header text color
                       ),
-                      // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xFF0C2FDA)), // Set row background color
+                      // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
                       columns: [
                         DataColumn(label: Text('Signe')),
                         DataColumn(label: Text('Matiere')),
@@ -446,26 +446,26 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                                           ),
 
                                         ),
-                                        Container(
-                                          width: 35,
-                                          child: TextButton(
-                                            onPressed: () async{
-                                              return showDialog(
-                                                context: context,
-                                                builder: (context) {
-                                                  return UpdateProfCoursDialog(courses: widget.courses[index], ProfId: widget.ProfId,);
-                                                },
-                                              );
-                                            },// Disable button functionality
-
-                                            child: Icon(Icons.edit, color: Colors.green),
-                                            style: TextButton.styleFrom(
-                                              primary: Colors.white,
-                                              elevation: 0,
-                                              // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
-                                            ),
-                                          ),
-                                        ),
+                                        // Container(
+                                        //   width: 35,
+                                        //   child: TextButton(
+                                        //     onPressed: () async{
+                                        //       return showDialog(
+                                        //         context: context,
+                                        //         builder: (context) {
+                                        //           return UpdateProfCoursDialog(courses: widget.courses[index], ProfId: widget.ProfId,);
+                                        //         },
+                                        //       );
+                                        //     },// Disable button functionality
+                                        //
+                                        //     child: Icon(Icons.edit, color: Colors.green),
+                                        //     style: TextButton.styleFrom(
+                                        //       primary: Colors.white,
+                                        //       elevation: 0,
+                                        //       // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                                        //     ),
+                                        //   ),
+                                        // ),
                                       ],
                                     )
                                 ),
@@ -819,6 +819,31 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                       ),),
 
                   ],
+                ),
+                SizedBox(height: 25,),
+                ElevatedButton(
+                  onPressed: () async{
+                    setState(() {
+                      Navigator.pop(context);
+                    });
+                    return showDialog(
+                      context: context,
+                      builder: (context) {
+                        return UpdateProfCoursDialog(courses: course, ProfId: course['id'],);
+                      },
+                    );
+                  },// Disable button functionality
+
+                  child: Text('Modifier'),
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.only(left: 20,right: 20),
+                    foregroundColor: Colors.lightGreen,
+                    backgroundColor: Colors.white,
+                    // side: BorderSide(color: Colors.black,),
+                    elevation: 3,
+                    // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                  ),
+
                 ),
               ],
             ),
