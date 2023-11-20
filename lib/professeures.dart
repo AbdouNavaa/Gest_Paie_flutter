@@ -143,7 +143,7 @@ class _ProfesseuresState extends State<Professeures> {
                   child: InkWell(
                     onTap: (){
                       Navigator.pop(context);
-                    }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,),
+                    }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,color: Colors.black,),
 
                   ),
                 ),
@@ -229,11 +229,14 @@ class _ProfesseuresState extends State<Professeures> {
                                           InkWell(
                                             onTap: () =>_showDetails(context, filteredItems?[index]),// Disable button functionality
 
-                                            child: CircleAvatar(
-                                              minRadius: 35.0,
-                                              maxRadius: 35.0,
-                                              backgroundColor: Colors.black26,
-                                              child: Icon(Icons.person,color: Colors.white,size: 50),
+                                            child: Padding(
+                                              padding: const EdgeInsets.only(top: 8.0),
+                                              child: Container(decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(10)),color: Colors.black26),
+                                                width: 80.0,
+                                                height: 75.0,
+                                                // color: Colors.black26,
+                                                child: Icon(Icons.person,color: Colors.white,size: 50),
+                                              ),
                                             ),
                                           ),
                                         ],
@@ -243,7 +246,9 @@ class _ProfesseuresState extends State<Professeures> {
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Text('${filteredItems?[index].nom} ${filteredItems?[index].prenom}'),
+                                          Text('${filteredItems?[index].nom} ${filteredItems?[index].prenom}',style: TextStyle(
+                                            color: Colors.black,
+                                          ),),
                                           SizedBox(height: 10),
                                           Text(' ${filteredItems?[index].mobile}',style: TextStyle(color: Colors.black38),),
                                          SizedBox(height: 10),
@@ -432,7 +437,21 @@ class _ProfesseuresState extends State<Professeures> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 // mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Prof Infos',style: TextStyle(fontSize: 30),),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    // mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      // Spacer(),
+                      Text("Prof Infos", style: TextStyle(fontSize: 30),),
+                      Spacer(),
+                      InkWell(
+                        child: Icon(Icons.close,size: 25),
+                        onTap: (){
+                          Navigator.pop(context);
+                        },
+                      )
+                    ],
+                  ),
                   SizedBox(height: 50),
                   Row(
                     children: [
@@ -679,34 +698,6 @@ class _ProfesseuresState extends State<Professeures> {
     );
   }
 
-  void AddProfesseur (String name,String prenom,String email,[num? mobile]) async {
-
-    // Check if the prix parameter is provided, otherwise use the default value of 100
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString("token")!;
-    print(token);
-    final response = await http.post(
-      Uri.parse('http://192.168.43.73:5000/professeur/'),
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode(<String, dynamic>{
-        "nom":name,
-        "prenom":prenom ,
-        "mobile": mobile,
-        "email": email ,
-      }),
-    );
-    if (response.statusCode == 200) {
-      print('Professeur ajouter avec succes');
-      setState(() {
-        Navigator.pop(context);
-      });
-    } else {
-      print("SomeThing Went Wrong");
-    }
-  }
 
   void updateProf( id,String name,String prenom, String email,[num? mobile]) async {
 
@@ -777,6 +768,34 @@ class _ProfesseuresState extends State<Professeures> {
     }
   }
 
+}
+void AddProfesseur (String name,String prenom,String email,[num? mobile]) async {
+
+  // Check if the prix parameter is provided, otherwise use the default value of 100
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String token = prefs.getString("token")!;
+  print(token);
+  final response = await http.post(
+    Uri.parse('http://192.168.43.73:5000/professeur/'),
+    headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+    body: jsonEncode(<String, dynamic>{
+      "nom":name,
+      "prenom":prenom ,
+      "mobile": mobile,
+      "email": email ,
+    }),
+  );
+  if (response.statusCode == 200) {
+    print('Professeur ajouter avec succes');
+    // setState(() {
+    //   Navigator.pop(context);
+    // });
+  } else {
+    print("SomeThing Went Wrong");
+  }
 }
 
 class Professeur {

@@ -160,7 +160,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                 ),
               ],
             ),
-            child: TextField(
+            child: TextField(style: TextStyle(color: Colors.black),
               onChanged: (value) {
                 setState(() {
                   searchQuery = value;
@@ -340,7 +340,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                               cells: [
                                 DataCell(
                                     CupertinoSwitch(
-                                      activeColor: Colors.black,
+                                      activeColor: Colors.black26,
                                       value: widget.courses[index]['isSigne'],
                                       onChanged: (value) async {
                                         final typesString = widget.courses[index]['types'];
@@ -412,21 +412,29 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                                       },
                                     )
                                 ),
-                                DataCell(Text('${widget.courses[index]['matiere']}'),
+                                DataCell(Text('${widget.courses[index]['matiere']}',style: TextStyle(
+                                  color: Colors.black,
+                                ),),
                                     onTap: () =>
                                         _showCourseDetails(context, widget.courses[index])),
                                 DataCell(
                                   Text(
                                     '${DateFormat('dd/M ').format(
                                       DateTime.parse(widget.courses[index]['date'].toString()).toLocal(),
-                                    )}',
+                                    )}',style: TextStyle(
+                                    color: Colors.black,
+                                  ),
                                   ),
                                 ),
                                 DataCell(
-                                  Text('${widget.courses[index]['TH']}'),
+                                  Text('${widget.courses[index]['TH']}',style: TextStyle(
+                                    color: Colors.black,
+                                  ),),
                                 ),
                                 DataCell(
-                                  Text('${widget.courses[index]['somme']}'),
+                                  Text('${widget.courses[index]['somme']}',style: TextStyle(
+                                    color: Colors.black,
+                                  ),),
                                 ),
                                 DataCell(
 
@@ -446,26 +454,6 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                                           ),
 
                                         ),
-                                        // Container(
-                                        //   width: 35,
-                                        //   child: TextButton(
-                                        //     onPressed: () async{
-                                        //       return showDialog(
-                                        //         context: context,
-                                        //         builder: (context) {
-                                        //           return UpdateProfCoursDialog(courses: widget.courses[index], ProfId: widget.ProfId,);
-                                        //         },
-                                        //       );
-                                        //     },// Disable button functionality
-                                        //
-                                        //     child: Icon(Icons.edit, color: Colors.green),
-                                        //     style: TextButton.styleFrom(
-                                        //       primary: Colors.white,
-                                        //       elevation: 0,
-                                        //       // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
-                                        //     ),
-                                        //   ),
-                                        // ),
                                       ],
                                     )
                                 ),

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:mailer/mailer.dart';
+import 'package:mailer/smtp_server.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'Cours.dart';
 import 'categories.dart';
@@ -291,6 +293,7 @@ class _AddCoursDialogState extends State<AddCoursDialog> {
                     SnackBar(content: Text('Please select a date.')),
                   );
                 }
+                // ...
                 else {
                   // Navigator.of(context).pop();
                   SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -298,27 +301,25 @@ class _AddCoursDialogState extends State<AddCoursDialog> {
 
                   _isSigne.text = _selectedSigne.toString();
 
-                  // print(selectedProfesseur!.nom);
-                  // print(selectedProfesseur!.id);
-                  // print(selectedMat!.name!);
-                  // print(selectedTypes); // Check the selected types here
-
                   DateTime date = DateFormat('yyyy/MM/dd HH:mm').parse(_date.text).toUtc();
+
                   // Pass the selected types to addCoursToProfesseur method
-                  addCours( selectedProfesseur!.id,selectedMat!.id!, selectedTypes, date,bool.parse(_isSigne.text));
+                  addCours(selectedProfesseur!.id, selectedMat!.id!, selectedTypes, date, bool.parse(_isSigne.text));
+
+                  // Send email to the professor
 
                   setState(() {
+
+                    sendEmail(selectedProfesseur!.email);
                     Navigator.of(context).pop(true);
                   });
 
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Matiere has been added to professor successfully.')),
+                    SnackBar(content: Text('${selectedProfesseur!.email}')),
                   );
-
-                  // setState(() {
-                  //   fetchProfessorInfo();
-                  // });
                 }
+// ...
+
               },
               child: Text("Ajouter"),
               style: ElevatedButton.styleFrom(
@@ -335,6 +336,25 @@ class _AddCoursDialogState extends State<AddCoursDialog> {
         ),
       ),
     );
+  }
+
+  Future<void> sendEmail(String professorEmail) async {
+    final smtpServer = gmail('babana9977@gmail.com', 'Abdou1998');
+    // final smtpServer = gmail('babana9977@gmail.com', 'Abdou1998', isLogEnabled: true, isSmtp: true, smtpPort: 587);
+
+    // Create our message.
+    final message = Message()
+      ..from = Address('babana9977@gmail.com', 'Abd Razagh Mohamed Nevaa Babana')
+      ..recipients.add('i17201.etu@iscae.mr')
+      ..subject = 'Nouveau Cours'
+      ..text = 'Un nouveau cours a été ajouté.';
+    try {
+      final sendReport = await send(message, smtpServer);
+      print('Message sent: ' + sendReport.toString());
+    } catch (e, s) {
+      print('Error while sending email: $e, $s');
+    }
+
   }
 
   Future<void> addCours( String professeurId,String matiereId, List<Map<String, dynamic>> types, DateTime date,bool isSigne) async {

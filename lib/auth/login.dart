@@ -109,8 +109,8 @@ class _LoginSectionState extends State<LoginSection> {
                 Center(
                   child: Card(
                     margin: EdgeInsets.only(top: 230),
-                    elevation: 10,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20),),
+                    elevation: 18,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(55),side: BorderSide(color: Colors.black12)),
 
                     child: Container(
                       height: MediaQuery.of(context).size.height/ 1.7 ,
@@ -146,7 +146,9 @@ class _LoginSectionState extends State<LoginSection> {
                                 ),
                               ],
                             ),
-                            child: TextField(
+                            child: TextField(style: TextStyle(
+                            color: Colors.black,
+                            ),
                               decoration: InputDecoration(
                                 border: InputBorder.none,
 
@@ -194,7 +196,9 @@ class _LoginSectionState extends State<LoginSection> {
                                 ),
                               ],
                             ),
-                            child: TextField(
+                            child: TextField(style: TextStyle(
+                            color: Colors.black,
+                            ),
                               decoration: InputDecoration(
                                 border: InputBorder.none,
                                 icon: IconButton(

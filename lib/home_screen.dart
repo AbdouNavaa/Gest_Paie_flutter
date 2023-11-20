@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:gestion_payements/matieres.dart';
 import 'package:gestion_payements/paie.dart';
 import 'package:gestion_payements/professeures.dart';
+import 'package:gestion_payements/settings.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:flutter/material.dart';
@@ -136,12 +138,26 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text(
-                    "BienVenue ${widget.role!} ${widget.name!}",
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 20,
-                    )
+                Row(
+                  children: [
+                    Text(
+                        "BienVenue ${widget.role!}",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                        )
+                    ),
+                    Text(
+                        " ${widget.name!.toUpperCase()}",
+                      style: GoogleFonts.italianno(
+                        // color: Colors.black,
+                        fontSize: 30.0,
+                        fontStyle: FontStyle.italic,
+                        fontWeight: FontWeight.bold,
+                        // letterSpacing: 2.0,
+                      ),
+                    ),
+                  ],
                 ),
                 Text(
                     DateFormat('dd-MM-yyyy').format(DateTime.now()).toString(),
@@ -276,6 +292,15 @@ class _HomeScreenState extends State<HomeScreen> {
                          Row(
                            children: [
                              _customCard(
+                               imageUrl: "settings2.png",
+                               // imageUrl: "user1.png",
+                               item: "Outils",
+                               duration: "",
+                               onPessed:  () async {
+                                 Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsPage()));
+                               },
+                             ),
+                             _customCard(
                                imageUrl: "logout1.png",
                                  // imageUrl: "user1.png",
                                  item: "Se Déconnecter",
@@ -286,6 +311,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                  Navigator.push(context, MaterialPageRoute(builder: (context) => LoginSection()));
                                },
                              ),
+
 
                            ],
                          ),
@@ -384,10 +410,19 @@ class _HomeScreenState extends State<HomeScreen> {
                          Row(
                            children: [
                              _customCard(
+                               imageUrl: "settings2.png",
+                               // imageUrl: "user1.png",
+                               item: "Outils",
+                               duration: "",
+                               onPessed:  () async {
+                                 Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsPage()));
+                               },
+                             ),
+                             _customCard(
                                imageUrl: "logout1.png",
-                                 // imageUrl: "user1.png",
-                                 item: "Se Déconnecter",
-                                 duration: "",
+                               // imageUrl: "user1.png",
+                               item: "Se Déconnecter",
+                               duration: "",
                                onPessed:  () async {
                                  SharedPreferences prefs = await SharedPreferences.getInstance();
                                  await prefs.setString('token', '');
@@ -395,8 +430,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                },
                              ),
 
+
                            ],
                          ),
+
                        ],
                      ),
                       if (widget.role == "admin")
@@ -517,9 +554,19 @@ class _HomeScreenState extends State<HomeScreen> {
                          Row(
                            children: [
                              _customCard(
-                                 imageUrl: "logout1.png",
-                                 item: "Se Déconnecter",
-                                 duration: "",
+                               imageUrl: "settings2.png",
+                               // imageUrl: "user1.png",
+                               item: "Outils",
+                               duration: "",
+                               onPessed:  () async {
+                                 Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsPage()));
+                               },
+                             ),
+                             _customCard(
+                               imageUrl: "logout1.png",
+                               // imageUrl: "user1.png",
+                               item: "Se Déconnecter",
+                               duration: "",
                                onPessed:  () async {
                                  SharedPreferences prefs = await SharedPreferences.getInstance();
                                  await prefs.setString('token', '');
@@ -527,8 +574,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                },
                              ),
 
+
                            ],
                          ),
+
+
                        ],
                      ),
                     ],
@@ -568,9 +618,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: <Widget>[
                       Text(
                         item,
-                        style: TextStyle(fontSize: 20),
+                        style: TextStyle(fontSize: 20,color: Colors.black),
                       ),
-                      Text(duration)
+                      Text(duration,style: TextStyle(
+                      color: Colors.black54,
+                      ),)
                     ],
                   ),
                 )

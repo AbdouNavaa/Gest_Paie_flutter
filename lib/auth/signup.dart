@@ -10,6 +10,7 @@ import '../Dashboard.dart';
 import '../categories.dart';
 import '../main.dart';
 import '../prof_info.dart';
+import '../professeures.dart';
 import 'login.dart';
 class SignUpSection extends StatefulWidget {
 
@@ -161,7 +162,9 @@ class _SignUpSectionState extends State<SignUpSection> {
                                     )
                                   ]
                               ),
-                              child: TextField(
+                              child: TextField(style: TextStyle(
+                              color: Colors.black,
+                              ),
                                 decoration: InputDecoration(
                                   border: InputBorder.none,
                                   icon: Icon(Icons.account_circle_outlined,
@@ -215,7 +218,9 @@ class _SignUpSectionState extends State<SignUpSection> {
                                     )
                                   ]
                               ),
-                              child: TextField(
+                              child: TextField(style: TextStyle(
+                              color: Colors.black,
+                              ),
                                   decoration: InputDecoration(
                                     border: InputBorder.none,
                                     icon: Icon(Icons.account_circle_outlined,
@@ -261,7 +266,9 @@ class _SignUpSectionState extends State<SignUpSection> {
                                     )
                                   ]
                               ),
-                              child: TextField(
+                              child: TextField(style: TextStyle(
+                              color: Colors.black,
+                              ),
                                   decoration: InputDecoration(
                                     border: InputBorder.none,
                                     icon: Icon(Icons.phone,
@@ -311,7 +318,9 @@ class _SignUpSectionState extends State<SignUpSection> {
                                     )
                                   ]
                               ),
-                              child: TextField(
+                              child: TextField(style: TextStyle(
+                              color: Colors.black,
+                              ),
                                   decoration: InputDecoration(
                                     border: InputBorder.none,
                                     icon: IconButton(
@@ -365,7 +374,9 @@ class _SignUpSectionState extends State<SignUpSection> {
                                     )
                                   ]
                               ),
-                              child: TextField(
+                              child: TextField(style: TextStyle(
+                              color: Colors.black,
+                              ),
                                   decoration: InputDecoration(
                                     border: InputBorder.none,
                                     icon: IconButton(
@@ -419,7 +430,9 @@ class _SignUpSectionState extends State<SignUpSection> {
                                     )
                                   ]
                               ),
-                              child: TextField(
+                              child: TextField(style: TextStyle(
+                              color: Colors.black,
+                              ),
                                 decoration: InputDecoration(
                                   border: InputBorder.none,
                                   icon: Icon(Icons.email_outlined,
@@ -470,9 +483,11 @@ class _SignUpSectionState extends State<SignUpSection> {
                                     setState(() {
                                       isLoginFailed =
                                       false; // Réinitialisation de la variable d'erreur
+                                      AddProfesseur(username, prenom, email,
+                                          num.parse(mobile));
                                     });
-                                    await signup(username, prenom, mobile, password,
-                                        passwordConfirm, email);
+                                    await signup(username, prenom, mobile, password, passwordConfirm, email);
+
                                     SharedPreferences prefs = await SharedPreferences
                                         .getInstance();
                                     String token = prefs.getString("token")!;

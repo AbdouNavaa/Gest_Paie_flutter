@@ -29,7 +29,7 @@ class _UsersState extends State<Users> {
     String token = prefs.getString("token")!;
     print(token);
 
-    var response = await http.delete(Uri.parse('http://192.168.43.73:5000/categorie' +"/$id"),
+    var response = await http.delete(Uri.parse('http://192.168.43.73:5000/user' +"/$id"),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -41,6 +41,7 @@ class _UsersState extends State<Users> {
     print(response.statusCode);
     if(response.statusCode ==200){
       fetchUser();
+      Navigator.pop(context);
     }
 
   }
@@ -95,7 +96,7 @@ class _UsersState extends State<Users> {
                     child: InkWell(
                       onTap: (){
                         Navigator.pop(context);
-                      }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,),
+                      }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,color: Colors.black,),
 
                     ),
                   ),
@@ -192,7 +193,7 @@ class _UsersState extends State<Users> {
                                   DataColumn(label: Text('Mobile')),
                                   DataColumn(label: Text('Role')),
                                   // DataColumn(label: Text('Catégorie')),
-                                  DataColumn(label: Text('Action')),
+                                  // DataColumn(label: Text('Action')),
                                 ],
                                 rows: [
                                   for (var index = 0; index < (filteredItems?.length ?? 0); index++)
@@ -202,7 +203,8 @@ class _UsersState extends State<Users> {
                                         // DataCell(Text('${index + 1}',style: TextStyle(fontSize: 15),)), // Numbering cell
                                         DataCell(
                                             CupertinoSwitch(
-                                              activeColor: Colors.black,
+                                              activeColor: Colors.black26,
+                                              // thumbColor: Colors.blueAccent,
                                               value: filteredItems![index].isActive!,
                                               onChanged: (value) async {
                                                 // Continue with the rest of your onChanged logic if the types string is in the expected format
@@ -225,166 +227,174 @@ class _UsersState extends State<Users> {
                                             )
 
                                         ), DataCell(Container(width: 70,
-                                            child: Text('${filteredItems?[index].name } ${filteredItems?[index].prenom}'))),
+                                            child: Text('${filteredItems?[index].name } ${filteredItems?[index].prenom}',style: TextStyle(
+                                              color: Colors.black,
+                                            ),))),
                                         DataCell(Container(width: 150,
-                                            child: Text('${filteredItems?[index].email}',)),),
+                                            child: Text('${filteredItems?[index].email}',style: TextStyle(
+                                              color: Colors.black,
+                                            ),)),),
                                         DataCell(Container(width: 68,
-                                            child: Text('${filteredItems?[index].mobile}',)),),
+                                            child: Text('${filteredItems?[index].mobile}',style: TextStyle(
+                                              color: Colors.black,
+                                            ),)),),
                                         DataCell(Container(width: 80,
-                                            child: Text('${filteredItems?[index].role}',)),),
+                                            child: Text('${filteredItems?[index].role}',style: TextStyle(
+                                              color: Colors.black,
+                                            ),)),),
 
                                         // DataCell(Container(width: 105,
                                         //     child: Text('${filteredItems?[index].description}',)),),
                                         // DataCell(Text('${filteredItems?[index].categorie}')),
-                                        DataCell(
-                                          Row(
-                                            children: [
-                                              Container(
-                                                width: 35,
-                                                child: TextButton(
-                                                  onPressed: () {
-                                                    _name.text = items![index].name!;
-                                                    _desc.text = items![index].prenom!;
-                                                    // _selectedTaux = items![index].email!;
-                                                    showDialog(
-                                                      context: context,
-                                                      builder: (BuildContext context) {
-                                                        return AlertDialog(
-                                                          title: Text("Mise à jour de la tâche"),
-                                                          content: Form(
-                                                            child: SingleChildScrollView(
-                                                              child: Column(
-                                                                mainAxisSize: MainAxisSize.min,
-                                                                children: [
-                                                                  TextFormField(
-                                                                    controller: _name,
-                                                                    decoration: InputDecoration(labelText: 'Name'),
-                                                                  ),
-                                                                  TextFormField(
-                                                                    controller: _desc,
-                                                                    decoration: InputDecoration(labelText: 'Descreption'),
-                                                                  ),
-                                                                  DropdownButtonFormField<num>(
-                                                                    value: _selectedTaux,
-                                                                    items: [
-                                                                      DropdownMenuItem<num>(
-                                                                        child: Text('500'),
-                                                                        value: 500,
-                                                                      ),
-                                                                      DropdownMenuItem<num>(
-                                                                        child: Text('900'),
-                                                                        value: 900,
-                                                                      ),
-                                                                    ],
-                                                                    onChanged: (value) {
-                                                                      setState(() {
-                                                                        _selectedTaux = value!;
-                                                                      });
-                                                                    },
-                                                                    decoration: InputDecoration(
-                                                                      filled: true,
-                                                                      fillColor: Colors.white,
-                                                                      hintText: "taux",
-                                                                      border: OutlineInputBorder(
-                                                                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                            ),
-                                                          ),
-                                                          actions: [
-                                                            TextButton(
-                                                              child: Text("ANNULER"),
-                                                              onPressed: () {
-                                                                Navigator.of(context).pop();
-                                                              },
-                                                            ),
-                                                            TextButton(
-                                                              child: Text(
-                                                                "MISE À JOUR",
-                                                                style: TextStyle(color: Colors.blue),
-                                                              ),
-                                                              onPressed: () {
-                                                                Navigator.of(context).pop();
-                                                                _taux.text = _selectedTaux.toString();
-
-                                                                fetchUser();
-                                                                // AddUser(_name.text, _desc.text);
-                                                                print(items![index].id!);
-                                                                UpdateCateg(items![index].id!, _name.text, _desc.text, _selectedTaux,);
-                                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                                  SnackBar(content: Text('Le Type est mis à jour avec succès.')),
-                                                                );
-
-                                                                setState(() {
-                                                                  fetchUser();
-                                                                });
-                                                              },
-                                                            ),
-                                                          ],
-                                                        );
-                                                      },
-                                                    );
-                                                  },
-                                                  child: Icon(Icons.edit, color: Colors.black),
-                                                  style: TextButton.styleFrom(
-                                                    primary: Colors.white,
-                                                    elevation: 0,
-                                                    // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
-                                                  ),
-                                                ),
-                                              ),
-                                              Container(
-                                                width: 35,
-                                                child: TextButton(
-                                                  onPressed: () {
-                                                    showDialog(
-                                                      context: context,
-                                                      builder: (BuildContext context) {
-                                                        return AlertDialog(
-                                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
-                                                          title: Text("Confirmer la suppression"),
-                                                          content: Text(
-                                                              "Êtes-vous sûr de vouloir supprimer cet élément ?"),
-                                                          actions: <Widget>[
-                                                            TextButton(
-                                                              child: Text("ANNULER"),
-                                                              onPressed: () {
-                                                                Navigator.of(context).pop();
-                                                              },
-                                                            ),
-                                                            TextButton(
-                                                              child: Text(
-                                                                "SUPPRIMER",
-                                                                // style: TextStyle(color: Colors.red),
-                                                              ),
-                                                              onPressed: () {
-                                                                Navigator.of(context).pop();
-                                                                DeleteUser(snapshot.data![index].id);
-                                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                                  SnackBar(content: Text('Le User a été Supprimer avec succès.')),
-                                                                );
-                                                              },
-                                                            ),
-                                                          ],
-                                                        );
-                                                      },
-                                                    );
-                                                  },
-
-                                                  child: Icon(Icons.delete, color: Colors.black),
-                                                  style: TextButton.styleFrom(
-                                                    primary: Colors.white,
-                                                    elevation: 0,
-                                                    // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
+                                        // DataCell(
+                                        //   Row(
+                                        //     children: [
+                                        //       Container(
+                                        //         width: 35,
+                                        //         child: TextButton(
+                                        //           onPressed: () {
+                                        //             _name.text = items![index].name!;
+                                        //             _desc.text = items![index].prenom!;
+                                        //             // _selectedTaux = items![index].email!;
+                                        //             showDialog(
+                                        //               context: context,
+                                        //               builder: (BuildContext context) {
+                                        //                 return AlertDialog(
+                                        //                   title: Text("Mise à jour de la tâche"),
+                                        //                   content: Form(
+                                        //                     child: SingleChildScrollView(
+                                        //                       child: Column(
+                                        //                         mainAxisSize: MainAxisSize.min,
+                                        //                         children: [
+                                        //                           TextFormField(
+                                        //                             controller: _name,
+                                        //                             decoration: InputDecoration(labelText: 'Name'),
+                                        //                           ),
+                                        //                           TextFormField(
+                                        //                             controller: _desc,
+                                        //                             decoration: InputDecoration(labelText: 'Descreption'),
+                                        //                           ),
+                                        //                           DropdownButtonFormField<num>(
+                                        //                             value: _selectedTaux,
+                                        //                             items: [
+                                        //                               DropdownMenuItem<num>(
+                                        //                                 child: Text('500'),
+                                        //                                 value: 500,
+                                        //                               ),
+                                        //                               DropdownMenuItem<num>(
+                                        //                                 child: Text('900'),
+                                        //                                 value: 900,
+                                        //                               ),
+                                        //                             ],
+                                        //                             onChanged: (value) {
+                                        //                               setState(() {
+                                        //                                 _selectedTaux = value!;
+                                        //                               });
+                                        //                             },
+                                        //                             decoration: InputDecoration(
+                                        //                               filled: true,
+                                        //                               fillColor: Colors.white,
+                                        //                               hintText: "taux",
+                                        //                               border: OutlineInputBorder(
+                                        //                                 borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                                        //                               ),
+                                        //                             ),
+                                        //                           ),
+                                        //                         ],
+                                        //                       ),
+                                        //                     ),
+                                        //                   ),
+                                        //                   actions: [
+                                        //                     TextButton(
+                                        //                       child: Text("ANNULER"),
+                                        //                       onPressed: () {
+                                        //                         Navigator.of(context).pop();
+                                        //                       },
+                                        //                     ),
+                                        //                     TextButton(
+                                        //                       child: Text(
+                                        //                         "MISE À JOUR",
+                                        //                         style: TextStyle(color: Colors.blue),
+                                        //                       ),
+                                        //                       onPressed: () {
+                                        //                         Navigator.of(context).pop();
+                                        //                         _taux.text = _selectedTaux.toString();
+                                        //
+                                        //                         fetchUser();
+                                        //                         // AddUser(_name.text, _desc.text);
+                                        //                         print(items![index].id!);
+                                        //                         UpdateCateg(items![index].id!, _name.text, _desc.text, _selectedTaux,);
+                                        //                         ScaffoldMessenger.of(context).showSnackBar(
+                                        //                           SnackBar(content: Text('Le Type est mis à jour avec succès.')),
+                                        //                         );
+                                        //
+                                        //                         setState(() {
+                                        //                           fetchUser();
+                                        //                         });
+                                        //                       },
+                                        //                     ),
+                                        //                   ],
+                                        //                 );
+                                        //               },
+                                        //             );
+                                        //           },
+                                        //           child: Icon(Icons.edit, color: Colors.black),
+                                        //           style: TextButton.styleFrom(
+                                        //             primary: Colors.white,
+                                        //             elevation: 0,
+                                        //             // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                                        //           ),
+                                        //         ),
+                                        //       ),
+                                        //       Container(
+                                        //         width: 35,
+                                        //         child: TextButton(
+                                        //           onPressed: () {
+                                        //             showDialog(
+                                        //               context: context,
+                                        //               builder: (BuildContext context) {
+                                        //                 return AlertDialog(
+                                        //                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
+                                        //                   title: Text("Confirmer la suppression"),
+                                        //                   content: Text(
+                                        //                       "Êtes-vous sûr de vouloir supprimer cet élément ?"),
+                                        //                   actions: <Widget>[
+                                        //                     TextButton(
+                                        //                       child: Text("ANNULER"),
+                                        //                       onPressed: () {
+                                        //                         Navigator.of(context).pop();
+                                        //                       },
+                                        //                     ),
+                                        //                     TextButton(
+                                        //                       child: Text(
+                                        //                         "SUPPRIMER",
+                                        //                         // style: TextStyle(color: Colors.red),
+                                        //                       ),
+                                        //                       onPressed: () {
+                                        //                         Navigator.of(context).pop();
+                                        //                         DeleteUser(snapshot.data![index].id);
+                                        //                         ScaffoldMessenger.of(context).showSnackBar(
+                                        //                           SnackBar(content: Text('Le User a été Supprimer avec succès.')),
+                                        //                         );
+                                        //                       },
+                                        //                     ),
+                                        //                   ],
+                                        //                 );
+                                        //               },
+                                        //             );
+                                        //           },
+                                        //
+                                        //           child: Icon(Icons.delete, color: Colors.black),
+                                        //           style: TextButton.styleFrom(
+                                        //             primary: Colors.white,
+                                        //             elevation: 0,
+                                        //             // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                                        //           ),
+                                        //         ),
+                                        //       ),
+                                        //     ],
+                                        //   ),
+                                        // ),
                                       ],
                                     ),
                                 ],

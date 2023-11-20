@@ -99,7 +99,7 @@ class _CoursesPageState extends State<CoursesPage> {
 
   TextEditingController _searchController = TextEditingController();
   int currentPage = 1;
-  int coursesPerPage = 4;
+  int coursesPerPage = 7;
   String searchQuery = '';
   bool sortByDateAscending = true;
 
@@ -107,8 +107,8 @@ class _CoursesPageState extends State<CoursesPage> {
     // Apply your filtering criteria here
     DateTime courseDate = DateTime.parse(course['date'].toString());
     bool isMatch = (course['matiere'].toLowerCase().contains(searchQuery.toLowerCase()) || course['professeur'].toLowerCase().contains(searchQuery.toLowerCase())
-    || course['isSigne'].toString().contains(searchQuery.toLowerCase()));
-        // || course['isPaid'].toString().contains(searchQuery.toLowerCase()));
+        || course['isSigne'].toString().contains(searchQuery.toLowerCase()));
+    // || course['isPaid'].toString().contains(searchQuery.toLowerCase()));
 
     // Check if the course date falls within the selected date range
     if ((widget.dateDeb == null || courseDate.isAtSameMomentAs(widget.dateDeb!.toLocal()) ||
@@ -151,7 +151,7 @@ class _CoursesPageState extends State<CoursesPage> {
                   child: InkWell(
                     onTap: (){
                       Navigator.pop(context);
-                    }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,),
+                    }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,color: Colors.black,),
 
                   ),
                 ),
@@ -174,7 +174,9 @@ class _CoursesPageState extends State<CoursesPage> {
                 ),
               ],
             ),
-            child: TextField(
+            child: TextField(style: TextStyle(
+              color: Colors.black,
+            ),
               onChanged: (value) {
                 setState(() {
                   searchQuery = value;
@@ -261,8 +263,8 @@ class _CoursesPageState extends State<CoursesPage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              Text('Eq. CM: ${widget.heuresTV}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),),
-                              Text('Montant Total : ${widget.sommeTV}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400)),
+                              Text('Eq. CM: ${widget.heuresTV.toStringAsFixed(2)}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),),
+                              Text('Montant Total : ${widget.sommeTV.toStringAsFixed(2)}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400)),
                             ],
                           ),
                           Center(child: Text('Nb de Cours: ${widget.coursNum}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400))),
@@ -323,294 +325,113 @@ class _CoursesPageState extends State<CoursesPage> {
                       ),
                     ),
                     // margin: EdgeInsets.only(left: 10),
-                    child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white12,
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(20.0),
-                          ),
-                        ),
-                        margin: EdgeInsets.only(left: 10,),
-                        child:
-                        SingleChildScrollView(scrollDirection: Axis.vertical,
-                          child: Column(
-                            children: [
-                              for (var index = (currentPage - 1) * coursesPerPage;
-                              index < widget.courses.length && index < currentPage * coursesPerPage;
-                              index++)
-                                if (courseFitsCriteria(widget.courses[index]))
-                                  Container(
-                                    // padding: EdgeInsets.only(bottom: 10),
-                                    height: 105,
-                                    child: Row(
+                    child: DataTable(
+                      showCheckboxColumn: true,
+                      showBottomBorder: true,
+                      // sortColumnIndex: 1,
+                      // sortAscending: true,
+                      headingRowHeight: 50,
+                      columnSpacing: 10,
+                      horizontalMargin: 3,
+                      // border: TableBorder(verticalInside: BorderSide(width: 1.5)),
+                      dataRowHeight: 50,
+                      headingTextStyle: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black, // Set header text color
+                      ),
+                      // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xFF0C2FDA)), // Set row background color
+                      columns: [
+                        DataColumn(label: Text('Prof')),
+                        DataColumn(label: Text('Matiere')),
+                        DataColumn(label: Text('Date')),
+                        DataColumn(label: Text('Eq.CM')),
+                        DataColumn(label: Text('Prix')),
+                        DataColumn(label: Text('Signé')),
+                        if (widget.role == "admin")
+                        DataColumn(label: Text('Paié')),
+                        DataColumn(label: Text('Details')),
+                      ],
+                      rows: [
+                        for (var index = (currentPage - 1) * coursesPerPage;
+                        index < widget.courses.length && index < currentPage * coursesPerPage;
+                        index++)
+                          if (courseFitsCriteria(widget.courses[index]))
+                            DataRow(
+                              onLongPress: () =>
+                                  _showCourseDetails(context, widget.courses[index]),
 
-                                      children: [
-                                        // Petit calendrier pour la date de début
-                                        Container(
-                                          width: 70,
-                                          height: 100,// Ajustez la largeur selon vos besoins
-                                          decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius: BorderRadius.circular(kDefaultPadding),
-                                              border: Border.all(color: Colors.black12)
-                                          ),
-                                          child:
-                                          Column(mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              Container(
-                                                width:100,
-                                                height: 50,
-                                                decoration: BoxDecoration(
-                                                    color: Color(0xff0fb2ea),
-                                                  // colors: [Color(0xff40dedf), Color(0xff0fb2ea)],
-                                                  borderRadius: BorderRadius.only(topLeft: Radius.circular(15),topRight: Radius.circular(15)),
-                                                    // border: Border.all(color: Colors.black12)
-                                                ),
-
-                                                child: Center(
-                                                  child: Text(
-                                                    '${DateFormat('dd / MM').format(
-                                                      DateTime.parse(widget.courses[index]['date'].toString()).toLocal(),
-                                                    )}',
-                                                    style: TextStyle(fontSize: 20,
-                                                        color: Colors.white,
-                                                        // fontWeight: FontWeight.bold,
-                                                        fontStyle: FontStyle.italic),
-                                                  ),
-                                                ),
-                                              ),
-
-
-                                              Container(
-                                                width:100,
-                                                height: 48,
-                                                child: Column(children: [
-                                                  Text('${DateFormat(' HH:mm').format(DateTime.parse(widget.courses[index]['date'].toString()).toLocal())}',
-                                                    style: TextStyle(
-                                                      fontSize: 17,
-                                                      fontWeight: FontWeight.w400,
-                                                      fontStyle: FontStyle.italic,
-                                                      // color: Colors.lightBlue
-                                                    ),),
-                                                  SizedBox(width: 10),
-                                                  Text('${DateFormat(' HH:mm').format(DateTime.parse(widget.courses[index]['date'].toString()).toLocal().add(
-                                                      Duration(minutes: (( widget.courses[index]['CM']+widget.courses[index]['TP']+widget.courses[index]['TD'] )* 60).toInt())))}',
-                                                    style: TextStyle(
-                                                      fontSize: 17,
-                                                      fontWeight: FontWeight.w400,
-                                                      fontStyle: FontStyle.italic,
-                                                      // color: Colors.lightBlue
-                                                    ),),
-                                                ],),
-                                              ),
-
-                                            ],
-                                          ),
-
-                                        ),
-                                        // Conteneur pour d'autres détails du cours
-                                        SizedBox(width: 10,),
-                                        InkWell(
-                                          onTap: (){
-                                            _showCourseDetails(context, widget.courses[index]);
-                                          },
-                                          child: Container(
-                                            width: 250,
-                                            height: 100,// Ajustez la largeur selon vos besoins
-                                            decoration: BoxDecoration(
-                                                color: Colors.white,
-                                                borderRadius: BorderRadius.circular(kDefaultPadding),
-                                                border: Border.all(color: Colors.black12)
-                                            ),
-                                            // width: MediaQuery.of(context).size.width - 120, // Ajustez la largeur selon vos besoins
-                                            child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              children: [
-                                                Column(
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  children: [
-                                                    Row(
-                                                      mainAxisAlignment: MainAxisAlignment.center,
-                                                      children: [
-                                                        Text('Prof:',
-                                                          style: TextStyle(
-                                                            fontSize: 15,
-                                                            fontWeight: FontWeight.w400,
-                                                            fontStyle: FontStyle.italic,
-                                                            // color: Colors.lightBlue
-                                                          ),),
-                                                        SizedBox(width: 10,),
-                                                        Text(widget.courses[index]['professeur'].toUpperCase(),
-                                                          style: TextStyle(
-                                                            fontSize: 15,
-                                                            fontWeight: FontWeight.w400,
-                                                            fontStyle: FontStyle.italic,
-                                                            // color: Colors.lightBlue
-                                                          ),),
-                                                        SizedBox(width: 40,),
-                                                      ],
-                                                    ),
-
-                                                    Row(
-                                                      mainAxisAlignment: MainAxisAlignment.center,
-
-                                                      children: [
-
-                                                        Column(
-                                                          // mainAxisAlignment: MainAxisAlignment.center,
-                                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                                          children: [
-                                                            Row(
-                                                              children: [
-                                                                Text('Matiere:',
-                                                                  style: TextStyle(
-                                                                    fontSize: 15,
-                                                                    fontWeight: FontWeight.w400,
-                                                                    fontStyle: FontStyle.italic,
-                                                                    // color: Colors.lightBlue
-                                                                  ),),
-
-                                                                SizedBox(width: 10,),
-                                                                Text('${widget.courses[index]['matiere']}',
-                                                                  style: TextStyle(
-                                                                    fontSize: 15,
-                                                                    fontWeight: FontWeight.w400,
-                                                                    fontStyle: FontStyle.italic,
-                                                                    // color: Colors.lightBlue
-                                                                  ),),
-
-                                                              ],
-                                                            ),
-                                                            SizedBox(height: 5),
-                                                            Row(
-                                                              children: [
-                                                                Text('MT:',
-                                                                  style: TextStyle(
-                                                                    fontSize: 15,
-                                                                    fontWeight: FontWeight.w400,
-                                                                    fontStyle: FontStyle.italic,
-                                                                    // color: Colors.lightBlue
-                                                                  ),),
-
-                                                                SizedBox(width: 10,),
-                                                                Text('${widget.courses[index]['prix']* widget.courses[index]['TH']}',
-                                                                  style: TextStyle(
-                                                                    fontSize: 15,
-                                                                    fontWeight: FontWeight.w400,
-                                                                    fontStyle: FontStyle.italic,
-                                                                    // color: Colors.lightBlue
-                                                                  ),),
-
-                                                              ],
-                                                            ),
-
-
-                                                          ],
-
-                                                        ),
-                                                        SizedBox(width: 15,),
-                                                        Column(
-                                                          // mainAxisAlignment: MainAxisAlignment.start,
-                                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                                          children: [
-                                                            Row(
-                                                              children: [
-                                                                Text('Signé:',
-                                                                  style: TextStyle(
-                                                                    fontSize: 15,
-                                                                    fontWeight: FontWeight.w400,
-                                                                    fontStyle: FontStyle.italic,
-                                                                    // color: Colors.lightBlue
-                                                                  ),),
-
-                                                                SizedBox(width: 10,),
-                                                                Text(widget.courses[index]['isSigne']?
-                                                                  'Oui':'Non',
-                                                                  style: TextStyle(
-                                                                    fontSize: 15,
-                                                                    fontWeight: FontWeight.w400,
-                                                                    fontStyle: FontStyle.italic,
-                                                                    color: widget.courses[index]['isSigne']? Colors.green: Colors.red
-                                                                    // color: Colors.lightBlue
-                                                                  ),),
-
-                                                              ],
-                                                            ),
-                                                            SizedBox(height: 5),
-                                                            Row(
-                                                              children: [
-                                                                Text('Eq.CM:',
-                                                                  style: TextStyle(
-                                                                    fontSize: 15,
-                                                                    fontWeight: FontWeight.w400,
-                                                                    fontStyle: FontStyle.italic,
-                                                                    // color: Colors.lightBlue
-                                                                  ),),
-
-                                                                SizedBox(width: 10,),
-                                                                Text('${widget.courses[index]['TH']}',
-                                                                  style: TextStyle(
-                                                                    fontSize: 15,
-                                                                    fontWeight: FontWeight.w400,
-                                                                    fontStyle: FontStyle.italic,
-                                                                    // color: Colors.lightBlue
-                                                                  ),),
-
-                                                              ],
-                                                            ),
-
-                                                          ],
-
-                                                        ),
-                                                        // SizedBox(width: 15,),
-
-                                                      ],
-                                                    ),
-                                                    if (widget.role == "admin")
-                                                      Row(
-                                                        mainAxisAlignment: MainAxisAlignment.center,
-                                                        children: [
-                                                          Text('Payé:',
-                                                            style: TextStyle(
-                                                              fontSize: 15,
-                                                              fontWeight: FontWeight.w400,
-                                                              fontStyle: FontStyle.italic,
-                                                              // color: Colors.lightBlue
-                                                            ),),
-
-                                                          SizedBox(width: 10,),
-                                                          Text(widget.courses[index]['isPaid']?
-                                                          'Oui':'Non',
-                                                            style: TextStyle(
-                                                                fontSize: 15,
-                                                                fontWeight: FontWeight.w400,
-                                                                fontStyle: FontStyle.italic,
-                                                                color: widget.courses[index]['isPaid']? Colors.green: Colors.red
-                                                              // color: Colors.lightBlue
-                                                            ),),
-
-                                                        ],
-                                                      ),
-
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ],
+                              cells: [
+                                // DataCell(Text('${index + 1}',style: TextStyle(fontSize: 18),)), // Numbering cell
+                                DataCell(Container(width: 45,child: Text('${widget.courses[index]['professeur']}',style: TextStyle(
+                                  color: Colors.black,
+                                ),)),),
+                                DataCell(Container(width: 45,child: Text('${widget.courses[index]['matiere']}',style: TextStyle(
+                                  color: Colors.black,
+                                ),)),
+                                  // onTap: () =>
+                                  //     _showCourseDetails(context, widget.courses[index])
+                                ),
+                                DataCell(
+                                  Container(width: 35,
+                                    child: Text(
+                                      '${DateFormat('dd/M ').format(
+                                        DateTime.parse(widget.courses[index]['date'].toString()).toLocal(),
+                                      )}',style: TextStyle(
+                                      color: Colors.black,
+                                    ),
                                     ),
                                   ),
-                            ],
-                          ),
-                        )
+                                ),
+                                DataCell(
+                                  Center(child: Container(width: 30, child: Text('${widget.courses[index]['TH']}',style: TextStyle(
+                                    color: Colors.black,
+                                  ),))),
+                                ),
+                                DataCell(
+                                  Text('${widget.courses[index]['somme']}',style: TextStyle(
+                                    color: Colors.black,
+                                  ),),
+                                ),
+                                DataCell(
+                                  Icon( widget.courses[index]['isSigne']? Icons.verified:Icons.cancel,
+                                      color: widget.courses[index]['isSigne']? Colors.green: Colors.red,size: 20,),
+                                ),
+                                if (widget.role == "admin")
+                                DataCell(
+                                  Icon( widget.courses[index]['isPaid']? Icons.verified:Icons.cancel,
+                                      color: widget.courses[index]['isPaid']? Colors.green: Colors.red, size: 20),
+                                ),
+                                DataCell(
+                                  Row(
+                                    // mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        width: 35,
+                                        child: TextButton(
+                                          onPressed: () =>_showCourseDetails(context, widget.courses[index]),// Disable button functionality
 
+                                          child: Icon(Icons.more_vert, color: Colors.blue),
+                                          style: TextButton.styleFrom(
+                                            primary: Colors.white,
+                                            elevation: 0,
+                                            // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                                          ),
+                                        ),
+
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                      ],
                     ),
                   ),
                 ),
               ),
             ),
           ),
+
           Visibility(
             visible: widget.courses.length > coursesPerPage,
             child: Row(
@@ -631,13 +452,18 @@ class _CoursesPageState extends State<CoursesPage> {
                   ),
                 ),
                 Container(
-                  width: 50,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  width: 115,
+                  child: Column(
                     children: [
-                      Text(currentPage.toString()),
-                      Text('/'),
-                      Text((widget.courses.length / coursesPerPage).ceil().toString()),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Text(currentPage.toString()),
+                          Text('/'),
+                          Text((widget.courses.length / coursesPerPage).ceil().toString()),
+                        ],
+                      ),
+                      Text('(${coursesPerPage} Cours par page)')
                     ],
                   ),
                 ),
@@ -970,35 +796,35 @@ class _CoursesPageState extends State<CoursesPage> {
 
                   ],
                 ),
-                  SizedBox(height: 25),
+                SizedBox(height: 25),
                 if (widget.role == "admin")
-                Column(
-                  children: [
-                    Row(
-                      children: [
-                        Text('Payé:',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w400,
-                            fontStyle: FontStyle.italic,
-                            // color: Colors.lightBlue
-                          ),),
+                  Column(
+                    children: [
+                      Row(
+                        children: [
+                          Text('Payé:',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.italic,
+                              // color: Colors.lightBlue
+                            ),),
 
-                        SizedBox(width: 10,),
-                        Text(
-                          course['isPaid']?
-                          'Oui':'Non',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w400,
-                            fontStyle: FontStyle.italic,
-                            // color: Colors.lightBlue
-                          ),),
+                          SizedBox(width: 10,),
+                          Text(
+                            course['isPaid']?
+                            'Oui':'Non',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.italic,
+                              // color: Colors.lightBlue
+                            ),),
 
-                      ],
-                    ),
-                  ],
-                ),
+                        ],
+                      ),
+                    ],
+                  ),
                 SizedBox(height: 25,),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -1127,12 +953,12 @@ class Course {
     required this.debit,
     required this.professeur,
     required this.matiere,
-     this.somme,
-     this.TH,
-     this.CM,
-     this.TD,
-     this.TP,
-     this.prix,
+    this.somme,
+    this.TH,
+    this.CM,
+    this.TD,
+    this.TP,
+    this.prix,
     required this.isSigne,
     required this.isPaid,
     this.updatedAt,

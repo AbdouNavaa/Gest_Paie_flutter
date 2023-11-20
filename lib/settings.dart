@@ -1,87 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:gestion_payements/theme.dart';
+import 'package:provider/provider.dart';
 
-class SettingsPage extends StatefulWidget {
-  @override
-  _SettingsPageState createState() => _SettingsPageState();
-}
-
-class _SettingsPageState extends State<SettingsPage> {
-  String selectedFont = 'Default';
-  String selectedLanguage = 'English';
-  String selectedTheme = 'light'; // Add this line
-
+class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final themeChanger = Provider.of<ThemeChanger>(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Settings'),
+        title: Text('Paramètres'),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            DropdownButton<String>(
-              value: selectedFont,
-              onChanged: (newValue) {
-                setState(() {
-                  selectedFont = newValue!;
-                });
-              },
-              items: ['Default', 'Roboto', 'Arial'].map<DropdownMenuItem<String>>(
-                    (String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                },
-              ).toList(),
-            ),
-
-            DropdownButton<String>(
-              value: selectedLanguage,
-              onChanged: (newValue) {
-                setState(() {
-                  selectedLanguage = newValue!;
-                });
-              },
-              items: ['English', 'French', 'Spanish'].map<DropdownMenuItem<String>>(
-                    (String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                },
-              ).toList(),
-            ),
-
-            RadioListTile(
-              title: Text('Light Theme'),
-              value: 'light',
-              groupValue: selectedTheme, // Update this line
+      body: Column(
+        children: <Widget>[
+          // ... Autres paramètres ...
+          ListTile(
+            title: Text('Mode Sombre'),
+            trailing: Switch(
+              value: themeChanger.themeData.brightness == Brightness.dark,
               onChanged: (value) {
-                setState(() {
-                  selectedTheme = value!; // Update the selected theme
-                });
-                // TODO: Update the theme based on user selection
+                if (value) {
+                  themeChanger.setTheme(ThemeData.dark());
+                } else {
+                  themeChanger.setTheme(ThemeData.light());
+                }
               },
             ),
-            RadioListTile(
-              title: Text('Dark Theme'),
-              value: 'dark',
-              groupValue: selectedTheme, // Update this line
-              onChanged: (value) {
-                setState(() {
-                  selectedTheme = value!; // Update the selected theme
-                });
-                // TODO: Update the theme based on user selection
-              },
-            ),
-
-            Text('Hello',style: TextStyle(),)
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
-

@@ -96,7 +96,7 @@ class _CategoriesState extends State<Categories> {
                     child: InkWell(
                       onTap: (){
                         Navigator.pop(context);
-                      }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,),
+                      }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,color: Colors.black,),
 
                     ),
                   ),
@@ -119,7 +119,9 @@ class _CategoriesState extends State<Categories> {
                   ),
                 ],
               ),
-              child: TextField(
+              child: TextField(style: TextStyle(
+                color: Colors.black,
+              ),
                 controller: _searchController,
                 onChanged: (value) async {
                   List<Category> Categories = await fetchCategory();
@@ -202,11 +204,15 @@ class _CategoriesState extends State<Categories> {
 
                                                 // onTap:() => _showcategDetails(context, categ)
                                               // ),
-                                              DataCell(Text('${categ.name}'),
+                                              DataCell(Text('${categ.name}',style: TextStyle(
+                                                color: Colors.black,
+                                              ),),
 
                                                 // onTap:() => _showcategDetails(context, categ)
                                               ),
-                                              DataCell(Text('${categ.prix}'),),
+                                              DataCell(Text('${categ.prix}',style: TextStyle(
+                                                color: Colors.black,
+                                              ),),),
                                               DataCell(
                                                 Row(
                                                   children: [
@@ -346,7 +352,7 @@ class _CategoriesState extends State<Categories> {
 
                                                           );
                                                         }, // Disable button functionality
-                                                        child: Icon(Icons.edit, color: Colors.black,),
+                                                        child: Icon(Icons.mode_edit_outline_outlined, color: Colors.black,),
 
                                                       ),
                                                     ),

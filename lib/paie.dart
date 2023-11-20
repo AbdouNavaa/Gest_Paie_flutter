@@ -25,32 +25,30 @@ class _PaieState extends State<Paie> {
     if (widget.dateDeb != null && widget.dateFin != null) {
       // If date filters are applied
       totalType = widget.courses.where((course) {
-        DateTime courseDate =
-        DateTime.parse(course['date'].toString());
-        return courseDate.isAtSameMomentAs(widget.dateDeb!.toLocal()) ||
-            (courseDate.isAfter(widget.dateDeb!.toLocal()) &&
-                courseDate.isBefore(
-                    widget.dateFin!.toLocal().add(Duration(days: 1))));
+        DateTime courseDate = DateTime.parse(course['date'].toString());
+        return (course['isSigne'] != false) && // Filter courses with signs
+            (courseDate.isAtSameMomentAs(widget.dateDeb!.toLocal()) || (courseDate.isAfter(widget.dateDeb!.toLocal()) &&
+                courseDate.isBefore(widget.dateFin!.toLocal().add(Duration(days: 1)))));
       }).map((course) => double.parse(course['TH'].toString())).fold(0, (prev, amount) => prev + amount);
+
       somme = widget.courses.where((course) {
-        DateTime courseDate =
-        DateTime.parse(course['date'].toString());
-        return courseDate.isAtSameMomentAs(widget.dateDeb!.toLocal()) ||
-            (courseDate.isAfter(widget.dateDeb!.toLocal()) &&
-                courseDate.isBefore(
-                    widget.dateFin!.toLocal().add(Duration(days: 1))));
+        DateTime courseDate = DateTime.parse(course['date'].toString());
+        return ( course['isSigne'] != false) && // Filter courses with signs
+            (courseDate.isAtSameMomentAs(widget.dateDeb!.toLocal()) ||
+                (courseDate.isAfter(widget.dateDeb!.toLocal()) &&
+                    courseDate.isBefore(
+                        widget.dateFin!.toLocal().add(Duration(days: 1)))));
       }).map((course) => double.parse(course['somme'].toString())).fold(0, (prev, amount) => prev + amount);
-    }
-    else if ((widget.dateDeb != null && widget.dateFin == null) || (widget.dateDeb == null && widget.dateFin != null) ) {
+    } else if ((widget.dateDeb != null && widget.dateFin == null) || (widget.dateDeb == null && widget.dateFin != null)) {
       // If date filters are applied
       totalType = 0;
       somme = 0;
-    }else {
+    } else {
       // If no date filters are applied
       int startIndex = (currentPage - 1) * coursesPerPage;
       int endIndex = startIndex + coursesPerPage - 1;
-      totalType = widget.courses.skip(startIndex).take(coursesPerPage).map((course) => double.parse(course['TH'].toString())).fold(0, (prev, amount) => prev + amount);
-      somme = widget.courses.skip(startIndex).take(coursesPerPage).map((course) => double.parse(course['somme'].toString())).fold(0, (prev, amount) => prev + amount);
+      totalType = widget.courses.skip(startIndex).take(coursesPerPage).where((course) => (course['signe'] != null && course['signe'] != '')).map((course) => double.parse(course['TH'].toString())).fold(0, (prev, amount) => prev + amount);
+      somme = widget.courses.skip(startIndex).take(coursesPerPage).where((course) => (course['signe'] != null && course['signe'] != '')).map((course) => double.parse(course['somme'].toString())).fold(0, (prev, amount) => prev + amount);
     }
   }
 
@@ -194,25 +192,35 @@ class _PaieState extends State<Paie> {
                       rows: [
                             DataRow(
                               cells: [
-                                DataCell(Text('${widget.ProfName}'),///hmmm
+                                DataCell(Text('${widget.ProfName}',style: TextStyle(
+                                  color: Colors.black,
+                                ),),///hmmm
                                 ),
                                 DataCell(
-                                  Text('${totalType.toStringAsFixed(2)}'),
+                                  Text('${totalType.toStringAsFixed(2)}',style: TextStyle(
+                                    color: Colors.black,
+                                  ),),
                                 ),
                                 DataCell(
-                                  Text('${somme.toStringAsFixed(2)}'),
+                                  Text('${somme.toStringAsFixed(2)}',style: TextStyle(
+                                    color: Colors.black,
+                                  ),),
                                 ),
                               ],
                             ),
                             DataRow(
                               cells: [
-                                DataCell(Text('Montant Totale (MRU)'),///hmmm
+                                DataCell(Text('Montant Totale (MRU)',style: TextStyle(
+                                  color: Colors.black,
+                                ),),///hmmm
                                 ),
                                 DataCell(
                                   Text(''),
                                 ),
                                 DataCell(
-                                  Text('${somme.toStringAsFixed(2)}'),
+                                  Text('${somme.toStringAsFixed(2)}',style: TextStyle(
+                                  color: Colors.black,
+                                ),),
                                 ),
                               ],
                             ),

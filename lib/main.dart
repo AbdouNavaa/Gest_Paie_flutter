@@ -5,6 +5,7 @@ import 'package:gestion_payements/auth/profile.dart';
 import 'package:gestion_payements/profs.dart';
 import 'package:gestion_payements/settings.dart';
 import 'package:gestion_payements/splash_screen.dart';
+import 'package:gestion_payements/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
@@ -18,42 +19,30 @@ import 'auth/settings.dart';
 import 'auth/signup.dart';
 import 'package:provider/provider.dart';
 
-import 'matieres.dart';
-
-
 void main() {
-  runApp( MyApp());
+  runApp(
+    ChangeNotifierProvider<ThemeChanger>(
+      create: (_) => ThemeChanger(),
+      child: MyApp(),
+    ),
+  );
 }
 
 
-// void main() {
-//   runApp(MyApp());
-// }
 
-// class MyApp extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       localizationsDelegates: [
-//         LocalizationService.delegate,
-//         GlobalMaterialLocalizations.delegate,
-//         GlobalWidgetsLocalizations.delegate,
-//       ],
-//       supportedLocales: [
-//         const Locale('en', 'US'),
-//         const Locale('fr', 'FR'),
-//         const Locale('es', 'ES'),
-//       ],
-//       home: SettingsPage(), // your initial page
-//     );
-//   }
-// }
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final themeChanger = Provider.of<ThemeChanger>(context);
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
+    //  theme: themeChanger.themeData, // Utilisez le thème actuel
+      theme: ThemeData(
+        brightness: Brightness.light,
+      ),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+      ),  debugShowCheckedModeBanner: false,
       routes: {
         '/': (context) => SplashScreen(),
         '/login': (context) => LoginSection(),

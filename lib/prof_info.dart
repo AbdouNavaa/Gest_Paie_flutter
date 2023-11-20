@@ -52,7 +52,7 @@ class _ProfesseurInfoPageState extends State<ProfesseurInfoPage> {
                   child: InkWell(
                     onTap: (){
                     Navigator.pop(context);
-                  }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,),
+                  }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,color: Colors.black,),
 
                   ),
                 ),

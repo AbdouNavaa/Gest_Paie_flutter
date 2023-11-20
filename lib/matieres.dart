@@ -233,7 +233,7 @@ class _MatieresState extends State<Matieres> {
                     child: InkWell(
                       onTap: (){
                         Navigator.pop(context);
-                      }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,),
+                      }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,color: Colors.black,),
 
                     ),
                   ),
@@ -256,7 +256,9 @@ class _MatieresState extends State<Matieres> {
                   ),
                 ],
               ),
-              child: TextField(
+              child: TextField(style: TextStyle(
+                color: Colors.black,
+              ),
                 controller: _searchController,
                 onChanged: (value) async {
                   List<Matiere> Matieres = await fetchMatiere();
@@ -334,7 +336,9 @@ class _MatieresState extends State<Matieres> {
                                     DataRow(
                                       cells: [
                                         // DataCell(Text('${filteredItems?[index].semestre}')),
-                                        DataCell(Text('${filteredItems?[index].code}')),
+                                        DataCell(Text('${filteredItems?[index].code}',style: TextStyle(
+                            color: Colors.black,
+                          ),)),
                                         // DataCell(Text(generateMatiereCode(
                                         //   filteredItems![index].categoriecode, // Replace with actual property name
                                         //   filteredItems![index]!.semestre!,
@@ -342,7 +346,9 @@ class _MatieresState extends State<Matieres> {
                                         // ))),
                                         // DataCell(Text('${filteredItems?[index].description}')),
                                         DataCell(Container(width: 165,
-                                            child: Text('${filteredItems?[index].description}',)),),
+                                            child: Text('${filteredItems?[index].description}',style: TextStyle(
+                      color: Colors.black,
+                      ),)),),
 
                                         // DataCell(Container(width: 105,
                                         //     child: Text('${filteredItems?[index].description}',)),),
@@ -514,7 +520,7 @@ class _MatieresState extends State<Matieres> {
                                                         }
                                                     );
                                                   },
-                                                  child: Icon(Icons.edit, color: Colors.black),
+                                                  child: Icon(Icons.mode_edit_outlined, color: Colors.black),
                                                   style: TextButton.styleFrom(
                                                     primary: Colors.white,
                                                     elevation: 0,
@@ -560,7 +566,7 @@ class _MatieresState extends State<Matieres> {
                                                     );
                                                   }, // Disable button functionality
 
-                                                  child: Icon(Icons.delete, color: Colors.black),
+                                                  child: Icon(Icons.delete_outline, color: Colors.black),
                                                   style: TextButton.styleFrom(
                                                     primary: Colors.white,
                                                     elevation: 0,
