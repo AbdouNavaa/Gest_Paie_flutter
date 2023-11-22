@@ -221,7 +221,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                        context,
                                        MaterialPageRoute(builder: (context) =>
                                            ProfCoursesPage(courses: courses,
-                                             coursNum: coursNum,
+                                             coursNum: coursPN,
                                              heuresTV: heuresTV,
                                              sommeTV: sommeTV, ProfId: ProfId,)),
                                      );

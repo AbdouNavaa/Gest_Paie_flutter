@@ -35,25 +35,39 @@ class ProfCoursesPage extends StatefulWidget {
 }
 
 class _ProfCoursesPageState extends State<ProfCoursesPage> {
+  bool isCourseSigned = false; // État pour suivre si le cours est signé ou non
   double totalType = 0;
+  double somme = 0;
+  int coursesNum = 0;
   void calculateTotalType() {
     if (widget.dateDeb != null && widget.dateFin != null) {
       // If date filters are applied
-      totalType = widget.courses
-          .where((course) {
-        DateTime courseDate =
-        DateTime.parse(course['date'].toString());
+      List<dynamic> coursesInDateRange = widget.courses.where((course) {
+        DateTime courseDate = DateTime.parse(course['date'].toString());
         return courseDate.isAtSameMomentAs(widget.dateDeb!.toLocal()) ||
             (courseDate.isAfter(widget.dateDeb!.toLocal()) &&
                 courseDate.isBefore(
                     widget.dateFin!.toLocal().add(Duration(days: 1))));
-      })
+      }).toList();
+
+      // Nombre de cours dans la période spécifiée
+      coursesNum = coursesInDateRange.length;
+
+      // Calcul d'autres valeurs en fonction de la liste filtrée des cours
+       totalType = coursesInDateRange
           .map((course) => double.parse(course['TH'].toString()))
           .fold(0, (prev, amount) => prev + amount);
+
+       somme = coursesInDateRange
+          .map((course) => double.parse(course['somme'].toString()))
+          .fold(0, (prev, amount) => prev + amount);
+
+      // Utilisez nombreDeCours, totalType, somme comme nécessaire
     }
     else if ((widget.dateDeb != null && widget.dateFin == null) || (widget.dateDeb == null && widget.dateFin != null) ) {
       // If date filters are applied
       totalType = 0;
+      somme = 0;
     }else {
       // If no date filters are applied
       int startIndex = (currentPage - 1) * coursesPerPage;
@@ -62,6 +76,12 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
           .skip(startIndex)
           .take(coursesPerPage)
           .map((course) => double.parse(course['TH'].toString()))
+          .fold(0, (prev, amount) => prev + amount);
+
+      somme = widget.courses
+          .skip(startIndex)
+          .take(coursesPerPage)
+          .map((course) => double.parse(course['somme'].toString()))
           .fold(0, (prev, amount) => prev + amount);
     }
   }
@@ -247,10 +267,17 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
+                              (widget.dateDeb != null && widget.dateFin != null)?
+                              Text('Eq. CM: ${totalType}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),):
                               Text('Eq. CM: ${widget.heuresTV}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),),
+
+                              (widget.dateDeb != null && widget.dateFin != null)?
+                              Text('Eq. CM: ${somme}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),):
                               Text('Montant Total : ${widget.sommeTV}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400)),
                             ],
                           ),
+                          (widget.dateDeb != null && widget.dateFin != null)?
+                          Text('Eq. CM: ${coursesNum}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),):
                           Center(child: Text('Nb de Cours: ${widget.coursNum}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400))),
 
                         ],
@@ -338,11 +365,15 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                               onLongPress: () =>
                                   _showCourseDetails(context, widget.courses[index]),
                               cells: [
+
                                 DataCell(
-                                    CupertinoSwitch(
+    widget.courses[index]['isSigne']? Icon(Icons.check_box_sharp):CupertinoSwitch(
                                       activeColor: Colors.black26,
                                       value: widget.courses[index]['isSigne'],
                                       onChanged: (value) async {
+
+
+
                                         final typesString = widget.courses[index]['types'];
                                         final typeParts = typesString.split(':');
 

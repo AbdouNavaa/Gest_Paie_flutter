@@ -29,26 +29,38 @@ class CoursesPage extends StatefulWidget {
 class _CoursesPageState extends State<CoursesPage> {
   double totalType = 0;
 // Calculate totalType based on applied date filters and pagination
+  double somme = 0;
+  int coursesNum = 0;
   void calculateTotalType() {
-    if ((widget.dateDeb != null && widget.dateFin != null) ) {
+    if (widget.dateDeb != null && widget.dateFin != null) {
       // If date filters are applied
-      totalType = widget.courses
-          .where((course) {
-        DateTime courseDate =
-        DateTime.parse(course['date'].toString());
+      List<dynamic> coursesInDateRange = widget.courses.where((course) {
+        DateTime courseDate = DateTime.parse(course['date'].toString());
         return courseDate.isAtSameMomentAs(widget.dateDeb!.toLocal()) ||
             (courseDate.isAfter(widget.dateDeb!.toLocal()) &&
                 courseDate.isBefore(
                     widget.dateFin!.toLocal().add(Duration(days: 1))));
-      })
+      }).toList();
+
+      // Nombre de cours dans la période spécifiée
+      coursesNum = coursesInDateRange.length;
+
+      // Calcul d'autres valeurs en fonction de la liste filtrée des cours
+      totalType = coursesInDateRange
           .map((course) => double.parse(course['TH'].toString()))
           .fold(0, (prev, amount) => prev + amount);
+
+      somme = coursesInDateRange
+          .map((course) => double.parse(course['somme'].toString()))
+          .fold(0, (prev, amount) => prev + amount);
+
+      // Utilisez nombreDeCours, totalType, somme comme nécessaire
     }
     else if ((widget.dateDeb != null && widget.dateFin == null) || (widget.dateDeb == null && widget.dateFin != null) ) {
       // If date filters are applied
       totalType = 0;
-    }
-    else {
+      somme = 0;
+    }else {
       // If no date filters are applied
       int startIndex = (currentPage - 1) * coursesPerPage;
       int endIndex = startIndex + coursesPerPage - 1;
@@ -57,8 +69,15 @@ class _CoursesPageState extends State<CoursesPage> {
           .take(coursesPerPage)
           .map((course) => double.parse(course['TH'].toString()))
           .fold(0, (prev, amount) => prev + amount);
+
+      somme = widget.courses
+          .skip(startIndex)
+          .take(coursesPerPage)
+          .map((course) => double.parse(course['somme'].toString()))
+          .fold(0, (prev, amount) => prev + amount);
     }
   }
+
 
   TextEditingController _selectedProf = TextEditingController();
   TextEditingController _selectedMatiere = TextEditingController();
@@ -263,13 +282,21 @@ class _CoursesPageState extends State<CoursesPage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              Text('Eq. CM: ${widget.heuresTV.toStringAsFixed(2)}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),),
-                              Text('Montant Total : ${widget.sommeTV.toStringAsFixed(2)}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400)),
+                              (widget.dateDeb != null && widget.dateFin != null)?
+                              Text('Eq. CM: ${totalType}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),):
+                              Text('Eq. CM: ${widget.heuresTV}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),),
+
+                              (widget.dateDeb != null && widget.dateFin != null)?
+                              Text('Eq. CM: ${somme}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),):
+                              Text('Montant Total : ${widget.sommeTV}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400)),
                             ],
                           ),
+                          (widget.dateDeb != null && widget.dateFin != null)?
+                          Text('Eq. CM: ${coursesNum}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),):
                           Center(child: Text('Nb de Cours: ${widget.coursNum}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400))),
 
                         ],
+
                       ),
                     ),
                   ),
