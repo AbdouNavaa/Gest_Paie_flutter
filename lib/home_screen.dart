@@ -82,7 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Stack(
         // overflow: Overflow.visible,
         fit: StackFit.expand,
-        children: <Widget>[
+        children: [
           ClipPath(
             clipper: ClippingClass(),
             child: Container(
@@ -178,7 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
             top: 200,
             right: 20,
             child: Column(
-              children: <Widget>[
+              children:[
                 GestureDetector(
                   onTap:(){},
                   child: Row(
@@ -336,7 +336,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                },
                              ),
                              _customCard(
-                                 imageUrl: "Lang2.jpg",
+                               imageUrl: "coding3.png",
                                  item: "Matieres",
                                  duration: "${mats?.length} Matieres",
                                onPessed: (){
@@ -445,7 +445,7 @@ class _HomeScreenState extends State<HomeScreen> {
                          Row(
                            children: [
                              _customCard(
-                                 imageUrl: "users2.webp",
+                                 imageUrl: "users1.jpg",
                                  item: "Utilisateures",
                                  duration: "${useres?.length!} Users",
                                onPessed: (){
@@ -540,7 +540,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                },
                              ),
                              _customCard(
-                               imageUrl: "Lang2.jpg",
+                               imageUrl: "coding3.png",
                                item: "Matieres",
                                duration: "${mats?.length} Matieres",
                                onPessed: (){

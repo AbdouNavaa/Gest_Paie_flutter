@@ -476,7 +476,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                                           child: TextButton(
                                             onPressed: () =>_showCourseDetails(context, widget.courses[index]),// Disable button functionality
 
-                                            child: Icon(Icons.more_vert, color: Colors.blue),
+                                            child: Icon(Icons.more_horiz, color: Colors.black54),
                                             style: TextButton.styleFrom(
                                               primary: Colors.white,
                                               elevation: 0,
@@ -829,7 +829,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
 
                     SizedBox(width: 10,),
                     Text(
-                      '${course['isSigne']}',
+                      '${course['isSigne']? 'Oui': 'Non'}',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,

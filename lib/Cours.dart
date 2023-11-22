@@ -421,12 +421,12 @@ class _CoursesPageState extends State<CoursesPage> {
                                   ),),
                                 ),
                                 DataCell(
-                                  Icon( widget.courses[index]['isSigne']? Icons.verified:Icons.cancel,
+                                  Icon( widget.courses[index]['isSigne']?  Icons.check:Icons.close_outlined,
                                       color: widget.courses[index]['isSigne']? Colors.green: Colors.red,size: 20,),
                                 ),
                                 if (widget.role == "admin")
                                 DataCell(
-                                  Icon( widget.courses[index]['isPaid']? Icons.verified:Icons.cancel,
+                                  Icon( widget.courses[index]['isPaid']? Icons.check:Icons.close_outlined,
                                       color: widget.courses[index]['isPaid']? Colors.green: Colors.red, size: 20),
                                 ),
                                 DataCell(
@@ -438,7 +438,7 @@ class _CoursesPageState extends State<CoursesPage> {
                                         child: TextButton(
                                           onPressed: () =>_showCourseDetails(context, widget.courses[index]),// Disable button functionality
 
-                                          child: Icon(Icons.more_vert, color: Colors.blue),
+                                          child: Icon(Icons.more_horiz, color: Colors.black54),
                                           style: TextButton.styleFrom(
                                             primary: Colors.white,
                                             elevation: 0,
