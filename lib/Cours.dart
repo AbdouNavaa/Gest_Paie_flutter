@@ -287,15 +287,16 @@ class _CoursesPageState extends State<CoursesPage> {
                               Text('Eq. CM: ${widget.heuresTV}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),),
 
                               (widget.dateDeb != null && widget.dateFin != null)?
-                              Text('Eq. CM: ${somme}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),):
+                              Text('Montant Total : ${somme}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),):
                               Text('Montant Total : ${widget.sommeTV}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400)),
                             ],
                           ),
                           (widget.dateDeb != null && widget.dateFin != null)?
-                          Text('Eq. CM: ${coursesNum}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),):
+                          Text('Nb de Cours: ${coursesNum}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),):
                           Center(child: Text('Nb de Cours: ${widget.coursNum}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400))),
 
                         ],
+
 
                       ),
                     ),
@@ -494,6 +495,7 @@ class _CoursesPageState extends State<CoursesPage> {
                     ],
                   ),
                 ),
+
                 ElevatedButton(
                   onPressed: () {
                     int totalPage = (widget.courses.length / coursesPerPage).ceil();

@@ -142,16 +142,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Text(
                         "BienVenue ${widget.role!}",
-                        style: TextStyle(
+                        style: GoogleFonts.slabo27px(
                           color: Colors.black,
                           fontSize: 20,
                         )
                     ),
                     Text(
                         " ${widget.name!.toUpperCase()}",
-                      style: GoogleFonts.italianno(
+                      style: GoogleFonts.slabo27px(
                         // color: Colors.black,
-                        fontSize: 30.0,
+                        fontSize: 20.0,
                         fontStyle: FontStyle.italic,
                         fontWeight: FontWeight.bold,
                         // letterSpacing: 2.0,
@@ -159,13 +159,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ],
                 ),
-                Text(
-                    DateFormat('dd-MM-yyyy').format(DateTime.now()).toString(),
-                    // DateTime.now().toString(),
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 18,
-                    )
+                Padding(
+                  padding: const EdgeInsets.only(left: 60.0),
+                  child: Text(
+                      DateFormat('dd-MM-yyyy').format(DateTime.now()).toString(),
+                      // DateTime.now().toString(),
+                      style: GoogleFonts.slabo27px(
+                        color: Colors.black,
+                        fontSize: 20,
+                      )
+                  ),
                 ),
               ],
             ),
@@ -618,9 +621,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: <Widget>[
                       Text(
                         item,
-                        style: TextStyle(fontSize: 20,color: Colors.black),
+                        style: GoogleFonts.slabo27px(fontSize: 20,color: Colors.black),
                       ),
-                      Text(duration,style: TextStyle(
+                      Text(duration,style: GoogleFonts.slabo27px(
                       color: Colors.black54,
                       ),)
                     ],
