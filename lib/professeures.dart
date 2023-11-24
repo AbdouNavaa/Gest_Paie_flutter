@@ -429,7 +429,7 @@ class _ProfesseuresState extends State<Professeures> {
 
         builder: (BuildContext context){
           return Container(
-            height: 500,
+            height: 600,
             padding: const EdgeInsets.all(25.0),
             child: SingleChildScrollView(
               child: Column(
@@ -499,6 +499,78 @@ class _ProfesseuresState extends State<Professeures> {
                         ),),
                       SizedBox(width: 10,),
                       Text('${prof!.mobile}',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                        ),),
+                    ],
+                  ),
+                  SizedBox(height: 25),
+                  Row(
+                    children: [
+                      Text('NBH:',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                        ),),
+                      SizedBox(width: 10,),
+                      Text('${prof!.nbh}',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                        ),),
+                    ],
+                  ),
+                  SizedBox(height: 25),
+                  Row(
+                    children: [
+                      Text('NBC:',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                        ),),
+                      SizedBox(width: 10,),
+                      Text('${prof!.nbc}',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                        ),),
+                    ],
+                  ),
+                  SizedBox(height: 25),
+                  Row(
+                    children: [
+                      Text('TH:',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                        ),),
+                      SizedBox(width: 10,),
+                      Text('${prof!.th}',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                        ),),
+                    ],
+                  ),
+                  SizedBox(height: 25),
+                  Row(
+                    children: [
+                      Text('Somme:',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                        ),),
+                      SizedBox(width: 10,),
+                      Text('${prof!.somme}',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w400,
@@ -803,6 +875,10 @@ class Professeur {
   String nom;
   String prenom;
   int mobile;
+  int nbh;
+  int nbc;
+  int th;
+  String somme;
   String email;
   List matieres; // Change this field to be of type List<String>
 
@@ -811,6 +887,10 @@ class Professeur {
     required this.nom,
     required this.prenom,
     required this.mobile,
+    required this.nbh,
+    required this.nbc,
+    required this.th,
+    required this.somme,
     required this.email,
     required this.matieres, // Update the constructor parameter
   });
@@ -822,6 +902,10 @@ class Professeur {
       nom: json['nom'],
       prenom: json['prenom'],
       mobile: json['mobile'],
+      nbh: json['nbh'],
+      nbc: json['nbc'],
+      th: json['th'],
+      somme: json['somme'],
       email: json['email'],
       matieres: List.from(json['matieres']), // Convert the 'matieres' list to List<String>
     );

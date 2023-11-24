@@ -147,7 +147,7 @@ class _UpdateCoursDialogState extends State<UpdateCoursDialog> {
 
   String getMatiereIdFromName(String name) {
     // Assuming you have a list of matieres named 'matieresList'
-    final matiere = matiereList.firstWhere((mat) => mat.name == name, orElse: () => Matiere(id: '', name: '', description: '', categorieId: '', semestres: []));
+    final matiere = matiereList.firstWhere((mat) => mat.name == name, orElse: () => Matiere(id: '', name: '', description: '', categorieId: '', categorie_name: '', code: '',));
     return matiere?.id ?? ''; // Return the ID if found, otherwise an empty string
   }
 

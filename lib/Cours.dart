@@ -653,7 +653,8 @@ class _CoursesPageState extends State<CoursesPage> {
                         ),),
 
                       SizedBox(width: 10,),
-                      Text('${DateFormat(' HH:mm').format(DateTime.parse(course['date'].toString()).toLocal().add(Duration(minutes: (( course['CM']+course['TP']+course['TD'] )* 60).toInt())))}',
+                      Text('${DateFormat(' HH:mm').format(DateTime.parse(course['date'].toString()).toLocal().add(Duration(minutes: (
+                          ( course['CM']+course['TP']+course['TD'] )* 60).toInt())))}',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w400,

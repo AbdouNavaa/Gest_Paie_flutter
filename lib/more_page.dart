@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gestion_payements/filliere.dart';
+import 'package:gestion_payements/semestre.dart';
 import 'package:gestion_payements/settings.dart';
 
 import 'Dashboard.dart';
@@ -93,20 +95,16 @@ class _MoreOptionsPageState extends State<MoreOptionsPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ProfilePage(
-                            username: widget.username,
-                            role: widget.userRole,
-                            email: widget.userEmail,
-                          ),
+                          builder: (context) =>Semestres()
                         ),
                       );
                     },
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        Icon(Icons.person_off, color: widget.isDark? Colors.green : Colors.black,),
+                        Icon(Icons.date_range, color: widget.isDark? Colors.green : Colors.black,),
                         SizedBox(width: 10,),
-                        Text('Profile'),
+                        Text('Semestres'),
                       ],
                     ),
                   ),
@@ -199,15 +197,15 @@ class _MoreOptionsPageState extends State<MoreOptionsPage> {
                      // Navigate to LogoutScreen
                      Navigator.push(
                        context,
-                       MaterialPageRoute(builder: (context) => LogoutScreen()),
+                       MaterialPageRoute(builder: (context) => Filliere()),
                      );
                    },
                    child: Row(
                      mainAxisAlignment: MainAxisAlignment.start,
                      children: [
-                       Icon(Icons.logout_outlined, color: widget.isDark? Colors.green : Colors.black,),
+                       Icon(Icons.file_copy_outlined, color: widget.isDark? Colors.green : Colors.black,),
                        SizedBox(width: 10,),
-                       Text('Logout'),
+                       Text('Filliere'),
                      ],
                    ),
                  ),
@@ -225,20 +223,16 @@ class _MoreOptionsPageState extends State<MoreOptionsPage> {
                      Navigator.push(
                        context,
                        MaterialPageRoute(
-                         builder: (context) => ProfilePage(
-                           username: widget.username,
-                           role: widget.userRole,
-                           email: widget.userEmail,
-                         ),
+                           builder: (context) =>Semestres()
                        ),
                      );
                    },
                    child: Row(
                      mainAxisAlignment: MainAxisAlignment.start,
                      children: [
-                       Icon(Icons.person_off, color: widget.isDark? Colors.green : Colors.black,),
+                       Icon(Icons.date_range, color: widget.isDark? Colors.green : Colors.black,),
                        SizedBox(width: 10,),
-                       Text('Profile'),
+                       Text('Semestres'),
                      ],
                    ),
                  ),
@@ -259,7 +253,8 @@ class _MoreOptionsPageState extends State<MoreOptionsPage> {
                    child: Row(
                      mainAxisAlignment: MainAxisAlignment.start,
                      children: [
-                       Icon(Icons.local_offer, color: widget.isDark? Colors.green : Colors.black,),
+                       Icon(Icons.qr_code, color: widget.isDark? Colors.green : Colors.black,),
+                       // Image.asset('assets/categ2.png'),
                        SizedBox(width: 10,),
                        Text('Categories'),
                      ],
@@ -281,7 +276,8 @@ class _MoreOptionsPageState extends State<MoreOptionsPage> {
                    child: Row(
                      mainAxisAlignment: MainAxisAlignment.start,
                      children: [
-                       Icon(Icons.school_outlined, color: widget.isDark? Colors.green : Colors.black,),
+                       Icon(Icons.code, color: widget.isDark? Colors.green : Colors.black,),
+                       // Image.asset('assets/coding3.png',width: 25,),
                        SizedBox(width: 10,),
                        Text('Matieres'),
                      ],

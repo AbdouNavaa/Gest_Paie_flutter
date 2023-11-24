@@ -27,6 +27,7 @@ class _LoginSectionState extends State<LoginSection> {
   var email;
 
   var password;
+  int i = 0;
 
   bool hidePassword = true;
   bool isLoginFailed = false;
@@ -160,7 +161,7 @@ class _LoginSectionState extends State<LoginSection> {
                               ),
                               onChanged: (value) {
                                 email = value;
-                                isEmailValid = validateEmail(value); // Appeler une fonction de validation pour l'email
+                                isEmailValid = validateEmail(value); // Appeler une fonction de validation pour l'email//abdou
                                 if (!isEmailValid) {
                                   emailErrorMessage = 'Email invalide.';
                                 } else {
@@ -212,6 +213,7 @@ class _LoginSectionState extends State<LoginSection> {
                                         ? Icons.vpn_key_off
                                         : Icons.vpn_key,
                                   ),
+
                                 ),
                                 hintText: "Password",
                               ),
@@ -225,12 +227,21 @@ class _LoginSectionState extends State<LoginSection> {
                                 else {
                                   passwordErrorMessage = '';
                                 }
+                                setState(() {
+                                  i +=1;
+
+                                });
                               },
                               onTap: () {
                                 setState(() {
                                   showFirstContainer = false; // Hide the first container
+                                  i = 0;
                                 });
                               },                    ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 270),
+                            child: Text(i.toString(),style: TextStyle(fontSize: 15),),
                           ),
                           if (!isPasswordValid)
                             Text(

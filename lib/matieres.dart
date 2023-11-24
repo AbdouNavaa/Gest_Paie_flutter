@@ -59,13 +59,10 @@ class _MatieresState extends State<Matieres> {
     }
 
   }
-  Future<void> UpdateMatiere(String id, String name,String? semestre, String description, String categorieId) async {
+  Future<void> UpdateMatiere(String id, String name, String description, String categorieId) async {
     final Map<String, dynamic> data = {
       "name": name,
-      "semestres": [
-        {
-          "name": semestre, // Ajoutez ici la valeur sélectionnée
-        },],
+
       "description": description,
       "categorie": categorieId,
       // "code": newCode,
@@ -190,17 +187,17 @@ class _MatieresState extends State<Matieres> {
   Widget build(BuildContext context) {
 
     // Sort the items list based on the semestre
-    filteredItems?.sort((a, b) {
-      final semestreOrder = {'S1': 1,'MS1': 2, 'S2': 3, 'S3': 4, 'S4': 5};
-      final semestreComparison = semestreOrder[a.semestre]!.compareTo(semestreOrder[b.semestre]!);
-
-      if (semestreComparison != 0) {
-        return semestreComparison; // Sort by semestre if they are different
-      } else {
-        // Sort by code within the same semestre
-        return a.code!.compareTo(b.code!);
-      }
-    });
+    // filteredItems?.sort((a, b) {
+    //   final semestreOrder = {'S1': 1,'MS1': 2, 'S2': 3, 'S3': 4, 'S4': 5};
+    //   // final semestreComparison = semestreOrder[a.semestre]!.compareTo(semestreOrder[b.semestre]!);
+    //
+    //   if (semestreComparison != 0) {
+    //     return semestreComparison; // Sort by semestre if they are different
+    //   } else {
+    //     // Sort by code within the same semestre
+    //     return a.code!.compareTo(b.code!);
+    //   }
+    // });
 
 
 // Build the DataTable with sorted items
@@ -366,7 +363,7 @@ class _MatieresState extends State<Matieres> {
                                                     _desc.text = filteredItems![index].description;
                                                     _categ = filteredItems![index].categorieId;
                                                     // selectedCateg = filteredItems![index].categorie;
-                                                    _selectedSemestre = filteredItems![index].semestre!;
+                                                    // _selectedSemestre = filteredItems![index].semestre!;
                                                     List<Category?> selectedCategories = List.generate(matieres.length, (_) => null);
 
                                                     showModalBottomSheet(
@@ -437,30 +434,6 @@ class _MatieresState extends State<Matieres> {
                                                                   ),
                                                                   // String? selectedType; // Variable pour suivre l'élément sélectionné
 
-                                                                  SizedBox(height: 10),
-                                                                  DropdownButtonFormField<String>(
-                                                                    value: filteredItems![index].semestre!,
-                                                                    onChanged: (newValue) {
-                                                                      setState(() {
-                                                                        selectedType = newValue;
-                                                                        print('hello');
-                                                                      });
-                                                                    },
-                                                                    items: availableTypes.map<DropdownMenuItem<String>>((type) {
-                                                                      return DropdownMenuItem<String>(
-                                                                        value: type['name'],
-                                                                        child: Text(type['name']),
-                                                                      );
-                                                                    }).toList(),
-                                                                        decoration: InputDecoration(
-                                                                      filled: true,
-                                                                      // fillColor: Colors.white,
-                                                                      border: OutlineInputBorder(
-                                                                        borderSide: BorderSide.none,gapPadding: 1,
-                                                                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                                                                      ),
-                                                                    ),
-                                                                  ),
 
                                                                   SizedBox(height: 10),
                                                                   TextFormField(
@@ -490,9 +463,8 @@ class _MatieresState extends State<Matieres> {
                                                                       UpdateMatiere(
                                                                         filteredItems![index].id!,
                                                                         _name.text,
-                                                                        _selectedSemestre,
                                                                         _desc.text,
-                                                                        selectedCategories[index]!.id!,
+                                                                        selectedCategories[index]!.id!
                                                                       );
 
 
@@ -531,42 +503,9 @@ class _MatieresState extends State<Matieres> {
                                               Container(
                                                 width: 35,
                                                 child: TextButton(
-                                                  onPressed: () {
-                                                    showDialog(
-                                                      context: context,
-                                                      builder: (BuildContext context) {
-                                                        return AlertDialog(
-                                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
-                                                          title: Text("Confirmer la suppression"),
-                                                          content: Text(
-                                                              "Êtes-vous sûr de vouloir supprimer cet élément ?"),
-                                                          actions: <Widget>[
-                                                            TextButton(
-                                                              child: Text("ANNULER"),
-                                                              onPressed: () {
-                                                                Navigator.of(context).pop();
-                                                              },
-                                                            ),
-                                                            TextButton(
-                                                              child: Text(
-                                                                "SUPPRIMER",
-                                                                // style: TextStyle(color: Colors.red),
-                                                              ),
-                                                              onPressed: () {
-                                                                Navigator.of(context).pop();
-                                                                DeleteMatiere(filteredItems![index].id!,);
-                                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                                  SnackBar(content: Text('Le Category a été Supprimer avec succès.')),
-                                                                );
-                                                              },
-                                                            ),
-                                                          ],
-                                                        );
-                                                      },
-                                                    );
-                                                  }, // Disable button functionality
+                                                  onPressed: () =>_showCourseDetails(context, filteredItems![index]),// Disable button functionality
 
-                                                  child: Icon(Icons.delete_outline, color: Colors.black),
+                                                  child: Icon(Icons.more_horiz, color: Colors.black54),
                                                   style: TextButton.styleFrom(
                                                     primary: Colors.white,
                                                     elevation: 0,
@@ -574,6 +513,52 @@ class _MatieresState extends State<Matieres> {
                                                   ),
                                                 ),
                                               ),
+                                              // Container(
+                                              //   width: 35,
+                                              //   child: TextButton(
+                                              //     onPressed: () {
+                                              //       showDialog(
+                                              //         context: context,
+                                              //         builder: (BuildContext context) {
+                                              //           return AlertDialog(
+                                              //             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
+                                              //             title: Text("Confirmer la suppression"),
+                                              //             content: Text(
+                                              //                 "Êtes-vous sûr de vouloir supprimer cet élément ?"),
+                                              //             actions: <Widget>[
+                                              //               TextButton(
+                                              //                 child: Text("ANNULER"),
+                                              //                 onPressed: () {
+                                              //                   Navigator.of(context).pop();
+                                              //                 },
+                                              //               ),
+                                              //               TextButton(
+                                              //                 child: Text(
+                                              //                   "SUPPRIMER",
+                                              //                   // style: TextStyle(color: Colors.red),
+                                              //                 ),
+                                              //                 onPressed: () {
+                                              //                   Navigator.of(context).pop();
+                                              //                   DeleteMatiere(filteredItems![index].id!,);
+                                              //                   ScaffoldMessenger.of(context).showSnackBar(
+                                              //                     SnackBar(content: Text('Le Category a été Supprimer avec succès.')),
+                                              //                   );
+                                              //                 },
+                                              //               ),
+                                              //             ],
+                                              //           );
+                                              //         },
+                                              //       );
+                                              //     }, // Disable button functionality
+                                              //
+                                              //     child: Icon(Icons.delete_outline, color: Colors.black),
+                                              //     style: TextButton.styleFrom(
+                                              //       primary: Colors.white,
+                                              //       elevation: 0,
+                                              //       // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                                              //     ),
+                                              //   ),
+                                              // ),
                                             ],
                                           ),
                                         ),
@@ -760,6 +745,244 @@ class _MatieresState extends State<Matieres> {
           );
 
   }
+  Future<void> _showCourseDetails(BuildContext context, Matiere mat) {
+    return showModalBottomSheet(
+        context: context,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
+            topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
+        isScrollControlled: true, // Rendre le contenu déroulable
+
+        builder: (BuildContext context){
+          return Container(
+            height: 650,
+            padding: const EdgeInsets.all(25.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              // mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Matiere Infos',style: TextStyle(fontSize: 30),),
+                SizedBox(height: 50),
+                Row(
+                  children: [
+                    Text('Nom:',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+                    SizedBox(width: 10,),
+                    Text(mat.name.toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+                  ],
+                ),
+                SizedBox(height: 25),
+                Row(
+                  children: [
+                    Text('Description:',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+
+                    SizedBox(width: 10,),
+                    Text('${mat.description}',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+
+                  ],
+                ),
+                SizedBox(height: 25),
+                Row(
+                  children: [
+                    Text('Categorie:',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+
+                    SizedBox(width: 10,),
+                    Text('${mat.categorie_name}',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+
+                  ],
+                ),
+                SizedBox(height: 25),
+                Row(
+                  children: [
+                    Text('Code:',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+
+                    SizedBox(width: 10,),
+                    Text('${mat.code}',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+
+                  ],
+                ),
+                SizedBox(height: 25),
+                Row(
+                  children: [
+                    Text('Code:',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+
+                    SizedBox(width: 10,),
+                    Text('${mat.code}',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+
+                  ],
+                ),
+                SizedBox(height: 25),
+                Row(
+                  children: [
+                    Text('Numero:',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+
+                    SizedBox(width: 10,),
+                    Text('${mat.numero}',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+
+                  ],
+                ),
+
+                SizedBox(height: 25,),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () async{
+                        // setState(() {
+                        //   Navigator.pop(context);
+                        // });
+                        // return showDialog(
+                        //   context: context,
+                        //   builder: (context) {
+                        //     return UpdateMatiere();
+                        //   },
+                        // );
+
+                      },// Disable button functionality
+
+                      child: Text('Modifier'),
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.only(left: 20,right: 20),
+                        foregroundColor: Colors.lightGreen,
+                        backgroundColor: Colors.white,
+                        // side: BorderSide(color: Colors.black,),
+                        elevation: 3,
+                        // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                      ),
+
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
+                              title: Text("Confirmer la suppression"),
+                              content: Text(
+                                  "Êtes-vous sûr de vouloir supprimer cet élément ?"),
+                              actions: <Widget>[
+                                TextButton(
+                                  child: Text("ANNULER"),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                                TextButton(
+                                  child: Text(
+                                    "SUPPRIMER",
+                                    // style: TextStyle(color: Colors.red),
+                                  ),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                    DeleteMatiere(mat.id);
+                                    setState(() {
+                                      Navigator.pop(context);
+                                    });
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Le Category a été Supprimer avec succès.')),
+                                    );
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }, // Disable button functionality
+
+                      child: Text('Supprimer'),
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.only(left: 20,right: 20),
+                        foregroundColor: Colors.redAccent,
+                        backgroundColor: Colors.white,
+                        // side: BorderSide(color: Colors.black,),
+                        elevation: 3,
+                        // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                      ),
+
+                    ),
+                  ],
+                ),
+
+              ],
+            ),
+          );
+        }
+
+
+    );
+  }
 }
 
 Future<List<Matiere>> fetchMatiere() async {
@@ -795,66 +1018,48 @@ class Matiere {
   final String id;
   final String name;
   final String? code;
-  final String? semestre;
   final String description;
   final String categorieId;
-  final num? categorie;
+  final String? categorie_name;
+  final num? numero;
   final num? taux;
-  final List<Semestre> semestres; // Ajout de la liste de semestres
+  // final List<Semestre> semestres; // Ajout de la liste de semestres
 
   Matiere({
     required this.id,
     required this.name,
-    this.semestre,
     required this.description,
     required this.categorieId,
-    this.code,
+     this.categorie_name,
+     this.code,
     this.taux,
-    this.categorie,
-    required this.semestres, // Initialisation de la liste de semestres
+    this.numero,
   });
 
   factory Matiere.fromJson(Map<String, dynamic> json) {
     // Traitement de la liste de semestres
-    final semestresData = json['semestres'] as List<dynamic>;
-    final List<Semestre> semestres = semestresData
-        .map((semestreJson) => Semestre.fromJson(semestreJson))
-        .toList();
+    // final semestresData = json['semestres'] as List<dynamic>;
+    // final List<Semestre> semestres = semestresData
+    //     .map((semestreJson) => Semestre.fromJson(semestreJson))
+    //     .toList();
 
     return Matiere(
       id: json['_id'],
       name: json['name'],
-      code: semestres.isNotEmpty ? semestres[0].codeEM : null,
+      code: json['code'],
+      // code: semestres.isNotEmpty ? semestres[0].codeEM : null,
       description: json['description'],
-      categorieId: json['categorie']['_id'],
-      semestre: semestres.isNotEmpty ? semestres[0].name : null,
-      taux: json['taux'] ?? 1,
-      categorie: json['categorie']['prix'],
-      semestres: semestres, // Initialisation de la liste de semestres
+      categorieId: json['categorie'],
+      // categorieId: json['categorie']['_id'],
+      // semestre: semestres.isNotEmpty ? semestres[0].name : null,
+      taux: json['taux'],
+      numero: json['numero'] ,
+      categorie_name: json['categorie_name'] ,
     );
   }
 }
 
 
-class Semestre {
-  final String id;
-  final String name;
-  final String codeEM;
-
-  Semestre({
-    required this.id,
-    required this.name,
-    required this.codeEM,
-  });
-
-  factory Semestre.fromJson(Map<String, dynamic> json) {
-    return Semestre(
-      id: json['_id'],
-      name: json['name'],
-      codeEM: json['code_EM'],
-    );
-  }
-}
 
 
 

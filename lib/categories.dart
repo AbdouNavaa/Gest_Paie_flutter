@@ -190,7 +190,7 @@ class _CategoriesState extends State<Categories> {
                                   ),
                                   // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
                                   columns: [
-                                    // DataColumn(label: Text('Code')),
+                                    DataColumn(label: Text('Code')),
                                     DataColumn(label: Text('Nom')),
                                     DataColumn(label: Text('Taux')),
                                     DataColumn(label: Text('Action')),
@@ -200,10 +200,10 @@ class _CategoriesState extends State<Categories> {
                                     for (var categ in filteredItems!)
                                         DataRow(
                                             cells: [
-                                              // DataCell(Container(child: Text('${categ.code}')),
+                                              DataCell(Container(child: Text('${categ.code}')),
 
                                                 // onTap:() => _showcategDetails(context, categ)
-                                              // ),
+                                              ),
                                               DataCell(Text('${categ.name}',style: TextStyle(
                                                 color: Colors.black,
                                               ),),
@@ -642,18 +642,18 @@ class Category {
   final String name;
   // final String? code;
   final String? description;
+  final num? nb_matieres;
+  final String? code;
   final num? prix;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
 
   Category({
     required this.id,
     required this.name,
     // this.code,
     this.description,
+    this.nb_matieres,
+    this.code,
     this.prix,
-    this.createdAt,
-    this.updatedAt,
   });
 
   factory Category.fromJson(Map<String, dynamic> json) {
@@ -662,9 +662,9 @@ class Category {
       name: json['name'],
       // code: json['code'],
       description: json['description'],
-      prix: json['prix'] ?? 100, // Provide a default value of 100 if not provided
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      nb_matieres: json['nb_matieres'],
+      code: json['code'],
+      prix: json['prix'] , // Provide a default value of 100 if not provided
     );
   }
 }
@@ -687,12 +687,12 @@ Future<List<Category>> fetchCategory() async {
     Map<String, dynamic> jsonResponse = jsonDecode(response.body);
     List<dynamic> categoriesData = jsonResponse['categories'];
 
-    // print(categoriesData);
+    print(categoriesData);
     List<Category> categories = categoriesData.map((item) {
       return Category.fromJson(item);
     }).toList();
 
-    print(categories);
+    // print(categories);
     return categories;
   } else {
     // If the server did not return a 200 OK response,

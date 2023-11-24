@@ -295,10 +295,6 @@ class _AddCoursDialogState extends State<AddCoursDialog> {
                 }
                 // ...
                 else {
-                  // Navigator.of(context).pop();
-                  SharedPreferences prefs = await SharedPreferences.getInstance();
-                  String token = prefs.getString("token")!;
-
                   _isSigne.text = _selectedSigne.toString();
 
                   DateTime date = DateFormat('yyyy/MM/dd HH:mm').parse(_date.text).toUtc();
@@ -494,10 +490,10 @@ Future<List<Matiere>> fetchMatieresByCategory(String categoryId) async {
     if (response.statusCode == 200) {
       final Map<String, dynamic> responseData = json.decode(response.body);
       final List<dynamic> matieresData = responseData['matieres'];
-      // print(categoryId);
-      // print(matieresData);
+      print(categoryId);
+      print(matieresData);
       List<Matiere> matieres = matieresData.map((data) => Matiere.fromJson(data)).toList();
-      // print(matieres);
+      print(matieres);
       return matieres;
     } else {
       throw Exception('Failed to fetch matières by category');
