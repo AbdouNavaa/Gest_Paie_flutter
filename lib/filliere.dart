@@ -123,7 +123,7 @@ class _FilliereState extends State<Filliere> {
     fetchfilliere();
   }
   TextEditingController _searchController = TextEditingController();
-  String getMatSemIdFromName(String id) {
+  List<dynamic> getMatSemIdFromName(String id) {
     final professeur = semList.firstWhere(
           (prof) => '${prof.id}' == id,
       orElse: () => Semestre(id: '', filliereName: '', elements: []),
@@ -131,7 +131,7 @@ class _FilliereState extends State<Filliere> {
     print('eles :${professeur.elements!.join(", ")
     }'); // Return the ID if found, otherwise an empty string
     print(id); // Return the ID if found, otherwise an empty string
-    return professeur.elements!.join(", "); // Return the ID if found, otherwise an empty string
+    return professeur.elements!; // Return the ID if found, otherwise an empty string
   }
   String getFilId(String id) {
     final fil = filteredItems?.firstWhere(
@@ -150,7 +150,7 @@ class _FilliereState extends State<Filliere> {
 
   }
   String getMatIdFromNames(String elements) {
-    List<String> ids = elements.split(', '); // Sépare la chaîne en une liste d'IDs
+    List<dynamic> ids = elements.split(', '); // Sépare la chaîne en une liste d'IDs
 
     // Traitez chaque ID individuellement ici
     String result = '';
@@ -167,6 +167,7 @@ class _FilliereState extends State<Filliere> {
   TextEditingController _desc = TextEditingController();
   TextEditingController _niveau = TextEditingController();
   String _selectedNiveau = "Licence";
+
 
 
   @override
@@ -862,8 +863,9 @@ class _FilliereState extends State<Filliere> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Text('ID: ${semestre['_id']}',style: TextStyle(fontSize: 18)),
-                    Text('ID: ${getMatIdFromNames(getMatSemIdFromName(semestre['_id']))}',style: TextStyle(fontSize: 18)),
-                    Text('Numéro: ${semestre['numero']}',style: TextStyle(fontSize: 18)),
+                    // '${getMatIdFromNames(grp.semestre!.elements!.join(", ")) }',
+                    Text('Matieres: [${getMatIdFromNames(getMatSemIdFromName(semestre['_id']).join(", "))}]',style: TextStyle(fontSize: 18)),
+                    Text('Numéro: S${semestre['numero']}',style: TextStyle(fontSize: 18)),
                     Text( 'Deb Semestre: ${DateFormat('dd/MM/yyyy ').format(
                       DateTime.parse(semestre['start']).toLocal(),
                     )}',style: TextStyle(fontSize: 18)),
@@ -882,7 +884,7 @@ class _FilliereState extends State<Filliere> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('ID: ${group['_id']}',style: TextStyle(fontSize: 18)),
+                    // Text('ID: ${group['_id']}',style: TextStyle(fontSize: 18)),
                     Text('Nom du groupe: ${group['groupName']}',style: TextStyle(fontSize: 18)),
                     Text('Is One: ${group['isOne']}',style: TextStyle(fontSize: 18)),
                     Text( 'Deb d\'Emploi: ${DateFormat('dd/MM/yyyy ').format(DateTime.parse(group['startEmploi']).toLocal(),)}',style: TextStyle(fontSize: 18)),
@@ -898,6 +900,11 @@ class _FilliereState extends State<Filliere> {
                 children: [
                   ElevatedButton(
                     onPressed: (){
+                      setState(() {
+                        // fetchfilliere();
+                        Navigator.pop(context);
+
+                      });
                       _name.text = data['filliere'];
                       // _code.text = categ.code!;
                       _desc.text = data['description'];

@@ -470,6 +470,7 @@ Future<List<Professeur>> fetchProfesseursByMatiere(String matiereId) async {
         final List<dynamic> professeursData = responseData['professeurs'];
         List<Professeur> fetchedProfesseurs =
         professeursData.map((data) => Professeur.fromJson(data)).toList();
+        print('Mat Pros${fetchedProfesseurs}');
         return fetchedProfesseurs;
       } else {
         throw Exception('Invalid API response: professeurs data is not a list');

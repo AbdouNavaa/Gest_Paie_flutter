@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import '../Ajout.dart';
+import '../categories.dart';
 import '../matieres.dart';
 
 
@@ -56,7 +57,7 @@ class _EmploiState extends State<Emploi> {
     String token = prefs.getString("token")!;
     print(token);
 
-    var response = await http.delete(Uri.parse('http://192.168.43.73:5000/categorie' +"/$id"),
+    var response = await http.delete(Uri.parse('http://192.168.43.73:5000/emploi' +"/$id"),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -68,6 +69,9 @@ class _EmploiState extends State<Emploi> {
     print(response.statusCode);
     if(response.statusCode ==200){
       fetchemploi();
+      setState(() {
+        Navigator.pop(context);
+      });
     }
 
   }
@@ -105,15 +109,243 @@ class _EmploiState extends State<Emploi> {
   }).catchError((error) {
       print('Erreur: $error');
     });
+
   }
   TextEditingController _searchController = TextEditingController();
 
-  TextEditingController _name = TextEditingController();
-  // TextEditingController _code = TextEditingController();
-  TextEditingController _desc = TextEditingController();
-  TextEditingController _taux = TextEditingController();
-  num _selectedTaux = 500;
+  TextEditingController _date = TextEditingController();
+  TextEditingController _numero = TextEditingController();
 
+  final TextEditingController _dayNumeroController = TextEditingController();
+
+  // List<Map<String, dynamic>> typesList = [{'name': 'CM', 'nbh': 1.5}];
+  Group? selectedGroup;
+  Matiere? selectedMat;
+  Professeur? selectedProfesseur;
+  List<Professeur> professeurs = [];
+  List<Matiere> matieres = [];
+  DateTime? selectedDateTime;
+  Future<void> selectTime(TextEditingController controller) async {
+    DateTime? selectedDateTime = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2030),
+    );
+
+    if (selectedDateTime != null) {
+      TimeOfDay? selectedTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.now(),
+      );
+
+      if (selectedTime != null) {
+        DateTime selectedDateTimeWithTime = DateTime(
+          selectedDateTime.year,
+          selectedDateTime.month,
+          selectedDateTime.day,
+          selectedTime.hour,
+          selectedTime.minute,
+        );
+
+        String formattedDateTime = DateFormat('yyyy/MM/dd HH:mm').format(selectedDateTimeWithTime);
+        setState(() {
+          controller.text = formattedDateTime;
+        });
+      }
+    }
+  }
+
+
+  Future<void> updateProfesseurList() async {
+    if (selectedMat != null) {
+      List<Professeur> fetchedProfesseurs = await fetchProfesseursByMatiere(selectedMat!.id);
+      setState(() {
+        professeurs = fetchedProfesseurs;
+        selectedProfesseur = null;
+      });
+    } else {
+      List<Professeur> fetchedProfesseurs = await fetchProfs();
+      setState(() {
+        professeurs = fetchedProfesseurs;
+        selectedProfesseur = null;
+      });
+    }
+  }
+
+  Future<void> selectDate(TextEditingController controller) async {
+    DateTime? selectedDateTime = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2030),
+    );
+
+    if (selectedDateTime != null) {
+      TimeOfDay? selectedTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.now(),
+      );
+
+      if (selectedTime != null) {
+        DateTime selectedDateTimeWithTime = DateTime(
+          selectedDateTime.year,
+          selectedDateTime.month,
+          selectedDateTime.day,
+          selectedTime.hour,
+          selectedTime.minute,
+        );
+
+        String formattedDateTime = DateFormat('yyyy/MM/dd HH:mm').format(selectedDateTimeWithTime);
+        setState(() {
+          controller.text = formattedDateTime;
+        });
+      }
+    }
+  }
+
+
+
+// Déclaration des listes au niveau de la classe
+  List<String> typeNames = ['CM', 'TP', 'TD']; // Liste des noms uniques de types
+  List<double> nbhValues = [1.5, 2]; // Liste des valeurs de 'nbh'
+
+// Autres parties de votre classe
+
+  Future<void> _addEmploi(String TN,double TH,DateTime? date,int days,String GpId,String ProfId,String MatId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString("token")!;
+    print(token);
+    // final response = await http.post(
+
+
+    final Uri uri = Uri.parse('http://192.168.43.73:5000/emploi');
+    final Map<String, dynamic> emploiData = {
+      "types": [
+        {"name": TN, "nbh": TH}
+      ],
+      "startTime": date!.toIso8601String(),
+      "dayNumero": days,
+      "group": GpId,
+      "professeur": ProfId,
+      "matiere": MatId
+    };
+
+    try {
+      final response = await http.post(
+        uri,
+        body: jsonEncode(emploiData),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Emploi ajouté avec succès.')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Échec de l\'ajout de l\'emploi.')),
+        );
+      }
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur: $error')),
+      );
+    }
+  }
+  Future<void> UpdateEmp (id,String TN,double TH,DateTime? date,int days,String GpId,String ProfId,String MatId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString("token")!;
+    final url = 'http://192.168.43.73:5000/emploi/'  + '/$id';
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+    final Map<String, dynamic> body = {
+      "types": [
+        {"name": TN, "nbh": TH}
+      ],
+      // "startTime": date!.toIso8601String(),
+      'startTime': date?.toIso8601String(),
+      "dayNumero": days,
+      "group": GpId,
+      "professeur": ProfId,
+      "matiere": MatId
+    };
+
+    if (date != null) {
+      body['startTime'] = date.toIso8601String();
+    }
+
+    try {
+      final response = await http.patch(
+        Uri.parse(url),
+        headers: headers,
+        body: json.encode(body),
+      );
+
+      if (response.statusCode == 201) {
+        // Course creation was successful
+        print("Emploi Updated successfully!");
+        final responseData = json.decode(response.body);
+        // print("Course ID: ${responseData['cours']['_id']}");
+        // You can handle the response data as needed
+        setState(() {
+          Navigator.pop(context);
+        });
+      } else {
+        // Course creation failed
+        print("Failed to update. Status code: ${response.statusCode}");
+        print("Error Message: ${response.body}");
+      }
+    } catch (error) {
+      print("Error: $error");
+    }
+  }
+
+  String selectedTypeName = 'CM'; // Nom de type sélectionné par défaut
+  double selectedNbhValue = 1.5; // Valeur 'nbh' sélectionnée par défaut
+
+  Widget _buildTypesInput() {
+    return Column(
+      children: [
+        DropdownButtonFormField<String>(
+          decoration: InputDecoration(hintMaxLines: 3),
+          value: selectedTypeName,
+          items: typeNames.map((typeName) {
+            return DropdownMenuItem<String>(
+              child: Text(typeName),
+              value: typeName,
+            );
+          }).toList(),
+          onChanged: (value) {
+            setState(() {
+              selectedTypeName = value ?? 'CM';
+            });
+          },
+        ),
+        SizedBox(height: 2),
+        DropdownButtonFormField<double>(
+          decoration: InputDecoration(hintMaxLines: 3),
+          value: selectedNbhValue,
+          items: nbhValues.map((nbhValue) {
+            return DropdownMenuItem<double>(
+              child: Text(nbhValue.toString()),
+              value: nbhValue,
+            );
+          }).toList(),
+          onChanged: (value) {
+            setState(() {
+              selectedNbhValue = value ?? 1.5;
+            });
+          },
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -150,7 +382,7 @@ class _EmploiState extends State<Emploi> {
                     ),
                   ),
                   SizedBox(width: 50,),
-                  Text("Liste de Emploi",style: TextStyle(fontSize: 25),)
+                  Text("Liste d\'Emplois",style: TextStyle(fontSize: 25),)
                 ],
               ),
             ),
@@ -261,205 +493,18 @@ class _EmploiState extends State<Emploi> {
                                             color: Colors.black,
                                           ),),),
                                           DataCell(
-                                            Row(
-                                              children: [
-                                                // Container(
-                                                //   width: 35,
-                                                //   child: TextButton(
-                                                //
-                                                //     onPressed: (){
-                                                //       _name.text = emp.name!;
-                                                //       // _code.text = emp.code!;
-                                                //       _desc.text = emp.description!;
-                                                //       _selectedTaux = emp.prix!;
-                                                //       showModalBottomSheet(
-                                                //           context: context,
-                                                //           shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
-                                                //               topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
-                                                //           isScrollControlled: true, // Rendre le contenu déroulable
-                                                //
-                                                //           builder: (BuildContext context){
-                                                //             return SingleChildScrollView(
-                                                //               child: Container(
-                                                //                 height: 600,
-                                                //                 padding: const EdgeInsets.all(25.0),
-                                                //                 child: Column(
-                                                //                   // mainAxisSize: MainAxisSize.min,
-                                                //                   children: [
-                                                //                     Row(
-                                                //                       crossAxisAlignment: CrossAxisAlignment.start,
-                                                //                       // mainAxisAlignment: MainAxisAlignment.start,
-                                                //                       children: [
-                                                //                         Text("Modifier une categorie", style: TextStyle(fontSize: 25),),
-                                                //                         Spacer(),
-                                                //                         InkWell(
-                                                //                           child: Icon(Icons.close),
-                                                //                           onTap: (){
-                                                //                             Navigator.pop(context);
-                                                //                           },
-                                                //                         )
-                                                //                       ],
-                                                //                     ),
-                                                //                     //hmmm
-                                                //                     SizedBox(height: 40),
-                                                //                     TextField(
-                                                //                       controller: _name,
-                                                //                       keyboardType: TextInputType.text,
-                                                //                       decoration: InputDecoration(
-                                                //                           filled: true,
-                                                //                           // fillColor: Colors.white,
-                                                //                           border: OutlineInputBorder(
-                                                //                               borderSide: BorderSide.none,gapPadding: 1,
-                                                //                               borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                                                //                     ),
-                                                //
-                                                //                     SizedBox(height: 10),
-                                                //                     TextFormField(
-                                                //                       controller: _desc,
-                                                //                       keyboardType: TextInputType.text,
-                                                //                       maxLines: 3,
-                                                //                       decoration: InputDecoration(
-                                                //                           filled: true,
-                                                //
-                                                //                           // fillColor: Colors.white,
-                                                //                           hintText: "description",
-                                                //                           border: OutlineInputBorder(
-                                                //                               borderSide: BorderSide.none,gapPadding: 1,
-                                                //                               borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                                                //                     ),
-                                                //
-                                                //                     SizedBox(height: 10),
-                                                //                     DropdownButtonFormField<num>(
-                                                //                       value: _selectedTaux,
-                                                //                       items: [
-                                                //                         DropdownMenuItem<num>(
-                                                //                           child: Text('500'),
-                                                //                           value: 500,
-                                                //                         ),
-                                                //                         DropdownMenuItem<num>(
-                                                //                           child: Text('900'),
-                                                //                           value: 900,
-                                                //                         ),
-                                                //                       ],
-                                                //                       onChanged: (value) {
-                                                //                         setState(() {
-                                                //                           _selectedTaux = value!;
-                                                //                         });
-                                                //                       },
-                                                //                       decoration: InputDecoration(
-                                                //                         filled: true,
-                                                //                         // fillColor: Colors.white,
-                                                //                         border: OutlineInputBorder(
-                                                //                           borderSide: BorderSide.none,gapPadding: 1,
-                                                //                           borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                                                //                         ),
-                                                //                       ),
-                                                //                     ),
-                                                //                     SizedBox(height: 10),
-                                                //
-                                                //
-                                                //
-                                                //
-                                                //                     ElevatedButton(
-                                                //                       onPressed: () {
-                                                //                         Navigator.of(context).pop();
-                                                //                         _taux.text = _selectedTaux.toString();
-                                                //
-                                                //                         fetchemploi();
-                                                //                         // Addemploi(_name.text, _desc.text);
-                                                //                         print(emp.id!);
-                                                //                         UpdateCateg(emp.id!, _name.text,_desc.text, _selectedTaux,);
-                                                //                         ScaffoldMessenger.of(context).showSnackBar(
-                                                //                           SnackBar(content: Text('Le Type est mis à jour avec succès.')),
-                                                //                         );
-                                                //
-                                                //                         setState(() {
-                                                //                           fetchemploi();
-                                                //                         });
-                                                //                       },
-                                                //                       child: Text("Modifier"),
-                                                //
-                                                //                       style: ElevatedButton.styleFrom(
-                                                //                         backgroundColor: Color(0xff0fb2ea),
-                                                //                         foregroundColor: Colors.white,
-                                                //                         elevation: 10,
-                                                //                         minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
-                                                //                         // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
-                                                //                         //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
-                                                //                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                                                //                       ),
-                                                //                     )
-                                                //                   ],
-                                                //                 ),
-                                                //               ),
-                                                //             );
-                                                //
-                                                //           }
-                                                //
-                                                //
-                                                //       );
-                                                //     }, // Disable button functionality
-                                                //     child: Icon(Icons.mode_edit_outline_outlined, color: Colors.black,),
-                                                //
-                                                //   ),
-                                                // ),
-                                                Container(
-                                                  width: 35,
-                                                  child: TextButton(
-                                                    onPressed: () =>_showCourseDetails(context, emp),// Disable button functionality
+                                            Container(
+                                              width: 35,
+                                              child: TextButton(
+                                                onPressed: () =>_showCourseDetails(context, emp),// Disable button functionality
 
-                                                    child: Icon(Icons.more_horiz, color: Colors.black54),
-                                                    style: TextButton.styleFrom(
-                                                      primary: Colors.white,
-                                                      elevation: 0,
-                                                      // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
-                                                    ),
-                                                  ),
+                                                child: Icon(Icons.more_horiz, color: Colors.black54),
+                                                style: TextButton.styleFrom(
+                                                  primary: Colors.white,
+                                                  elevation: 0,
+                                                  // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
                                                 ),
-
-                                                Container(
-                                                  width: 35,
-                                                  child: TextButton(
-                                                    onPressed: () {
-                                                      showDialog(
-                                                        context: context,
-                                                        builder: (BuildContext context) {
-                                                          return AlertDialog(
-                                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
-                                                            title: Text("Confirmer la suppression"),
-                                                            content: Text(
-                                                                "Êtes-vous sûr de vouloir supprimer cet élément ?"),
-                                                            actions: <Widget>[
-                                                              TextButton(
-                                                                child: Text("ANNULER"),
-                                                                onPressed: () {
-                                                                  Navigator.of(context).pop();
-                                                                },
-                                                              ),
-                                                              TextButton(
-                                                                child: Text(
-                                                                  "SUPPRIMER",
-                                                                  // style: TextStyle(color: Colors.red),
-                                                                ),
-                                                                onPressed: () {
-                                                                  Navigator.of(context).pop();
-                                                                  DeleteEmploi(emp.id);
-                                                                  ScaffoldMessenger.of(context).showSnackBar(
-                                                                    SnackBar(content: Text('Le emploi a été Supprimer avec succès.')),
-                                                                  );
-                                                                },
-                                                              ),
-                                                            ],
-                                                          );
-                                                        },
-                                                      );
-                                                    }, // Disable button functionality
-                                                    child: Icon(Icons.delete_outline, color: Colors.black,),
-
-                                                  ),
-                                                ),
-
-                                              ],
+                                              ),
                                             ),
                                           ),
                                           // DataCell(Container(width: 105,
@@ -482,7 +527,7 @@ class _EmploiState extends State<Emploi> {
         ),
         floatingActionButton: FloatingActionButton.extended(
           // heroTag: 'uniqueTag',
-          tooltip: 'Ajouter une categorie',
+          tooltip: 'Ajouter un Emploi',
           backgroundColor: Colors.white,
           label: Row(
             children: [Icon(Icons.add,color: Colors.black,)],
@@ -499,10 +544,6 @@ class _EmploiState extends State<Emploi> {
   }
 
   Future<void> _displayTextInputDialog(BuildContext context) async {
-    // TextEditingController _name = TextEditingController();
-    // TextEditingController _description = TextEditingController();
-    // TextEditingController _prix = TextEditingController();
-    // num _selectedTaux = 500;
 
 
     return showModalBottomSheet(
@@ -513,115 +554,225 @@ class _EmploiState extends State<Emploi> {
 
         builder: (BuildContext context){
           return SingleChildScrollView(
+            scrollDirection: Axis.vertical,
             child: Container(
-              height: 600,
+              height: 680,
               padding: const EdgeInsets.all(25.0),
-              child: Column(
-                // mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    // mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text("Ajouter une Categorie", style: TextStyle(fontSize: 25),),
-                      Spacer(),
-                      InkWell(
-                        child: Icon(Icons.close),
-                        onTap: (){
+              child: SingleChildScrollView(
+                child: Column(
+                  // mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      // mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text("Ajouter un Emploi", style: TextStyle(fontSize: 25),),
+                        Spacer(),
+                        InkWell(
+                          child: Icon(Icons.close),
+                          onTap: (){
+                            Navigator.pop(context);
+                          },
+                        )
+                      ],
+                    ),
+                    //hmmm
+                    SizedBox(height: 40),
+                    // _buildTypesInput(),
+                    Row(
+                      children: [
+                        Container(
+                          width: 147.5,
+                          child: DropdownButtonFormField<String>(
+                            value: selectedTypeName,
+                            items: typeNames.map((typeName) {
+                              return DropdownMenuItem<String>(
+                                child: Text(typeName),
+                                value: typeName,
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                selectedTypeName = value ?? 'CM';
+                              });
+                            },
+                            decoration: InputDecoration(
+                              filled: true,
+                              // fillColor: Color(0xA3B0AF1),
+                              hintText: "selection d'une Group",
+
+                              border: OutlineInputBorder(
+                                borderSide: BorderSide.none,gapPadding: 1,
+                                borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                              ),
+                            ),
+
+                          ),
+                        ),
+                        SizedBox(width: 10),
+                        Container(
+                          width: 147.5,
+                          child: DropdownButtonFormField<double>(
+                            decoration: InputDecoration(
+                              filled: true,
+                              border: OutlineInputBorder(
+                                borderSide: BorderSide.none,gapPadding: 1,
+                                borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                              ),
+                            ),
+                            value: selectedNbhValue,
+                            items: nbhValues.map((nbhValue) {
+                              return DropdownMenuItem<double>(
+                                child: Text(nbhValue.toString()),
+                                value: nbhValue,
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                selectedNbhValue = value ?? 1.5;
+                              });
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 10),
+                    TextFormField(
+                      controller: _date,
+                      decoration: InputDecoration(
+                          filled: true,
+                          // fillColor: Color(0xA3B0AF1),
+                          hintText: "Date",
+                          border: OutlineInputBorder(
+                              borderSide: BorderSide.none,gapPadding: 1,
+                              borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                      // readOnly: true,
+                      onTap: () => selectDate(_date),
+                    ),
+
+                    SizedBox(height: 10),
+                    TextField(
+                      controller: _numero,
+                      keyboardType: TextInputType.text,
+                      decoration: InputDecoration(
+                          filled: true,
+                          // fillColor: Colors.white,
+                          hintText: "Nb de Jours",
+                          border: OutlineInputBorder(
+                              borderSide: BorderSide.none,gapPadding: 1,
+                              borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                    ),
+
+                    SizedBox(height: 10),
+                    DropdownButtonFormField<Group>(
+                      value: selectedGroup,
+                      items: grpList.map((grp) {
+                        return DropdownMenuItem<Group>(
+                          value: grp,
+                          child: Text(grp.groupName ?? ''),
+                        );
+                      }).toList(),
+                      onChanged: (value) async{
+                        setState(() {
+                          selectedGroup = value;
+                        });
+                      },
+                      decoration: InputDecoration(
+                        filled: true,
+                        // fillColor: Color(0xA3B0AF1),
+                        hintText: "selection d'une Group",
+
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide.none,gapPadding: 1,
+                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    DropdownButtonFormField<Matiere>(
+                      value: selectedMat,
+                      items: matiereList.map((matiere) {
+                        return DropdownMenuItem<Matiere>(
+                          value: matiere,
+                          child: Text(matiere.name ?? ''),
+                        );
+                      }).toList(),
+                      onChanged: (value)async {
+                        setState(()  {
+                          selectedMat = value;
+                          selectedProfesseur = null; // Reset the selected professor
+                          // professeurs = await fetchProfesseursByMatiere(selectedMat!.id); // Clear the professeurs list when a matière is selected
+                          updateProfesseurList(); // Update the list of professeurs based on the selected matière
+                        });
+                      },
+                      decoration: InputDecoration(
+                        filled: true,
+                        // fillColor: Color(0xA3B0AF1),
+                        hintText: "selection d'une Matiere",
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide.none,gapPadding: 1,
+                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: 10),
+                    DropdownButtonFormField<Professeur>(
+                      value: selectedProfesseur,
+                      items: professeurs.map((professeur) {
+                        return DropdownMenuItem<Professeur>(
+                          value: professeur,
+                          child: Text(professeur.nom ?? ''),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          selectedProfesseur = value;
+                        });
+                      },
+                      decoration: InputDecoration(
+                        filled: true,
+                        // fillColor: Color(0xA3B0AF1),
+                        hintText: "selection d'un  Professeur", // Update the hintText
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide.none,gapPadding: 1,
+                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height:20),
+                    ElevatedButton(
+                      onPressed: (){
+                        Navigator.of(context).pop();
+
+                        setState(() {
+                          // fetchemploi();
                           Navigator.pop(context);
-                        },
-                      )
-                    ],
-                  ),
-                  //hmmm
-                  SizedBox(height: 40),
-                  TextField(
-                    controller: _name,
-                    keyboardType: TextInputType.text,
-                    decoration: InputDecoration(
-                        filled: true,
-                        // fillColor: Colors.white,
-                        hintText: "Nom",
-                        border: OutlineInputBorder(
-                            borderSide: BorderSide.none,gapPadding: 1,
-                            borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                  ),
+                        });
+                        // fetchemploi();
+                        DateTime date = DateFormat('yyyy/MM/dd HH:mm').parse(_date.text).toUtc();
+                        _addEmploi(selectedTypeName,selectedNbhValue,date,int.parse(_numero.text),selectedGroup!.id,selectedProfesseur!.id,selectedMat!.id);
+                        // Addemploi(_name.text, _desc.text);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('L\'emploi a été ajouter avec succès.')),
+                        );
 
-                  SizedBox(height: 10),
-                  TextFormField(
-                    controller: _desc,
-                    keyboardType: TextInputType.text,
-                    maxLines: 3,
-                    decoration: InputDecoration(
-                        filled: true,
+                      },
+                      child: Text("Ajouter"),
 
-                        // fillColor: Colors.white,
-                        hintText: "description",
-                        border: OutlineInputBorder(
-                            borderSide: BorderSide.none,gapPadding: 1,
-                            borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                  ),
-
-                  SizedBox(height: 10),
-                  DropdownButtonFormField<num>(
-                    value: _selectedTaux,
-                    items: [
-                      DropdownMenuItem<num>(
-                        child: Text('500'),
-                        value: 500,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xff0fb2ea),
+                        foregroundColor: Colors.white,
+                        elevation: 10,
+                        minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
+                        // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
+                        //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                       ),
-                      DropdownMenuItem<num>(
-                        child: Text('900'),
-                        value: 900,
-                      ),
-                    ],
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedTaux = value!;
-                      });
-                    },
-                    decoration: InputDecoration(
-                      filled: true,
-                      // fillColor: Colors.white,
-                      hintText: "taux",
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide.none,gapPadding: 1,
-                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 10),
-
-
-
-
-                  ElevatedButton(
-                    onPressed: (){
-                      Navigator.of(context).pop();
-                      fetchemploi();
-                      _taux.text = _selectedTaux.toString();
-                      Addemploi(_name.text,_desc.text,num.parse(_taux.text));
-                      // Addemploi(_name.text, _desc.text);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Le emploi a été ajouter avec succès.')),
-                      );
-                      // setState(() {
-                      //   fetchemploi();
-                      // });
-                    },
-                    child: Text("Ajouter"),
-
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xff0fb2ea),
-                      foregroundColor: Colors.white,
-                      elevation: 10,
-                      minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
-                      // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
-                      //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                    ),
-                  )
-                ],
+                    )
+                  ],
+                ),
               ),
             ),
           );
@@ -837,16 +988,256 @@ class _EmploiState extends State<Emploi> {
                   children: [
                     ElevatedButton(
                       onPressed: () async{
-                        // setState(() {
-                        //   Navigator.pop(context);
-                        // });
-                        // return showDialog(
-                        //   context: context,
-                        //   builder: (context) {
-                        //     return UpdateEmploi();
-                        //   },
-                        // );
 
+                        setState(() {
+                          Navigator.pop(context);
+                        });
+                        // selectedMat = emp.mat!;
+                        _dayNumeroController.text = emp.dayNumero!.toString();
+                        _date.text = DateFormat('dd/MM/yyyy HH:mm').format(DateTime.parse(emp.startTime.toString()));
+
+                         showModalBottomSheet(
+                            context: context,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
+                                topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
+                            isScrollControlled: true, // Rendre le contenu déroulable
+
+
+                            builder: (BuildContext context){
+                              return SingleChildScrollView(
+                                scrollDirection: Axis.vertical,
+                                child: Container(
+                                  height: 680,
+                                  padding: const EdgeInsets.all(25.0),
+                                  child: SingleChildScrollView(
+                                    child: Column(
+                                      // mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Row(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          // mainAxisAlignment: MainAxisAlignment.start,
+                                          children: [
+                                            Text("Modifier  l\'Emploi", style: TextStyle(fontSize: 25),),
+                                            Spacer(),
+                                            InkWell(
+                                              child: Icon(Icons.close),
+                                              onTap: (){
+                                                Navigator.pop(context);
+                                              },
+                                            )
+                                          ],
+                                        ),
+                                        //hmmm
+                                        SizedBox(height: 40),
+                                        // _buildTypesInput(),
+                                        Row(
+                                          children: [
+                                            Container(
+                                              width: 147.5,
+                                              child: DropdownButtonFormField<String>(
+                                                value: selectedTypeName,
+                                                items: typeNames.map((typeName) {
+                                                  return DropdownMenuItem<String>(
+                                                    child: Text(typeName),
+                                                    value: typeName,
+                                                  );
+                                                }).toList(),
+                                                onChanged: (value) {
+                                                  setState(() {
+                                                    selectedTypeName = value ?? 'CM';
+                                                  });
+                                                },
+                                                decoration: InputDecoration(
+                                                  filled: true,
+                                                  // fillColor: Color(0xA3B0AF1),
+                                                  hintText: "selection d'une Group",
+
+                                                  border: OutlineInputBorder(
+                                                    borderSide: BorderSide.none,gapPadding: 1,
+                                                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                                                  ),
+                                                ),
+
+                                              ),
+                                            ),
+                                            SizedBox(width: 10),
+                                            Container(
+                                              width: 147.5,
+                                              child: DropdownButtonFormField<double>(
+                                                decoration: InputDecoration(
+                                                  filled: true,
+                                                  border: OutlineInputBorder(
+                                                    borderSide: BorderSide.none,gapPadding: 1,
+                                                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                                                  ),
+                                                ),
+                                                value: selectedNbhValue,
+                                                items: nbhValues.map((nbhValue) {
+                                                  return DropdownMenuItem<double>(
+                                                    child: Text(nbhValue.toString()),
+                                                    value: nbhValue,
+                                                  );
+                                                }).toList(),
+                                                onChanged: (value) {
+                                                  setState(() {
+                                                    selectedNbhValue = value ?? 1.5;
+                                                  });
+                                                },
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(height: 10),
+                                        TextFormField(
+                                          controller: _date,
+                                          decoration: InputDecoration(
+                                              filled: true,
+                                              // fillColor: Color(0xA3B0AF1),
+                                              hintText: "Date",
+                                              border: OutlineInputBorder(
+                                                  borderSide: BorderSide.none,gapPadding: 1,
+                                                  borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                                          // readOnly: true,
+                                          onTap: () => selectDate(_date),
+                                        ),
+
+                                        SizedBox(height: 10),
+                                        TextField(
+                                          controller: _dayNumeroController,
+                                          keyboardType: TextInputType.text,
+                                          decoration: InputDecoration(
+                                              filled: true,
+                                              // fillColor: Colors.white,
+                                              hintText: "Nb de Jours",
+                                              border: OutlineInputBorder(
+                                                  borderSide: BorderSide.none,gapPadding: 1,
+                                                  borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                                        ),
+
+                                        SizedBox(height: 10),
+                                        DropdownButtonFormField<Group>(
+                                          value: selectedGroup,
+                                          items: grpList.map((grp) {
+                                            return DropdownMenuItem<Group>(
+                                              value: grp,
+                                              child: Text(grp.groupName ?? ''),
+                                            );
+                                          }).toList(),
+                                          onChanged: (value) async{
+                                            setState(() {
+                                              selectedGroup = value;
+                                            });
+                                          },
+                                          decoration: InputDecoration(
+                                            filled: true,
+                                            // fillColor: Color(0xA3B0AF1),
+                                            hintText: "selection d'une Group",
+
+                                            border: OutlineInputBorder(
+                                              borderSide: BorderSide.none,gapPadding: 1,
+                                              borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(height: 10),
+                                        DropdownButtonFormField<Matiere>(
+                                          value: selectedMat,
+                                          items: matiereList.map((matiere) {
+                                            return DropdownMenuItem<Matiere>(
+                                              value: matiere,
+                                              child: Text(matiere.name ?? ''),
+                                            );
+                                          }).toList(),
+                                          onChanged: (value)async {
+                                            setState(()  {
+                                              selectedMat = value;
+                                              selectedProfesseur = null; // Reset the selected professor
+                                              // professeurs = await fetchProfesseursByMatiere(selectedMat!.id); // Clear the professeurs list when a matière is selected
+                                              updateProfesseurList(); // Update the list of professeurs based on the selected matière
+                                            });
+                                          },
+                                          decoration: InputDecoration(
+                                            filled: true,
+                                            // fillColor: Color(0xA3B0AF1),
+                                            hintText: "selection d'une Matiere",
+                                            border: OutlineInputBorder(
+                                              borderSide: BorderSide.none,gapPadding: 1,
+                                              borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                                            ),
+                                          ),
+                                        ),
+
+                                        SizedBox(height: 10),
+                                        DropdownButtonFormField<Professeur>(
+                                          value: selectedProfesseur,
+                                          items: professeurs.map((professeur) {
+                                            return DropdownMenuItem<Professeur>(
+                                              value: professeur,
+                                              child: Text(professeur.nom ?? ''),
+                                            );
+                                          }).toList(),
+                                          onChanged: (value) {
+                                            setState(() {
+                                              selectedProfesseur = value;
+                                            });
+                                          },
+                                          decoration: InputDecoration(
+                                            filled: true,
+                                            // fillColor: Color(0xA3B0AF1),
+                                            hintText: "selection d'un  Professeur", // Update the hintText
+                                            border: OutlineInputBorder(
+                                              borderSide: BorderSide.none,gapPadding: 1,
+                                              borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                                            ),
+                                          ),
+                                        ),
+
+                                        SizedBox(height:20),
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+
+                                            DateTime date = DateFormat('yyyy/MM/dd HH:mm').parse(_date.text).toUtc();
+
+                                            // Check if you're updating an existing matiere or creating a new one
+                                            UpdateEmp(
+                                              emp.id!,
+                                              selectedTypeName,
+                                              selectedNbhValue,
+                                                date,int.parse(_dayNumeroController.text),selectedGroup!.id,selectedProfesseur!.id,selectedMat!.id
+                                            );
+
+                                            setState(() {
+                                              Navigator.pop(context);
+                                            });
+
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(content: Text('Le Type est mis à jour avec succès.')),
+                                            );
+                                          },
+                                          child: Text("Modifier"),
+
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Color(0xff0fb2ea),
+                                            foregroundColor: Colors.white,
+                                            elevation: 10,
+                                            minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
+                                            // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
+                                            //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                          ),
+                                        )
+
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+
+                            }
+
+
+                        );
                       },// Disable button functionality
 
                       child: Text('Modifier'),

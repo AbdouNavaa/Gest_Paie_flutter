@@ -91,7 +91,7 @@ class _GroupsState extends State<Groups> {
     return result.isNotEmpty ? result.substring(0, result.length - 2) : '';
   }
 
-  Future<void> selectTime(TextEditingController controller) async {
+  Future<void> selectDate(TextEditingController controller) async {
     DateTime? selectedDateTime = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -100,23 +100,10 @@ class _GroupsState extends State<Groups> {
     );
 
     if (selectedDateTime != null) {
-      TimeOfDay? selectedTime = await showTimePicker(
-        context: context,
-        initialTime: TimeOfDay.now(),
-      );
-
-      if (selectedTime != null) {
-        DateTime selectedDateTimeWithTime = DateTime(
-          selectedDateTime.year,
-          selectedDateTime.month,
-          selectedDateTime.day,
-        );
-
-        String formattedDateTime = DateFormat('yyyy/MM/dd ').format(selectedDateTimeWithTime);
-        setState(() {
-          controller.text = formattedDateTime;
-        });
-      }
+      String formattedDateTime = DateFormat('yyyy/MM/dd').format(selectedDateTime);
+      setState(() {
+        controller.text = formattedDateTime;
+      });
     }
   }
 
@@ -247,9 +234,9 @@ class _GroupsState extends State<Groups> {
                   // setState(() {
                   //   Implémentez la logique de filtrage ici
                   //   Par exemple, filtrez les Groupesseurs dont le name ou le préname contient la valeur saisie
-                    // filteredItems = Groupes!.where((sem) =>
-                    // grp..toString().toLowerCase().contains(value.toLowerCase()) ||
-                    //     grp.filliereName!.toLowerCase().contains(value.toLowerCase())).toList();
+                  // filteredItems = Groupes!.where((sem) =>
+                  // grp..toString().toLowerCase().contains(value.toLowerCase()) ||
+                  //     grp.filliereName!.toLowerCase().contains(value.toLowerCase())).toList();
                   // });
                 },
                 decoration: InputDecoration(
@@ -309,7 +296,7 @@ class _GroupsState extends State<Groups> {
                                 // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
                                 columns: [
                                   DataColumn(label: Text('G.Nom')),
-                                  DataColumn(label: Text('Seule?')),
+                                  DataColumn(label: Text('Filliere')),
                                   DataColumn(label: Text('Deb.Emp')),
                                   DataColumn(label: Text('Fin.Emp')),
                                   DataColumn(label: Text('Action')),
@@ -323,11 +310,19 @@ class _GroupsState extends State<Groups> {
 
                                             // onTap:() => _showcategDetails(context, categ)
                                           ),
-                                          DataCell(Container(child: Text('${grp.isOne}'))),
-                                          DataCell(Container(child: Text( '${DateFormat('dd/MM/yyyy ').format(
+                                          DataCell(Container(child:
+                                          Row(
+                                            children: [
+                                              Text(getFilIdFromName(grp.filliereId!),),
+                                              SizedBox(child: Text('-'),),
+                                              Text('${grp.semestre!.numero}',),
+                                            ],
+                                          ),
+                                          )),
+                                          DataCell(Container(child: Text( '${DateFormat('dd/M/yy ').format(
                                             DateTime.parse(grp.startEmploi.toString()).toLocal(),
                                           )}',))),
-                                          DataCell(Container(child: Text( '${DateFormat('dd/MM/yyyy ').format(
+                                          DataCell(Container(child: Text( '${DateFormat('dd/M/yy ').format(
                                             DateTime.parse(grp.finishEmploi.toString()).toLocal(),
                                           )}',))),
 
@@ -337,7 +332,7 @@ class _GroupsState extends State<Groups> {
                                                 Container(
                                                   width: 35,
                                                   child: TextButton(
-                                                    onPressed: () =>_showSemDetails(context, grp,grp.id),// Disable button functionality
+                                                    onPressed: () =>_showGroupDetails(context, grp,grp.id),// Disable button functionality
 
                                                     child: Icon(Icons.more_horiz, color: Colors.black54),
                                                     style: TextButton.styleFrom(
@@ -494,7 +489,7 @@ class _GroupsState extends State<Groups> {
                             borderSide: BorderSide.none,gapPadding: 1,
                             borderRadius: BorderRadius.all(Radius.circular(10.0)))),
                     // readOnly: true,
-                    onTap: () => selectTime(_date),
+                    onTap: () => selectDate(_date),
                   ),
 
 
@@ -567,7 +562,7 @@ class _GroupsState extends State<Groups> {
     );
   }
 
-  Future<void> _showSemDetails(BuildContext context, Group grp,String GrpId) {
+  Future<void> _showGroupDetails(BuildContext context, Group grp,String GrpId) {
     return showModalBottomSheet(
         context: context,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
@@ -740,16 +735,15 @@ class _GroupsState extends State<Groups> {
                   children: [
                     ElevatedButton(
                       onPressed: () async {
-                        List<filliere> types = await fetchfilliere();
-                        List<Matiere> matieres = await fetchMatiere();
-                        // _numero.text = grp..toString();
+
+                        setState(() {
+                          Navigator.pop(context);
+                        });
+
                         _name.text = grp.groupName;
                         _isOne.text = grp.isOne;
                         _sem.text = grp.semestre!.id;
                         _date.text = DateFormat('dd/MM/yyyy').format(DateTime.parse(grp.startEmploi.toString()));
-                        // selectedCateg = filteredItems![index].categorie;
-                        // _selectedGroup = filteredItems![index].semestre!;
-                        List<Semes?> selectedCategories = List.generate(semLis.length, (_) => null);
 
                         showModalBottomSheet(
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
@@ -764,11 +758,9 @@ class _GroupsState extends State<Groups> {
                                   height: 600,
                                   padding: const EdgeInsets.all(25.0),
                                   child: Column(
-                                    // mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Row(
                                         crossAxisAlignment: CrossAxisAlignment.start,
-                                        // mainAxisAlignment: MainAxisAlignment.start,
                                         children: [
                                           Text("Modifier un Group", style: TextStyle(fontSize: 20),),
                                           Spacer(),
@@ -858,7 +850,8 @@ class _GroupsState extends State<Groups> {
                                           });
                                         },
                                         decoration: InputDecoration(
-                                          filled: true,label: Text('Filliere'),labelStyle: TextStyle(fontSize: 20,color: Colors.black),
+                                          filled: true,
+                                          // labelText: 'Filliere',labelStyle: TextStyle(fontSize: 20,color: Colors.black),
                                           // fillColor: Color(0xA3B0AF1),
                                           hintText: "selection d'une Filliere",
                                           border: OutlineInputBorder(
@@ -881,7 +874,7 @@ class _GroupsState extends State<Groups> {
                                                 borderSide: BorderSide.none,gapPadding: 1,
                                                 borderRadius: BorderRadius.all(Radius.circular(10.0)))),
                                         // readOnly: true,
-                                        onTap: () => selectTime(_date),
+                                        onTap: () => selectDate(_date),
                                       ),
 
 
@@ -939,152 +932,6 @@ class _GroupsState extends State<Groups> {
                       style: ElevatedButton.styleFrom(
                         padding: EdgeInsets.only(left: 20,right: 20),
                         foregroundColor: Colors.lightGreen,
-                        backgroundColor: Colors.white,
-                        // side: BorderSide(color: Colors.black,),
-                        elevation: 3,
-                        // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
-                      ),
-
-                    ),
-                    ElevatedButton(
-                      onPressed:() {
-                        showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                  insetPadding: EdgeInsets.only(top: 80,),
-// backgroundColor: Color(0xB0AFAFA3),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.only(
-                                      topRight: Radius.circular(20),
-                                      topLeft: Radius.circular(20),
-                                    ),
-                                  ),
-                                  title: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    // mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Text("Ajouter une Matiere", style: TextStyle(fontSize: 20),),
-                                      Spacer(),
-                                      InkWell(
-                                        child: Icon(Icons.close),
-                                        onTap: (){
-                                          Navigator.pop(context);
-                                        },
-                                      )
-                                    ],
-                                  ),
-                                  content: Container(
-                                    width: MediaQuery.of(context).size.width,
-                                    height: 700,
-                                    // color: Color(0xA3B0AF1),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.max,
-                                      // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        SizedBox(height: 16),
-                                        Text(
-                                          "Selection d'une Categorie:",
-                                          style: TextStyle(fontWeight: FontWeight.bold),
-                                        ),
-                                        SizedBox(height: 20),
-                                        DropdownButtonFormField<Category>(
-                                          value: selectedCategory,
-                                          items: categories.map((category) {
-                                            return DropdownMenuItem<Category>(
-                                              value: category,
-                                              child: Text(category.name ?? ''),
-                                            );
-                                          }).toList(),
-                                          onChanged: (value) async{
-                                            setState(() {
-                                              selectedCategory = value;
-                                              selectedMat = null; // Reset the selected matière
-                                              // matieres = []; // Clear the matieres list when a category is selected
-                                              updateMatiereList(); // Update the list of matières based on the selected category
-                                            });
-                                          },
-                                          decoration: InputDecoration(
-                                            filled: true,
-                                            // fillColor: Colors.white,
-                                            // fillColor: Color(0xA3B0AF1),
-                                            hintText: "....",hintStyle: TextStyle(fontSize: 20),
-                                            border: OutlineInputBorder(
-                                              borderSide: BorderSide.none,gapPadding: 1,
-                                              borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(height: 20),
-                                        Text(
-                                          "Selection d'une Matiere",
-                                          style: TextStyle(fontWeight: FontWeight.bold),
-                                        ),
-                                        SizedBox(height: 20),
-                                        DropdownButtonFormField<Matiere>(
-                                          value: selectedMat,
-                                          items: matiereList.map((matiere) {
-                                            return DropdownMenuItem<Matiere>(
-                                              value: matiere,
-                                              child: Text(matiere.name ?? ''),
-                                            );
-                                          }).toList(),
-                                          onChanged: (value)async {
-                                            setState(()  {
-                                              selectedMat = value;
-                                              // professeurs = await fetchProfesseursByMatiere(selectedMat!.id); // Clear the professeurs list when a matière is selected
-                                            });
-                                          },
-                                          decoration: InputDecoration(
-                                            filled: true,
-                                            hintText: "....",hintStyle: TextStyle(fontSize: 20),
-                                            // fillColor: Color(0xA3B0AF1),
-                                            border: OutlineInputBorder(
-                                              borderSide: BorderSide.none,gapPadding: 1,
-                                              borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                                            ),
-                                          ),
-                                        ),
-
-                                        SizedBox(height: 20),
-
-                                        ElevatedButton(
-                                          onPressed: () async {
-                                            Navigator.of(context).pop();
-                                            SharedPreferences prefs = await SharedPreferences.getInstance();
-                                            String token = prefs.getString("token")!;
-
-
-                                            AddSemMat(grp.id, selectedMat!.id!);
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(content: Text('Matiere has been added to professor successfully.')),
-                                            );
-
-                                            setState(() {
-                                              Navigator.pop(context);
-                                            });
-                                          },
-                                          child: Text("Ajouter"),
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Color(0xff0fb2ea),
-                                            foregroundColor: Colors.white,
-                                            elevation: 10,
-                                            minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
-                                            // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
-                                            //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
-                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                  )
-                              );});
-                      },
-
-                      child: Text('Ajout Mat'),
-                      style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.only(left: 20,right: 20),
-                        foregroundColor: Colors.blue,
                         backgroundColor: Colors.white,
                         // side: BorderSide(color: Colors.black,),
                         elevation: 3,
@@ -1183,34 +1030,6 @@ class _GroupsState extends State<Groups> {
       print("SomeThing Went Wrong");
     }
   }
-  Future<void> AddSemMat( id,String matiereId) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString("token")!;
-
-    final url = 'http://192.168.43.73:5000/semestre/$id/$matiereId';
-    final headers = {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
-    };
-    final body = json.encode({
-      'element': [matiereId],
-    });
-
-    final response = await http.post(Uri.parse(url), headers: headers, body: body);
-
-    // print(response.statusCode);
-    if (response.statusCode == 200) {
-      final responseData = json.decode(response.body);
-      // You can handle the response data here if needed
-      print(responseData);
-      setState(() {
-        Navigator.pop(context);
-      });
-    } else {
-      // Handle errors
-      print('Failed to add matiere to professeus. Status Code: ${response.statusCode}');
-    }
-  }
 
   Future<void> UpdateGroup (id,String groupName,String isOne,String semestre,DateTime? date) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -1270,8 +1089,8 @@ class Group {
     required this.id,
     required this.groupName,
     required this.isOne,
-     this.startEmploi,
-     this.semestre,
+    this.startEmploi,
+    this.semestre,
     this.finishEmploi,
     this.filliereId,
   });

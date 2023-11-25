@@ -56,6 +56,28 @@ class _SemestresState extends State<Semestres> {
     }
 
   }
+  void DeleteMatSem(id,String matiereId) async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString("token")!;
+    print(token);
+    var response = await http.delete(Uri.parse('http://192.168.43.73:5000/semestre/$id/$matiereId'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      // body: jsonEncode(regBody)
+    );
+
+    var jsonResponse = jsonDecode(response.body);
+    print(response.statusCode);
+    if(response.statusCode ==200){
+      fetchSemestre();
+      // setState(() {
+        Navigator.pop(context);
+      // });
+    }
+
+  }
   String getMatIdFromName(String id) {
     // Assuming you have a list of professeurs named 'professeursList'
     final professeur = matiereList.firstWhere((prof) => '${prof.id}' == id, orElse: () =>Matiere(id: '', name: '', description: '', categorieId: '', categorie_name: '', code: '',));
@@ -75,7 +97,7 @@ class _SemestresState extends State<Semestres> {
     return result.isNotEmpty ? result.substring(0, result.length - 2) : '';
   }
 
-  Future<void> selectTime(TextEditingController controller) async {
+  Future<void> selectDate(TextEditingController controller) async {
     DateTime? selectedDateTime = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -84,26 +106,12 @@ class _SemestresState extends State<Semestres> {
     );
 
     if (selectedDateTime != null) {
-      TimeOfDay? selectedTime = await showTimePicker(
-        context: context,
-        initialTime: TimeOfDay.now(),
-      );
-
-      if (selectedTime != null) {
-        DateTime selectedDateTimeWithTime = DateTime(
-          selectedDateTime.year,
-          selectedDateTime.month,
-          selectedDateTime.day,
-        );
-
-        String formattedDateTime = DateFormat('yyyy/MM/dd ').format(selectedDateTimeWithTime);
-        setState(() {
-          controller.text = formattedDateTime;
-        });
-      }
+      String formattedDateTime = DateFormat('yyyy/MM/dd').format(selectedDateTime);
+      setState(() {
+        controller.text = formattedDateTime;
+      });
     }
   }
-
 
   @override
   void initState() {
@@ -296,65 +304,18 @@ class _SemestresState extends State<Semestres> {
                                           )}',))),
 
                                           DataCell(
-                                            Row(
-                                              children: [
-                                                Container(
-                                                  width: 35,
-                                                  child: TextButton(
-                                                    onPressed: () =>_showSemDetails(context, sem),// Disable button functionality
+                                            Container(
+                                              width: 35,
+                                              child: TextButton(
+                                                onPressed: () =>_showSemDetails(context, sem),// Disable button functionality
 
-                                                    child: Icon(Icons.more_horiz, color: Colors.black54),
-                                                    style: TextButton.styleFrom(
-                                                      primary: Colors.white,
-                                                      elevation: 0,
-                                                      // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
-                                                    ),
-                                                  ),
+                                                child: Icon(Icons.more_horiz, color: Colors.black54),
+                                                style: TextButton.styleFrom(
+                                                  primary: Colors.white,
+                                                  elevation: 0,
+                                                  // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
                                                 ),
-
-                                                Container(
-                                                  width: 35,
-                                                  child: TextButton(
-                                                    onPressed: () {
-                                                      showDialog(
-                                                        context: context,
-                                                        builder: (BuildContext context) {
-                                                          return AlertDialog(
-                                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
-                                                            title: Text("Confirmer la suppression"),
-                                                            content: Text(
-                                                                "Êtes-vous sûr de vouloir supprimer cet élément ?"),
-                                                            actions: <Widget>[
-                                                              TextButton(
-                                                                child: Text("ANNULER"),
-                                                                onPressed: () {
-                                                                  Navigator.of(context).pop();
-                                                                },
-                                                              ),
-                                                              TextButton(
-                                                                child: Text(
-                                                                  "SUPPRIMER",
-                                                                  // style: TextStyle(color: Colors.red),
-                                                                ),
-                                                                onPressed: () {
-                                                                  Navigator.of(context).pop();
-                                                                  DeleteSemestres(sem.id);
-                                                                  ScaffoldMessenger.of(context).showSnackBar(
-                                                                    SnackBar(content: Text('Le Semestre a été Supprimer avec succès.')),
-                                                                  );
-                                                                },
-                                                              ),
-                                                            ],
-                                                          );
-                                                        },
-                                                      );
-                                                    }, // Disable button functionality
-                                                    child: Icon(Icons.delete_outline, color: Colors.black,),
-
-                                                  ),
-                                                ),
-
-                                              ],
+                                              ),
                                             ),
                                           ),
                                           // DataCell(Container(width: 105,
@@ -448,7 +409,7 @@ class _SemestresState extends State<Semestres> {
                             borderSide: BorderSide.none,gapPadding: 1,
                             borderRadius: BorderRadius.all(Radius.circular(10.0)))),
                     // readOnly: true,
-                    onTap: () => selectTime(_date),
+                    onTap: () => selectDate(_date),
                   ),
 
 
@@ -670,12 +631,14 @@ class _SemestresState extends State<Semestres> {
                       ),),
 
                     SizedBox(width: 10,),
-                    Text(
-                      '${getMatIdFromNames(sem.elements!.join(", ")) }',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
+                    InkWell(
+                      child: Text(
+                        '${getMatIdFromNames(sem.elements!.join(", ")) }',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                        ),
                       ),
                     ),
 
@@ -687,6 +650,12 @@ class _SemestresState extends State<Semestres> {
                   children: [
                     ElevatedButton(
                       onPressed: () async {
+                        setState(() {
+                          // fetchfilliere();
+                          Navigator.pop(context);
+
+                        });
+
                         List<filliere> types = await fetchfilliere();
                         List<Matiere> matieres = await fetchMatiere();
                         _numero.text = sem.numero.toString();
@@ -726,17 +695,7 @@ class _SemestresState extends State<Semestres> {
                                         ],
                                       ),
                                       SizedBox(height: 40),
-                                      TextField(
-                                        controller: _numero,
-                                        keyboardType: TextInputType.text,
-                                        decoration: InputDecoration(
-                                            filled: true,
-                                            // fillColor: Colors.white,
-                                            border: OutlineInputBorder(
-                                                borderSide: BorderSide.none,gapPadding: 1,
-                                                borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                                      ),
-                                      SizedBox(height: 10),
+                                      // SizedBox(height: 10),
                                       DropdownButtonFormField<filliere>(
                                         value: selectedFil,
                                         items: filList.map((fil) {
@@ -802,7 +761,7 @@ class _SemestresState extends State<Semestres> {
                                                 borderSide: BorderSide.none,gapPadding: 1,
                                                 borderRadius: BorderRadius.all(Radius.circular(10.0)))),
                                         // readOnly: true,
-                                        onTap: () => selectTime(_date),
+                                        onTap: () => selectDate(_date),
                                       ),
 
 
@@ -811,7 +770,7 @@ class _SemestresState extends State<Semestres> {
 
                                       ElevatedButton(
                                         onPressed: () {
-                                          Navigator.of(context).pop();
+                                          // Navigator.of(context).pop();
 
                                           DateTime date = DateFormat('yyyy/MM/dd').parse(_date.text).toUtc();
 
@@ -824,6 +783,9 @@ class _SemestresState extends State<Semestres> {
                                               selectedMat!.id!,
                                           );
 
+                                          setState(() {
+                                            Navigator.pop(context);
+                                          });
 
                                           ScaffoldMessenger.of(context).showSnackBar(
                                             SnackBar(content: Text('Le Type est mis à jour avec succès.')),
@@ -1106,7 +1068,7 @@ class _SemestresState extends State<Semestres> {
     });
 
     if (date != null) {
-      body['date'] = date.toIso8601String();
+      body['start'] = date?.toIso8601String();
     }
 
     try {
@@ -1122,6 +1084,9 @@ class _SemestresState extends State<Semestres> {
         final responseData = json.decode(response.body);
         // print("Course ID: ${responseData['cours']['_id']}");
         // You can handle the response data as needed
+        setState(() {
+          Navigator.pop(context);
+        });
       } else {
         // Course creation failed
         print("Failed to update. Status code: ${response.statusCode}");
