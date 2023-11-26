@@ -40,8 +40,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   List<User>? useres;
   List<Professeur>? profs;
-  List<Matiere>? mats;
-  List<Category>? categs;
+  List<Group>? groups;
+  List<emploi>? emplois;
   int coursNum = 0;
   int coursPN = 0;
 @override
@@ -55,16 +55,16 @@ class _HomeScreenState extends State<HomeScreen> {
     }).catchError((error) {
       print('Erreur: $error');
     });
-    fetchMatiere().then((data) {
+    fetchGroup().then((data) {
       setState(() {
-        mats = data; // Assigner la liste renvoyée par Matiereesseur à items
+        groups = data; // Assigner la liste renvoyée par Matiereesseur à items
       });
     }).catchError((error) {
       print('Erreur: $error');
     });
-    fetchCategory().then((data) {
+    fetchemploi().then((data) {
       setState(() {
-        categs = data; // Assigner la liste renvoyée par Matiereesseur à items
+        emplois = data; // Assigner la liste renvoyée par Matiereesseur à items
       });
     }).catchError((error) {
       print('Erreur: $error');
@@ -339,7 +339,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                  item: "Categories",
                                height: 150,
                                width: 150,
-                               duration: "${categs?.length} Categories",
+                               duration: "${emplois?.length} Categories",
                                onPessed: (){
                                  Navigator.push(
                                      context, MaterialPageRoute(builder: (context) => Categories()));
@@ -351,7 +351,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                  item: "Matieres",
                                height: 150,
                                width: 150,
-                               duration: "${mats?.length} Matieres",
+                               duration: "${groups?.length} Matieres",
                                onPessed: (){
                                  Navigator.push(
                                      context, MaterialPageRoute(builder: (context) => Matieres()));
@@ -560,9 +560,9 @@ class _HomeScreenState extends State<HomeScreen> {
                            Row(
                              children: [
                                _customCard(
-                                 imageUrl: "categ2.png",
+                                 imageUrl: "emp4.png",
                                  item: "Emploi",
-                                 duration: "${categs?.length!} Emploi",
+                                 duration: "${emplois?.length!} Emploi",
                                  height: 135,
                                  width: 150,
                                  onPessed: (){
@@ -572,9 +572,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                  },
                                ),
                                _customCard(
-                                 imageUrl: "coding3.png",
+                                 imageUrl: "grps4.jpg",
                                  item: "Groups",
-                                 duration: "${mats?.length} Groups",
+                                 duration: "${groups?.length} Groups",
                                  height: 135,
                                  width: 150,
                                  onPessed: (){
@@ -653,7 +653,7 @@ class _HomeScreenState extends State<HomeScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
-                Image.asset("assets/" + imageUrl,width: 40,),
+                Image.asset("assets/" + imageUrl,width: 60,fit: BoxFit.cover),
                 Align(
                   alignment: Alignment.bottomLeft,
                   child: Column(
