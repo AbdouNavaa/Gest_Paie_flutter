@@ -231,13 +231,18 @@ class _GroupsState extends State<Groups> {
                 onChanged: (value) async {
                   List<Group> Groupes = await fetchGroup();
 
-                  // setState(() {
-                  //   Implémentez la logique de filtrage ici
-                  //   Par exemple, filtrez les Groupesseurs dont le name ou le préname contient la valeur saisie
-                  // filteredItems = Groupes!.where((sem) =>
-                  // grp..toString().toLowerCase().contains(value.toLowerCase()) ||
-                  //     grp.filliereName!.toLowerCase().contains(value.toLowerCase())).toList();
-                  // });
+                  setState(() {
+                    // Implémentez la logique de filtrage ici
+                    // Par exemple, filtrez les emploiesseurs dont le name ou le préname contient la valeur saisie
+                    filteredItems = Groupes!.where((grp) =>
+                        (grp.groupName!).toLowerCase().contains(value.toLowerCase()) ||
+                            getFilIdFromName(grp.filliereId!).toLowerCase().contains(value.toLowerCase()) ||
+                        (grp.isOne!).toLowerCase().contains(value.toLowerCase()) ||
+                        (grp.startEmploi!.toString()).toLowerCase().contains(value.toLowerCase()) ||
+                        (grp.finishEmploi!.toString()).toLowerCase().contains(value.toLowerCase())
+                    ).toList();
+                  });
+
                 },
                 decoration: InputDecoration(
                   prefixIcon: Icon(Icons.search, color: Colors.grey),

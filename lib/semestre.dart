@@ -221,6 +221,8 @@ class _SemestresState extends State<Semestres> {
                     // Par exemple, filtrez les Semestreesseurs dont le name ou le préname contient la valeur saisie
                     filteredItems = Semestress!.where((sem) =>
                     sem.numero!.toString().toLowerCase().contains(value.toLowerCase()) ||
+                        (sem.start!.toString()).toLowerCase().contains(value.toLowerCase()) ||
+                        (sem.finish!.toString()).toLowerCase().contains(value.toLowerCase()) ||
                         sem.filliereName!.toLowerCase().contains(value.toLowerCase())).toList();
                   });
                 },
@@ -280,7 +282,7 @@ class _SemestresState extends State<Semestres> {
                                 ),
                                 // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
                                 columns: [
-                                  DataColumn(label: Text('Numero')),
+                                  DataColumn(label: Text('Nom')),
                                   DataColumn(label: Text('Fillieres')),
                                   DataColumn(label: Text('Deb')),
                                   DataColumn(label: Text('Fin')),
@@ -291,7 +293,7 @@ class _SemestresState extends State<Semestres> {
                                   for (var sem in filteredItems!)
                                     DataRow(
                                         cells: [
-                                          DataCell(Container(child: Text('${sem.numero}')),
+                                          DataCell(Container(child: Text('S${sem.numero}')),
 
                                             // onTap:() => _showcategDetails(context, categ)
                                           ),

@@ -441,37 +441,37 @@ class _UpdateCoursDialogState extends State<UpdateCoursDialog> {
 
 
 
-Future<List<Professeur>> fetchProfs() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  String token = prefs.getString("token")!;
-  print(token);
-
-  final response = await http.get(
-    Uri.parse('http://192.168.43.73:5000/professeur/'),
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
-    },
-  );
-
-  print(response.statusCode);
-  // print(response.body);
-
-  if (response.statusCode == 200) {
-    Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-    List<dynamic> professeursData = jsonResponse['professeurs'];
-
-    // print(matieresData);
-    List<Professeur> profs = professeursData.map((item) {
-      return Professeur.fromJson(item);
-    }).toList();
-
-    print("Prof List: $profs");
-    return profs;
-  } else {
-    throw Exception('Failed to load Matiere');
-  }
-}
+// Future<List<Professeur>> fetchProfs() async {
+//   SharedPreferences prefs = await SharedPreferences.getInstance();
+//   String token = prefs.getString("token")!;
+//   print(token);
+//
+//   final response = await http.get(
+//     Uri.parse('http://192.168.43.73:5000/professeur/'),
+//     headers: {
+//       'Content-Type': 'application/json',
+//       'Authorization': 'Bearer $token',
+//     },
+//   );
+//
+//   print(response.statusCode);
+//   // print(response.body);
+//
+//   if (response.statusCode == 200) {
+//     Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+//     List<dynamic> professeursData = jsonResponse['professeurs'];
+//
+//     // print(matieresData);
+//     List<Professeur> profs = professeursData.map((item) {
+//       return Professeur.fromJson(item);
+//     }).toList();
+//
+//     print("Prof List: $profs");
+//     return profs;
+//   } else {
+//     throw Exception('Failed to load Matiere');
+//   }
+// }
 Future<List<Professeur>> fetchProfesseursByMatiere(String matiereId) async {
   String apiUrl = 'http://192.168.43.73:5000/matiere/$matiereId/professeur';
 

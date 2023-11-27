@@ -10,15 +10,15 @@ import 'constants.dart';
 
 class CoursesPage extends StatefulWidget {
   final List<dynamic> courses;
-  final int coursNum;
-  final num heuresTV;
+  // final int coursNum;
+  // final num heuresTV;
   final String role;
-  final num sommeTV;
+  // final num sommeTV;
   DateTime? dateDeb;
   DateTime? dateFin;
 // Calculate the sums for filtered courses
 
-  CoursesPage({required this.courses, required this.coursNum, required this.heuresTV, required this.sommeTV, required this.role}) {}
+  CoursesPage({required this.courses, required this.role}) {}
 
 
 
@@ -31,6 +31,16 @@ class _CoursesPageState extends State<CoursesPage> {
 // Calculate totalType based on applied date filters and pagination
   double somme = 0;
   int coursesNum = 0;
+  List<Professeur> professeurList = [];
+
+  String getProfesseurIdFromName(String id) {
+    // Assuming you have a list of professeurs named 'professeursList'
+    final professeur = professeurList.firstWhere((prof) => '${prof.id}' == id, orElse: () => Professeur(id: '', nom: '', prenom: '', mobile: 0, email: '', matieres: []));
+    print(professeur.nom);
+    return professeur.nom; // Return the ID if found, otherwise an empty string
+
+  }
+
   void calculateTotalType() {
     if (widget.dateDeb != null && widget.dateFin != null) {
       // If date filters are applied
@@ -82,12 +92,21 @@ class _CoursesPageState extends State<CoursesPage> {
   TextEditingController _selectedProf = TextEditingController();
   TextEditingController _selectedMatiere = TextEditingController();
   TextEditingController _date = TextEditingController();
-  TextEditingController _isSigne = TextEditingController();
+  TextEditingController _isSigned = TextEditingController();
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+
+    fetchProfs().then((data) {
+      setState(() {
+        professeurList = data; // Assigner la liste renvoyée par emploiesseur à items
+      });
+    }).catchError((error) {
+      print('Erreur: $error');
+    });
+
   }
 
   void DeleteCours(id) async{
@@ -126,7 +145,7 @@ class _CoursesPageState extends State<CoursesPage> {
     // Apply your filtering criteria here
     DateTime courseDate = DateTime.parse(course['date'].toString());
     bool isMatch = (course['matiere'].toLowerCase().contains(searchQuery.toLowerCase()) || course['professeur'].toLowerCase().contains(searchQuery.toLowerCase())
-        || course['isSigne'].toString().contains(searchQuery.toLowerCase()));
+        || course['isSigned'].toString().contains(searchQuery.toLowerCase()));
     // || course['isPaid'].toString().contains(searchQuery.toLowerCase()));
 
     // Check if the course date falls within the selected date range
@@ -277,28 +296,28 @@ class _CoursesPageState extends State<CoursesPage> {
                     // color: Colors.black87,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     child: InkWell(
-                      child: Column(mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              (widget.dateDeb != null && widget.dateFin != null)?
-                              Text('Eq. CM: ${totalType}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),):
-                              Text('Eq. CM: ${widget.heuresTV}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),),
-
-                              (widget.dateDeb != null && widget.dateFin != null)?
-                              Text('Montant Total : ${somme}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),):
-                              Text('Montant Total : ${widget.sommeTV}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400)),
-                            ],
-                          ),
-                          (widget.dateDeb != null && widget.dateFin != null)?
-                          Text('Nb de Cours: ${coursesNum}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),):
-                          Center(child: Text('Nb de Cours: ${widget.coursNum}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400))),
-
-                        ],
-
-
-                      ),
+                      // child: Column(mainAxisAlignment: MainAxisAlignment.center,
+                      //   children: [
+                      //     // Row(
+                      //     //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      //     //   children: [
+                      //     //     (widget.dateDeb != null && widget.dateFin != null)?
+                      //     //     Text('Eq. CM: ${totalType}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),):
+                      //     //     Text('Eq. CM: ${widget.heuresTV}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),),
+                      //     //
+                      //     //     (widget.dateDeb != null && widget.dateFin != null)?
+                      //     //     Text('Montant Total : ${somme}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),):
+                      //     //     Text('Montant Total : ${widget.sommeTV}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400)),
+                      //     //   ],
+                      //     // ),
+                      //     (widget.dateDeb != null && widget.dateFin != null)?
+                      //     Text('Nb de Cours: ${coursesNum}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),):
+                      //     Center(child: Text('Nb de Cours: ${widget.coursNum}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400))),
+                      //
+                      //   ],
+                      //
+                      //
+                      // ),
                     ),
                   ),
                 ),
@@ -390,7 +409,7 @@ class _CoursesPageState extends State<CoursesPage> {
 
                               cells: [
                                 // DataCell(Text('${index + 1}',style: TextStyle(fontSize: 18),)), // Numbering cell
-                                DataCell(Container(width: 45,child: Text('${widget.courses[index]['professeur']}',style: TextStyle(
+                                DataCell(Container(width: 45,child: Text('${getProfesseurIdFromName(widget.courses[index]['professeur_id'])}',style: TextStyle(
                                   color: Colors.black,
                                 ),)),),
                                 DataCell(Container(width: 45,child: Text('${widget.courses[index]['matiere']}',style: TextStyle(
@@ -421,13 +440,13 @@ class _CoursesPageState extends State<CoursesPage> {
                                   ),),
                                 ),
                                 DataCell(
-                                  Icon( widget.courses[index]['isSigne']?  Icons.check:Icons.close_outlined,
-                                      color: widget.courses[index]['isSigne']? Colors.green: Colors.red,size: 20,),
+                                  Icon( widget.courses[index]['isSigned'] =="OUI"?  Icons.check:Icons.close_outlined,
+                                      color: widget.courses[index]['isSigned']=="OUI"? Colors.green: Colors.red,size: 20,),
                                 ),
                                 if (widget.role == "admin")
                                 DataCell(
-                                  Icon( widget.courses[index]['isPaid']? Icons.check:Icons.close_outlined,
-                                      color: widget.courses[index]['isPaid']? Colors.green: Colors.red, size: 20),
+                                  Icon( widget.courses[index]['isPaid']=="OUI"? Icons.check:Icons.close_outlined,
+                                      color: widget.courses[index]['isPaid']=="OUI"? Colors.green: Colors.red, size: 20),
                                 ),
                                 DataCell(
                                   Row(
@@ -654,7 +673,7 @@ class _CoursesPageState extends State<CoursesPage> {
 
                       SizedBox(width: 10,),
                       Text('${DateFormat(' HH:mm').format(DateTime.parse(course['date'].toString()).toLocal().add(Duration(minutes: (
-                          ( course['CM']+course['TP']+course['TD'] )* 60).toInt())))}',
+                          ( course['TH'])* 60).toInt())))}',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w400,
@@ -792,7 +811,7 @@ class _CoursesPageState extends State<CoursesPage> {
                       ),),
 
                     SizedBox(width: 10,),
-                    Text('${course['prix']* course['TH']}',
+                    Text('${course['matiere_prix']* course['TH']}',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,
@@ -815,7 +834,7 @@ class _CoursesPageState extends State<CoursesPage> {
 
                     SizedBox(width: 10,),
                     Text(
-                      course['isSigne']?
+                      course['isSigned'] == "OUI"?
                       'Oui':'Non',
                       style: TextStyle(
                         fontSize: 20,
@@ -842,7 +861,7 @@ class _CoursesPageState extends State<CoursesPage> {
 
                           SizedBox(width: 10,),
                           Text(
-                            course['isPaid']?
+                            course['isPaid'] =="OUI"?
                             'Oui':'Non',
                             style: TextStyle(
                               fontSize: 20,
@@ -972,7 +991,7 @@ class Course {
   final num? TD;
   final num? prix;
   final num? somme;
-  final bool isSigne;
+  final bool isSigned;
   final bool isPaid;
   final DateTime? updatedAt;
 
@@ -989,7 +1008,7 @@ class Course {
     this.TD,
     this.TP,
     this.prix,
-    required this.isSigne,
+    required this.isSigned,
     required this.isPaid,
     this.updatedAt,
   });
@@ -1007,7 +1026,7 @@ class Course {
       TD: json['TD'],
       somme: json['somme'],
       TP: json['TP'],
-      isSigne: json['isSigne'],
+      isSigned: json['isSigned'],
       isPaid: json['isPaid'],
       updatedAt: DateTime.parse(json['updatedAt']),
     );

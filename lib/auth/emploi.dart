@@ -118,43 +118,21 @@ class _EmploiState extends State<Emploi> {
 
   final TextEditingController _dayNumeroController = TextEditingController();
 
-  // List<Map<String, dynamic>> typesList = [{'name': 'CM', 'nbh': 1.5}];
+  List<String> days = [
+    "Dimanch",
+    "Lundi",
+    "Mardi",
+    "Mercredi",
+    "Jeudi",
+    "Vendredi",
+    "Samedi",
+  ];
   Group? selectedGroup;
   Matiere? selectedMat;
   Professeur? selectedProfesseur;
   List<Professeur> professeurs = [];
   List<Matiere> matieres = [];
   DateTime? selectedDateTime;
-  Future<void> selectTime(TextEditingController controller) async {
-    DateTime? selectedDateTime = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2030),
-    );
-
-    if (selectedDateTime != null) {
-      TimeOfDay? selectedTime = await showTimePicker(
-        context: context,
-        initialTime: TimeOfDay.now(),
-      );
-
-      if (selectedTime != null) {
-        DateTime selectedDateTimeWithTime = DateTime(
-          selectedDateTime.year,
-          selectedDateTime.month,
-          selectedDateTime.day,
-          selectedTime.hour,
-          selectedTime.minute,
-        );
-
-        String formattedDateTime = DateFormat('yyyy/MM/dd HH:mm').format(selectedDateTimeWithTime);
-        setState(() {
-          controller.text = formattedDateTime;
-        });
-      }
-    }
-  }
 
 
   Future<void> updateProfesseurList() async {
@@ -196,7 +174,7 @@ class _EmploiState extends State<Emploi> {
           selectedTime.minute,
         );
 
-        String formattedDateTime = DateFormat('yyyy/MM/dd HH:mm').format(selectedDateTimeWithTime);
+        String formattedDateTime = DateFormat('HH:mm').format(selectedDateTimeWithTime);
         setState(() {
           controller.text = formattedDateTime;
         });
@@ -212,7 +190,7 @@ class _EmploiState extends State<Emploi> {
 
 // Autres parties de votre classe
 
-  Future<void> _addEmploi(String TN,double TH,DateTime? date,int days,String GpId,String ProfId,String MatId) async {
+  Future<void> _addEmploi(String TN,double TH,String date,int days,String GpId,String ProfId,String MatId) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token")!;
     print(token);
@@ -224,7 +202,7 @@ class _EmploiState extends State<Emploi> {
       "types": [
         {"name": TN, "nbh": TH}
       ],
-      "startTime": date!.toIso8601String(),
+      "startTime": date,
       "dayNumero": days,
       "group": GpId,
       "professeur": ProfId,
@@ -256,7 +234,7 @@ class _EmploiState extends State<Emploi> {
       );
     }
   }
-  Future<void> UpdateEmp (id,String TN,double TH,DateTime? date,int days,String GpId,String ProfId,String MatId) async {
+  Future<void> UpdateEmp (id,String TN,double TH,String date,int days,String GpId,String ProfId,String MatId) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token")!;
     final url = 'http://192.168.43.73:5000/emploi/'  + '/$id';
@@ -269,7 +247,7 @@ class _EmploiState extends State<Emploi> {
         {"name": TN, "nbh": TH}
       ],
       // "startTime": date!.toIso8601String(),
-      'startTime': date?.toIso8601String(),
+      'startTime': date,
       "dayNumero": days,
       "group": GpId,
       "professeur": ProfId,
@@ -277,7 +255,7 @@ class _EmploiState extends State<Emploi> {
     };
 
     if (date != null) {
-      body['startTime'] = date.toIso8601String();
+      body['startTime'] = date;
     }
 
     try {
@@ -412,7 +390,10 @@ class _EmploiState extends State<Emploi> {
                     // Par exemple, filtrez les emploiesseurs dont le name ou le préname contient la valeur saisie
                     filteredItems = Emplois!.where((emploi) =>
                     getProfesseurIdFromName(emploi.professor!).toLowerCase().contains(value.toLowerCase()) ||
-                        getMatIdFromName(emploi.mat)!.toLowerCase().contains(value.toLowerCase())).toList();
+                        getMatIdFromName(emploi.mat)!.toLowerCase().contains(value.toLowerCase()) ||
+                        (days[emploi.dayNumero]).toLowerCase().contains(value.toLowerCase()) ||
+                        (emploi.startTime!).toLowerCase().contains(value.toLowerCase())
+                    ).toList();
                   });
                 },
                 decoration: InputDecoration(
@@ -471,9 +452,10 @@ class _EmploiState extends State<Emploi> {
                                 ),
                                 // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
                                 columns: [
-                                  DataColumn(label: Text('Code')),
-                                  DataColumn(label: Text('Nom')),
-                                  DataColumn(label: Text('Taux')),
+                                  DataColumn(label: Text('Prof')),
+                                  DataColumn(label: Text('Mtiere')),
+                                  DataColumn(label: Text('Jour')),
+                                  DataColumn(label: Text('Deb')),
                                   DataColumn(label: Text('Action')),
                                   // DataColumn(label: Text('Descrition')),
                                 ],
@@ -489,7 +471,10 @@ class _EmploiState extends State<Emploi> {
 
                                             // onTap:() => _showcategDetails(context, categ)
                                           ),
-                                          DataCell(Text('${getGroupIdFromName(emp.group)}',style: TextStyle(
+                                          DataCell(Text(days[emp.dayNumero],style: TextStyle(
+                                            color: Colors.black,
+                                          ),),),
+                                          DataCell(Text(emp.startTime!,style: TextStyle(
                                             color: Colors.black,
                                           ),),),
                                           DataCell(
@@ -751,8 +736,8 @@ class _EmploiState extends State<Emploi> {
                           Navigator.pop(context);
                         });
                         // fetchemploi();
-                        DateTime date = DateFormat('yyyy/MM/dd HH:mm').parse(_date.text).toUtc();
-                        _addEmploi(selectedTypeName,selectedNbhValue,date,int.parse(_numero.text),selectedGroup!.id,selectedProfesseur!.id,selectedMat!.id);
+                        // DateTime date = DateFormat('yyyy/MM/dd HH:mm').parse(_date.text).toUtc();
+                        _addEmploi(selectedTypeName,selectedNbhValue,_date.text,int.parse(_numero.text),selectedGroup!.id,selectedProfesseur!.id,selectedMat!.id);
                         // Addemploi(_name.text, _desc.text);
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('L\'emploi a été ajouter avec succès.')),
@@ -844,7 +829,7 @@ class _EmploiState extends State<Emploi> {
                 SizedBox(height: 25),
                 Row(
                   children: [
-                    Text('Numero:',
+                    Text('Jour:',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,
@@ -853,32 +838,7 @@ class _EmploiState extends State<Emploi> {
                       ),),
 
                     SizedBox(width: 10,),
-                    Text('${emp.dayNumero}',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                  ],
-                ),
-                SizedBox(height: 25),
-                Row(
-                  children: [
-                    Text('Date:',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                    SizedBox(width: 10,),
-                    Text(
-                        '${DateFormat('dd/MM/yyyy ').format(
-                      DateTime.parse(emp.startTime.toString()).toLocal(),
-                    )}',
+                    Text(days[emp.dayNumero],
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,
@@ -900,10 +860,7 @@ class _EmploiState extends State<Emploi> {
                       ),),
 
                     SizedBox(width: 10,),
-                    Text(
-                        '${DateFormat('HH:mm ').format(
-                      DateTime.parse(emp.startTime.toString()).toLocal(),
-                    )}',
+                    Text(emp.startTime!,
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,
@@ -925,8 +882,7 @@ class _EmploiState extends State<Emploi> {
                       ),),
 
                     SizedBox(width: 10,),
-                    Text('${DateFormat(' HH:mm').format(DateTime.parse(emp.startTime.toString()).toLocal().add(Duration(minutes: (
-                        ( emp.types[0]['nbh'] )* 60).toInt())))}',
+                    Text(emp.finishTime!,
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,
@@ -940,7 +896,7 @@ class _EmploiState extends State<Emploi> {
                 SizedBox(height: 25),
                 Row(
                   children: [
-                    Text('Types:',
+                    Text('Type:',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,
@@ -987,14 +943,14 @@ class _EmploiState extends State<Emploi> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     ElevatedButton(
-                      onPressed: () async{
+                      onPressed: () {
 
                         setState(() {
                           Navigator.pop(context);
                         });
                         // selectedMat = emp.mat!;
                         _dayNumeroController.text = emp.dayNumero!.toString();
-                        _date.text = DateFormat('dd/MM/yyyy HH:mm').format(DateTime.parse(emp.startTime.toString()));
+                        _date.text = emp.startTime!;
 
                          showModalBottomSheet(
                             context: context,
@@ -1197,14 +1153,14 @@ class _EmploiState extends State<Emploi> {
                                           onPressed: () {
                                             Navigator.of(context).pop();
 
-                                            DateTime date = DateFormat('yyyy/MM/dd HH:mm').parse(_date.text).toUtc();
+                                            // DateTime date = DateFormat('yyyy/MM/dd HH:mm').parse(_date.text).toUtc();
 
                                             // Check if you're updating an existing matiere or creating a new one
                                             UpdateEmp(
                                               emp.id!,
                                               selectedTypeName,
                                               selectedNbhValue,
-                                                date,int.parse(_dayNumeroController.text),selectedGroup!.id,selectedProfesseur!.id,selectedMat!.id
+                                                _date.text,int.parse(_dayNumeroController.text),selectedGroup!.id,selectedProfesseur!.id,selectedMat!.id
                                             );
 
                                             setState(() {
@@ -1392,7 +1348,7 @@ class _EmploiState extends State<Emploi> {
 class emploi {
   final String id;
   final List<Map<String, dynamic>> types;
-  final DateTime startTime;
+  final String? startTime;
   final int dayNumero;
   final String group;
   final String professor;
@@ -1414,7 +1370,7 @@ class emploi {
     return emploi(
       id: json['_id'],
       types: List<Map<String, dynamic>>.from(json['types']),
-      startTime: DateTime.parse(json['startTime']),
+      startTime: json['startTime'],
       dayNumero: json['dayNumero'],
       group: json['group'],
       professor: json['professeur'],
@@ -1427,7 +1383,7 @@ class emploi {
     return {
       '_id': id,
       'types': types,
-      'startTime': startTime.toIso8601String(),
+      'startTime': startTime,
       'dayNumero': dayNumero,
       'group': group,
       'professeur': professor,

@@ -199,7 +199,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                width: 150,
                                duration: "${coursPN} Cours",
                                onPessed: ()async{
-                                 try {
+                                 // try {
                                    SharedPreferences prefs = await SharedPreferences.getInstance();
                                    String token = prefs.getString("token")!;
                                    final professorData = await fetchProfessorInfo();
@@ -217,21 +217,22 @@ class _HomeScreenState extends State<HomeScreen> {
 
                                    if (response.statusCode == 200) {
                                      List<dynamic> courses = json.decode(
-                                         response.body)['data']['coursLL'];
-                                       coursPN = json.decode(response.body)['data']['countLL'];
-                                     num heuresTV = json.decode(response.body)['data']['heuresTV'];
-                                     num sommeTV = json.decode(response.body)['data']['sommeTV'];
-                                     String ProfId = json.decode(response.body)['data']['id'];
-                                     setState(() {
-                                       coursPN = json.decode(response.body)['data']['countLL'];
-                                     });
+                                         response.body)['cours'];
+                                       // coursPN = json.decode(response.body)['data']['countLL'];
+                                     // num heuresTV = json.decode(response.body)['data']['heuresTV'];
+                                     // num sommeTV = json.decode(response.body)['data']['sommeTV'];
+                                     // String ProfId = json.decode(response.body)['data']['id'];
+                                     // setState(() {
+                                     //   coursPN = json.decode(response.body)['data']['countLL'];
+                                     // });
                                      Navigator.push(
                                        context,
                                        MaterialPageRoute(builder: (context) =>
                                            ProfCoursesPage(courses: courses,
-                                             coursNum: coursPN,
-                                             heuresTV: heuresTV,
-                                             sommeTV: sommeTV, ProfId: ProfId,)),
+                                             // coursNum: coursPN,
+                                             // heuresTV: heuresTV,
+                                             // sommeTV: sommeTV,
+                                             ProfId: id,)),
                                      );
                                    }
                                    else {
@@ -240,10 +241,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                      print('Failed to fetch prof courses. Status Code: ${response
                                          .statusCode}');
                                    }
-                                 } catch (err) {
-                                   Navigator.pop(context);
-                                   print('Server Error: $err');
-                                 }
+                                 // } catch (err) {
+                                 //   Navigator.pop(context);
+                                 //   print('Server Error: $err');
+                                 // }
                                },
                              ),
 
@@ -253,11 +254,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                height: 150,
                                width: 150,  duration: "",
                                onPessed: ()async{
-                                 try {
+                                 // try {
                                    SharedPreferences prefs = await SharedPreferences.getInstance();
                                    String token = prefs.getString("token")!;
                                    final professorData = await fetchProfessorInfo();
                                    String id = professorData['professeur']['_id'];
+                                   String nom = professorData['professeur']['nom'];
 
                                    print(id);
                                    var response = await http.get(
@@ -270,17 +272,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                    // print(response.body);
 
                                    if (response.statusCode == 200) {
-                                     List<dynamic> courses = json.decode(
-                                         response.body)['data']['coursLL'];
-                                     String ProfId = json.decode(response.body)['data']['id'];
-                                     String ProfName = json.decode(response.body)['data']['professeur'];
+                                     List<dynamic> courses = json.decode(response.body)['cours'];
+                                     // String ProfId = json.decode(response.body)['data']['id'];
+                                     // String ProfName = json.decode(response.body)['cours']['professeur'];
                                      setState(() {
                                      });
                                      Navigator.push(
                                        context,
                                        MaterialPageRoute(builder: (context) =>
                                            Paie(courses: courses,
-                                             ProfId: ProfId, ProfName: ProfName,)),
+                                             ProfId: id, ProfName: nom,)),
                                      );
                                    }
                                    else {
@@ -289,10 +290,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                      print('Failed to fetch prof courses. Status Code: ${response
                                          .statusCode}');
                                    }
-                                 } catch (err) {
-                                   Navigator.pop(context);
-                                   print('Server Error: $err');
-                                 }
+                                 // } catch (err) {
+                                 //   Navigator.pop(context);
+                                 //   print('Server Error: $err');
+                                 // }
                                },
 
                              ),
@@ -399,9 +400,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                      context,
                                      MaterialPageRoute(builder: (context) =>
                                          CoursesPage(courses: courses,
-                                           coursNum: coursNum,
-                                           heuresTV: heuresTV,
-                                           sommeTV: sommeTV, role: role,)),
+                                           // coursNum: coursNum,
+                                           // heuresTV: heuresTV,
+                                           // sommeTV: sommeTV,
+                                           role: role,
+                                         )),
                                    );
                                  } else {
                                    // Handle error
@@ -517,21 +520,22 @@ class _HomeScreenState extends State<HomeScreen> {
 
                                    if (response.statusCode == 200) {
                                      List<dynamic> courses = json.decode(
-                                         response.body)['data']['coursLL'];
-                                      this.coursNum = json.decode(response.body)['data']['countLL'];
-                                     num heuresTV = json.decode(response.body)['data']['heuresTV'];
-                                     num sommeTV = json.decode(response.body)['data']['sommeTV'];
-                                     setState(() {
-                                       this.coursNum = json.decode(response.body)['data']['countLL'];
-
-                                     });
+                                         response.body)['cours'];
+                                      // this.coursNum = json.decode(response.body)['data']['countLL'];
+                                     // num heuresTV = json.decode(response.body)['data']['heuresTV'];
+                                     // num sommeTV = json.decode(response.body)['data']['sommeTV'];
+                                     // setState(() {
+                                     //   this.coursNum = json.decode(response.body)['data']['countLL'];
+                                     //
+                                     // });
                                      Navigator.push(
                                        context,
                                        MaterialPageRoute(builder: (context) =>
                                            CoursesPage(courses: courses,
-                                             coursNum: coursNum,
-                                             heuresTV: heuresTV,
-                                             sommeTV: sommeTV, role: role,)),
+                                             // coursNum: coursNum,
+                                             // heuresTV: heuresTV,
+                                             // sommeTV: sommeTV,
+                                             role: role,)),
                                      );
                                    } else {
                                      // Handle error

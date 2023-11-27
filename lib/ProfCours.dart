@@ -19,14 +19,14 @@ class ProfCoursesPage extends StatefulWidget {
   final List<dynamic> courses;
 
   final String ProfId;
-  final int coursNum;
-  final num heuresTV;
-  final num sommeTV;
+  // final int coursNum;
+  // final num heuresTV;
+  // final num sommeTV;
   DateTime? dateDeb;
   DateTime? dateFin;
 // Calculate the sums for filtered courses
 
-  ProfCoursesPage({required this.courses, required this.coursNum, required this.heuresTV, required this.sommeTV, required this.ProfId}) {}
+  ProfCoursesPage({required this.courses, required this.ProfId}) {}
 
 
 
@@ -114,13 +114,13 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
   int coursesPerPage = 5;
   String searchQuery = '';
   bool sortByDateAscending = true;
-  bool isSigned = false;
+  bool isSignedd = false;
 
   bool courseFitsCriteria(Map<String, dynamic> course) {
     // Apply your filtering criteria here
     DateTime courseDate = DateTime.parse(course['date'].toString());
     bool isMatch = (course['matiere'].toLowerCase().contains(searchQuery.toLowerCase())
-        || course['isSigne'].toString().contains(searchQuery.toLowerCase()));
+        || course['isSigned'].toString().contains(searchQuery.toLowerCase()));
 
     // Check if the course date falls within the selected date range
     if ((widget.dateDeb == null || courseDate.isAtSameMomentAs(widget.dateDeb!.toLocal()) ||
@@ -262,26 +262,26 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                     // color: Colors.black87,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     child: InkWell(
-                      child: Column(mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              (widget.dateDeb != null && widget.dateFin != null)?
-                              Text('Eq. CM: ${totalType}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),):
-                              Text('Eq. CM: ${widget.heuresTV}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),),
-
-                              (widget.dateDeb != null && widget.dateFin != null)?
-                              Text('Montant Total : ${somme}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),):
-                              Text('Montant Total : ${widget.sommeTV}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400)),
-                            ],
-                          ),
-                          (widget.dateDeb != null && widget.dateFin != null)?
-                          Text('Nb de Cours: ${coursesNum}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),):
-                          Center(child: Text('Nb de Cours: ${widget.coursNum}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400))),
-
-                        ],
-                      ),
+                      // child: Column(mainAxisAlignment: MainAxisAlignment.center,
+                      //   children: [
+                      //     Row(
+                      //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      //       children: [
+                      //         (widget.dateDeb != null && widget.dateFin != null)?
+                      //         Text('Eq. CM: ${totalType}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),):
+                      //         Text('Eq. CM: ${widget.heuresTV}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),),
+                      //
+                      //         (widget.dateDeb != null && widget.dateFin != null)?
+                      //         Text('Montant Total : ${somme}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),):
+                      //         Text('Montant Total : ${widget.sommeTV}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400)),
+                      //       ],
+                      //     ),
+                      //     (widget.dateDeb != null && widget.dateFin != null)?
+                      //     Text('Nb de Cours: ${coursesNum}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),):
+                      //     Center(child: Text('Nb de Cours: ${widget.coursNum}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400))),
+                      //
+                      //   ],
+                      // ),
                     ),
                   ),
                 ),
@@ -367,73 +367,74 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                               cells: [
 
                                 DataCell(
-    widget.courses[index]['isSigne']? Icon(Icons.check_box_sharp):CupertinoSwitch(
+    widget.courses[index]['isSigned'] == "YES"? Icon(Icons.check_box_sharp):CupertinoSwitch(
                                       activeColor: Colors.black26,
-                                      value: widget.courses[index]['isSigne'],
+                                      value:  widget.courses[index]['isSigned'] == "YES"? true: false,
                                       onChanged: (value) async {
 
 
 
-                                        final typesString = widget.courses[index]['types'];
-                                        final typeParts = typesString.split(':');
+                                        // final typesString = widget.courses[index]['types'];
+                                        // print(widget.courses[index]['types']);
+                                        // final typeParts = typesString.split(':');
 
-                                        print(typeParts);
-                                        print(typeParts.length);
+                                        // print(typeParts);
+                                        // print(typeParts.length);
                                         // Check if the "types" string is in the expected format
-                                        if (typeParts.length > 2) {
-                                          // Display an alert or notification here
-                                          showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return AlertDialog(
-                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25),),elevation: 1,
-                                                title: Text('Impossible'),
-                                                content: Column(
-                                                  mainAxisSize: MainAxisSize.min,
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text("Il y en a plus d'un type"),
-                                                    Text("Cours Type [${widget.courses[index]['types']}]"),
-                                                    SizedBox(height: 10,),
-                                                    Text("Il faut cliquer sur button de Modification",style: TextStyle(color: Colors.blueGrey),),
-                                                  ],
-                                                ),
-                                                actions: [
-                                                  TextButton(
-                                                    onPressed: () {
-                                                      Navigator.of(context).pop();
-                                                    },
-                                                    child: Text('OK'),
-                                                  ),
-                                                ],
-                                              );
-                                            },
-                                          );
-                                          return;
-                                        }
+                                        // if (typeParts.length > 2) {
+                                        //   // Display an alert or notification here
+                                        //   showDialog(
+                                        //     context: context,
+                                        //     builder: (BuildContext context) {
+                                        //       return AlertDialog(
+                                        //         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25),),elevation: 1,
+                                        //         title: Text('Impossible'),
+                                        //         content: Column(
+                                        //           mainAxisSize: MainAxisSize.min,
+                                        //           crossAxisAlignment: CrossAxisAlignment.start,
+                                        //           children: [
+                                        //             Text("Il y en a plus d'un type"),
+                                        //             Text("Cours Type [${widget.courses[index]['types']}]"),
+                                        //             SizedBox(height: 10,),
+                                        //             Text("Il faut cliquer sur button de Modification",style: TextStyle(color: Colors.blueGrey),),
+                                        //           ],
+                                        //         ),
+                                        //         actions: [
+                                        //           TextButton(
+                                        //             onPressed: () {
+                                        //               Navigator.of(context).pop();
+                                        //             },
+                                        //             child: Text('OK'),
+                                        //           ),
+                                        //         ],
+                                        //       );
+                                        //     },
+                                        //   );
+                                        //   return;
+                                        // }
 
                                         // Continue with the rest of your onChanged logic if the types string is in the expected format
                                         setState(() {
-                                          widget.courses[index]['isSigne'] = value;
+                                          widget.courses[index]['isSigned'] = value;
                                         });
 
                                         Navigator.of(context).pop();
 
                                         final updatedDate = DateFormat('yyyy-MM-ddTHH:mm').parse(widget.courses[index]['date']).toUtc();
-                                        final typeName = typeParts[0].trim();
-                                        final typeNbhString = typeParts[1].replaceAll(',', '').trim();
+                                        // final typeName = typeParts[0].trim();
+                                        // final typeNbhString = typeParts[1].replaceAll(',', '').trim();
 
-                                        final updatedTypes = [{'name': typeName, 'nbh': typeNbhString}];
+                                        // final updatedTypes = [{'name': typeName, 'nbh': typeNbhString}];
 
                                         final matiereName = widget.courses[index]['matiere'];
-                                        final matiereId = getMatiereIdFromName(matiereName);
+                                        // final matiereId = getMatiereIdFromName(matiereName);
 
-                                        if (matiereId != null) {
+                                        if (widget.courses[index]['matiere_id'] != null) {
                                           updateProfCours(
                                             widget.courses[index]['_id'],
                                             widget.ProfId,
-                                            matiereId,
-                                            updatedTypes,
+                                            widget.courses[index]['matiere_id'],
+                                            widget.courses[index]['CM'],
                                             updatedDate,
                                             value,
                                           );
@@ -646,7 +647,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                         ),),
 
                       SizedBox(width: 10,),
-                      Text('${DateFormat(' HH:mm').format(DateTime.parse(course['date'].toString()).toLocal())}',
+                      Text(course['startTime'],
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w400,
@@ -668,7 +669,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                         ),),
 
                       SizedBox(width: 10,),
-                      Text('${DateFormat(' HH:mm').format(DateTime.parse(course['date'].toString()).toLocal().add(Duration(minutes: (( course['CM']+course['TP']+course['TD'] )* 60).toInt())))}',
+                      Text(course['finishTime'],
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w400,
@@ -806,7 +807,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                       ),),
 
                     SizedBox(width: 10,),
-                    Text('${course['prix']* course['TH']}',
+                    Text('${course['somme']}',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,
@@ -829,7 +830,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
 
                     SizedBox(width: 10,),
                     Text(
-                      '${course['isSigne']? 'Oui': 'Non'}',
+                      '${course['isSigned'] == "YES"? 'Oui': 'Non'}',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,
@@ -848,7 +849,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                     return showDialog(
                       context: context,
                       builder: (context) {
-                        return UpdateProfCoursDialog(courses: course, ProfId: course['id'],);
+                        return UpdateProfCoursDialog(courses: course, ProfId: course['professeur_id'],);
                       },
                     );
                   },// Disable button functionality
@@ -1191,7 +1192,7 @@ class _UpdateProfCoursDialogState extends State<UpdateProfCoursDialog> {
   List<Category> categories = [];
   bool _selectedSigne = false;
   TextEditingController _date = TextEditingController();
-  TextEditingController _isSigne = TextEditingController();
+  TextEditingController _isSigned = TextEditingController();
 
   bool showMatDropdown = false;
   late String mat;
@@ -1201,7 +1202,7 @@ class _UpdateProfCoursDialogState extends State<UpdateProfCoursDialog> {
     fetchProfMat();
     fetchMats();
     _date.text = DateFormat('yyyy/MM/dd HH:mm').format(DateTime.parse(widget.courses['date'])).toString();
-    _selectedSigne = widget.courses['isSigne'];
+    // _selectedSigne = widget.courses['isSigned'];
     mat = widget.courses['matiere'];
   }
 
@@ -1386,7 +1387,7 @@ class _UpdateProfCoursDialogState extends State<UpdateProfCoursDialog> {
             onPressed: () async{
               Navigator.of(context).pop(true);
 
-              _isSigne.text = _selectedSigne.toString();
+              _isSigned.text = _selectedSigne.toString();
 
               print(selectedTypes); // Check the selected types here
 
@@ -1395,12 +1396,12 @@ class _UpdateProfCoursDialogState extends State<UpdateProfCoursDialog> {
 
               if (showMatDropdown) {
                 // No changes, directly use the selected IDs
-                updateProfCours(widget.courses['_id'],widget.ProfId,selectedMat!['_id']!, selectedTypes, date,bool.parse(_isSigne.text));
+                updateProfCours(widget.courses['_id'],widget.ProfId,selectedMat!['_id']!, widget.courses['CM'], date,bool.parse(_isSigned.text));
               } else {
                 // Changes made, get the updated IDs
                 String updatedMatId = await getMatiereIdFromName(mat); // Get updated matière ID
                 print('updatedMatId: $updatedMatId');
-                updateProfCours(widget.courses['_id'], widget.ProfId, updatedMatId, selectedTypes, date, bool.parse(_isSigne.text));
+                updateProfCours(widget.courses['_id'], widget.ProfId, updatedMatId, widget.courses['CM'], date, bool.parse(_isSigned.text));
               }
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Le Type est  Update avec succès.')),
@@ -1420,7 +1421,7 @@ class _UpdateProfCoursDialogState extends State<UpdateProfCoursDialog> {
 
 }
 
-Future<void> updateProfCours( id,String professeurId,String matiereId, List<Map<String, dynamic>> types, DateTime? date, bool isSigne) async {
+Future<void> updateProfCours( id,String professeurId,String matiereId, double CM, DateTime? date, bool isSigned) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String token = prefs.getString("token")!;
   final url = 'http://192.168.43.73:5000/cours/'  + '/$id';
@@ -1431,9 +1432,10 @@ Future<void> updateProfCours( id,String professeurId,String matiereId, List<Map<
   Map<String, dynamic> body =({
     'professeur': professeurId,
     'matiere': matiereId,
-    'types': types,
+    // 'types': types,
+    "types": CM,
     // 'date': date?.toIso8601String(),
-    'isSigne':isSigne
+    'isSigned':isSigned
   });
 
   if (date != null) {
