@@ -47,8 +47,13 @@ class _FilliereState extends State<Filliere> {
     print(response.statusCode);
     if(response.statusCode ==200){
       setState(() {
-       Navigator.pop(context);
-
+        fetchfilliere().then((data) {
+          setState(() {
+            filteredItems = data; // Assigner la liste renvoyée par filliereesseur à items
+          });
+        }).catchError((error) {
+          print('Erreur: $error');
+        });
       });
     }
 
@@ -90,7 +95,7 @@ class _FilliereState extends State<Filliere> {
     for (var elementId in semestre.elements!) {
       final matiere = matiereList.firstWhere(
             (matiere) => matiere.id == elementId,
-        orElse: () => Matiere(id: '', name: 'Matiere introuvable', description: '', categorieId: ''),
+        orElse: () => Matiere(id: '', name: 'Matiere introuvable',  categorieId: ''),
       );
       matiereNames.add(matiere.name);
     }
@@ -144,7 +149,7 @@ class _FilliereState extends State<Filliere> {
   }
   String getMatIdFromName(String id) {
     // Assuming you have a list of professeurs named 'professeursList'
-    final professeur = matiereList.firstWhere((prof) => '${prof.id}' == id, orElse: () =>Matiere(id: '', name: '', description: '', categorieId: '', categorie_name: '', code: '',));
+    final professeur = matiereList.firstWhere((prof) => '${prof.id}' == id, orElse: () =>Matiere(id: '', name: '', categorieId: '', categorie_name: '', code: '',));
     print(professeur.name);
     return professeur.name; // Return the ID if found, otherwise an empty string
 
@@ -166,7 +171,7 @@ class _FilliereState extends State<Filliere> {
   // TextEditingController _code = TextEditingController();
   TextEditingController _desc = TextEditingController();
   TextEditingController _niveau = TextEditingController();
-  String _selectedNiveau = "Licence";
+  String _selectedNiveau = "licence";
 
 
 
@@ -297,7 +302,7 @@ class _FilliereState extends State<Filliere> {
                                   DataColumn(label: Text('Nom')),
                                   DataColumn(label: Text('Niveau')),
                                   DataColumn(label: Text('Desc')),
-                                  DataColumn(label: Text('Periode')),
+                                  // DataColumn(label: Text('Periode')),
                                   DataColumn(label: Text('Action')),
                                   // DataColumn(label: Text('Descrition')),
                                 ],
@@ -305,10 +310,10 @@ class _FilliereState extends State<Filliere> {
                                   for (var fil in filteredItems!)
                                     DataRow(
                                         cells: [
-                                          DataCell(Container(child: Text('${fil.name}')),),
+                                          DataCell(Container(child: Text('${fil.name.toUpperCase()}')),),
                                           DataCell(Container(child: Text('${fil.niveau}')),),
                                           DataCell(Container(child: Text('${fil.description}')),),
-                                          DataCell(Container(child: Text('${fil.periode}')),),
+                                          // DataCell(Container(child: Text('${fil.periode}')),),
 
                                           DataCell(
                                             Row(
@@ -385,7 +390,7 @@ class _FilliereState extends State<Filliere> {
         builder: (BuildContext context){
           return SingleChildScrollView(
             child: Container(
-              height: 600,
+              height: 450,
               padding: const EdgeInsets.all(25.0),
               child: Column(
                 // mainAxisSize: MainAxisSize.min,
@@ -394,7 +399,7 @@ class _FilliereState extends State<Filliere> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     // mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      Text("Ajouter une Filliere", style: TextStyle(fontSize: 25),),
+                      Text("Ajouter un Filliere", style: TextStyle(fontSize: 25),),
                       Spacer(),
                       InkWell(
                         child: Icon(Icons.close),
@@ -423,16 +428,16 @@ class _FilliereState extends State<Filliere> {
                     value: _selectedNiveau,
                     items: [
                       DropdownMenuItem<String>(
-                        child: Text('Licence'),
-                        value: "Licence",
+                        child: Text('licence'),
+                        value: "licence",
                       ),
                       DropdownMenuItem<String>(
                         child: Text('Master'),
-                        value: "Master",
+                        value: "master",
                       ),
                       DropdownMenuItem<String>(
                         child: Text('Doctorat'),
-                        value: "Doctorat",
+                        value: "doctorat",
                       ),
                     ],
                     onChanged: (value) {
@@ -466,10 +471,7 @@ class _FilliereState extends State<Filliere> {
                             borderRadius: BorderRadius.all(Radius.circular(10.0)))),
                   ),
 
-
-
-
-
+                  SizedBox(height: 15),
                   ElevatedButton(
                     onPressed: (){
                       Navigator.of(context).pop();
@@ -482,7 +484,7 @@ class _FilliereState extends State<Filliere> {
                         SnackBar(content: Text('Le filliere a été ajouter avec succès.')),
                       );
                       setState(() {
-                        Navigator.pop(context);
+                      fetchfilliere();
                       });
                     },
                     child: Text("Ajouter"),
@@ -507,119 +509,88 @@ class _FilliereState extends State<Filliere> {
 
     );
   }
-  Future<void> _showFilDetails(BuildContext context, filliere fil) {
-    return showModalBottomSheet(
-        context: context,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
-            topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
-        isScrollControlled: true, // Rendre le contenu déroulable
 
-        builder: (BuildContext context){
-          return Container(
-            height: 650,
-            padding: const EdgeInsets.all(25.0),
+  void showFetchedDataModal(BuildContext context, Map<String, dynamic> data,String filId ) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
+          topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
+      isScrollControlled: true, // Rendre le contenu déroulable
+      builder: (BuildContext context) {
+        return Container(
+          height: 650,
+          padding: EdgeInsets.all(20.0),
+          child: SingleChildScrollView(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              // mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text('Filliere Infos',style: TextStyle(fontSize: 30),),
                 SizedBox(height: 50),
-                Row(
-                  children: [
-                    Text('Nom:',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-                    SizedBox(width: 10,),
-                    Text(fil.name.toUpperCase(),
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-                  ],
+                Text(
+                  'Fillière: ${data['filliere']}',
+                  style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
                 ),
-                SizedBox(height: 25),
-                Row(
-                  children: [
-                    Text('Niveau:',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                    SizedBox(width: 10,),
-                    Text('${ fil.niveau}',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                  ],
+                SizedBox(height: 10),
+                Text('Description: ${data['description']}',style: TextStyle(fontSize: 18)),
+                SizedBox(height: 10),
+                Text('Niveau: ${data['niveau']}',style: TextStyle(fontSize: 18)),
+                SizedBox(height: 20),
+                Text(
+                  'Semestres:',
+                  style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
                 ),
-                SizedBox(height: 25),
-                Row(
-                  children: [
-                    Text('Description:',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                    SizedBox(width: 10,),
-                    Text('${fil.description}',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                  ],
+                for (var semestre in data['semestres'])
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Text('ID: ${semestre['_id']}',style: TextStyle(fontSize: 18)),
+                      // '${getMatIdFromNames(grp.semestre!.elements!.join(", ")) }',
+                      Text('Matieres: [${getMatIdFromNames(getMatSemIdFromName(semestre['_id']).join(", "))}]',style: TextStyle(fontSize: 18)),
+                      Text('Numéro: S${semestre['numero']}',style: TextStyle(fontSize: 18)),
+                      Text( 'Deb Semestre: ${DateFormat('dd/MM/yyyy ').format(
+                        DateTime.parse(semestre['start']).toLocal(),
+                      )}',style: TextStyle(fontSize: 18)),
+                      Text( 'Fin Semestre: ${DateFormat('dd/MM/yyyy ').format(
+                        DateTime.parse(semestre['finish']).toLocal(),
+                      )}',style: TextStyle(fontSize: 18)),
+                      SizedBox(height: 10),
+                    ],
+                  ),
+                SizedBox(height: 20),
+                Text(
+                  'Groupes:',
+                  style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
                 ),
-                SizedBox(height: 25),
-               Row(
-                  children: [
-                    Text('Periode:',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
+                for (var group in data['groups'])
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Text('ID: ${group['_id']}',style: TextStyle(fontSize: 18)),
+                      Text('Nom du groupe: ${group['name']}',style: TextStyle(fontSize: 18)),
+                      // Text('Is One: ${group['isOne']}',style: TextStyle(fontSize: 18)),
+                      Text( 'Deb d\'Emploi: ${DateFormat('dd/MM/yyyy ').format(DateTime.parse(group['startEmploi']).toLocal(),)}',style: TextStyle(fontSize: 18)),
+                      Text( 'Fin d\'Emploi: ${DateFormat('dd/MM/yyyy ').format(DateTime.parse(group['finishEmploi']).toLocal(),)}',style: TextStyle(fontSize: 18)),
+                      SizedBox(height: 10),
+                    ],
+                  ),
+                SizedBox(height: 20),
+                // Ajoutez d'autres informations à afficher ici selon vos besoins
 
-                    SizedBox(width: 10,),
-                    Text('${fil.periode}',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                  ],
-                ),
-                SizedBox(height: 25),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     ElevatedButton(
                       onPressed: (){
-                        _name.text = fil.name!;
+                        setState(() {
+                          // fetchfilliere();
+                          Navigator.pop(context);
+
+                        });
+                        _name.text = data['filliere'];
                         // _code.text = categ.code!;
-                        _desc.text = fil.description!;
-                        _selectedNiveau = fil.niveau!;
+                        _desc.text = data['description'];
+                        _selectedNiveau = data['niveau'];
                         showModalBottomSheet(
                             context: context,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
@@ -629,7 +600,7 @@ class _FilliereState extends State<Filliere> {
                             builder: (BuildContext context){
                               return SingleChildScrollView(
                                 child: Container(
-                                  height: 600,
+                                  height: 450,
                                   padding: const EdgeInsets.all(25.0),
                                   child: Column(
                                     // mainAxisSize: MainAxisSize.min,
@@ -669,15 +640,15 @@ class _FilliereState extends State<Filliere> {
                                         items: [
                                           DropdownMenuItem<String>(
                                             child: Text('Licence'),
-                                            value: "Licence",
+                                            value: "licence",
                                           ),
                                           DropdownMenuItem<String>(
                                             child: Text('Master'),
-                                            value: "Master",
+                                            value: "master",
                                           ),
                                           DropdownMenuItem<String>(
                                             child: Text('Doctorat'),
-                                            value: "Doctorat",
+                                            value: "doctorat",
                                           ),
                                         ],
                                         onChanged: (value) {
@@ -719,17 +690,17 @@ class _FilliereState extends State<Filliere> {
                                           Navigator.of(context).pop();
                                           _niveau.text = _selectedNiveau.toString();
 
+                                          fetchfilliere();
 
-                                          setState(() {
-                                            // fetchfilliere();
-                                            Navigator.pop(context);
-
-                                          });
                                           // AddCategory(_name.text, _desc.text);
-                                          UpdateFilliere(fil.id!, _name.text,_selectedNiveau,_desc.text,);
+                                          UpdateFilliere(filId, _name.text,_selectedNiveau,_desc.text,);
                                           ScaffoldMessenger.of(context).showSnackBar(
                                             SnackBar(content: Text('Le filliere est mis à jour avec succès.')),
                                           );
+                                          setState(() {
+                                            fetchfilliere();
+
+                                          });
 
                                         },
                                         child: Text("Modifier"),
@@ -791,13 +762,15 @@ class _FilliereState extends State<Filliere> {
                                   ),
                                   onPressed: () {
                                     Navigator.of(context).pop();
-                                    DeleteFilliere(fil.id);
-                                    setState(() {
-                                      Navigator.pop(context);
-                                    });
+                                    fetchfilliere();
+                                    DeleteFilliere(filId);
+
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(content: Text('Le Category a été Supprimer avec succès.')),
                                     );
+                                    setState(() {
+                                      fetchfilliere();
+                                    });
                                   },
                                 ),
                               ],
@@ -821,296 +794,8 @@ class _FilliereState extends State<Filliere> {
                 ),
 
               ],
+
             ),
-          );
-        }
-
-
-    );
-  }
-
-  void showFetchedDataModal(BuildContext context, Map<String, dynamic> data,String filId ) {
-    showModalBottomSheet(
-      context: context,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
-          topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
-      isScrollControlled: true, // Rendre le contenu déroulable
-      builder: (BuildContext context) {
-        return Container(
-          height: 650,
-          padding: EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Filliere Infos',style: TextStyle(fontSize: 30),),
-              SizedBox(height: 50),
-              Text(
-                'Fillière: ${data['filliere']}',
-                style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 10),
-              Text('Description: ${data['description']}',style: TextStyle(fontSize: 18)),
-              SizedBox(height: 10),
-              Text('Niveau: ${data['niveau']}',style: TextStyle(fontSize: 18)),
-              SizedBox(height: 20),
-              Text(
-                'Semestres:',
-                style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
-              ),
-              for (var semestre in data['semestres'])
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Text('ID: ${semestre['_id']}',style: TextStyle(fontSize: 18)),
-                    // '${getMatIdFromNames(grp.semestre!.elements!.join(", ")) }',
-                    Text('Matieres: [${getMatIdFromNames(getMatSemIdFromName(semestre['_id']).join(", "))}]',style: TextStyle(fontSize: 18)),
-                    Text('Numéro: S${semestre['numero']}',style: TextStyle(fontSize: 18)),
-                    Text( 'Deb Semestre: ${DateFormat('dd/MM/yyyy ').format(
-                      DateTime.parse(semestre['start']).toLocal(),
-                    )}',style: TextStyle(fontSize: 18)),
-                    Text( 'Fin Semestre: ${DateFormat('dd/MM/yyyy ').format(
-                      DateTime.parse(semestre['finish']).toLocal(),
-                    )}',style: TextStyle(fontSize: 18)),
-                    SizedBox(height: 10),
-                  ],
-                ),
-              SizedBox(height: 20),
-              Text(
-                'Groupes:',
-                style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
-              ),
-              for (var group in data['groups'])
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Text('ID: ${group['_id']}',style: TextStyle(fontSize: 18)),
-                    Text('Nom du groupe: ${group['groupName']}',style: TextStyle(fontSize: 18)),
-                    Text('Is One: ${group['isOne']}',style: TextStyle(fontSize: 18)),
-                    Text( 'Deb d\'Emploi: ${DateFormat('dd/MM/yyyy ').format(DateTime.parse(group['startEmploi']).toLocal(),)}',style: TextStyle(fontSize: 18)),
-                    Text( 'Fin d\'Emploi: ${DateFormat('dd/MM/yyyy ').format(DateTime.parse(group['finishEmploi']).toLocal(),)}',style: TextStyle(fontSize: 18)),
-                    SizedBox(height: 10),
-                  ],
-                ),
-              SizedBox(height: 20),
-              // Ajoutez d'autres informations à afficher ici selon vos besoins
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    onPressed: (){
-                      setState(() {
-                        // fetchfilliere();
-                        Navigator.pop(context);
-
-                      });
-                      _name.text = data['filliere'];
-                      // _code.text = categ.code!;
-                      _desc.text = data['description'];
-                      _selectedNiveau = data['niveau'];
-                      showModalBottomSheet(
-                          context: context,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
-                              topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
-                          isScrollControlled: true, // Rendre le contenu déroulable
-
-                          builder: (BuildContext context){
-                            return SingleChildScrollView(
-                              child: Container(
-                                height: 600,
-                                padding: const EdgeInsets.all(25.0),
-                                child: Column(
-                                  // mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      // mainAxisAlignment: MainAxisAlignment.start,
-                                      children: [
-                                        Text("Modifier", style: TextStyle(fontSize: 25),),
-                                        Spacer(),
-                                        InkWell(
-                                          child: Icon(Icons.close),
-                                          onTap: (){
-                                            Navigator.pop(context);
-                                          },
-                                        )
-                                      ],
-                                    ),
-                                    //hmmm
-                                    SizedBox(height: 40),
-                                    TextField(
-                                      controller: _name,
-                                      keyboardType: TextInputType.text,
-                                      decoration: InputDecoration(
-                                          filled: true,
-                                          // fillColor: Colors.white,
-                                          border: OutlineInputBorder(
-                                              borderSide: BorderSide.none,gapPadding: 1,
-                                              borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                                    ),
-
-
-
-                                    SizedBox(height: 10),
-                                    DropdownButtonFormField<String>(
-                                      value: _selectedNiveau,
-                                      items: [
-                                        DropdownMenuItem<String>(
-                                          child: Text('Licence'),
-                                          value: "Licence",
-                                        ),
-                                        DropdownMenuItem<String>(
-                                          child: Text('Master'),
-                                          value: "Master",
-                                        ),
-                                        DropdownMenuItem<String>(
-                                          child: Text('Doctorat'),
-                                          value: "Doctorat",
-                                        ),
-                                      ],
-                                      onChanged: (value) {
-                                        setState(() {
-                                          _selectedNiveau = value!;
-                                        });
-                                      },
-                                      decoration: InputDecoration(
-                                        filled: true,
-                                        // fillColor: Colors.white,
-                                        border: OutlineInputBorder(
-                                          borderSide: BorderSide.none,gapPadding: 1,
-                                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                                        ),
-                                      ),
-                                    ),
-
-                                    SizedBox(height: 10),
-                                    TextFormField(
-                                      controller: _desc,
-                                      keyboardType: TextInputType.text,
-                                      maxLines: 3,
-                                      decoration: InputDecoration(
-                                          filled: true,
-
-                                          // fillColor: Colors.white,
-                                          hintText: "description",
-                                          border: OutlineInputBorder(
-                                              borderSide: BorderSide.none,gapPadding: 1,
-                                              borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                                    ),
-                                    SizedBox(height: 10),
-
-
-
-
-                                    ElevatedButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                        _niveau.text = _selectedNiveau.toString();
-
-
-                                        setState(() {
-                                          // fetchfilliere();
-                                          Navigator.pop(context);
-
-                                        });
-                                        // AddCategory(_name.text, _desc.text);
-                                        UpdateFilliere(filId, _name.text,_selectedNiveau,_desc.text,);
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(content: Text('Le filliere est mis à jour avec succès.')),
-                                        );
-
-                                      },
-                                      child: Text("Modifier"),
-
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Color(0xff0fb2ea),
-                                        foregroundColor: Colors.white,
-                                        elevation: 10,
-                                        minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
-                                        // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
-                                        //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              ),
-                            );
-
-                          }
-
-
-                      );
-                    }, // Disable button functionality
-
-
-                    child: Text('Modifier'),
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.only(left: 20,right: 20),
-                      foregroundColor: Colors.lightGreen,
-                      backgroundColor: Colors.white,
-                      // side: BorderSide(color: Colors.black,),
-                      elevation: 3,
-                      // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
-                    ),
-
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
-                            title: Text("Confirmer la suppression"),
-                            content: Text(
-                                "Êtes-vous sûr de vouloir supprimer cet élément ?"),
-                            actions: <Widget>[
-                              TextButton(
-                                child: Text("ANNULER"),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                              ),
-                              TextButton(
-                                child: Text(
-                                  "SUPPRIMER",
-                                  // style: TextStyle(color: Colors.red),
-                                ),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                  DeleteFilliere(data['filliere']);
-                                  setState(() {
-                                    Navigator.pop(context);
-                                  });
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Le Category a été Supprimer avec succès.')),
-                                  );
-                                },
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    }, // Disable button functionality
-
-                    child: Text('Supprimer'),
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.only(left: 20,right: 20),
-                      foregroundColor: Colors.redAccent,
-                      backgroundColor: Colors.white,
-                      // side: BorderSide(color: Colors.black,),
-                      elevation: 3,
-                      // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
-                    ),
-
-                  ),
-                ],
-              ),
-
-            ],
-
           ),
         );
       },
@@ -1139,7 +824,13 @@ class _FilliereState extends State<Filliere> {
     if (response.statusCode == 200) {
       print('filliere ajouter avec succes');
       setState(() {
-        Navigator.pop(context);
+        fetchfilliere().then((data) {
+          setState(() {
+            filteredItems = data; // Assigner la liste renvoyée par filliereesseur à items
+          });
+        }).catchError((error) {
+          print('Erreur: $error');
+        });
       });
     } else {
       print("SomeThing Went Wrong");
@@ -1176,7 +867,13 @@ class _FilliereState extends State<Filliere> {
         // You can handle the response data as needed
 
         setState(() {
-          Navigator.pop(context);
+          fetchfilliere().then((data) {
+            setState(() {
+              filteredItems = data; // Assigner la liste renvoyée par filliereesseur à items
+            });
+          }).catchError((error) {
+            print('Erreur: $error');
+          });
         });
       } else {
         // Course creation failed

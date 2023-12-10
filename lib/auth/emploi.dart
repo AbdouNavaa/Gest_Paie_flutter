@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gestion_payements/filliere.dart';
 import 'package:gestion_payements/group.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -30,28 +31,41 @@ class _EmploiState extends State<Emploi> {
   List<Professeur> professeurList = [];
   List<Group> grpList = [];
   List<Matiere> matiereList = [];
+  List<filliere> filList = [];
 
   String getProfesseurIdFromName(String id) {
     // Assuming you have a list of professeurs named 'professeursList'
-    final professeur = professeurList.firstWhere((prof) => '${prof.id}' == id, orElse: () => Professeur(id: '', nom: '', prenom: '', mobile: 0, email: '', matieres: []));
-    print(professeur.nom);
+    final professeur = professeurList.firstWhere((prof) => '${prof.id}' == id, orElse: () =>
+        Professeur(id: '', nom: '',  mobile: 0, email: '', ));
+    print(professeurs);
     return professeur.nom; // Return the ID if found, otherwise an empty string
 
   }
+
   String getGroupIdFromName(String id) {
     // Assuming you have a list of professeurs named 'professeursList'
-    final grp = grpList.firstWhere((g) => '${g.id}' == id, orElse: () => Group(id: '', groupName: '', isOne: '', startEmploi: null, semestre: null));
+    final grp = grpList.firstWhere((g) => '${g.id}' == id, orElse: () => Group(id: '', groupName: '',  startEmploi: null, semestre: null));
     print( grp.groupName);
-    return grp.groupName; // Return the ID if found, otherwise an empty string
+    return '${getFilIdFromName(grp.filliereId!).toUpperCase()}${grp.semestre!.numero}-${grp.groupName}'; // Return the ID if found, otherwise an empty string
 
   }
+
   String getMatIdFromName(String id) {
     // Assuming you have a list of professeurs named 'professeursList'
-    final professeur = matiereList.firstWhere((prof) => '${prof.id}' == id, orElse: () =>Matiere(id: '', name: '', description: '', categorieId: '', categorie_name: '', code: '',));
+    final professeur = matiereList.firstWhere((prof) => '${prof.id}' == id, orElse: () =>Matiere(id: '', name: '',  categorieId: '', categorie_name: '', code: '',));
     // print(professeur.name);
     return professeur.name; // Return the ID if found, otherwise an empty string
 
   }
+
+  String getFilIdFromName(String id) {
+    // Assuming you have a list of professeurs named 'professeursList'
+    final fil = filList.firstWhere((f) => '${f.id}' == id, orElse: () =>filliere(id: '', name: '', description: '', niveau: ''));
+    print(id);
+    return fil.name; // Return the ID if found, otherwise an empty string
+
+  }
+
   void DeleteEmploi(id) async{
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token")!;
@@ -83,7 +97,11 @@ class _EmploiState extends State<Emploi> {
     fetchemploi().then((data) {
       setState(() {
         filteredItems = data; // Assigner la liste renvoyée par emploiesseur à items
+
+
       });
+
+
     }).catchError((error) {
       print('Erreur: $error');
     });
@@ -91,6 +109,15 @@ class _EmploiState extends State<Emploi> {
       setState(() {
         grpList = data; // Assigner la liste renvoyée par emploiesseur à items
       });
+
+      fetchMatiere().then((data) {
+        setState(() {
+          matiereList = data; // Assigner la liste renvoyée par emploiesseur à items
+        });
+      }).catchError((error) {
+        print('Erreur: $error');
+      });
+
     }).catchError((error) {
       print('Erreur: $error');
     });
@@ -98,19 +125,19 @@ class _EmploiState extends State<Emploi> {
       setState(() {
         professeurList = data; // Assigner la liste renvoyée par emploiesseur à items
       });
-      fetchMatiere().then((data) {
+    }).catchError((error) {
+      print('Erreur: $error');
+    });
+    fetchfilliere().then((data) {
       setState(() {
-        matiereList = data; // Assigner la liste renvoyée par emploiesseur à items
+        filList = data; // Assigner la liste renvoyée par emploiesseur à items
       });
     }).catchError((error) {
       print('Erreur: $error');
     });
 
-  }).catchError((error) {
-      print('Erreur: $error');
-    });
-
   }
+
   TextEditingController _searchController = TextEditingController();
 
   TextEditingController _date = TextEditingController();
@@ -186,22 +213,24 @@ class _EmploiState extends State<Emploi> {
 
 // Déclaration des listes au niveau de la classe
   List<String> typeNames = ['CM', 'TP', 'TD']; // Liste des noms uniques de types
-  List<double> nbhValues = [1.5, 2]; // Liste des valeurs de 'nbh'
-
-// Autres parties de votre classe
-
-  Future<void> _addEmploi(String TN,double TH,String date,int days,String GpId,String ProfId,String MatId) async {
+  List<double> nbhValues = [1.5, 2];
+  Future<void> addEmploi(String date, int days, String GpId, String ProfId, String MatId) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token")!;
     print(token);
-    // final response = await http.post(
-
 
     final Uri uri = Uri.parse('http://192.168.43.73:5000/emploi');
+
+    List<Map<String, dynamic>> typesList = [];
+
+    // Récupération de la liste des types sélectionnés avec les valeurs correspondantes
+    for (int i = 0; i < typeNames.length; i++) {
+      double value = selectedTypeName == typeNames[i] ? selectedNbhValue : 0.0;
+      typesList.add({"name": typeNames[i], "nbh": value});
+    }
+
     final Map<String, dynamic> emploiData = {
-      "types": [
-        {"name": TN, "nbh": TH}
-      ],
+      "types": typesList,
       "startTime": date,
       "dayNumero": days,
       "group": GpId,
@@ -220,9 +249,18 @@ class _EmploiState extends State<Emploi> {
       );
 
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Emploi ajouté avec succès.')),
-        );
+
+
+        print('Emploi ajouter avec succes');
+        fetchemploi().then((data) {
+          setState(() {
+            filteredItems = data; // Assigner la liste renvoyée par Groupesseur à items
+          });
+        }).catchError((error) {
+          print('Erreur: $error');
+        });
+
+
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Échec de l\'ajout de l\'emploi.')),
@@ -234,18 +272,28 @@ class _EmploiState extends State<Emploi> {
       );
     }
   }
+
   Future<void> UpdateEmp (id,String TN,double TH,String date,int days,String GpId,String ProfId,String MatId) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token")!;
     final url = 'http://192.168.43.73:5000/emploi/'  + '/$id';
+
+    List<Map<String, dynamic>> typesList = [];
+
+    // Récupération de la liste des types sélectionnés avec les valeurs correspondantes
+    for (int i = 0; i < typeNames.length; i++) {
+      double value = selectedTypeName == typeNames[i] ? selectedNbhValue : 0.0;
+      typesList.add({"name": typeNames[i], "nbh": value});
+    }
     final headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',
     };
     final Map<String, dynamic> body = {
-      "types": [
-        {"name": TN, "nbh": TH}
-      ],
+      "types": typesList,
+      // "types": [
+      //   {"name": TN, "nbh": TH}
+      // ],
       // "startTime": date!.toIso8601String(),
       'startTime': date,
       "dayNumero": days,
@@ -271,9 +319,17 @@ class _EmploiState extends State<Emploi> {
         final responseData = json.decode(response.body);
         // print("Course ID: ${responseData['cours']['_id']}");
         // You can handle the response data as needed
-        setState(() {
-          Navigator.pop(context);
-        });
+          fetchemploi().then((data) {
+            setState(() {
+              filteredItems = data; // Assigner la liste renvoyée par emploiesseur à items
+
+
+            });
+
+
+          }).catchError((error) {
+            print('Erreur: $error');
+          });
       } else {
         // Course creation failed
         print("Failed to update. Status code: ${response.statusCode}");
@@ -584,7 +640,7 @@ class _EmploiState extends State<Emploi> {
                             decoration: InputDecoration(
                               filled: true,
                               // fillColor: Color(0xA3B0AF1),
-                              hintText: "selection d'une Group",
+                              // hintText: "selection d'une Group",
 
                               border: OutlineInputBorder(
                                 borderSide: BorderSide.none,gapPadding: 1,
@@ -654,7 +710,7 @@ class _EmploiState extends State<Emploi> {
                       items: grpList.map((grp) {
                         return DropdownMenuItem<Group>(
                           value: grp,
-                          child: Text(grp.groupName ?? ''),
+                          child: Text('${getFilIdFromName(grp.filliereId!).toUpperCase()}${grp.semestre!.numero}-${grp.groupName}' ?? ''),
                         );
                       }).toList(),
                       onChanged: (value) async{
@@ -686,7 +742,6 @@ class _EmploiState extends State<Emploi> {
                         setState(()  {
                           selectedMat = value;
                           selectedProfesseur = null; // Reset the selected professor
-                          // professeurs = await fetchProfesseursByMatiere(selectedMat!.id); // Clear the professeurs list when a matière is selected
                           updateProfesseurList(); // Update the list of professeurs based on the selected matière
                         });
                       },
@@ -731,17 +786,17 @@ class _EmploiState extends State<Emploi> {
                       onPressed: (){
                         Navigator.of(context).pop();
 
-                        setState(() {
-                          // fetchemploi();
-                          Navigator.pop(context);
-                        });
-                        // fetchemploi();
+                        fetchemploi();
                         // DateTime date = DateFormat('yyyy/MM/dd HH:mm').parse(_date.text).toUtc();
-                        _addEmploi(selectedTypeName,selectedNbhValue,_date.text,int.parse(_numero.text),selectedGroup!.id,selectedProfesseur!.id,selectedMat!.id);
+                        addEmploi(_date.text,int.parse(_numero.text),selectedGroup!.id,selectedProfesseur!.id,selectedMat!.id);
                         // Addemploi(_name.text, _desc.text);
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('L\'emploi a été ajouter avec succès.')),
                         );
+
+                        setState(() {
+                          fetchemploi();
+                        });
 
                       },
                       child: Text("Ajouter"),
@@ -767,6 +822,9 @@ class _EmploiState extends State<Emploi> {
 
     );
   }
+  Map<String, dynamic>? findTypeWithNonZeroNbh(List<dynamic> types) {
+    return types.firstWhere((type) => type['nbh'] != 0);
+  }
   Future<void> _showCourseDetails(BuildContext context, emploi emp) {
     return showModalBottomSheet(
         context: context,
@@ -775,15 +833,16 @@ class _EmploiState extends State<Emploi> {
         isScrollControlled: true, // Rendre le contenu déroulable
 
         builder: (BuildContext context){
+          final typeWithNonZeroNbh = findTypeWithNonZeroNbh(emp.types);
           return Container(
-            height: 650,
+            height: 580,
             padding: const EdgeInsets.all(25.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.center,
               // mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Matiere Infos',style: TextStyle(fontSize: 30),),
+                Text('Emploi Infos',style: TextStyle(fontSize: 30),),
                 SizedBox(height: 50),
                 Row(
                   children: [
@@ -817,6 +876,29 @@ class _EmploiState extends State<Emploi> {
 
                     SizedBox(width: 10,),
                     Text('${getMatIdFromName( emp.mat)}',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+
+                  ],
+                ),
+
+                SizedBox(height: 25),
+                Row(
+                  children: [
+                    Text('Group:',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+
+                    SizedBox(width: 10,),
+                    Text('${getGroupIdFromName( emp.group)}',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,
@@ -892,51 +974,56 @@ class _EmploiState extends State<Emploi> {
 
                   ],
                 ),
-
-                SizedBox(height: 25),
-                Row(
-                  children: [
-                    Text('Type:',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                    SizedBox(width: 10,),
-                    Text('${emp.types[0]['name']}',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                  ],
-                ),
-                SizedBox(height: 25),
-                Row(
-                  children: [
-                    Text('Nb Heures:',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                    SizedBox(width: 10,),
-                    Text('${emp.types[0]['nbh']}',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                  ],
-                ),
+                  // SizedBox(height: 15),
+                if (typeWithNonZeroNbh != null)
+                  Column(
+                    children: [
+                      SizedBox(height: 25),
+                      Row(
+                        children: [
+                          Text('Type:',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.italic,
+                              // color: Colors.lightBlue
+                            ),
+                          ),
+                          SizedBox(width: 10,),
+                          Text('${typeWithNonZeroNbh['name']}',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.italic,
+                              // color: Colors.lightBlue
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 25),
+                      Row(
+                        children: [
+                          Text('Nb Heures:',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.italic,
+                              // color: Colors.lightBlue
+                            ),
+                          ),
+                          SizedBox(width: 10,),
+                          Text('${typeWithNonZeroNbh['nbh']}',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.italic,
+                              // color: Colors.lightBlue
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
 
                 SizedBox(height: 25,),
                 Row(
@@ -1076,7 +1163,7 @@ class _EmploiState extends State<Emploi> {
                                           items: grpList.map((grp) {
                                             return DropdownMenuItem<Group>(
                                               value: grp,
-                                              child: Text(grp.groupName ?? ''),
+                                              child: Text('${getFilIdFromName(grp.filliereId!).toUpperCase()}${grp.semestre!.numero}-${grp.groupName}' ?? ''),
                                             );
                                           }).toList(),
                                           onChanged: (value) async{
@@ -1153,9 +1240,9 @@ class _EmploiState extends State<Emploi> {
                                           onPressed: () {
                                             Navigator.of(context).pop();
 
-                                            // DateTime date = DateFormat('yyyy/MM/dd HH:mm').parse(_date.text).toUtc();
 
-                                            // Check if you're updating an existing matiere or creating a new one
+                                            fetchemploi();
+
                                             UpdateEmp(
                                               emp.id!,
                                               selectedTypeName,
@@ -1164,7 +1251,7 @@ class _EmploiState extends State<Emploi> {
                                             );
 
                                             setState(() {
-                                              Navigator.pop(context);
+                                              fetchemploi();
                                             });
 
                                             ScaffoldMessenger.of(context).showSnackBar(
@@ -1270,34 +1357,6 @@ class _EmploiState extends State<Emploi> {
   }
 
 
-  void Addemploi (String name,String description,[num? prix]) async {
-
-    // Check if the prix parameter is provided, otherwise use the default value of 100
-    if (prix == null) {
-      prix = 100;
-    }
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString("token")!;
-    print(token);
-    final response = await http.post(
-      Uri.parse('http://192.168.43.73:5000/categorie/'),
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode(<String, dynamic>{
-        "name":name,
-        // "code":code ,
-        "description":description ,
-        "prix": prix ,
-      }),
-    );
-    if (response.statusCode == 200) {
-      print('emploi ajouter avec succes');
-    } else {
-      print("SomeThing Went Wrong");
-    }
-  }
 
   Future<void> UpdateEmploi( id,String professeurId,String matiereId, List<Map<String, dynamic>> types, DateTime? date, bool isPaid) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -1413,12 +1472,12 @@ Future<List<emploi>> fetchemploi() async {
     List<dynamic> empData = jsonResponse['emplois'];
 
     print(empData);
-    List<emploi> categories = empData.map((item) {
+    List<emploi> emplois = empData.map((item) {
       return emploi.fromJson(item);
     }).toList();
 
-    // print(categories);
-    return categories;
+    print(emplois);
+    return emplois;
   } else {
     // If the server did not return a 200 OK response,
     // then throw an exception.

@@ -277,16 +277,16 @@ class _ProfessorDetailsWidgetState extends State<ProfessorDetailsWidget> {
                   // headingRowColor: MaterialStateColor.resolveWith((states) =>  Colors.blue,), // Set row background color
                   columns: [
                     DataColumn(label: Text('Matiere')),
-                    DataColumn(label: Text('Description')),
-                    DataColumn(label: Text('Prix')),
+                    // DataColumn(label: Text('Description')),
+                    // DataColumn(label: Text('Prix')),
                     DataColumn(label: Text('Action')),
                   ],
                   rows: [
                     for (var matiere in widget.professor['matieres'])
                       DataRow(cells: [
-                        DataCell(Text('${matiere['name']}')),
-                        DataCell(Text('${matiere['description']}')),
-                        DataCell(Text('${matiere['categorie']['prix']}')),
+                        DataCell(Text(matiere)),
+                        // DataCell(Text('${matiere['description']}')),
+                        // DataCell(Text('${matiere['categorie']['prix']}')),
                         DataCell(
                           ElevatedButton(
                             onPressed: () => _showDeleteConfirmationDialog(context, matiere), // Disable button functionality

@@ -95,6 +95,36 @@ class _ProfesseuresState extends State<Professeures> {
     }
   }
 
+  Future<void> fetchProfDatails(id) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString("token")!;
+    print(token);
+
+    final response = await http.get(
+      Uri.parse('http://192.168.43.73:5000/professeur/'+'/$id'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    print(response.statusCode);
+    // print(response.body);
+
+    if (response.statusCode == 200) {
+      Map<String, dynamic> professeursData = jsonDecode(response.body);
+      // List<dynamic> professeursData = jsonResponse['professeur'];
+      _showDetails(context, professeursData);
+      print(professeursData);
+
+    } else {
+      throw Exception('Failed to load Matiere');
+    }
+  }
+
+  List<Matiere> matiereList = [];
+
+
   @override
   void initState() {
     super.initState();
@@ -102,16 +132,47 @@ class _ProfesseuresState extends State<Professeures> {
       setState(() {
         filteredItems = data; // Assigner la liste renvoyée par Professeuresseur à items
       });
+
+    }).catchError((error) {
+      print('Erreur: $error');
+    });
+
+    fetchMatiere().then((data) {
+      setState(() {
+        matiereList = data; // Assigner la liste renvoyée par emploiesseur à items
+      });
     }).catchError((error) {
       print('Erreur: $error');
     });
 
     fetchCategories();
   }
+
+  String getMatIdFromName(String id) {
+    final professeur = matiereList.firstWhere((prof) => '${prof.id}' == id, orElse: () =>Matiere(id: '', name: 'blbla', categorieId: '', categorie_name: '', code: '',));
+    print('MatID: ${matiereList}');
+    return professeur.name; // Return the ID if found, otherwise an empty string
+
+  }
+  String getMatIdFromNames(String elements) {
+    List<dynamic> ids = elements.split(', '); // Sépare la chaîne en une liste d'IDs
+
+    // Traitez chaque ID individuellement ici
+    String result = '';
+    for (var id in ids) {
+      result += getMatIdFromName((id)) + '   '; // Traitez chaque ID avec getMatIdFromName
+    }
+
+    print(result);
+    return result.isNotEmpty ? result.substring(0, result.length - 2) : '';
+  }
+
   TextEditingController _searchController = TextEditingController();
 
   TextEditingController _name = TextEditingController();
   TextEditingController _prenom = TextEditingController();
+  TextEditingController _Banque = TextEditingController();
+  TextEditingController _account = TextEditingController();
   TextEditingController _email = TextEditingController();
   TextEditingController _mobile = TextEditingController();
   TextEditingController _matieres = TextEditingController();
@@ -175,8 +236,10 @@ class _ProfesseuresState extends State<Professeures> {
                   // Implémentez la logique de filtrage ici
                   // Par exemple, filtrez les Professeuresseurs dont le name ou le préname contient la valeur saisie
                   filteredItems = Professeurs!.where((professeur) =>
-                  professeur.nom!.toLowerCase().contains(value.toLowerCase()) ||
-                      professeur.prenom!.toLowerCase().contains(value.toLowerCase())).toList();
+                  professeur.nom!.toLowerCase().contains(value.toLowerCase())
+                      // ||
+                      // professeur.prenom!.toLowerCase().contains(value.toLowerCase())
+                  ).toList();
                 });
               },
               decoration: InputDecoration(
@@ -227,7 +290,7 @@ class _ProfesseuresState extends State<Professeures> {
                                       Column(
                                         children: [
                                           InkWell(
-                                            onTap: () =>_showDetails(context, filteredItems?[index]),// Disable button functionality
+                                            onTap: () => fetchProfDatails(filteredItems?[index].id),// Disable button functionality
 
                                             child: Padding(
                                               padding: const EdgeInsets.only(top: 8.0),
@@ -246,11 +309,11 @@ class _ProfesseuresState extends State<Professeures> {
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Text('${filteredItems?[index].nom} ${filteredItems?[index].prenom}',style: TextStyle(
+                                          Text('${filteredItems?[index].nom} ',style: TextStyle(
                                             color: Colors.black,
                                           ),),
                                           SizedBox(height: 10),
-                                          Text(' ${filteredItems?[index].mobile}',style: TextStyle(color: Colors.black38),),
+                                          Text(' ${filteredItems?[index].banque}',style: TextStyle(color: Colors.black38),),
                                          SizedBox(height: 10),
                                           Text(' ${filteredItems?[index].email}',style: TextStyle(color: Colors.black38),),
                                         ],
@@ -341,20 +404,20 @@ class _ProfesseuresState extends State<Professeures> {
                                       Radius.circular(10.0)))),
                         ),
 
-                        SizedBox(height: 10),
-                        TextField(
-                          controller: _prenom,
-                          keyboardType: TextInputType.text,
-                          decoration: InputDecoration(
-                              filled: true,
-                              // fillColor: Color(0xA3B0AF1),
-                              // fillColor: Colors.white,
-                              hintText: "Prenom",
-                              border: OutlineInputBorder(
-                                  borderSide: BorderSide.none,gapPadding: 1,
-                                  borderRadius: BorderRadius.all(
-                                      Radius.circular(10.0)))),
-                        ),
+                        // SizedBox(height: 10),
+                        // TextField(
+                        //   controller: _prenom,
+                        //   keyboardType: TextInputType.text,
+                        //   decoration: InputDecoration(
+                        //       filled: true,
+                        //       // fillColor: Color(0xA3B0AF1),
+                        //       // fillColor: Colors.white,
+                        //       hintText: "Prenom",
+                        //       border: OutlineInputBorder(
+                        //           borderSide: BorderSide.none,gapPadding: 1,
+                        //           borderRadius: BorderRadius.all(
+                        //               Radius.circular(10.0)))),
+                        // ),
 
                         SizedBox(height: 10),
                         TextField(
@@ -385,12 +448,42 @@ class _ProfesseuresState extends State<Professeures> {
                                   borderRadius: BorderRadius.all(
                                       Radius.circular(10.0)))),
                         ),
+
+                        SizedBox(height: 10),
+                        TextField(
+                          controller: _Banque,
+                          keyboardType: TextInputType.text,
+                          decoration: InputDecoration(
+                              filled: true,
+                              // fillColor: Color(0xA3B0AF1),
+                              // fillColor: Colors.white,
+                              hintText: "Banque",
+                              border: OutlineInputBorder(
+                                  borderSide: BorderSide.none,gapPadding: 1,
+                                  borderRadius: BorderRadius.all(
+                                      Radius.circular(10.0)))),
+                        ),
+
+                        SizedBox(height: 10),
+                        TextField(
+                          controller: _account,
+                          keyboardType: TextInputType.text,
+                          decoration: InputDecoration(
+                              filled: true,
+                              // fillColor: Color(0xA3B0AF1),
+                              // fillColor: Colors.white,
+                              hintText: "Compte",
+                              border: OutlineInputBorder(
+                                  borderSide: BorderSide.none,gapPadding: 1,
+                                  borderRadius: BorderRadius.all(
+                                      Radius.circular(10.0)))),
+                        ),
                         SizedBox(height: 30),
                         ElevatedButton(onPressed: () {
                           Navigator.of(context).pop();
                           fetchProfs();
-                          AddProfesseur(_name.text, _prenom.text, _email.text,
-                              num.parse(_mobile.text));
+                          AddProfesseur(_name.text, _Banque.text, _email.text,
+                              num.parse(_mobile.text),num.parse(_account.text));
                           // AddProfesseur(_name.text, _desc.text);
                           setState(() {
                             Navigator.pop(context);
@@ -420,7 +513,7 @@ class _ProfesseuresState extends State<Professeures> {
                 );
               });
   }
-  Future<void> _showDetails(BuildContext context, Professeur? prof) {
+  Future<void> _showDetails(BuildContext context, Map<String, dynamic> prof) {
     return showModalBottomSheet(
         context: context,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
@@ -433,321 +526,293 @@ class _ProfesseuresState extends State<Professeures> {
             padding: const EdgeInsets.all(25.0),
             child: SingleChildScrollView(
               child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                // mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    // mainAxisAlignment: MainAxisAlignment.start,
+                  // for (var p in prof['professeur'])
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    // mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Spacer(),
-                      Text("Prof Infos", style: TextStyle(fontSize: 30),),
-                      Spacer(),
-                      InkWell(
-                        child: Icon(Icons.close,size: 25),
-                        onTap: (){
-                          Navigator.pop(context);
-                        },
-                      )
-                    ],
-                  ),
-                  SizedBox(height: 50),
-                  Row(
-                    children: [
-                      Text('Nom:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                        ),),
-                      SizedBox(width: 10,),
-                      Text('${prof!.nom} ${prof!.prenom}',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                        ),),
-                    ],
-                  ),
-                  SizedBox(height: 25),
-                  Row(
-                    children: [
-                      Text('Email:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                        ),),
-                      SizedBox(width: 10,),
-                      Text('${prof!.email}',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                        ),),
-                    ],
-                  ),
-                  SizedBox(height: 25),
-                  Row(
-                    children: [
-                      Text('mobile:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                        ),),
-                      SizedBox(width: 10,),
-                      Text('${prof!.mobile}',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                        ),),
-                    ],
-                  ),
-                  SizedBox(height: 25),
-                  Row(
-                    children: [
-                      Text('NBH:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                        ),),
-                      SizedBox(width: 10,),
-                      Text('${prof!.nbh}',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                        ),),
-                    ],
-                  ),
-                  SizedBox(height: 25),
-                  Row(
-                    children: [
-                      Text('NBC:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                        ),),
-                      SizedBox(width: 10,),
-                      Text('${prof!.nbc}',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                        ),),
-                    ],
-                  ),
-                  SizedBox(height: 25),
-                  Row(
-                    children: [
-                      Text('TH:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                        ),),
-                      SizedBox(width: 10,),
-                      Text('${prof!.th}',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                        ),),
-                    ],
-                  ),
-                  SizedBox(height: 25),
-                  Row(
-                    children: [
-                      Text('Somme:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                        ),),
-                      SizedBox(width: 10,),
-                      Text('${prof!.somme}',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                        ),),
-                    ],
-                  ),
-                  SizedBox(height: 25),
-                  Row(
-                    children: [
-                      Text('Matieres:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                        ),),
-                      SizedBox(width: 10,),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        // mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          for (var matiere in prof!.matieres) // Assuming items![index].matieres is a list of matieres for the professor
-                            Row(
-                              children: [
-                                Text(matiere['name'] ?? '',
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w400,
-                                      fontStyle: FontStyle.italic,
-                                    )),
-                                TextButton(
-                                onPressed: (){
-                                      showDialog(
-                                        context: context,
-                                        builder: (context) {
-                                          return AlertDialog(
-                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
-                                            title: Text('Supprimer Matiere'),
-                                            content: Text('Voulez vous supprimer: ${matiere['name']}?'),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () {
-                                                  Navigator.of(context).pop(); // Close the dialog
-                                                },
-                                                child: Text('Cancel'),
-                                              ),
-                                              TextButton(
-                                                onPressed: () {
-                                                  Navigator.of(context).pop(); // Close the dialog
-                                                  String profId = prof!.id!;
-                                                  String matiereId = matiere['_id']; // Replace 'matiere' with the actual matiere data
-                                                  deleteMatiereFromProfesseur(profId, matiereId);
-                                                  setState(() {
-                                                    Navigator.pop(context);
-                                                  });ScaffoldMessenger.of(context).showSnackBar(
-                                                    SnackBar(
-                                                        content: Text('La matiere est Supprimer avec succès.',)),);
+                          // Spacer(),
+                          Text("Prof Infos", style: TextStyle(fontSize: 30),),
+                          Spacer(),
+                          InkWell(
+                            child: Icon(Icons.close,size: 25),
+                            onTap: (){
+                              Navigator.pop(context);
+                            },
+                          )
+                        ],
+                      ),
+                      SizedBox(height: 50),
+                      Row(
+                        children: [
+                          Text('Nom:',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.italic,
+                            ),),
+                          SizedBox(width: 10,),
+                          Text('${prof['professeur']['nomComplet']} ',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.italic,
+                            ),),
+                        ],
+                      ),
+                      SizedBox(height: 25),
+                      Row(
+                        children: [
+                          Text('Email:',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.italic,
+                            ),),
+                          SizedBox(width: 10,),
+                          Text('${prof['professeur']['email']}',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.italic,
+                            ),),
+                        ],
+                      ),
+                      SizedBox(height: 25),
+                      Row(
+                        children: [
+                          Text('mobile:',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.italic,
+                            ),),
+                          SizedBox(width: 10,),
+                          Text('${prof['professeur']['mobile']}',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.italic,
+                            ),),
+                        ],
+                      ),
+                      SizedBox(height: 25),
+                      Row(
+                        children: [
+                          Text('Banque:',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.italic,
+                            ),),
+                          SizedBox(width: 10,),
+                          Text('${prof['professeur']['banque']}',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.italic,
+                            ),),
+                        ],
+                      ),
+                      SizedBox(height: 25),
+                      Row(
+                        children: [
+                          Text('Compte:',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.italic,
+                            ),),
+                          SizedBox(width: 10,),
+                          Text('${prof['professeur']['accountNumero']}',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.italic,
+                            ),),
+                        ],
+                      ),
+                      SizedBox(height: 25),
+                      Row(
+                        children: [
+                          Text('Matieres:',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.italic,
+                            ),),
+                          SizedBox(width: 10,),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              for (var matiere in prof['matieres']) // Assuming items![index].matieres is a list of matieres for the professor
+                                Row(
+                                  children: [
+                                    // Text('Matieres: [${getMatIdFromNames(getMatSemIdFromName(semestre['_id']).join(", "))}]',style: TextStyle(fontSize: 18)),
+                                    Text(matiere['name'] ?? '',//abdou
+                                        style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w400,
+                                          fontStyle: FontStyle.italic,
+                                        )),
+                                    TextButton(
+                                    onPressed: (){
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) {
+                                              return AlertDialog(
+                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
+                                                title: Text('Supprimer Matiere'),
+                                                content: Text('Voulez vous supprimer: ${matiere['name']}?'),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      Navigator.of(context).pop(); // Close the dialog
+                                                    },
+                                                    child: Text('Cancel'),
+                                                  ),
+                                                  TextButton(
+                                                    onPressed: () {
+                                                      Navigator.of(context).pop(); // Close the dialog
+                                                      String profId = prof['professeur']['id']!;
+                                                      String matiereId = matiere['_id']; // Replace 'matiere' with the actual matiere data
+                                                      deleteMatiereFromProfesseur(profId, matiereId);
+                                                      setState(() {
+                                                        Navigator.pop(context);
+                                                      });ScaffoldMessenger.of(context).showSnackBar(
+                                                        SnackBar(
+                                                            content: Text('La matiere est Supprimer avec succès.',)),);
 
-                                                },
-                                                child: Text('Supprimer'),
-                                              ),
-                                            ],
+                                                    },
+                                                    child: Text('Supprimer'),
+                                                  ),
+                                                ],
+                                              );
+                                            },
                                           );
                                         },
-                                      );
-                                    },
-                                    child: Icon(Icons.delete, color: Colors.red,))
-                              ],
+                                        child: Icon(Icons.delete, color: Colors.red,))
+                                  ],
+                                ),
+                            ],
+                          ),
+
+                        ],
+                      ),
+                      // SizedBox(height: 40,),
+                      // ElevatedButton(
+                      //   onPressed:() =>_AddProfMatriere(context,prof['professeur']['_id']!),
+                      //   child:Text('Ajouter une Matiere au Prof',style: TextStyle(fontSize: 18)),
+                      //
+                      //   style: ElevatedButton.styleFrom(
+                      //     backgroundColor: Color(0xff0fb2ea),
+                      //     foregroundColor: Colors.white,
+                      //     elevation: 10,
+                      //     minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
+                      //     // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
+                      //     //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
+                      //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                      //   ),
+                      //
+                      // ),
+                      SizedBox(height: 20,),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              // Modifier les informations du professeur
+                            },
+                            child: Text('Modifier'),
+                            style: ElevatedButton.styleFrom(
+                              padding: EdgeInsets.only(left: 20,right: 20),
+                              foregroundColor: Colors.lightGreen,
+                              backgroundColor: Colors.white,
+                              // side: BorderSide(color: Colors.black,),
+                              elevation: 3,
+                              // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
                             ),
+
+                          ),
+                          ElevatedButton(
+                            onPressed:() {
+                            Navigator.pop(context);
+                              _AddProfMatriere(context,prof['professeur']['_id']!);
+
+                            setState(() {
+                              fetchMatiere();
+                            });
+                              },
+
+                            child: Text('Ajout Mat'),
+                            style: ElevatedButton.styleFrom(
+                              padding: EdgeInsets.only(left: 20,right: 20),
+                              foregroundColor: Colors.blue,
+                              backgroundColor: Colors.white,
+                              // side: BorderSide(color: Colors.black,),
+                              elevation: 3,
+                              // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                            ),
+
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                                    elevation: 1,
+                                    title: Text("Confirmer la suppression"),
+                                    content: Text("Êtes-vous sûr de vouloir supprimer cet élément ?"),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        child: Text("ANNULER"),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                      TextButton(
+                                        child: Text("SUPPRIMER"),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+
+                                          DeleteProfesseur(prof['professeur']['_id']!);
+                                          setState(() {
+                                            Navigator.pop(context);
+                                          });
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(content: Text('Le Professeur a été Supprimer avec succès.')),
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            child: Text('Supprimer'),
+                            style: ElevatedButton.styleFrom(
+                              padding: EdgeInsets.only(left: 20,right: 20),
+                              foregroundColor: Colors.redAccent,
+                              backgroundColor: Colors.white,
+                              // side: BorderSide(color: Colors.black,),
+                              elevation: 3,
+                              // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                            ),
+                          ),
                         ],
                       ),
 
                     ],
                   ),
-                  // SizedBox(height: 40,),
-                  // ElevatedButton(
-                  //   onPressed:() =>_AddProfMatriere(context,prof.id!),
-                  //   child:Text('Ajouter une Matiere au Prof',style: TextStyle(fontSize: 18)),
-                  //
-                  //   style: ElevatedButton.styleFrom(
-                  //     backgroundColor: Color(0xff0fb2ea),
-                  //     foregroundColor: Colors.white,
-                  //     elevation: 10,
-                  //     minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
-                  //     // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
-                  //     //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
-                  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                  //   ),
-                  //
-                  // ),
-                  SizedBox(height: 20,),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          // Modifier les informations du professeur
-                        },
-                        child: Text('Modifier'),
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.only(left: 20,right: 20),
-                          foregroundColor: Colors.lightGreen,
-                          backgroundColor: Colors.white,
-                          // side: BorderSide(color: Colors.black,),
-                          elevation: 3,
-                          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
-                        ),
-
-                      ),
-                      ElevatedButton(
-                        onPressed:() {
-                          setState(() {
-                            Navigator.pop(context);
-                          });
-                          _AddProfMatriere(context,prof.id!);
-                          },
-
-                        child: Text('Ajout Mat'),
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.only(left: 20,right: 20),
-                          foregroundColor: Colors.blue,
-                          backgroundColor: Colors.white,
-                          // side: BorderSide(color: Colors.black,),
-                          elevation: 3,
-                          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
-                        ),
-
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                                elevation: 1,
-                                title: Text("Confirmer la suppression"),
-                                content: Text("Êtes-vous sûr de vouloir supprimer cet élément ?"),
-                                actions: <Widget>[
-                                  TextButton(
-                                    child: Text("ANNULER"),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                  ),
-                                  TextButton(
-                                    child: Text("SUPPRIMER"),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-
-                                      DeleteProfesseur(prof.id!);
-                                      setState(() {
-                                        Navigator.pop(context);
-                                      });
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text('Le Professeur a été Supprimer avec succès.')),
-                                      );
-                                    },
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                        child: Text('Supprimer'),
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.only(left: 20,right: 20),
-                          foregroundColor: Colors.redAccent,
-                          backgroundColor: Colors.white,
-                          // side: BorderSide(color: Colors.black,),
-                          elevation: 3,
-                          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
-                        ),
-                      ),
-                    ],
-                  ),
-
                 ],
               ),
             ),
@@ -760,7 +825,14 @@ class _ProfesseuresState extends State<Professeures> {
 
   Future<void> _AddProfMatriere(BuildContext context,String Id) async {
     setState(() {
-      Navigator.pop(context);
+      fetchProfs().then((data) {
+        setState(() {
+          filteredItems = data; // Assigner la liste renvoyée par Professeuresseur à items
+        });
+
+      }).catchError((error) {
+        print('Erreur: $error');
+      });
     });
     return showDialog(
       context: context,
@@ -841,7 +913,7 @@ class _ProfesseuresState extends State<Professeures> {
   }
 
 }
-void AddProfesseur (String name,String prenom,String email,[num? mobile]) async {
+void AddProfesseur (String name,String Banque,String email,num mobile,[num? account]) async {
 
   // Check if the prix parameter is provided, otherwise use the default value of 100
   SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -854,10 +926,11 @@ void AddProfesseur (String name,String prenom,String email,[num? mobile]) async 
       'Authorization': 'Bearer $token',
     },
     body: jsonEncode(<String, dynamic>{
-      "nom":name,
-      "prenom":prenom ,
+      "nomComplet":name,
+      "banque":Banque ,
       "mobile": mobile,
       "email": email ,
+      "accountNumero": account ,
     }),
   );
   if (response.statusCode == 200) {
@@ -873,41 +946,46 @@ void AddProfesseur (String name,String prenom,String email,[num? mobile]) async 
 class Professeur {
   String id;
   String nom;
-  String prenom;
+  // String prenom;
   int mobile;
-  int nbh;
-  int nbc;
-  int th;
-  String somme;
+  String? banque;
+  int? compte;
+  num nbh;
+  num nbc;
+  num th;
+  num somme;
   String email;
-  List matieres; // Change this field to be of type List<String>
+  // List matieres; // Change this field to be of type List<String>
 
   Professeur({
     required this.id,
     required this.nom,
-    required this.prenom,
+     this.banque,
+     this.compte,
     required this.mobile,
     required this.nbh,
     required this.nbc,
     required this.th,
     required this.somme,
     required this.email,
-    required this.matieres, // Update the constructor parameter
+    // required this.matieres, // Update the constructor parameter
   });
 
   // Add a factory method to create a Professeur object from a JSON map
   factory Professeur.fromJson(Map<String, dynamic> json) {
     return Professeur(
       id: json['_id'],
-      nom: json['nom'],
-      prenom: json['prenom'],
+      nom: json['nomComplet'],
+      // prenom: json['prenom'],
       mobile: json['mobile'],
       nbh: json['nbh'],
       nbc: json['nbc'],
       th: json['th'],
       somme: json['somme'],
       email: json['email'],
-      matieres: List.from(json['matieres']), // Convert the 'matieres' list to List<String>
+      banque: json['banque'],
+      compte: json['accountNumero'],
+      // matieres: List.from(json['matieres']), // Convert the 'matieres' list to List<String>
     );
   }
 }
@@ -926,6 +1004,7 @@ class _AddProfMatState extends State<AddProfMat> {
   void initState()  {
     super.initState();
     fetchCategories();
+
   }
   Category? selectedCateg; // initialiser le type sélectionné à null
   Future<void> fetchCategories() async {

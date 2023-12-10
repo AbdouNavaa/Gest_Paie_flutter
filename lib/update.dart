@@ -53,8 +53,8 @@ class _UpdateCoursDialogState extends State<UpdateCoursDialog> {
     fetchproffs();
     fetchProfs();
     _date.text = DateFormat('yyyy/MM/dd HH:mm').format(DateTime.parse(widget.courses['date'])).toString();
-    _selectedSigne = widget.courses['isSigne'];
-    mat = widget.courses['matiere'];
+    // _selectedSigne = widget.courses['isSigne'];
+    mat = widget.courses['prix'];
     prof = widget.courses['professeur'];
   }
 
@@ -141,13 +141,15 @@ class _UpdateCoursDialogState extends State<UpdateCoursDialog> {
 
   String getProfesseurIdFromName(String name) {
     // Assuming you have a list of professeurs named 'professeursList'
-    final professeur = professeurList.firstWhere((prof) => '${prof.nom} ${prof.prenom}' == name, orElse: () => Professeur(id: '', nom: '', prenom: '', mobile: 0, email: '', matieres: []));
+    final professeur = professeurList.firstWhere((prof) => '${prof.nom} ' == name, orElse: () =>
+        Professeur(id: '', nom: '',  mobile: 0, email: '', ));
+        // Professeur(id: '', nom: '',  mobile: 0, email: '', matieres: []));
     return professeur?.id ?? ''; // Return the ID if found, otherwise an empty string
   }
 
   String getMatiereIdFromName(String name) {
     // Assuming you have a list of matieres named 'matieresList'
-    final matiere = matiereList.firstWhere((mat) => mat.name == name, orElse: () => Matiere(id: '', name: '', description: '', categorieId: '', categorie_name: '', code: '',));
+    final matiere = matiereList.firstWhere((mat) => mat.name == name, orElse: () => Matiere(id: '', name: '',  categorieId: '', categorie_name: '', code: '',));
     return matiere?.id ?? ''; // Return the ID if found, otherwise an empty string
   }
 

@@ -29,7 +29,7 @@ class _CategoriesState extends State<Categories> {
     String token = prefs.getString("token")!;
     print(token);
 
-    var response = await http.delete(Uri.parse('http://192.168.43.73:5000/categorie' +"/$id"),
+    var response = await http.delete(Uri.parse('http://192.168.43.73:5000/categorie/$id' ),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -40,7 +40,14 @@ class _CategoriesState extends State<Categories> {
     var jsonResponse = jsonDecode(response.body);
     print(response.statusCode);
     if(response.statusCode ==200){
-      fetchCategory();
+      fetchCategory().then((data) {
+        setState(() {
+          filteredItems = data;
+        });
+      }).catchError((error) {
+        print('Erreur lors de la récupération des Matieres: $error');
+      });
+
     }
 
   }
@@ -146,277 +153,251 @@ class _CategoriesState extends State<Categories> {
             ),
 
             Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(20),
-                        topRight: Radius.circular(20))),
-                child: Padding(
-                  padding: const EdgeInsets.all(1.0),
-                  child: FutureBuilder<List<Category>>(
-                    future: fetchCategory(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
-                      } else {
-                        if (snapshot.hasError) {
-                          return Text('Error: ${snapshot.error}');
-                        } else {
-                          List<Category>? items = snapshot.data;
+              child: Card(
+                elevation: 4,
+                margin: const EdgeInsets.all(8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: DataTable(
+                    showCheckboxColumn: true,
+                    showBottomBorder: true,
+                    headingRowHeight: 50,
+                    columnSpacing: 8,
+                    dataRowHeight: 50,
+                    columns: [
+                      DataColumn(label: Text('Code')),
+                      DataColumn(label: Text('Nom')),
+                      DataColumn(label: Text('Taux')),
+                      DataColumn(label: Text('Nb Mat')),
+                      DataColumn(label: Text('Action')),
+                    ],
+                    rows: [
+                      for (var categ in filteredItems!)
+                        DataRow(
+                            cells: [
+                              DataCell(Container(child: Text('${categ.code}')),
 
-                          return SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Container(
-                                width: MediaQuery.of(context).size.width,
-                                decoration: BoxDecoration(
-                                  color: Colors.white12,
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(20.0),
-                                  ),
-                                ),
-                                // margin: EdgeInsets.only(left: 10),
-                                child:
-                                DataTable(
-                                  showCheckboxColumn: true,
-                                  showBottomBorder: true,
-                                  headingRowHeight: 50,
-                                  columnSpacing: 15,
-                                  dataRowHeight: 50,
-                                  // border: TableBorder.all(color: Colors.black12, width: 2),
-                                  headingTextStyle: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black, // Set header text color
-                                  ),
-                                  // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
-                                  columns: [
-                                    DataColumn(label: Text('Code')),
-                                    DataColumn(label: Text('Nom')),
-                                    DataColumn(label: Text('Taux')),
-                                    DataColumn(label: Text('Action')),
-                                    // DataColumn(label: Text('Descrition')),
-                                  ],
-                                  rows: [
-                                    for (var categ in filteredItems!)
-                                        DataRow(
-                                            cells: [
-                                              DataCell(Container(child: Text('${categ.code}')),
+                                // onTap:() => _showcategDetails(context, categ)
+                              ),
+                              DataCell(Text('${categ.name}',style: TextStyle(
+                                color: Colors.black,
+                              ),),
 
-                                                // onTap:() => _showcategDetails(context, categ)
-                                              ),
-                                              DataCell(Text('${categ.name}',style: TextStyle(
-                                                color: Colors.black,
-                                              ),),
+                                // onTap:() => _showcategDetails(context, categ)
+                              ),
+                              DataCell(Text('${categ.prix}',style: TextStyle(
+                                color: Colors.black,
+                              ),),),
+                              DataCell(Text('${categ.nb_matieres}',style: TextStyle(
+                                color: Colors.black,
+                              ),),),
+                              DataCell(
+                                Row(
+                                  children: [
+                                    Container(
+                                      width: 35,
+                                      child: TextButton(
 
-                                                // onTap:() => _showcategDetails(context, categ)
-                                              ),
-                                              DataCell(Text('${categ.prix}',style: TextStyle(
-                                                color: Colors.black,
-                                              ),),),
-                                              DataCell(
-                                                Row(
-                                                  children: [
-                                                    Container(
-                                                      width: 35,
-                                                      child: TextButton(
+                                        onPressed: (){
+                                          _name.text = categ.name!;
+                                          // _code.text = categ.code!;
+                                          _desc.text = categ.description!;
+                                          _selectedTaux = categ.prix!;
+                                          showModalBottomSheet(
+                                              context: context,
+                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
+                                                  topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
+                                              isScrollControlled: true, // Rendre le contenu déroulable
 
-                                                        onPressed: (){
-                                                          _name.text = categ.name!;
-                                                          // _code.text = categ.code!;
-                                                          _desc.text = categ.description!;
-                                                          _selectedTaux = categ.prix!;
-                                                          showModalBottomSheet(
-                                                              context: context,
-                                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
-                                                                  topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
-                                                              isScrollControlled: true, // Rendre le contenu déroulable
+                                              builder: (BuildContext context){
+                                                return SingleChildScrollView(
+                                                  child: Container(
+                                                    height: 600,
+                                                    padding: const EdgeInsets.all(25.0),
+                                                    child: Column(
+                                                      // mainAxisSize: MainAxisSize.min,
+                                                      children: [
+                                                        Row(
+                                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                                          // mainAxisAlignment: MainAxisAlignment.start,
+                                                          children: [
+                                                            Text("Modifier une categorie", style: TextStyle(fontSize: 25),),
+                                                            Spacer(),
+                                                            InkWell(
+                                                              child: Icon(Icons.close),
+                                                              onTap: (){
+                                                                Navigator.pop(context);
+                                                              },
+                                                            )
+                                                          ],
+                                                        ),
+                                                        //hmmm
+                                                        SizedBox(height: 40),
+                                                        TextField(
+                                                          controller: _name,
+                                                          keyboardType: TextInputType.text,
+                                                          decoration: InputDecoration(
+                                                              filled: true,
+                                                              // fillColor: Colors.white,
+                                                              border: OutlineInputBorder(
+                                                                  borderSide: BorderSide.none,gapPadding: 1,
+                                                                  borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                                                        ),
 
-                                                              builder: (BuildContext context){
-                                                                return SingleChildScrollView(
-                                                                  child: Container(
-                                                                    height: 600,
-                                                                    padding: const EdgeInsets.all(25.0),
-                                                                    child: Column(
-                                                                      // mainAxisSize: MainAxisSize.min,
-                                                                      children: [
-                                                                        Row(
-                                                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                                                          // mainAxisAlignment: MainAxisAlignment.start,
-                                                                          children: [
-                                                                            Text("Modifier une categorie", style: TextStyle(fontSize: 25),),
-                                                                            Spacer(),
-                                                                            InkWell(
-                                                                              child: Icon(Icons.close),
-                                                                              onTap: (){
-                                                                                Navigator.pop(context);
-                                                                              },
-                                                                            )
-                                                                          ],
-                                                                        ),
-                                                                        //hmmm
-                                                                        SizedBox(height: 40),
-                                                                        TextField(
-                                                                          controller: _name,
-                                                                          keyboardType: TextInputType.text,
-                                                                          decoration: InputDecoration(
-                                                                              filled: true,
-                                                                              // fillColor: Colors.white,
-                                                                              border: OutlineInputBorder(
-                                                                                  borderSide: BorderSide.none,gapPadding: 1,
-                                                                                  borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                                                                        ),
+                                                        SizedBox(height: 10),
+                                                        TextFormField(
+                                                          controller: _desc,
+                                                          keyboardType: TextInputType.text,
+                                                          maxLines: 3,
+                                                          decoration: InputDecoration(
+                                                              filled: true,
 
-                                                                        SizedBox(height: 10),
-                                                                        TextFormField(
-                                                                          controller: _desc,
-                                                                          keyboardType: TextInputType.text,
-                                                                          maxLines: 3,
-                                                                          decoration: InputDecoration(
-                                                                              filled: true,
+                                                              // fillColor: Colors.white,
+                                                              hintText: "description",
+                                                              border: OutlineInputBorder(
+                                                                  borderSide: BorderSide.none,gapPadding: 1,
+                                                                  borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                                                        ),
 
-                                                                              // fillColor: Colors.white,
-                                                                              hintText: "description",
-                                                                              border: OutlineInputBorder(
-                                                                                  borderSide: BorderSide.none,gapPadding: 1,
-                                                                                  borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                                                                        ),
-
-                                                                        SizedBox(height: 10),
-                                                                        DropdownButtonFormField<num>(
-                                                                          value: _selectedTaux,
-                                                                          items: [
-                                                                            DropdownMenuItem<num>(
-                                                                              child: Text('500'),
-                                                                              value: 500,
-                                                                            ),
-                                                                            DropdownMenuItem<num>(
-                                                                              child: Text('900'),
-                                                                              value: 900,
-                                                                            ),
-                                                                          ],
-                                                                          onChanged: (value) {
-                                                                            setState(() {
-                                                                              _selectedTaux = value!;
-                                                                            });
-                                                                          },
-                                                                          decoration: InputDecoration(
-                                                                            filled: true,
-                                                                            // fillColor: Colors.white,
-                                                                            border: OutlineInputBorder(
-                                                                              borderSide: BorderSide.none,gapPadding: 1,
-                                                                              borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                        SizedBox(height: 10),
+                                                        SizedBox(height: 10),
+                                                        DropdownButtonFormField<num>(
+                                                          value: _selectedTaux,
+                                                          items: [
+                                                            DropdownMenuItem<num>(
+                                                              child: Text('500'),
+                                                              value: 500,
+                                                            ),
+                                                            DropdownMenuItem<num>(
+                                                              child: Text('900'),
+                                                              value: 900,
+                                                            ),
+                                                          ],
+                                                          onChanged: (value) {
+                                                            setState(() {
+                                                              _selectedTaux = value!;
+                                                            });
+                                                          },
+                                                          decoration: InputDecoration(
+                                                            filled: true,
+                                                            // fillColor: Colors.white,
+                                                            border: OutlineInputBorder(
+                                                              borderSide: BorderSide.none,gapPadding: 1,
+                                                              borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        SizedBox(height: 10),
 
 
 
 
-                                                                        ElevatedButton(
-                                                                          onPressed: () {
-                                                                            Navigator.of(context).pop();
-                                                                            _taux.text = _selectedTaux.toString();
+                                                        ElevatedButton(
+                                                          onPressed: () {
+                                                            Navigator.of(context).pop();
+                                                            _taux.text = _selectedTaux.toString();
 
-                                                                            fetchCategory();
-                                                                            // AddCategory(_name.text, _desc.text);
-                                                                            print(categ.id!);
-                                                                            UpdateCateg(categ.id!, _name.text,_desc.text, _selectedTaux,);
-                                                                            ScaffoldMessenger.of(context).showSnackBar(
-                                                                              SnackBar(content: Text('Le Type est mis à jour avec succès.')),
-                                                                            );
+                                                            fetchCategory();
+                                                            // AddCategory(_name.text, _desc.text);
+                                                            print(categ.id!);
+                                                            UpdateCateg(categ.id!, _name.text,_desc.text, _selectedTaux,);
+                                                            ScaffoldMessenger.of(context).showSnackBar(
+                                                              SnackBar(content: Text('Le Type est mis à jour avec succès.')),
+                                                            );
 
-                                                                            setState(() {
-                                                                              fetchCategory();
-                                                                            });
-                                                                          },
-                                                                          child: Text("Modifier"),
+                                                            setState(() {
+                                                              fetchCategory();
+                                                            });
+                                                          },
+                                                          child: Text("Modifier"),
 
-                                                                          style: ElevatedButton.styleFrom(
-                                                                            backgroundColor: Color(0xff0fb2ea),
-                                                                            foregroundColor: Colors.white,
-                                                                            elevation: 10,
-                                                                            minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
-                                                                            // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
-                                                                            //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
-                                                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                                                                          ),
-                                                                        )
-                                                                      ],
-                                                                    ),
-                                                                  ),
-                                                                );
-
-                                                              }
-
-
-                                                          );
-                                                        }, // Disable button functionality
-                                                        child: Icon(Icons.mode_edit_outline_outlined, color: Colors.black,),
-
-                                                      ),
+                                                          style: ElevatedButton.styleFrom(
+                                                            backgroundColor: Color(0xff0fb2ea),
+                                                            foregroundColor: Colors.white,
+                                                            elevation: 10,
+                                                            minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
+                                                            // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
+                                                            //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
+                                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                                          ),
+                                                        )
+                                                      ],
                                                     ),
-                                                    Container(
-                                                      width: 35,
-                                                      child: TextButton(
-                                                        onPressed: () {
-                                                          showDialog(
-                                                            context: context,
-                                                            builder: (BuildContext context) {
-                                                              return AlertDialog(
-                                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
-                                                                title: Text("Confirmer la suppression"),
-                                                                content: Text(
-                                                                    "Êtes-vous sûr de vouloir supprimer cet élément ?"),
-                                                                actions: <Widget>[
-                                                                  TextButton(
-                                                                    child: Text("ANNULER"),
-                                                                    onPressed: () {
-                                                                      Navigator.of(context).pop();
-                                                                    },
-                                                                  ),
-                                                                  TextButton(
-                                                                    child: Text(
-                                                                      "SUPPRIMER",
-                                                                      // style: TextStyle(color: Colors.red),
-                                                                    ),
-                                                                    onPressed: () {
-                                                                      Navigator.of(context).pop();
-                                                                      DeleteCategory(categ.id);
-                                                                      ScaffoldMessenger.of(context).showSnackBar(
-                                                                        SnackBar(content: Text('Le Category a été Supprimer avec succès.')),
-                                                                      );
-                                                                    },
-                                                                  ),
-                                                                ],
-                                                              );
-                                                            },
-                                                          );
-                                                        }, // Disable button functionality
-                                                        child: Icon(Icons.delete_outline, color: Colors.black,),
+                                                  ),
+                                                );
 
-                                                      ),
+                                              }
+                                          );
+                                        }, // Disable button functionality
+                                        child: Icon(Icons.mode_edit_outline_outlined, color: Colors.black,),
+
+                                      ),
+                                    ),
+                                    Container(
+                                      width: 35,
+                                      child: TextButton(
+                                        onPressed: () {
+                                          showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return AlertDialog(
+                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
+                                                title: Text("Confirmer la suppression"),
+                                                content: Text(
+                                                    "Êtes-vous sûr de vouloir supprimer cet élément ?"),
+                                                actions: <Widget>[
+                                                  TextButton(
+                                                    child: Text("ANNULER"),
+                                                    onPressed: () {
+                                                      Navigator.of(context).pop();
+                                                    },
+                                                  ),
+                                                  TextButton(
+                                                    child: Text(
+                                                      "SUPPRIMER",
+                                                      // style: TextStyle(color: Colors.red),
                                                     ),
+                                                    onPressed: () {
+                                                      Navigator.of(context).pop();
 
-                                                  ],
-                                                ),
-                                              ),
-                                              // DataCell(Container(width: 105,
-                                              //     child: Text('${categ.description}',)),),
+                                                      fetchCategory();
+                                                      DeleteCategory(categ!.id);
+                                                      print(categ.id!);
+                                                      // Navigator.of(context).pop();
+                                                      ScaffoldMessenger.of(context).showSnackBar(
+                                                        SnackBar(content: Text('Le Category a été Supprimer avec succès.')),
+                                                      );
+                                                      setState(() {
+                                                        fetchCategory();
+                                                      });
+                                                    },
+                                                  ),
+                                                ],
+                                              );
+                                            },
+                                          );
+                                        }, // Disable button functionality
+                                        child: Icon(Icons.delete_outline, color: Colors.black,),
 
+                                      ),
+                                    ),
 
-                                            ]),
                                   ],
                                 ),
                               ),
-                            );
-                    }
-                      }
-                    },
+                              // DataCell(Container(width: 105,
+                              //     child: Text('${categ.description}',)),),
+
+
+                            ]),
+                    ],
                   ),
                 ),
               ),
             ),
+
           ],
         ),
         floatingActionButton: FloatingActionButton.extended(
@@ -453,7 +434,7 @@ class _CategoriesState extends State<Categories> {
         builder: (BuildContext context){
           return SingleChildScrollView(
             child: Container(
-              height: 600,
+              height: 450,
               padding: const EdgeInsets.all(25.0),
               child: Column(
                 // mainAxisSize: MainAxisSize.min,
@@ -537,6 +518,7 @@ class _CategoriesState extends State<Categories> {
                   ElevatedButton(
                     onPressed: (){
                       Navigator.of(context).pop();
+
                       fetchCategory();
                       _taux.text = _selectedTaux.toString();
                       AddCategory(_name.text,_desc.text,num.parse(_taux.text));
@@ -544,9 +526,9 @@ class _CategoriesState extends State<Categories> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Le Category a été ajouter avec succès.')),
                       );
-                      // setState(() {
-                      //   fetchCategory();
-                      // });
+                      setState(() {
+                        fetchCategory();
+                      });
                     },
                     child: Text("Ajouter"),
 
@@ -596,6 +578,14 @@ class _CategoriesState extends State<Categories> {
     );
     if (response.statusCode == 200) {
       print('Category ajouter avec succes');
+      fetchCategory().then((data) {
+        setState(() {
+          filteredItems = data;
+        });
+      }).catchError((error) {
+        print('Erreur lors de la récupération des Matieres: $error');
+      });
+
     } else {
       print("SomeThing Went Wrong");
     }

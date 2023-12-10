@@ -57,16 +57,20 @@ class _GroupsState extends State<Groups> {
     var jsonResponse = jsonDecode(response.body);
     print(response.statusCode);
     if(response.statusCode ==200){
-      fetchGroup();
-      // setState(() {
-      Navigator.pop(context);
-      // });
+      fetchGroup().then((data) {
+        setState(() {
+          filteredItems = data; // Assigner la liste renvoyée par Groupesseur à items
+        });
+      }).catchError((error) {
+        print('Erreur: $error');
+      });
+
     }
 
   }
   String getMatIdFromName(String id) {
     // Assuming you have a list of professeurs named 'professeursList'
-    final professeur = matiereList.firstWhere((prof) => '${prof.id}' == id, orElse: () =>Matiere(id: '', name: '', description: '', categorieId: '', categorie_name: '', code: '',));
+    final professeur = matiereList.firstWhere((prof) => '${prof.id}' == id, orElse: () =>Matiere(id: '', name: '',  categorieId: '', categorie_name: '', code: '',));
     print(professeur.name);
     return professeur.name; // Return the ID if found, otherwise an empty string
 
@@ -167,7 +171,7 @@ class _GroupsState extends State<Groups> {
   TextEditingController _name = TextEditingController();
   TextEditingController _sem = TextEditingController();
   TextEditingController _isOne = TextEditingController();
-  String _selectedGN = "ALL";
+  String _selectedGN = "A";
   String _selectedOne = "YES";
 
 
@@ -237,7 +241,7 @@ class _GroupsState extends State<Groups> {
                     filteredItems = Groupes!.where((grp) =>
                         (grp.groupName!).toLowerCase().contains(value.toLowerCase()) ||
                             getFilIdFromName(grp.filliereId!).toLowerCase().contains(value.toLowerCase()) ||
-                        (grp.isOne!).toLowerCase().contains(value.toLowerCase()) ||
+                        // (grp.isOne!).toLowerCase().contains(value.toLowerCase()) ||
                         (grp.startEmploi!.toString()).toLowerCase().contains(value.toLowerCase()) ||
                         (grp.finishEmploi!.toString()).toLowerCase().contains(value.toLowerCase())
                     ).toList();
@@ -318,7 +322,7 @@ class _GroupsState extends State<Groups> {
                                           DataCell(Container(child:
                                           Row(
                                             children: [
-                                              Text(getFilIdFromName(grp.filliereId!),),
+                                              Text(getFilIdFromName(grp.filliereId!).toUpperCase(),),
                                               SizedBox(child: Text('-'),),
                                               Text('${grp.semestre!.numero}',),
                                             ],
@@ -422,10 +426,6 @@ class _GroupsState extends State<Groups> {
                     value: _selectedGN,
                     items: [
                       DropdownMenuItem<String>(
-                        child: Text('ALL'),
-                        value: "ALL",
-                      ),
-                      DropdownMenuItem<String>(
                         child: Text('A'),
                         value: "A",
                       ),
@@ -452,36 +452,6 @@ class _GroupsState extends State<Groups> {
                       ),
                     ),
                   ),
-
-
-                  SizedBox(height: 15),
-                  DropdownButtonFormField<String>(
-                    value: _selectedOne,
-                    items: [
-                      DropdownMenuItem<String>(
-                        child: Text('YES'),
-                        value: "YES",
-                      ),
-                      DropdownMenuItem<String>(
-                        child: Text('NO'),
-                        value: "NO",
-                      ),
-                    ],
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedOne = value!;
-                      });
-                    },
-                    decoration: InputDecoration(
-                      filled: true,labelText: 'Seule?',labelStyle: TextStyle(fontSize: 20,color: Colors.black),
-                      // fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide.none,gapPadding: 1,
-                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                      ),
-                    ),
-                  ),
-
 
                   SizedBox(height: 10),
                   TextFormField(
@@ -527,13 +497,13 @@ class _GroupsState extends State<Groups> {
                   ElevatedButton(
                     onPressed: (){
                       Navigator.of(context).pop();
-                      // fetchfilliere();
+                      fetchGroup();
                       DateTime date = DateFormat('yyyy/MM/dd').parse(_date.text).toUtc();
                       _name.text = _selectedGN.toString();
                       _isOne.text = _selectedOne.toString();
 
                       // Pass the selected types to addCoursToProfesseur method
-                      AddGroup(_name.text,_isOne.text, selectedFil!.id!,date);
+                      AddGroup(_name.text, selectedFil!.id!,date);
                       // AddGroup(int.parse(_numero.text),date, selectedFil!.id!);
 
                       // Addfilliere(_name.text, _desc.text);
@@ -541,7 +511,7 @@ class _GroupsState extends State<Groups> {
                         SnackBar(content: Text('Le filliere a été ajouter avec succès.')),
                       );
                       setState(() {
-                        Navigator.pop(context);
+                        fetchGroup();
                       });
                     },
                     child: Text("Ajouter"),
@@ -602,28 +572,6 @@ class _GroupsState extends State<Groups> {
                         fontStyle: FontStyle.italic,
                         // color: Colors.lightBlue
                       ),),
-                  ],
-                ),
-                SizedBox(height: 25),
-                Row(
-                  children: [
-                    Text('seule?:',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                    SizedBox(width: 10,),
-                    Text('${grp.isOne}',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
                   ],
                 ),
                 SizedBox(height: 25),
@@ -746,7 +694,7 @@ class _GroupsState extends State<Groups> {
                         });
 
                         _name.text = grp.groupName;
-                        _isOne.text = grp.isOne;
+                        // _isOne.text = grp.isOne;
                         _sem.text = grp.semestre!.id;
                         _date.text = DateFormat('dd/MM/yyyy').format(DateTime.parse(grp.startEmploi.toString()));
 
@@ -782,10 +730,6 @@ class _GroupsState extends State<Groups> {
                                         value: _name.text,
                                         items: [
                                           DropdownMenuItem<String>(
-                                            child: Text('ALL'),
-                                            value: "ALL",
-                                          ),
-                                          DropdownMenuItem<String>(
                                             child: Text('A'),
                                             value: "A",
                                           ),
@@ -813,33 +757,6 @@ class _GroupsState extends State<Groups> {
                                         ),
                                       ),
                                       SizedBox(height: 15),
-                                      DropdownButtonFormField<String>(
-                                        value: _isOne.text,
-                                        items: [
-                                          DropdownMenuItem<String>(
-                                            child: Text('YES'),
-                                            value: "YES",
-                                          ),
-                                          DropdownMenuItem<String>(
-                                            child: Text('NO'),
-                                            value: "NO",
-                                          ),
-                                        ],
-                                        onChanged: (value) {
-                                          setState(() {
-                                            _selectedOne = value!;
-                                          });
-                                        },
-                                        decoration: InputDecoration(
-                                          filled: true,labelText: 'Seule?',labelStyle: TextStyle(fontSize: 20,color: Colors.black),
-                                          // fillColor: Colors.white,
-                                          border: OutlineInputBorder(
-                                            borderSide: BorderSide.none,gapPadding: 1,
-                                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                                          ),
-                                        ),
-                                      ),
-                                      SizedBox(height: 10),
                                       DropdownButtonFormField<Semestre>(
                                         value: selectedFil,
                                         items: semLis.map((fil) {
@@ -893,23 +810,19 @@ class _GroupsState extends State<Groups> {
                                           _isOne.text = _selectedOne.toString();
                                           DateTime date = DateFormat('yyyy/MM/dd').parse(_date.text).toUtc();
 
-                                          // Check if you're updating an existing matiere or creating a new one
-                                          UpdateGroup(
-                                            grp.id!,
-                                            _name.text,
-                                            _isOne.text,
-                                            selectedFil!.id!,
-                                            // selectedMat!.id!,
-                                            date,
-                                          );
+                                          fetchGroup();
 
-                                          setState(() {
-                                            Navigator.pop(context);
-                                          });
+                                          UpdateGroup(grp.id!, _name.text, selectedFil!.id!, date,);
+
+
 
                                           ScaffoldMessenger.of(context).showSnackBar(
                                             SnackBar(content: Text('Le Type est mis à jour avec succès.')),
                                           );
+                                          setState(() {
+                                           // Navigator.pop(context);
+                                            fetchGroup();
+                                          });
                                         },
                                         child: Text("Modifier"),
 
@@ -968,13 +881,18 @@ class _GroupsState extends State<Groups> {
                                   ),
                                   onPressed: () {
                                     Navigator.of(context).pop();
+
+                                    fetchGroup();
                                     DeleteGroups(GrpId);
-                                    setState(() {
-                                      Navigator.pop(context);
-                                    });
+
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(content: Text('Le Category a été Supprimer avec succès.')),
                                     );
+
+                                    setState(() {
+                                      Navigator.pop(context);
+                                      fetchGroup();
+                                    });
                                   },
                                 ),
                               ],
@@ -1007,7 +925,7 @@ class _GroupsState extends State<Groups> {
   }
 
 
-  void AddGroup (String Gname,String isOne,String semId,DateTime? date) async {
+  void AddGroup (String Gname,String semId,DateTime? date) async {
 
     // Check if the prix parameter is provided, otherwise use the default value of 100
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -1020,23 +938,27 @@ class _GroupsState extends State<Groups> {
         'Authorization': 'Bearer $token',
       },
       body: jsonEncode(<String, dynamic>{
-        "groupName":Gname,
-        "isOne": isOne ,
+        "name":Gname,
         "semestre": semId ,
-        'start': date?.toIso8601String(),
+        'startEmploi': date?.toIso8601String(),
       }),
     );
     if (response.statusCode == 200) {
       print('Group ajouter avec succes');
-      setState(() {
-        Navigator.pop(context);
+      fetchGroup().then((data) {
+        setState(() {
+          filteredItems = data; // Assigner la liste renvoyée par Groupesseur à items
+        });
+      }).catchError((error) {
+        print('Erreur: $error');
       });
+
     } else {
       print("SomeThing Went Wrong");
     }
   }
 
-  Future<void> UpdateGroup (id,String groupName,String isOne,String semestre,DateTime? date) async {
+  Future<void> UpdateGroup (id,String groupName,String semestre,DateTime? date) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token")!;
     final url = 'http://192.168.43.73:5000/group/'  + '/$id';
@@ -1045,8 +967,7 @@ class _GroupsState extends State<Groups> {
       'Authorization': 'Bearer $token',
     };
     Map<String, dynamic> body =({
-      "groupName":groupName,
-      "isOne": isOne ,
+      "name":groupName,
       "semestre":[semestre] ,
       'startEmploi': date?.toIso8601String(),
     });
@@ -1068,6 +989,14 @@ class _GroupsState extends State<Groups> {
         final responseData = json.decode(response.body);
         // print("Course ID: ${responseData['cours']['_id']}");
         // You can handle the response data as needed
+        fetchGroup().then((data) {
+          setState(() {
+            filteredItems = data;
+          });
+        }).catchError((error) {
+          print('Erreur lors de la récupération des Matieres: $error');
+        });
+
       } else {
         // Course creation failed
         print("Failed to update. Status code: ${response.statusCode}");
@@ -1084,7 +1013,7 @@ class _GroupsState extends State<Groups> {
 class Group {
   String id;
   String groupName;
-  String isOne;
+  // String isOne;
   DateTime? startEmploi;
   Semes? semestre;
   DateTime? finishEmploi;
@@ -1093,7 +1022,7 @@ class Group {
   Group({
     required this.id,
     required this.groupName,
-    required this.isOne,
+    // required this.isOne,
     this.startEmploi,
     this.semestre,
     this.finishEmploi,
@@ -1103,8 +1032,8 @@ class Group {
   factory Group.fromJson(Map<String, dynamic> json) {
     return Group(
       id: json['_id'],
-      groupName: json['groupName'],
-      isOne: json['isOne'],
+      groupName: json['name'],
+      // isOne: json['isOne'],
       startEmploi: DateTime.parse(json['startEmploi']),
       semestre: Semes.fromJson(json['semestre']),
       finishEmploi: DateTime.parse(json['finishEmploi']),

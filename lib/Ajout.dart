@@ -399,29 +399,32 @@ class _AddCoursDialogState extends State<AddCoursDialog> {
 class Professeur {
   String id;
   String nom;
-  String prenom;
   int mobile;
   String email;
-  List matieres; // Change this field to be of type List<String>
+  String? Banque;
+  int? account;
+  // List matieres; // Change this field to be of type List<String>
 
   Professeur({
     required this.id,
     required this.nom,
-    required this.prenom,
+     this.Banque,
+     this.account,
     required this.mobile,
     required this.email,
-    required this.matieres, // Update the constructor parameter
+    // required this.matieres, // Update the constructor parameter
   });
 
   // Add a factory method to create a Professeur object from a JSON map
   factory Professeur.fromJson(Map<String, dynamic> json) {
     return Professeur(
       id: json['_id'],
-      nom: json['nom'],
-      prenom: json['prenom'],
+      nom: json['nomComplet'],
+      Banque: json['banque'],
       mobile: json['mobile'],
+      account: json['accountNumero'],
       email: json['email'],
-      matieres: List.from(json['matieres']), // Convert the 'matieres' list to List<String>
+      // matieres: List.from(json['matieres']), // Convert the 'matieres' list to List<String>
     );
   }
 }

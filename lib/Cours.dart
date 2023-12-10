@@ -10,7 +10,7 @@ import 'constants.dart';
 
 class CoursesPage extends StatefulWidget {
   final List<dynamic> courses;
-  // final int coursNum;
+  final int coursNum;
   // final num heuresTV;
   final String role;
   // final num sommeTV;
@@ -18,7 +18,7 @@ class CoursesPage extends StatefulWidget {
   DateTime? dateFin;
 // Calculate the sums for filtered courses
 
-  CoursesPage({required this.courses, required this.role}) {}
+  CoursesPage({required this.courses, required this.role, required this.coursNum}) {}
 
 
 
@@ -35,11 +35,38 @@ class _CoursesPageState extends State<CoursesPage> {
 
   String getProfesseurIdFromName(String id) {
     // Assuming you have a list of professeurs named 'professeursList'
-    final professeur = professeurList.firstWhere((prof) => '${prof.id}' == id, orElse: () => Professeur(id: '', nom: '', prenom: '', mobile: 0, email: '', matieres: []));
+    final professeur = professeurList.firstWhere((prof) => '${prof.id}' == id, orElse: () => Professeur(id: '', nom: '',  mobile: 0, email: ''));
     print(professeur.nom);
     return professeur.nom; // Return the ID if found, otherwise an empty string
 
   }
+
+  void payeCours( id,String isPaid) async {
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString("token")!;
+    print(token);
+    final response = await http.patch(
+      Uri.parse("http://192.168.43.73:5000/cours" + "/$id/paye"),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(<String, dynamic>{
+        'isPaid':isPaid
+      }),
+    );
+    print(response.statusCode);
+    if (response.statusCode == 201) {
+      // Fetch the updated list of Matieres and update the UI
+      setState(() {
+        Navigator.pop(context);
+      });
+    } else {
+      return Future.error('Server Error');
+    }
+  }
+  
 
   void calculateTotalType() {
     if (widget.dateDeb != null && widget.dateFin != null) {
@@ -140,11 +167,12 @@ class _CoursesPageState extends State<CoursesPage> {
   int coursesPerPage = 7;
   String searchQuery = '';
   bool sortByDateAscending = true;
-
+  bool showSigned = false;
+  bool showPaid = false;
   bool courseFitsCriteria(Map<String, dynamic> course) {
     // Apply your filtering criteria here
     DateTime courseDate = DateTime.parse(course['date'].toString());
-    bool isMatch = (course['matiere'].toLowerCase().contains(searchQuery.toLowerCase()) || course['professeur'].toLowerCase().contains(searchQuery.toLowerCase())
+    bool isMatch = (course['prix'].toLowerCase().contains(searchQuery.toLowerCase()) || course['professeur'].toLowerCase().contains(searchQuery.toLowerCase())
         || course['isSigned'].toString().contains(searchQuery.toLowerCase()));
     // || course['isPaid'].toString().contains(searchQuery.toLowerCase()));
 
@@ -222,7 +250,7 @@ class _CoursesPageState extends State<CoursesPage> {
               },
               decoration: InputDecoration(
                 prefixIcon: Icon(Icons.search, color: Colors.grey),
-                hintText: 'Search by matiere ',
+                hintText: 'Recherche ',
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               ),
@@ -284,66 +312,68 @@ class _CoursesPageState extends State<CoursesPage> {
           // Display the calculated sums
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                Container(width: MediaQuery.of(context).size.width /1.25,height: 50,
-                  // color: Colors.black87,
-                  margin: EdgeInsets.all(8),
-                  child: Card(
-                    elevation: 5,
-                    // margin: EdgeInsets.only(top: 10),
-                    shadowColor: Colors.blue,
-                    // color: Colors.black87,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    child: InkWell(
-                      // child: Column(mainAxisAlignment: MainAxisAlignment.center,
-                      //   children: [
-                      //     // Row(
-                      //     //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      //     //   children: [
-                      //     //     (widget.dateDeb != null && widget.dateFin != null)?
-                      //     //     Text('Eq. CM: ${totalType}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),):
-                      //     //     Text('Eq. CM: ${widget.heuresTV}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),),
-                      //     //
-                      //     //     (widget.dateDeb != null && widget.dateFin != null)?
-                      //     //     Text('Montant Total : ${somme}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),):
-                      //     //     Text('Montant Total : ${widget.sommeTV}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400)),
-                      //     //   ],
-                      //     // ),
-                      //     (widget.dateDeb != null && widget.dateFin != null)?
-                      //     Text('Nb de Cours: ${coursesNum}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),):
-                      //     Center(child: Text('Nb de Cours: ${widget.coursNum}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400))),
-                      //
-                      //   ],
-                      //
-                      //
-                      // ),
+            child: SizedBox(
+              child: Row(
+                children: [
+                  Row(
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            showSigned = !showSigned;
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)),
+                            padding: EdgeInsets.only(left: 53, right: 53),
+                            backgroundColor: Colors.white,foregroundColor: Colors.black54,side: BorderSide(color: Colors.black12,width: 1)),
+                        child: Text('Signé'),
+                      ),
+                      SizedBox(width: 10),
+                      ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            showPaid = !showPaid;
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)),
+                            padding: EdgeInsets.only(left: 55, right: 55),
+                            backgroundColor: Colors.white,foregroundColor: Colors.black54,side: BorderSide(color: Colors.black12,width: 1)),
+                        child: Text('Payé'),
+                      ),
+                    ],
+                  ),
+                  SizedBox(width: 10),
+                  Container(width: MediaQuery.of(context).size.width /8,height: 45,
+                    child: Card(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      color: Colors.white,
+                      child: TextButton(
+                        onPressed: () {
+                          setState(() {
+                            totalType =0;
+                            sortByDateAscending = !sortByDateAscending;
+                            // Reverse the sorting order when the button is tapped
+                            widget.courses.sort((a, b) {
+                              DateTime dateA = DateTime.parse(a['date'].toString());
+                              DateTime dateB = DateTime.parse(b['date'].toString());
+
+                              // Sort in ascending order if sortByDateAscending is true,
+                              // otherwise sort in descending order
+                              return sortByDateAscending ? dateA.compareTo(dateB) : dateB.compareTo(dateA);
+                            });
+                          });
+                        },
+                        child: Icon(sortByDateAscending ? Icons.arrow_upward : Icons.arrow_downward,color: sortByDateAscending ? Colors.black26: Colors.black87,),
+                      ),
                     ),
                   ),
-                ),
-                Container(width: MediaQuery.of(context).size.width /10,height: 40,color: sortByDateAscending ? Color(0xff0fb2ea): Color(
-                    0x10000000),
-                  child: TextButton(
-                    onPressed: () {
-                      setState(() {
-                        totalType =0;
-                        sortByDateAscending = !sortByDateAscending;
-                        // Reverse the sorting order when the button is tapped
-                        widget.courses.sort((a, b) {
-                          DateTime dateA = DateTime.parse(a['date'].toString());
-                          DateTime dateB = DateTime.parse(b['date'].toString());
 
-                          // Sort in ascending order if sortByDateAscending is true,
-                          // otherwise sort in descending order
-                          return sortByDateAscending ? dateA.compareTo(dateB) : dateB.compareTo(dateA);
-                        });
-                      });
-                    },
-                    child: Icon(sortByDateAscending ? Icons.arrow_upward : Icons.arrow_downward,color: sortByDateAscending ? Colors.white: Colors.black87,),
-                  ),
-                ),
-
-              ],
+                ],
+              ),
             ),
           ),
 
@@ -371,107 +401,174 @@ class _CoursesPageState extends State<CoursesPage> {
                         Radius.circular(20.0),
                       ),
                     ),
-                    // margin: EdgeInsets.only(left: 10),
-                    child: DataTable(
-                      showCheckboxColumn: true,
-                      showBottomBorder: true,
-                      // sortColumnIndex: 1,
-                      // sortAscending: true,
-                      headingRowHeight: 50,
-                      columnSpacing: 10,
-                      horizontalMargin: 3,
-                      // border: TableBorder(verticalInside: BorderSide(width: 1.5)),
-                      dataRowHeight: 50,
-                      headingTextStyle: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black, // Set header text color
+                    margin: EdgeInsets.only(left: 3),
+                    child: Card(
+                      margin: const EdgeInsets.all(8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
                       ),
-                      // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xFF0C2FDA)), // Set row background color
-                      columns: [
-                        DataColumn(label: Text('Prof')),
-                        DataColumn(label: Text('Matiere')),
-                        DataColumn(label: Text('Date')),
-                        DataColumn(label: Text('Eq.CM')),
-                        DataColumn(label: Text('Prix')),
-                        DataColumn(label: Text('Signé')),
-                        if (widget.role == "admin")
-                        DataColumn(label: Text('Paié')),
-                        DataColumn(label: Text('Details')),
-                      ],
-                      rows: [
-                        for (var index = (currentPage - 1) * coursesPerPage;
-                        index < widget.courses.length && index < currentPage * coursesPerPage;
-                        index++)
-                          if (courseFitsCriteria(widget.courses[index]))
-                            DataRow(
-                              onLongPress: () =>
-                                  _showCourseDetails(context, widget.courses[index]),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: DataTable(
+                          showCheckboxColumn: true,
+                          showBottomBorder: true,
+                          // sortColumnIndex: 1,
+                          // sortAscending: true,
+                          headingRowHeight: 50,
+                          columnSpacing: 13,
+                          horizontalMargin: 3,
+                          // border: TableBorder(verticalInside: BorderSide(width: 1.5)),
+                          dataRowHeight: 50,
+                          headingTextStyle: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black, // Set header text color
+                          ),
+                          // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xFF0C2FDA)), // Set row background color
+                          columns: [
+                            // if ( showSigned)
+                            if (!showPaid)
+                              DataColumn(label: Text('Signé')),
+                            // if (widget.role == "admin" && showPaid)
+                            if (widget.role == "admin"&& !showSigned )
+                              DataColumn(label: Text('Paié')),
+                            DataColumn(label: Text('Date')),
+                            DataColumn(label: Text('Prof')),
+                            DataColumn(label: Text('Matiere')),
+                            DataColumn(label: Text('Eq.CM')),
+                            // DataColumn(label: Text('Prix')),
+                              DataColumn(label: Text('Details')),
+                          ],
 
-                              cells: [
-                                // DataCell(Text('${index + 1}',style: TextStyle(fontSize: 18),)), // Numbering cell
-                                DataCell(Container(width: 45,child: Text('${getProfesseurIdFromName(widget.courses[index]['professeur_id'])}',style: TextStyle(
-                                  color: Colors.black,
-                                ),)),),
-                                DataCell(Container(width: 45,child: Text('${widget.courses[index]['matiere']}',style: TextStyle(
-                                  color: Colors.black,
-                                ),)),
-                                  // onTap: () =>
-                                  //     _showCourseDetails(context, widget.courses[index])
-                                ),
-                                DataCell(
-                                  Container(width: 35,
-                                    child: Text(
-                                      '${DateFormat('dd/M ').format(
-                                        DateTime.parse(widget.courses[index]['date'].toString()).toLocal(),
-                                      )}',style: TextStyle(
-                                      color: Colors.black,
-                                    ),
-                                    ),
-                                  ),
-                                ),
-                                DataCell(
-                                  Center(child: Container(width: 30, child: Text('${widget.courses[index]['TH']}',style: TextStyle(
-                                    color: Colors.black,
-                                  ),))),
-                                ),
-                                DataCell(
-                                  Text('${widget.courses[index]['somme']}',style: TextStyle(
-                                    color: Colors.black,
-                                  ),),
-                                ),
-                                DataCell(
-                                  Icon( widget.courses[index]['isSigned'] =="OUI"?  Icons.check:Icons.close_outlined,
-                                      color: widget.courses[index]['isSigned']=="OUI"? Colors.green: Colors.red,size: 20,),
-                                ),
-                                if (widget.role == "admin")
-                                DataCell(
-                                  Icon( widget.courses[index]['isPaid']=="OUI"? Icons.check:Icons.close_outlined,
-                                      color: widget.courses[index]['isPaid']=="OUI"? Colors.green: Colors.red, size: 20),
-                                ),
-                                DataCell(
-                                  Row(
-                                    // mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Container(
-                                        width: 35,
-                                        child: TextButton(
-                                          onPressed: () =>_showCourseDetails(context, widget.courses[index]),// Disable button functionality
 
-                                          child: Icon(Icons.more_horiz, color: Colors.black54),
-                                          style: TextButton.styleFrom(
-                                            primary: Colors.white,
-                                            elevation: 0,
-                                            // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
-                                          ),
-                                        ),
+                          rows: [
+                            for (var index = (currentPage - 1) * coursesPerPage;
+                            index < widget.courses.length && index < currentPage * coursesPerPage;
+                            index++)
+                              if (courseFitsCriteria(widget.courses[index]))
+                                if ((!showSigned || widget.courses[index]['isSigned'] == 'oui') &&
+                                    (!showPaid || widget.courses[index]['isPaid'] == 'oui'))
+                                DataRow(
+                                  onLongPress: () =>
+                                      _showCourseDetails(context, widget.courses[index]),
 
+                                  cells: [
+                                    // DataCell(Text('${index + 1}',style: TextStyle(fontSize: 18),)), // Numbering cell
+                                    // if ( showSigned)
+                                    if (!showPaid)
+                                      DataCell(
+                                        Icon( widget.courses[index]['isSigned'] =="oui"?  Icons.check:Icons.close_outlined,
+                                          color: widget.courses[index]['isSigned']=="oui"? Colors.green: Colors.red,size: 20,),
                                       ),
-                                    ],
-                                  ),
+                                    if (widget.role == "admin" && !showSigned)
+                                    // if (widget.role == "admin")
+                                      DataCell(
+                                        InkWell(onTap: (){
+                                          payeCours(
+                                              widget.courses[index]['_id'],
+                                              'oui'
+                                          );
+
+                                          setState(() {
+                                            Navigator.pop(context);
+                                          });
+                                        },
+                                          child: Icon( widget.courses[index]['isPaid']=="oui"? Icons.check:Icons.close_outlined,
+                                              color: widget.courses[index]['isPaid']=="oui"? Colors.green: Colors.red, size: 20),
+                                        ),
+                                      ),
+                                    DataCell(
+                                      Container(width: 35,
+                                        child: Text(
+                                          '${DateFormat('dd/M ').format(
+                                            DateTime.parse(widget.courses[index]['date'].toString()).toLocal(),
+                                          )}',style: TextStyle(
+                                          color: Colors.black,
+                                        ),
+                                        ),
+                                      ),
+                                    ),
+                                    DataCell(Container(width: 50,child: Text('${widget.courses[index]['professeur']}',style: TextStyle(
+                                      color: Colors.black,
+                                    ),)),),
+                                    DataCell(Container(width: 55,child: Text('${widget.courses[index]['prix']}',style: TextStyle(
+                                      color: Colors.black,
+                                    ),)),
+                                      // onTap: () =>
+                                      //     _showCourseDetails(context, widget.courses[index])
+                                    ),
+                                    DataCell(
+                                      Center(child: Container(width: 25, child: Text('${widget.courses[index]['TH']}',style: TextStyle(
+                                        color: Colors.black,
+                                      ),))),
+                                    ),
+                                    // DataCell(
+                                    //   Text('${widget.courses[index]['somme']}',style: TextStyle(
+                                    //     color: Colors.black,
+                                    //   ),),
+                                    // ),
+                                     DataCell(
+                                      Row(
+                                        // mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Container(
+                                            width: 25,
+                                            child: TextButton(
+                                              onPressed: () =>_showCourseDetails(context, widget.courses[index]),// Disable button functionality
+
+                                              child: Icon(Icons.more_horiz, color: Colors.black54),
+                                              style: TextButton.styleFrom(
+                                                primary: Colors.white,
+                                                elevation: 0,
+                                                // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                                              ),
+                                            ),
+
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
+                            DataRow(
+                              cells: [
+                                if (!showPaid)
+                                  DataCell(Icon(Icons.title_outlined)
+                                  ),
+                                if (widget.role == "admin"&& !showSigned)
+                                  DataCell(
+                                   Icon(Icons.title_outlined)
+                                  ),
+
+
+                                DataCell(
+                                  (widget.dateDeb != null && widget.dateFin != null)?
+                                  Text(' ${coursesNum}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w900,fontStyle: FontStyle.italic),):
+                                  Center(child: Text('NBC: ${widget.coursNum}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w900,fontStyle: FontStyle.italic))),
+
+                                ),
+                                DataCell(
+                                  Text('Eq. CM: ',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w900,fontStyle: FontStyle.italic),),
+
+                                ),
+                                DataCell(
+                                  Text('${totalType}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w900,fontStyle: FontStyle.italic),),
+
+                                ),
+                                DataCell(
+                                  // (widget.dateDeb != null && widget.dateFin != null)?
+                                    Text('MT',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w900,fontStyle: FontStyle.italic),)
+                                  // Text('Montant Total : ${widget.sommeTV}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400)),
+                                ),
+                               DataCell(
+                                      Text('${somme}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w900,fontStyle: FontStyle.italic),)
+                                  ),
+
                               ],
                             ),
-                      ],
+
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -650,13 +747,14 @@ class _CoursesPageState extends State<CoursesPage> {
                         ),),
 
                       SizedBox(width: 10,),
-                      Text('${DateFormat(' HH:mm').format(DateTime.parse(course['date'].toString()).toLocal())}',
+                      Text('${course['startTime']}',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w400,
                           fontStyle: FontStyle.italic,
                           // color: Colors.lightBlue
                         ),),
+
 
                     ],
                   ),
@@ -672,8 +770,7 @@ class _CoursesPageState extends State<CoursesPage> {
                         ),),
 
                       SizedBox(width: 10,),
-                      Text('${DateFormat(' HH:mm').format(DateTime.parse(course['date'].toString()).toLocal().add(Duration(minutes: (
-                          ( course['TH'])* 60).toInt())))}',
+                      Text('${course['finishTime']}',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w400,
@@ -721,7 +818,7 @@ class _CoursesPageState extends State<CoursesPage> {
                           ),),
 
                         SizedBox(width: 10,),
-                        Text('${course['TP']}',
+                        Text('${course['TD']}',
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w400,
@@ -743,7 +840,7 @@ class _CoursesPageState extends State<CoursesPage> {
                           ),),
 
                         SizedBox(width: 10,),
-                        Text('${course['TD']}',
+                        Text('${course['TP']}',
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w400,
@@ -834,8 +931,8 @@ class _CoursesPageState extends State<CoursesPage> {
 
                     SizedBox(width: 10,),
                     Text(
-                      course['isSigned'] == "OUI"?
-                      'Oui':'Non',
+                      course['isSigned'] == "oui"?
+                      'Oui':'pas encore',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,
@@ -861,8 +958,8 @@ class _CoursesPageState extends State<CoursesPage> {
 
                           SizedBox(width: 10,),
                           Text(
-                            course['isPaid'] =="OUI"?
-                            'Oui':'Non',
+                            course['isPaid'] =="oui"?
+                            'Oui':'pas encore',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w400,

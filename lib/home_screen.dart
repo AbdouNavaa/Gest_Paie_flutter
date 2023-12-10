@@ -4,6 +4,7 @@ import 'package:gestion_payements/group.dart';
 import 'package:gestion_payements/matieres.dart';
 import 'package:gestion_payements/more_page.dart';
 import 'package:gestion_payements/paie.dart';
+import 'package:gestion_payements/paiements.dart';
 import 'package:gestion_payements/professeures.dart';
 import 'package:gestion_payements/settings.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -79,6 +80,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
 
 }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -259,7 +262,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                    String token = prefs.getString("token")!;
                                    final professorData = await fetchProfessorInfo();
                                    String id = professorData['professeur']['_id'];
-                                   String nom = professorData['professeur']['nom'];
+                                   String nom = professorData['professeur']['nomComplet'];
 
                                    print(id);
                                    var response = await http.get(
@@ -400,7 +403,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                      context,
                                      MaterialPageRoute(builder: (context) =>
                                          CoursesPage(courses: courses,
-                                           // coursNum: coursNum,
+                                           coursNum: coursNum,
                                            // heuresTV: heuresTV,
                                            // sommeTV: sommeTV,
                                            role: role,
@@ -525,14 +528,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                      // num heuresTV = json.decode(response.body)['data']['heuresTV'];
                                      // num sommeTV = json.decode(response.body)['data']['sommeTV'];
                                      // setState(() {
-                                     //   this.coursNum = json.decode(response.body)['data']['countLL'];
+                                       this.coursNum = json.decode(response.body)['cours'].length;
                                      //
                                      // });
+                                     // print('NBC :${json.decode(response.body)['cours'].length}');
                                      Navigator.push(
                                        context,
                                        MaterialPageRoute(builder: (context) =>
                                            CoursesPage(courses: courses,
-                                             // coursNum: coursNum,
+                                             coursNum: coursNum,
                                              // heuresTV: heuresTV,
                                              // sommeTV: sommeTV,
                                              role: role,)),
@@ -551,10 +555,32 @@ class _HomeScreenState extends State<HomeScreen> {
                                  duration: "",
                                  height: 135,
                                  width: 150,
-                                 onPessed: (){
-                                   ScaffoldMessenger.of(context).showSnackBar(
-                                     SnackBar(content: Text(' Ne fonctionne pas actuellement')),
+                                 onPessed: ()async{
+                                   SharedPreferences prefs = await SharedPreferences.getInstance();
+                                   String token = prefs.getString("token")!;
+                                   String role = prefs.getString("role")!;
+                                   var response = await http.get(
+                                     Uri.parse('http://192.168.43.73:5000/cours'),
+                                     headers: {
+                                       'Content-Type': 'application/json',
+                                       'Authorization': 'Bearer $token'
+                                     },
                                    );
+                                   // print(response.body);
+
+                                   if (response.statusCode == 200) {
+                                     List<dynamic> courses = json.decode(
+                                         response.body)['cours'];
+                                     this.coursNum = json.decode(response.body)['cours'].length;
+                                     Navigator.push(
+                                       context,
+                                       MaterialPageRoute(builder: (context) => Paiements()),
+                                     );
+                                   } else {
+                                     // Handle error
+                                     print('Failed to fetch prof courses. Status Code: ${response
+                                         .statusCode}');
+                                   }
                                  },
                                ),
 

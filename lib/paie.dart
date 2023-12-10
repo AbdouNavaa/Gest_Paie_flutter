@@ -29,16 +29,16 @@ class _PaieState extends State<Paie> {
         return (course['isSigne'] != false) && // Filter courses with signs
             (courseDate.isAtSameMomentAs(widget.dateDeb!.toLocal()) || (courseDate.isAfter(widget.dateDeb!.toLocal()) &&
                 courseDate.isBefore(widget.dateFin!.toLocal().add(Duration(days: 1)))));
-      }).map((course) => double.parse(course['TH'].toString())).fold(0, (prev, amount) => prev + amount);
+      }).map((course) => double.parse(course['nombre_heures'].toString())).fold(0, (prev, amount) => prev + amount);
 
       somme = widget.courses.where((course) {
         DateTime courseDate = DateTime.parse(course['date'].toString());
-        return ( course['isSigne'] != false) && // Filter courses with signs
+        return ( course['isSigne'] != "pas encore") && // Filter courses with signs
             (courseDate.isAtSameMomentAs(widget.dateDeb!.toLocal()) ||
                 (courseDate.isAfter(widget.dateDeb!.toLocal()) &&
                     courseDate.isBefore(
                         widget.dateFin!.toLocal().add(Duration(days: 1)))));
-      }).map((course) => double.parse(course['somme'].toString())).fold(0, (prev, amount) => prev + amount);
+      }).map((course) => double.parse(course['TH'].toString())).fold(0, (prev, amount) => prev + amount);
     } else if ((widget.dateDeb != null && widget.dateFin == null) || (widget.dateDeb == null && widget.dateFin != null)) {
       // If date filters are applied
       totalType = 0;
@@ -47,8 +47,10 @@ class _PaieState extends State<Paie> {
       // If no date filters are applied
       int startIndex = (currentPage - 1) * coursesPerPage;
       int endIndex = startIndex + coursesPerPage - 1;
-      totalType = widget.courses.skip(startIndex).take(coursesPerPage).where((course) => (course['signe'] != null && course['signe'] != '')).map((course) => double.parse(course['TH'].toString())).fold(0, (prev, amount) => prev + amount);
-      somme = widget.courses.skip(startIndex).take(coursesPerPage).where((course) => (course['signe'] != null && course['signe'] != '')).map((course) => double.parse(course['somme'].toString())).fold(0, (prev, amount) => prev + amount);
+      totalType = widget.courses.skip(startIndex).take(coursesPerPage).where((course) =>
+      (course['signe'] != null && course['signe'] != '')).map((course) => double.parse(course['TH'].toString())).fold(0, (prev, amount) => prev + amount);
+      somme = widget.courses.skip(startIndex).take(coursesPerPage).where((course) =>
+      (course['signe'] != null && course['signe'] != '')).map((course) => double.parse(course['TH'].toString())).fold(0, (prev, amount) => prev + amount);
     }
   }
 

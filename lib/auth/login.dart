@@ -197,7 +197,8 @@ class _LoginSectionState extends State<LoginSection> {
                                 ),
                               ],
                             ),
-                            child: TextField(style: TextStyle(
+                            child: TextField(
+                              style: TextStyle(
                             color: Colors.black,
                             ),
                               decoration: InputDecoration(
@@ -210,15 +211,23 @@ class _LoginSectionState extends State<LoginSection> {
                                   },
                                   icon: Icon(
                                     hidePassword
-                                        ? Icons.vpn_key_off
-                                        : Icons.vpn_key,
+                                        ? Icons.visibility_off_outlined
+                                        : Icons.visibility_outlined,
                                   ),
 
                                 ),
-                                hintText: "Password",
+                                // hintText: "Password",
                               ),
                               obscureText: hidePassword,
+                              maxLength: 8, // Limiter la longueur du texte à 8 caractères
+
+
                               onChanged: (value) {
+                                if (value.length > 8) {
+                                  password.text = value.substring(0, 8); // Limiter la longueur à 8 caractères
+
+                                  password.selection = TextSelection.collapsed(offset: 8);
+                                }
                                 password = value;
                                 isPasswordValid = validatePassword(value); // Appeler une fonction de validation pour le mot de passe
                                 if (!isPasswordValid) {
@@ -227,21 +236,12 @@ class _LoginSectionState extends State<LoginSection> {
                                 else {
                                   passwordErrorMessage = '';
                                 }
-                                setState(() {
-                                  i +=1;
-
-                                });
                               },
                               onTap: () {
                                 setState(() {
                                   showFirstContainer = false; // Hide the first container
-                                  i = 0;
                                 });
                               },                    ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 270),
-                            child: Text(i.toString(),style: TextStyle(fontSize: 15),),
                           ),
                           if (!isPasswordValid)
                             Text(

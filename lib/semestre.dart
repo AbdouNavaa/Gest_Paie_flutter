@@ -49,10 +49,15 @@ class _SemestresState extends State<Semestres> {
     var jsonResponse = jsonDecode(response.body);
     print(response.statusCode);
     if(response.statusCode ==200){
-      fetchSemestre();
-      // setState(() {
-        Navigator.pop(context);
-      // });
+      Navigator.pop(context);
+      fetchSemestre().then((data) {
+        setState(() {
+          filteredItems = data;
+        });
+      }).catchError((error) {
+        print('Erreur lors de la récupération des Matieres: $error');
+      });
+
     }
 
   }
@@ -80,7 +85,7 @@ class _SemestresState extends State<Semestres> {
   }
   String getMatIdFromName(String id) {
     // Assuming you have a list of professeurs named 'professeursList'
-    final professeur = matiereList.firstWhere((prof) => '${prof.id}' == id, orElse: () =>Matiere(id: '', name: '', description: '', categorieId: '', categorie_name: '', code: '',));
+    final professeur = matiereList.firstWhere((prof) => '${prof.id}' == id, orElse: () =>Matiere(id: '', name: '',  categorieId: '', categorie_name: '', code: '',));
     // print(professeur.name);
     return professeur.name; // Return the ID if found, otherwise an empty string
 
@@ -120,6 +125,15 @@ class _SemestresState extends State<Semestres> {
       setState(() {
         filteredItems = data; // Assigner la liste renvoyée par Semestreesseur à items
       });
+
+      fetchMatiere().then((data) {
+        setState(() {
+          matiereList = data; // Assigner la liste renvoyée par emploiesseur à items
+        });
+      }).catchError((error) {
+        print('Erreur: $error');
+      });
+
     }).catchError((error) {
       print('Erreur: $error');
     });
@@ -130,16 +144,11 @@ class _SemestresState extends State<Semestres> {
     }).catchError((error) {
       print('Erreur: $error');
     });
+
+
     fetchProfs().then((data) {
       setState(() {
         professeurList = data; // Assigner la liste renvoyée par Semestreesseur à items
-      });
-      fetchMatiere().then((data) {
-        setState(() {
-          matiereList = data; // Assigner la liste renvoyée par Semestreesseur à items
-        });
-      }).catchError((error) {
-        print('Erreur: $error');
       });
 
     }).catchError((error) {
@@ -297,7 +306,7 @@ class _SemestresState extends State<Semestres> {
 
                                             // onTap:() => _showcategDetails(context, categ)
                                           ),
-                                          DataCell(Container(child: Text('${sem.filliereName}'))),
+                                          DataCell(Container(child: Text('${sem.filliereName.toUpperCase()}'))),
                                           DataCell(Container(child: Text( '${DateFormat('dd/MM/yyyy ').format(
                                             DateTime.parse(sem.start.toString()).toLocal(),
                                           )}',))),
@@ -367,7 +376,7 @@ class _SemestresState extends State<Semestres> {
         builder: (BuildContext context){
           return SingleChildScrollView(
             child: Container(
-              height: 600,
+              height: 480,
               padding: const EdgeInsets.all(25.0),
               child: Column(
                 // mainAxisSize: MainAxisSize.min,
@@ -432,7 +441,7 @@ class _SemestresState extends State<Semestres> {
                     decoration: InputDecoration(
                       filled: true,
                       // fillColor: Color(0xA3B0AF1),
-                      hintText: "selection d'une Matiere",
+                      hintText: "selection d'un Filliere",
                       border: OutlineInputBorder(
                         borderSide: BorderSide.none,gapPadding: 1,
                         borderRadius: BorderRadius.all(Radius.circular(10.0)),
@@ -441,6 +450,7 @@ class _SemestresState extends State<Semestres> {
                   ),
 
    SizedBox(height: 10),
+
                   DropdownButtonFormField<Matiere>(
                     value: selectedMat,
                     items: matiereList.map((matiere) {
@@ -452,6 +462,9 @@ class _SemestresState extends State<Semestres> {
                     onChanged: (value)async {
                       setState(()  {
                         selectedMat = value;
+                        // selectedProfesseur = null; // Reset the selected professor
+                        // professeurs = await fetchProfesseursByMatiere(selectedMat!.id); // Clear the professeurs list when a matière is selected
+                        // updateProfesseurList(); // Update the list of professeurs based on the selected matière
                       });
                     },
                     decoration: InputDecoration(
@@ -465,15 +478,11 @@ class _SemestresState extends State<Semestres> {
                     ),
                   ),
 
-
-
-
-
-
+                  SizedBox(height: 15),
                   ElevatedButton(
                     onPressed: (){
                       Navigator.of(context).pop();
-                      // fetchfilliere();
+                      fetchSemestre();
                       DateTime date = DateFormat('yyyy/MM/dd').parse(_date.text).toUtc();
 
                       // Pass the selected types to addCoursToProfesseur method
@@ -485,7 +494,7 @@ class _SemestresState extends State<Semestres> {
                         SnackBar(content: Text('Le filliere a été ajouter avec succès.')),
                       );
                       setState(() {
-                        Navigator.pop(context);
+                      fetchSemestre();
                       });
                     },
                     child: Text("Ajouter"),
@@ -560,7 +569,7 @@ class _SemestresState extends State<Semestres> {
                       ),),
 
                     SizedBox(width: 10,),
-                    Text('${sem.filliereName}',
+                    Text('${sem.filliereName.toUpperCase()}',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,
@@ -652,11 +661,11 @@ class _SemestresState extends State<Semestres> {
                   children: [
                     ElevatedButton(
                       onPressed: () async {
-                        setState(() {
-                          // fetchfilliere();
-                          Navigator.pop(context);
-
-                        });
+                        // setState(() {
+                        //   // fetchfilliere();
+                        //   Navigator.pop(context);
+                        //
+                        // });
 
                         List<filliere> types = await fetchfilliere();
                         List<Matiere> matieres = await fetchMatiere();
@@ -677,7 +686,7 @@ class _SemestresState extends State<Semestres> {
                             builder: (BuildContext context){
                               return SingleChildScrollView(
                                 child: Container(
-                                  height: 600,
+                                  height: 450,
                                   padding: const EdgeInsets.all(25.0),
                                   child: Column(
                                     // mainAxisSize: MainAxisSize.min,
@@ -714,7 +723,7 @@ class _SemestresState extends State<Semestres> {
                                         decoration: InputDecoration(
                                           filled: true,
                                           // fillColor: Color(0xA3B0AF1),
-                                          hintText: "selection d'une Matiere",
+                                          hintText: "selection d'un Filliere",
                                           border: OutlineInputBorder(
                                             borderSide: BorderSide.none,gapPadding: 1,
                                             borderRadius: BorderRadius.all(Radius.circular(10.0)),
@@ -772,7 +781,9 @@ class _SemestresState extends State<Semestres> {
 
                                       ElevatedButton(
                                         onPressed: () {
-                                          // Navigator.of(context).pop();
+                                          Navigator.of(context).pop();
+
+                                          fetchSemestre();
 
                                           DateTime date = DateFormat('yyyy/MM/dd').parse(_date.text).toUtc();
 
@@ -785,14 +796,14 @@ class _SemestresState extends State<Semestres> {
                                               selectedMat!.id!,
                                           );
 
-                                          setState(() {
-                                            Navigator.pop(context);
-                                          });
 
                                           ScaffoldMessenger.of(context).showSnackBar(
                                             SnackBar(content: Text('Le Type est mis à jour avec succès.')),
                                           );
-                                        },
+
+                                          setState(() {
+                                            fetchSemestre();
+                                          });                                        },
                                         child: Text("Modifier"),
 
                                         style: ElevatedButton.styleFrom(
@@ -897,13 +908,14 @@ class _SemestresState extends State<Semestres> {
                                      String token = prefs.getString("token")!;
 
 
+                                     fetchSemestre();
                                      AddSemMat(sem.id, selectedMat!.id!);
                                      ScaffoldMessenger.of(context).showSnackBar(
                                        SnackBar(content: Text('Matiere has been added to professor successfully.')),
                                      );
 
                                      setState(() {
-                                       Navigator.pop(context);
+                                       fetchSemestre();
                                      });
                                    },
                                    child: Text("Ajouter"),
@@ -958,13 +970,18 @@ class _SemestresState extends State<Semestres> {
                                   ),
                                   onPressed: () {
                                     Navigator.of(context).pop();
+                                    fetchSemestre();
                                     DeleteSemestres(sem.id);
-                                    setState(() {
-                                      Navigator.pop(context);
-                                    });
+
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(content: Text('Le Category a été Supprimer avec succès.')),
                                     );
+
+                                    setState(() {
+                                      fetchSemestre();
+
+                                    });
+
                                   },
                                 ),
                               ],
@@ -1019,7 +1036,14 @@ class _SemestresState extends State<Semestres> {
     if (response.statusCode == 200) {
       print('filliere ajouter avec succes');
       setState(() {
-        Navigator.pop(context);
+        fetchSemestre().then((data) {
+          setState(() {
+            filteredItems = data;
+          });
+        }).catchError((error) {
+          print('Erreur lors de la récupération des Matieres: $error');
+        });
+
       });
     } else {
       print("SomeThing Went Wrong");
@@ -1086,9 +1110,14 @@ class _SemestresState extends State<Semestres> {
         final responseData = json.decode(response.body);
         // print("Course ID: ${responseData['cours']['_id']}");
         // You can handle the response data as needed
-        setState(() {
-          Navigator.pop(context);
+        fetchSemestre().then((data) {
+          setState(() {
+            filteredItems = data;
+          });
+        }).catchError((error) {
+          print('Erreur lors de la récupération des Matieres: $error');
         });
+
       } else {
         // Course creation failed
         print("Failed to update. Status code: ${response.statusCode}");

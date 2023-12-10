@@ -22,6 +22,8 @@ class _SignUpSectionState extends State<SignUpSection> {
   var email;
   var username;
   var prenom;
+  var Banque;
+  var account;
   var mobile;
 
   var password;
@@ -146,7 +148,7 @@ class _SignUpSectionState extends State<SignUpSection> {
                           children: <Widget>[
                             Container(
                               width: MediaQuery.of(context).size.width / 1.2,
-                              height: 55,
+                                height: 45,
                               padding: EdgeInsets.only(
                                   top: 4, left: 16, right: 16, bottom: 4
                               ),
@@ -162,7 +164,8 @@ class _SignUpSectionState extends State<SignUpSection> {
                                     )
                                   ]
                               ),
-                              child: TextField(style: TextStyle(
+                              child:
+                              TextField(style: TextStyle(
                               color: Colors.black,
                               ),
                                 decoration: InputDecoration(
@@ -201,7 +204,7 @@ class _SignUpSectionState extends State<SignUpSection> {
                                   .of(context)
                                   .size
                                   .width / 1.2,
-                              height: 55,
+                                height: 45,
                               margin: EdgeInsets.only(top: 20),
                               padding: EdgeInsets.only(
                                   top: 8, left: 16, right: 16, bottom: 4
@@ -249,7 +252,7 @@ class _SignUpSectionState extends State<SignUpSection> {
                                   .of(context)
                                   .size
                                   .width / 1.2,
-                              height: 55,
+                                height: 45,
                               margin: EdgeInsets.only(top: 20),
                               padding: EdgeInsets.only(
                                   top: 8, left: 16, right: 16, bottom: 4
@@ -301,7 +304,7 @@ class _SignUpSectionState extends State<SignUpSection> {
                                   .of(context)
                                   .size
                                   .width / 1.2,
-                              height: 55,
+                                height: 45,
                               margin: EdgeInsets.only(top: 20),
                               padding: EdgeInsets.only(
                                   top: 4, left: 16, right: 16, bottom: 4
@@ -357,7 +360,7 @@ class _SignUpSectionState extends State<SignUpSection> {
                                   .of(context)
                                   .size
                                   .width / 1.2,
-                              height: 55,
+                                height: 45,
                               margin: EdgeInsets.only(top: 20),
                               padding: EdgeInsets.only(
                                   top: 4, left: 16, right: 16, bottom: 4
@@ -413,7 +416,7 @@ class _SignUpSectionState extends State<SignUpSection> {
                                   .of(context)
                                   .size
                                   .width / 1.2,
-                              height: 55,
+                                height: 45,
                               margin: EdgeInsets.only(top: 20),
                               padding: EdgeInsets.only(
                                   top: 4, left: 16, right: 16, bottom: 4
@@ -458,14 +461,93 @@ class _SignUpSectionState extends State<SignUpSection> {
                                 emailErrorMessage,
                                 style: TextStyle(color: Colors.red),
                               ),
+                            Container(
+                              width: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .width / 1.2,
+                                height: 45,
+                              margin: EdgeInsets.only(top: 20),
+                              padding: EdgeInsets.only(
+                                  top: 4, left: 16, right: 16, bottom: 4
+                              ),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.all(
+                                      Radius.circular(50)
+                                  ),
+                                  color: Colors.white,
+                                  boxShadow: [
+                                    BoxShadow(
+                                        color: Colors.black12,
+                                        blurRadius: 5
+                                    )
+                                  ]
+                              ),
+                              child: TextField(style: TextStyle(
+                                color: Colors.black,
+                              ),
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  icon: Icon(Icons.account_balance,
+                                    color: Colors.grey,
+                                  ),
+                                  hintText: 'Banque',
+                                ),
+                                onChanged: (value) {
+                                  Banque = value;
+                                },
+
+                              ),
+                            ),
+                            Container(
+                              width: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .width / 1.2,
+                                height: 45,
+                              margin: EdgeInsets.only(top: 20),
+                              padding: EdgeInsets.only(
+                                  top: 8, left: 16, right: 16, bottom: 4
+                              ),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.all(
+                                      Radius.circular(50)
+                                  ),
+                                  color: Colors.white,
+                                  boxShadow: [
+                                    BoxShadow(
+                                        color: Colors.black12,
+                                        blurRadius: 5
+                                    )
+                                  ]
+                              ),
+                              child: TextField(style: TextStyle(
+                                color: Colors.black,
+                              ),
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    icon: Icon(Icons.switch_account_outlined,
+                                      color: Colors.grey,
+                                    ),
+                                    hintText: 'Compte',
+                                  ),
+                                  onChanged: (value) {
+                                    account = value;
+                                  }
+                              ),
+                            ),
+
                             SizedBox(height: 30,),
 
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
                             Container(
                               height: 45,
                               width: MediaQuery
                                   .of(context)
                                   .size
-                                  .width / 1.2,
+                                  .width / 2.5,
                               decoration: BoxDecoration(
                                   gradient: LinearGradient(
                                     colors: [
@@ -480,13 +562,16 @@ class _SignUpSectionState extends State<SignUpSection> {
                               child: Center(
                                 child: ElevatedButton(
                                   onPressed: () async {
+
                                     setState(() {
-                                      isLoginFailed =
-                                      false; // Réinitialisation de la variable d'erreur
-                                      AddProfesseur(username, prenom, email,
-                                          num.parse(mobile));
+                                      // isLoginFailed = false; // Réinitialisation de la variable d'erreur
+                                      AddProfesseur("${username} ${prenom}",Banque, email,
+                                          num.parse(mobile) ,num.parse(account));
                                     });
-                                    await signup(username, prenom, mobile, password, passwordConfirm, email);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Le Prof est ajoute avec succès.')),
+                                    );
+                                    await signup(username, prenom, mobile, Banque,account,password, passwordConfirm, email);
 
                                     SharedPreferences prefs = await SharedPreferences
                                         .getInstance();
@@ -527,7 +612,7 @@ class _SignUpSectionState extends State<SignUpSection> {
                                   style: ElevatedButton.styleFrom(
                                       shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(15)),
-                                      padding: EdgeInsets.only(left: 117, right: 117),
+                                      padding: EdgeInsets.only(left: 20, right: 20),
                                       backgroundColor: Color(0xff0fb2ea)),
                                   // icon: Icon(Icons.save),
                                   child: Center(
@@ -540,11 +625,11 @@ class _SignUpSectionState extends State<SignUpSection> {
                                   ),),
                               ),
                             ),
-                            SizedBox(height: 15,),
+                            SizedBox(width: 10,),
 
                             Container(
                               height: 45,
-                              width: MediaQuery.of(context).size.width / 1.2,
+                              width: MediaQuery.of(context).size.width / 2.5,
                               decoration: BoxDecoration(
                                   gradient: LinearGradient(
                                     colors: [
@@ -566,7 +651,8 @@ class _SignUpSectionState extends State<SignUpSection> {
                                   style: ElevatedButton.styleFrom(
                                       shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(15)),
-                                      padding: EdgeInsets.only(left: 117, right: 117),
+                                      padding: EdgeInsets.only(left: 20, right: 20),
+                                      // padding: EdgeInsets.only(left: 117, right: 117),
                                       backgroundColor: Colors.white,
                                       foregroundColor: Colors.black87),
                                   // icon: Icon(Icons.save),
@@ -580,6 +666,7 @@ class _SignUpSectionState extends State<SignUpSection> {
                                   ),),
                               ),
                             ),
+                          ],)
                           ],
                         ),
                       ),
@@ -595,7 +682,7 @@ class _SignUpSectionState extends State<SignUpSection> {
     );
   }
 
-  signup(username, prenom, mobile, password, passwordConfirm, email) async {
+  signup(username, prenom, mobile,banque,compte, password, passwordConfirm, email) async {
     var url = "http://192.168.43.73:5000/auth/signup"; // iOS
     final response = await http.post(
       Uri.parse(url),
@@ -626,6 +713,14 @@ class _SignUpSectionState extends State<SignUpSection> {
       await prefs.setString('email', email1);
       await prefs.setString('nom', nom);
       print('Welcom $nom');
+      setState(() {
+        // isLoginFailed = false; // Réinitialisation de la variable d'erreur
+        AddProfesseur("${nom} ${prenom}",banque, email,
+            num.parse(mobile) ,num.parse(compte));
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Le Prof est ajoute avec succès.')),
+      );
     } else {
       // Authentification échouée
       isLoginFailed = true;

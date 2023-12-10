@@ -55,11 +55,11 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
 
       // Calcul d'autres valeurs en fonction de la liste filtrée des cours
        totalType = coursesInDateRange
-          .map((course) => double.parse(course['TH'].toString()))
+          .map((course) => double.parse(course['nombre_heures'].toString()))
           .fold(0, (prev, amount) => prev + amount);
 
        somme = coursesInDateRange
-          .map((course) => double.parse(course['somme'].toString()))
+          .map((course) => double.parse(course['TH'].toString()))
           .fold(0, (prev, amount) => prev + amount);
 
       // Utilisez nombreDeCours, totalType, somme comme nécessaire
@@ -75,16 +75,41 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
       totalType = widget.courses
           .skip(startIndex)
           .take(coursesPerPage)
-          .map((course) => double.parse(course['TH'].toString()))
+          .map((course) => double.parse(course['nombre_heures'].toString()))
           .fold(0, (prev, amount) => prev + amount);
 
       somme = widget.courses
           .skip(startIndex)
           .take(coursesPerPage)
-          .map((course) => double.parse(course['somme'].toString()))
+          .map((course) => double.parse(course['TH'].toString()))
           .fold(0, (prev, amount) => prev + amount);
     }
   }
+
+
+  void singeCours( id,bool isSigned) async {
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString("token")!;
+    print(token);
+    final response = await http.patch(
+      Uri.parse("http://192.168.43.73:5000/cours" + "/$id/signe"),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(<String, dynamic>{
+      'isSigned':isSigned? "oui": "pas encore"
+      }),
+    );
+    print(response.statusCode);
+    if (response.statusCode == 201) {
+      // Fetch the updated list of Matieres and update the UI
+    } else {
+      return Future.error('Server Error');
+    }
+  }
+
 
   String getMatiereIdFromName(String matiereName) {
     final matiere = matieresList.firstWhere((matiere) => matiere.name == matiereName);
@@ -119,7 +144,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
   bool courseFitsCriteria(Map<String, dynamic> course) {
     // Apply your filtering criteria here
     DateTime courseDate = DateTime.parse(course['date'].toString());
-    bool isMatch = (course['matiere'].toLowerCase().contains(searchQuery.toLowerCase())
+    bool isMatch = (course['somme'].toLowerCase().contains(searchQuery.toLowerCase())
         || course['isSigned'].toString().contains(searchQuery.toLowerCase()));
 
     // Check if the course date falls within the selected date range
@@ -262,26 +287,29 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                     // color: Colors.black87,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     child: InkWell(
-                      // child: Column(mainAxisAlignment: MainAxisAlignment.center,
-                      //   children: [
-                      //     Row(
-                      //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      //       children: [
-                      //         (widget.dateDeb != null && widget.dateFin != null)?
-                      //         Text('Eq. CM: ${totalType}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),):
-                      //         Text('Eq. CM: ${widget.heuresTV}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),),
-                      //
-                      //         (widget.dateDeb != null && widget.dateFin != null)?
-                      //         Text('Montant Total : ${somme}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),):
-                      //         Text('Montant Total : ${widget.sommeTV}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400)),
-                      //       ],
-                      //     ),
-                      //     (widget.dateDeb != null && widget.dateFin != null)?
-                      //     Text('Nb de Cours: ${coursesNum}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),):
-                      //     Center(child: Text('Nb de Cours: ${widget.coursNum}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400))),
-                      //
-                      //   ],
-                      // ),
+                      child: Column(mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              // (widget.dateDeb != null && widget.dateFin != null)?
+                              Text('Eq. CM: ${totalType}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),),
+                              // Text('Eq. CM: ${widget.heuresTV}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),),
+
+                              // (widget.dateDeb != null && widget.dateFin != null)?
+                              Text('Montant Total : ${somme}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
+                              // Text('Montant Total : ${widget.sommeTV}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400)),
+                            ],
+                          ),
+                          // (widget.dateDeb != null && widget.dateFin != null)?
+                          Text('Nb de Cours: ${coursesNum}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
+                          // Center(child: Text('Nb de Cours: ${widget.coursNum}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400))),
+
+                        ],
+
+
+                      ),
+
                     ),
                   ),
                 ),
@@ -367,9 +395,9 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                               cells: [
 
                                 DataCell(
-    widget.courses[index]['isSigned'] == "YES"? Icon(Icons.check_box_sharp):CupertinoSwitch(
+    widget.courses[index]['isSigned'] == "oui"? Icon(Icons.check_box_sharp):CupertinoSwitch(
                                       activeColor: Colors.black26,
-                                      value:  widget.courses[index]['isSigned'] == "YES"? true: false,
+                                      value:  widget.courses[index]['isSigned'] == "oui"? true: false,
                                       onChanged: (value) async {
 
 
@@ -426,21 +454,30 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
 
                                         // final updatedTypes = [{'name': typeName, 'nbh': typeNbhString}];
 
-                                        final matiereName = widget.courses[index]['matiere'];
+                                        final matiereName = widget.courses[index]['somme'];
                                         // final matiereId = getMatiereIdFromName(matiereName);
-
-                                        if (widget.courses[index]['matiere_id'] != null) {
-                                          updateProfCours(
+                                        singeCours(
                                             widget.courses[index]['_id'],
-                                            widget.ProfId,
-                                            widget.courses[index]['matiere_id'],
-                                            widget.courses[index]['CM'],
-                                            updatedDate,
-                                            value,
-                                          );
-                                        } else {
-                                          print("Matiere not found with name: $matiereName");
-                                        }
+                                            value
+                                        );
+                                        // if (widget.courses[index]['matiere_id'] != null) {
+                                        //
+                                        // }
+                                        // else {
+                                        //
+                                        //   updateCours(
+                                        //     widget.courses[index]['_id'],
+                                        //     widget.ProfId,
+                                        //     widget.courses[index]['matiere_id'],
+                                        //     widget.courses[index]['CM'],
+                                        //     widget.courses[index]['TP'],
+                                        //     widget.courses[index]['TD'],
+                                        //     updatedDate,
+                                        //       widget.courses[index]['startTime'],
+                                        //     value
+                                        //   );
+                                        //   print("Matiere not found with name: $matiereName");
+                                        // }
                                       },
                                     )
                                 ),
@@ -602,7 +639,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                       ),),
 
                     SizedBox(width: 10,),
-                    Text('${course['matiere']}',
+                    Text('${course['somme']}',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,
@@ -785,7 +822,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                       ),),
 
                     SizedBox(width: 10,),
-                    Text('${course['TH']}',
+                    Text('${course['nombre_heures']}',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,
@@ -807,7 +844,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                       ),),
 
                     SizedBox(width: 10,),
-                    Text('${course['somme']}',
+                    Text('${course['TH']}',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,
@@ -1203,7 +1240,7 @@ class _UpdateProfCoursDialogState extends State<UpdateProfCoursDialog> {
     fetchMats();
     _date.text = DateFormat('yyyy/MM/dd HH:mm').format(DateTime.parse(widget.courses['date'])).toString();
     // _selectedSigne = widget.courses['isSigned'];
-    mat = widget.courses['matiere'];
+    mat = widget.courses['somme'];
   }
 
   Future<void> selectTime(TextEditingController controller) async {
@@ -1253,7 +1290,7 @@ class _UpdateProfCoursDialogState extends State<UpdateProfCoursDialog> {
   }
   String getMatiereIdFromName(String name) {
     // Assuming you have a list of matieres named 'matieresList'
-    final matiere = matiereList.firstWhere((mat) => mat.name == name, orElse: () => Matiere(id: '', name: '', description: '', categorieId: '', categorie_name: '', code: '',));
+    final matiere = matiereList.firstWhere((mat) => mat.name == name, orElse: () => Matiere(id: '', name: '',  categorieId: '', categorie_name: '', code: '',));
     return matiere?.id ?? ''; // Return the ID if found, otherwise an empty string
   }
 
@@ -1396,12 +1433,12 @@ class _UpdateProfCoursDialogState extends State<UpdateProfCoursDialog> {
 
               if (showMatDropdown) {
                 // No changes, directly use the selected IDs
-                updateProfCours(widget.courses['_id'],widget.ProfId,selectedMat!['_id']!, widget.courses['CM'], date,bool.parse(_isSigned.text));
+                // updateProfCours(widget.courses['_id'],widget.ProfId,selectedMat!['_id']!, widget.courses['CM'], date,bool.parse(_isSigned.text));
               } else {
                 // Changes made, get the updated IDs
                 String updatedMatId = await getMatiereIdFromName(mat); // Get updated matière ID
                 print('updatedMatId: $updatedMatId');
-                updateProfCours(widget.courses['_id'], widget.ProfId, updatedMatId, widget.courses['CM'], date, bool.parse(_isSigned.text));
+                // updateProfCours(widget.courses['_id'], widget.ProfId, updatedMatId, widget.courses['CM'], date, bool.parse(_isSigned.text));
               }
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Le Type est  Update avec succès.')),
@@ -1421,9 +1458,16 @@ class _UpdateProfCoursDialogState extends State<UpdateProfCoursDialog> {
 
 }
 
-Future<void> updateProfCours( id,String professeurId,String matiereId, double CM, DateTime? date, bool isSigned) async {
+Future<void> updateProfCours( id,String professeurId,String matiereId, double CM, double TP, double TD, DateTime? date,String startTime, bool isSigned) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String token = prefs.getString("token")!;
+
+  List<Map<String, dynamic>> types = [
+    {"name": "CM", "nbh": CM},
+    {"name": "TP", "nbh": TP},
+    {"name": "TD", "nbh": TD},
+  ];
+
   final url = 'http://192.168.43.73:5000/cours/'  + '/$id';
   final headers = {
     'Content-Type': 'application/json',
@@ -1432,10 +1476,10 @@ Future<void> updateProfCours( id,String professeurId,String matiereId, double CM
   Map<String, dynamic> body =({
     'professeur': professeurId,
     'matiere': matiereId,
-    // 'types': types,
-    "types": CM,
-    // 'date': date?.toIso8601String(),
-    'isSigned':isSigned
+    'types': types,
+    "startTime": CM,
+    'date': date?.toIso8601String(),
+    'isSigned':isSigned? "oui": "pas encore"
   });
 
   if (date != null) {

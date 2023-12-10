@@ -39,31 +39,41 @@ class _MatieresState extends State<Matieres> {
     final category = categories.firstWhere((c) => c.id == categoryId, orElse: () => Category(id: '', name: '')); // Replace 'Category' with your actual Category class
     return category.name;
   }
-  void DeleteMatiere(id) async{
-    // SharedPreferences prefs = await SharedPreferences.getInstance();
-    // String token = prefs.getString("token")!;
-    // print(token);
 
-    var response = await http.delete(Uri.parse('http://192.168.43.73:5000/matiere' +"/$id"),
-      // headers: {
-      //   'Content-Type': 'application/json',
-      //   'Authorization': 'Bearer $token',
-      // },
+
+  void DeleteMatiere(id) async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString("token")!;
+    print(token);
+
+    var response = await http.delete(Uri.parse('http://192.168.43.73:5000/matiere/$id' ),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
       // body: jsonEncode(regBody)
     );
 
     var jsonResponse = jsonDecode(response.body);
     print(response.statusCode);
     if(response.statusCode ==200){
-      fetchMatiere();
+      fetchMatiere().then((data) {
+        setState(() {
+          filteredItems = data;
+        });
+      }).catchError((error) {
+        print('Erreur lors de la récupération des Matieres: $error');
+      });
+
     }
 
   }
-  Future<void> UpdateMatiere(String id, String name, String description, String categorieId) async {
+
+  Future<void> UpdateMatiere(String id, String name, String categorieId) async {
     final Map<String, dynamic> data = {
       "name": name,
 
-      "description": description,
+      // "description": description,
       "categorie": categorieId,
       // "code": newCode,
     };
@@ -90,14 +100,12 @@ class _MatieresState extends State<Matieres> {
     }
   }
 
-  void AddMatiere(String name,String?  semestre,String description, String? categorieId) async {
+  void AddMatiere(String name,String description, String? categorieId) async {
     final Map<String, dynamic> data = {
       "name": name,
-      "semestres": [
-        {
-          "name": semestre, // Ajoutez ici la valeur sélectionnée
-        },],
+
       "description": description,
+      "categorie": categorieId,
     };
 
     if (categorieId != null) {
@@ -115,7 +123,7 @@ class _MatieresState extends State<Matieres> {
     );
 
     print(response.statusCode);
-    if (response.statusCode == 201) {
+    if (response.statusCode == 200) {
       print('Matiere ajoutée avec succès');
 
       fetchMatiere().then((data) {
@@ -264,8 +272,9 @@ class _MatieresState extends State<Matieres> {
                     // Implémentez la logique de filtrage ici
                     // Par exemple, filtrez les Matiereesseurs dont le name ou le préname contient la valeur saisie
                     filteredItems = Matieres!.where((Matiere) =>
-                    Matiere.name!.toLowerCase().contains(value.toLowerCase()) ||
-                        Matiere.description!.toLowerCase().contains(value.toLowerCase())).toList();
+                    Matiere.name!.toLowerCase().contains(value.toLowerCase())
+                        // Matiere.description!.toLowerCase().contains(value.toLowerCase())
+                    ).toList();
                   });
                 },
                 decoration: InputDecoration(
@@ -315,11 +324,6 @@ class _MatieresState extends State<Matieres> {
                                 headingRowHeight: 50,
                                 columnSpacing: 8,
                                 dataRowHeight: 50,
-                                // border: TableBorder.all(color: Colors.black12, width: 2),
-                                headingTextStyle: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black, // Set header text color
-                                ),
                                 // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
                                 columns: [
                                   // DataColumn(label: Text('Semestre')),
@@ -342,168 +346,18 @@ class _MatieresState extends State<Matieres> {
                                         //   index, // Use index as matiereCount
                                         // ))),
                                         // DataCell(Text('${filteredItems?[index].description}')),
-                                        DataCell(Container(width: 165,
-                                            child: Text('${filteredItems?[index].description}',style: TextStyle(
+                                        DataCell(Container(width: 120,
+                                            child: Text('${filteredItems?[index].name}',style: TextStyle(
                       color: Colors.black,
                       ),)),),
 
-                                        // DataCell(Container(width: 105,
-                                        //     child: Text('${filteredItems?[index].description}',)),),
-                                        // DataCell(Text('${filteredItems?[index].categorie}')),
                                         DataCell(
                                           Row(
                                             children: [
                                               Container(
-                                                width: 35,
+                                                width: 30,
                                                 child: TextButton(
-                                                  onPressed: () async {
-                                                    List<Category> types = await fetchCategory();
-                                                    List<Matiere> matieres = await fetchMatiere();
-                                                    _name.text = filteredItems![index].name;
-                                                    _desc.text = filteredItems![index].description;
-                                                    _categ = filteredItems![index].categorieId;
-                                                    // selectedCateg = filteredItems![index].categorie;
-                                                    // _selectedSemestre = filteredItems![index].semestre!;
-                                                    List<Category?> selectedCategories = List.generate(matieres.length, (_) => null);
-
-                                                    showModalBottomSheet(
-                                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
-                                                            topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
-                                                        isScrollControlled: true, // Rendre le contenu déroulable
-
-
-                                                        context: context,
-                                                        builder: (BuildContext context){
-                                                          return SingleChildScrollView(
-                                                            child: Container(
-                                                              height: 600,
-                                                              padding: const EdgeInsets.all(25.0),
-                                                              child: Column(
-                                                                // mainAxisSize: MainAxisSize.min,
-                                                                children: [
-                                                                  Row(
-                                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                                    // mainAxisAlignment: MainAxisAlignment.start,
-                                                                    children: [
-                                                                      Text("Modifier une Matiere", style: TextStyle(fontSize: 20),),
-                                                                      Spacer(),
-                                                                      InkWell(
-                                                                        child: Icon(Icons.close),
-                                                                        onTap: (){
-                                                                          Navigator.pop(context);
-                                                                        },
-                                                                      )
-                                                                    ],
-                                                                  ),
-                                                                  SizedBox(height: 40),
-                                                                  TextField(
-                                                                    controller: _name,
-                                                                    keyboardType: TextInputType.text,
-                                                                    decoration: InputDecoration(
-                                                                        filled: true,
-                                                                        // fillColor: Colors.white,
-                                                                        border: OutlineInputBorder(
-                                                                            borderSide: BorderSide.none,gapPadding: 1,
-                                                                            borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                                                                  ),
-                                                                  SizedBox(height: 10),
-                                                                  DropdownButtonFormField<Category>(
-                                                                    value: selectedCategories[index],//getCategoryNameFromId
-
-                                                                    hint: Text('${filteredItems![index].code}'),
-                                                                    items: types.map((type) {
-                                                                      return DropdownMenuItem<Category>(
-                                                                        value: type,
-                                                                        child: Text(type.name ?? ''),
-                                                                      );
-                                                                    }).toList(),
-
-                                                                    onChanged: (value) {
-                                                                      setState(() {
-                                                                        selectedCategories[index] = value;
-                                                                      });
-                                                                    },
-                                                                    decoration: InputDecoration(
-                                                                      filled: true,
-                                                                      // fillColor: Colors.white,
-                                                                      border: OutlineInputBorder(
-                                                                        borderSide: BorderSide.none,gapPadding: 1,
-                                                                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                  // String? selectedType; // Variable pour suivre l'élément sélectionné
-
-
-                                                                  SizedBox(height: 10),
-                                                                  TextFormField(
-                                                                    controller: _desc,
-                                                                    keyboardType: TextInputType.text,
-                                                                    maxLines: 3,
-                                                                    decoration: InputDecoration(
-                                                                        filled: true,
-
-                                                                        // fillColor: Colors.white,
-                                                                        hintText: "description",
-                                                                        border: OutlineInputBorder(
-                                                                            borderSide: BorderSide.none,gapPadding: 1,
-                                                                            borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                                                                  ),
-
-
-
-                                                                  SizedBox(height: 10),
-
-                                                                  ElevatedButton(
-                                                                    onPressed: () {
-                                                                      Navigator.of(context).pop();
-
-
-                                                                      // Check if you're updating an existing matiere or creating a new one
-                                                                      UpdateMatiere(
-                                                                        filteredItems![index].id!,
-                                                                        _name.text,
-                                                                        _desc.text,
-                                                                        selectedCategories[index]!.id!
-                                                                      );
-
-
-                                                                      ScaffoldMessenger.of(context).showSnackBar(
-                                                                        SnackBar(content: Text('Le Type est mis à jour avec succès.')),
-                                                                      );
-                                                                    },
-                                                                    child: Text("Modifier"),
-
-                                                                    style: ElevatedButton.styleFrom(
-                                                                      backgroundColor: Color(0xff0fb2ea),
-                                                                      foregroundColor: Colors.white,
-                                                                      elevation: 10,
-                                                                      minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
-                                                                      // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
-                                                                      //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
-                                                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                                                                    ),
-                                                                  )
-                                                                ],
-                                                              ),
-                                                            ),
-                                                          );
-
-                                                        }
-                                                    );
-                                                  },
-                                                  child: Icon(Icons.mode_edit_outlined, color: Colors.black),
-                                                  style: TextButton.styleFrom(
-                                                    primary: Colors.white,
-                                                    elevation: 0,
-                                                    // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
-                                                  ),
-                                                ),
-                                              ),
-                                              Container(
-                                                width: 35,
-                                                child: TextButton(
-                                                  onPressed: () =>_showCourseDetails(context, filteredItems![index]),// Disable button functionality
+                                                  onPressed: () =>_showCourseDetails(context, filteredItems![index],filteredItems![index].id),// Disable button functionality
 
                                                   child: Icon(Icons.more_horiz, color: Colors.black54),
                                                   style: TextButton.styleFrom(
@@ -513,52 +367,6 @@ class _MatieresState extends State<Matieres> {
                                                   ),
                                                 ),
                                               ),
-                                              // Container(
-                                              //   width: 35,
-                                              //   child: TextButton(
-                                              //     onPressed: () {
-                                              //       showDialog(
-                                              //         context: context,
-                                              //         builder: (BuildContext context) {
-                                              //           return AlertDialog(
-                                              //             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
-                                              //             title: Text("Confirmer la suppression"),
-                                              //             content: Text(
-                                              //                 "Êtes-vous sûr de vouloir supprimer cet élément ?"),
-                                              //             actions: <Widget>[
-                                              //               TextButton(
-                                              //                 child: Text("ANNULER"),
-                                              //                 onPressed: () {
-                                              //                   Navigator.of(context).pop();
-                                              //                 },
-                                              //               ),
-                                              //               TextButton(
-                                              //                 child: Text(
-                                              //                   "SUPPRIMER",
-                                              //                   // style: TextStyle(color: Colors.red),
-                                              //                 ),
-                                              //                 onPressed: () {
-                                              //                   Navigator.of(context).pop();
-                                              //                   DeleteMatiere(filteredItems![index].id!,);
-                                              //                   ScaffoldMessenger.of(context).showSnackBar(
-                                              //                     SnackBar(content: Text('Le Category a été Supprimer avec succès.')),
-                                              //                   );
-                                              //                 },
-                                              //               ),
-                                              //             ],
-                                              //           );
-                                              //         },
-                                              //       );
-                                              //     }, // Disable button functionality
-                                              //
-                                              //     child: Icon(Icons.delete_outline, color: Colors.black),
-                                              //     style: TextButton.styleFrom(
-                                              //       primary: Colors.white,
-                                              //       elevation: 0,
-                                              //       // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
-                                              //     ),
-                                              //   ),
-                                              // ),
                                             ],
                                           ),
                                         ),
@@ -614,7 +422,7 @@ class _MatieresState extends State<Matieres> {
             builder: (BuildContext context){
                 return SingleChildScrollView(
                   child: Container(
-                    height: 600,
+                    height: 450,
                     padding: const EdgeInsets.all(25.0),
                     child: Column(
                       // mainAxisSize: MainAxisSize.min,
@@ -672,32 +480,6 @@ class _MatieresState extends State<Matieres> {
                         // String? selectedType; // Variable pour suivre l'élément sélectionné
 
                         SizedBox(height: 10),
-                        DropdownButtonFormField<String>(
-                          value: selectedType,
-                          onChanged: (newValue) {
-                            setState(() {
-                              selectedType = newValue;
-                              print('hello');
-                            });
-                          },
-                          items: availableTypes.map<DropdownMenuItem<String>>((type) {
-                            return DropdownMenuItem<String>(
-                              value: type['name'],
-                              child: Text(type['name']),
-                            );
-                          }).toList(),
-                          decoration: InputDecoration(
-                            filled: true,
-                            // fillColor: Colors.white,
-                            hintText: "Semestre",
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide.none,gapPadding: 1,
-                              borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                            ),
-                          ),
-                        ),
-
-                        SizedBox(height: 10),
                         TextFormField(
                           controller: _description,
                           keyboardType: TextInputType.text,
@@ -719,11 +501,16 @@ class _MatieresState extends State<Matieres> {
                         ElevatedButton(
                           onPressed: (){
                           Navigator.of(context).pop();
+
                           // fetchMatiere();
-                          AddMatiere(_name.text,selectedType, _description.text,selectedCateg!.id!);
+                          AddMatiere(_name.text, _description.text,selectedCateg!.id!);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('Le Maitiere a été ajouter avec succès.')),
+
                           );
+                          setState(() {
+                            fetchMatiere();
+                          });
                         }, child: Text("Ajouter"),
 
                           style: ElevatedButton.styleFrom(
@@ -745,7 +532,7 @@ class _MatieresState extends State<Matieres> {
           );
 
   }
-  Future<void> _showCourseDetails(BuildContext context, Matiere mat) {
+  Future<void> _showCourseDetails(BuildContext context, Matiere mat,String MatId) {
     return showModalBottomSheet(
         context: context,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
@@ -754,7 +541,7 @@ class _MatieresState extends State<Matieres> {
 
         builder: (BuildContext context){
           return Container(
-            height: 650,
+            height: 500,
             padding: const EdgeInsets.all(25.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -785,28 +572,6 @@ class _MatieresState extends State<Matieres> {
                 SizedBox(height: 25),
                 Row(
                   children: [
-                    Text('Description:',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                    SizedBox(width: 10,),
-                    Text('${mat.description}',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                  ],
-                ),
-                SizedBox(height: 25),
-                Row(
-                  children: [
                     Text('Categorie:',
                       style: TextStyle(
                         fontSize: 20,
@@ -817,28 +582,6 @@ class _MatieresState extends State<Matieres> {
 
                     SizedBox(width: 10,),
                     Text('${mat.categorie_name}',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                  ],
-                ),
-                SizedBox(height: 25),
-                Row(
-                  children: [
-                    Text('Code:',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                    SizedBox(width: 10,),
-                    Text('${mat.code}',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,
@@ -898,18 +641,129 @@ class _MatieresState extends State<Matieres> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     ElevatedButton(
-                      onPressed: () async{
-                        // setState(() {
-                        //   Navigator.pop(context);
-                        // });
-                        // return showDialog(
-                        //   context: context,
-                        //   builder: (context) {
-                        //     return UpdateMatiere();
-                        //   },
-                        // );
+                      onPressed: () async {
+                        List<Category> types = await fetchCategory();
+                        List<Matiere> matieres = await fetchMatiere();
+                        _name.text = mat.name;
+                        // _desc.text = filteredItems![index].description;
+                        _categ = mat.categorieId;
+                        // selectedCateg = filteredItems![index].categorie;
+                        // _selectedSemestre = filteredItems![index].semestre!;
+                        List<Category?> selectedCategories = List.generate(matieres.length, (_) => null);
 
-                      },// Disable button functionality
+                        showModalBottomSheet(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
+                                topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
+                            isScrollControlled: true, // Rendre le contenu déroulable
+
+
+                            context: context,
+                            builder: (BuildContext context){
+                              return SingleChildScrollView(
+                                child: Container(
+                                  height: 450,
+                                  padding: const EdgeInsets.all(25.0),
+                                  child: Column(
+                                    // mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        // mainAxisAlignment: MainAxisAlignment.start,
+                                        children: [
+                                          Text("Modifier une Matiere", style: TextStyle(fontSize: 20),),
+                                          Spacer(),
+                                          InkWell(
+                                            child: Icon(Icons.close),
+                                            onTap: (){
+                                              Navigator.pop(context);
+                                            },
+                                          )
+                                        ],
+                                      ),
+                                      SizedBox(height: 40),
+                                      TextField(
+                                        controller: _name,
+                                        keyboardType: TextInputType.text,
+                                        decoration: InputDecoration(
+                                            filled: true,
+                                            // fillColor: Colors.white,
+                                            border: OutlineInputBorder(
+                                                borderSide: BorderSide.none,gapPadding: 1,
+                                                borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                                      ),
+                                      SizedBox(height: 10),
+                                      DropdownButtonFormField<Category>(
+                                        value: selectedCateg,//getCategoryNameFromId
+
+                                        hint: Text('${mat.code}'),
+                                        items: types.map((type) {
+                                          return DropdownMenuItem<Category>(
+                                            value: type,
+                                            child: Text(type.name ?? ''),
+                                          );
+                                        }).toList(),
+
+                                        onChanged: (value) {
+                                          setState(() {
+                                            selectedCateg = value;
+                                          });
+                                        },
+                                        decoration: InputDecoration(
+                                          filled: true,
+                                          // fillColor: Colors.white,
+                                          border: OutlineInputBorder(
+                                            borderSide: BorderSide.none,gapPadding: 1,
+                                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                                          ),
+                                        ),
+                                      ),
+                                      // String? selectedType; // Variable pour suivre l'élément sélectionné
+
+
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+
+
+                                          fetchMatiere();
+                                          // Check if you're updating an existing matiere or creating a new one
+                                          UpdateMatiere(
+                                              mat.id!,
+                                              _name.text,
+                                              // _desc.text,
+                                            selectedCateg!.id!
+                                          );
+
+
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(content: Text('Le Type est mis à jour avec succès.')),
+                                          );
+                                          setState(() {
+                                            Navigator.pop(context);
+                                            // fetchMatiere();
+                                          });
+                                        },
+                                        child: Text("Modifier"),
+
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Color(0xff0fb2ea),
+                                          foregroundColor: Colors.white,
+                                          elevation: 10,
+                                          minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
+                                          // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
+                                          //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              );
+
+                            }
+                        );
+                      },
+
 
                       child: Text('Modifier'),
                       style: ElevatedButton.styleFrom(
@@ -946,13 +800,20 @@ class _MatieresState extends State<Matieres> {
                                   ),
                                   onPressed: () {
                                     Navigator.of(context).pop();
-                                    DeleteMatiere(mat.id);
-                                    setState(() {
-                                      Navigator.pop(context);
-                                    });
+
+                                    fetchMatiere();
+                                    DeleteMatiere(mat!.id);
+                                    print(mat.id!);
+
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(content: Text('Le Category a été Supprimer avec succès.')),
                                     );
+
+                                    setState(() {
+                                      Navigator.of(context).pop();
+                                      fetchMatiere();
+                                    });
+
                                   },
                                 ),
                               ],
@@ -1018,7 +879,7 @@ class Matiere {
   final String id;
   final String name;
   final String? code;
-  final String description;
+  // final String description;
   final String categorieId;
   final String? categorie_name;
   final num? numero;
@@ -1028,7 +889,7 @@ class Matiere {
   Matiere({
     required this.id,
     required this.name,
-    required this.description,
+    // required this.description,
     required this.categorieId,
      this.categorie_name,
      this.code,
@@ -1037,24 +898,14 @@ class Matiere {
   });
 
   factory Matiere.fromJson(Map<String, dynamic> json) {
-    // Traitement de la liste de semestres
-    // final semestresData = json['semestres'] as List<dynamic>;
-    // final List<Semestre> semestres = semestresData
-    //     .map((semestreJson) => Semestre.fromJson(semestreJson))
-    //     .toList();
-
     return Matiere(
       id: json['_id'],
       name: json['name'],
-      code: json['code'],
-      // code: semestres.isNotEmpty ? semestres[0].codeEM : null,
-      description: json['description'],
       categorieId: json['categorie'],
-      // categorieId: json['categorie']['_id'],
-      // semestre: semestres.isNotEmpty ? semestres[0].name : null,
+      categorie_name: json['categorie_name'] ,
+      code: json['code'],
       taux: json['taux'],
       numero: json['numero'] ,
-      categorie_name: json['categorie_name'] ,
     );
   }
 }

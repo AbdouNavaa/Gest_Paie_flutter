@@ -47,18 +47,7 @@ class _SplashScreenState extends State<SplashScreen> {
               child: Column(
                 children: [
                   Text(
-                    "Gestion",
-                    style: GoogleFonts.italianno(
-                      color: Colors.black,
-                      fontSize: 70.0,
-                      fontStyle: FontStyle.italic,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 2.0,
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  Text(
-                    "Paiements",
+                    "GP",
                     style: GoogleFonts.italianno(
                       color: Colors.black,
                       fontSize: 70.0,
@@ -70,7 +59,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 ],
               ),
             ),
-            SizedBox(height: 40),
+            SizedBox(height: 200),
             CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
             ),
