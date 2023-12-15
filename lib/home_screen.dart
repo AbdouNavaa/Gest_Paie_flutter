@@ -165,17 +165,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 60.0),
-                  child: Text(
-                      DateFormat('dd-MM-yyyy').format(DateTime.now()).toString(),
-                      // DateTime.now().toString(),
-                      style: GoogleFonts.slabo27px(
-                        color: Colors.black,
-                        fontSize: 20,
-                      )
-                  ),
-                ),
+                // Padding(
+                //   padding: const EdgeInsets.only(left: 60.0),
+                //   child: Text(
+                //       DateFormat('dd-MM-yyyy').format(DateTime.now()).toString(),
+                //       // DateTime.now().toString(),
+                //       style: GoogleFonts.slabo27px(
+                //         color: Colors.black,
+                //         fontSize: 20,
+                //       )
+                //   ),
+                // ),
               ],
             ),
           ),
@@ -531,7 +531,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                        this.coursNum = json.decode(response.body)['cours'].length;
                                      //
                                      // });
-                                     // print('NBC :${json.decode(response.body)['cours'].length}');
+                                     // print('NBC :${json.decode(response.body)['cours']}');
                                      Navigator.push(
                                        context,
                                        MaterialPageRoute(builder: (context) =>
@@ -574,7 +574,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                      this.coursNum = json.decode(response.body)['cours'].length;
                                      Navigator.push(
                                        context,
-                                       MaterialPageRoute(builder: (context) => Paiements()),
+                                       MaterialPageRoute(builder: (context) => Paiements(courses: courses,)),
                                      );
                                    } else {
                                      // Handle error

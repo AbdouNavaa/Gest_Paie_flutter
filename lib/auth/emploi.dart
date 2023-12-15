@@ -178,36 +178,22 @@ class _EmploiState extends State<Emploi> {
     }
   }
 
-  Future<void> selectDate(TextEditingController controller) async {
-    DateTime? selectedDateTime = await showDatePicker(
+  Future<void> selectTime(TextEditingController controller) async {
+    TimeOfDay? selectedTime = await showTimePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2030),
+      initialTime: TimeOfDay.now(),
     );
 
-    if (selectedDateTime != null) {
-      TimeOfDay? selectedTime = await showTimePicker(
-        context: context,
-        initialTime: TimeOfDay.now(),
-      );
+    if (selectedTime != null) {
+      String formattedTime = selectedTime.format(context); // Utilise la méthode format avec le context
 
-      if (selectedTime != null) {
-        DateTime selectedDateTimeWithTime = DateTime(
-          selectedDateTime.year,
-          selectedDateTime.month,
-          selectedDateTime.day,
-          selectedTime.hour,
-          selectedTime.minute,
-        );
 
-        String formattedDateTime = DateFormat('HH:mm').format(selectedDateTimeWithTime);
-        setState(() {
-          controller.text = formattedDateTime;
-        });
-      }
+      setState(() {
+        controller.text = formattedTime;
+      });
     }
   }
+
 
 
 
@@ -510,6 +496,7 @@ class _EmploiState extends State<Emploi> {
                                 columns: [
                                   DataColumn(label: Text('Prof')),
                                   DataColumn(label: Text('Mtiere')),
+                                  DataColumn(label: Text('Group')),
                                   DataColumn(label: Text('Jour')),
                                   DataColumn(label: Text('Deb')),
                                   DataColumn(label: Text('Action')),
@@ -524,6 +511,10 @@ class _EmploiState extends State<Emploi> {
                                             // onTap:() => _showcategDetails(context, categ)
                                           ),
                                          DataCell(Container(child: Text('${getMatIdFromName(emp.mat)}')),
+
+                                            // onTap:() => _showcategDetails(context, categ)
+                                          ),
+                                         DataCell(Container(child: Text('${getGroupIdFromName(emp.group)}')),
 
                                             // onTap:() => _showcategDetails(context, categ)
                                           ),
@@ -688,7 +679,7 @@ class _EmploiState extends State<Emploi> {
                               borderSide: BorderSide.none,gapPadding: 1,
                               borderRadius: BorderRadius.all(Radius.circular(10.0)))),
                       // readOnly: true,
-                      onTap: () => selectDate(_date),
+                      onTap: () => selectTime(_date),
                     ),
 
                     SizedBox(height: 10),
@@ -730,33 +721,38 @@ class _EmploiState extends State<Emploi> {
                       ),
                     ),
                     SizedBox(height: 10),
-                    DropdownButtonFormField<Matiere>(
-                      value: selectedMat,
-                      items: matiereList.map((matiere) {
-                        return DropdownMenuItem<Matiere>(
-                          value: matiere,
-                          child: Text(matiere.name ?? ''),
-                        );
-                      }).toList(),
-                      onChanged: (value)async {
-                        setState(()  {
-                          selectedMat = value;
-                          selectedProfesseur = null; // Reset the selected professor
-                          updateProfesseurList(); // Update the list of professeurs based on the selected matière
-                        });
-                      },
-                      decoration: InputDecoration(
-                        filled: true,
-                        // fillColor: Color(0xA3B0AF1),
-                        hintText: "selection d'une Matiere",
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide.none,gapPadding: 1,
-                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                        ),
+                  DropdownButtonFormField<Matiere>(
+                    value: selectedMat,
+                    items: (selectedGroup != null && selectedGroup!.semestre != null)
+                        ? selectedGroup!.semestre!.elements.map((elementId) {
+                      // Trouver la matière correspondant à l'identifiant dans la liste des matières
+                      Matiere? matiere = matiereList.firstWhere((mat) => mat.id == elementId, orElse: () => Matiere(id: '', name: '', categorieId: ''));
+                      return DropdownMenuItem<Matiere>(
+                        value: matiere,
+                        child: Text(matiere?.name ?? ''),
+                      );
+                    }).toList()
+                        : [],
+                    onChanged: (value) async {
+                      setState(() {
+                        selectedMat = value;
+                        selectedProfesseur = null;
+                        updateProfesseurList();
+                      });
+                    },
+                    // Le reste de ton code reste inchangé
+                    decoration: InputDecoration(
+                      filled: true,
+                      // fillColor: Color(0xA3B0AF1),
+                      hintText: "selection d'une Matiere", // Update the hintText
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide.none,gapPadding: 1,
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
                       ),
                     ),
+                  ),
 
-                    SizedBox(height: 10),
+                  SizedBox(height: 10),
                     DropdownButtonFormField<Professeur>(
                       value: selectedProfesseur,
                       items: professeurs.map((professeur) {
@@ -1141,7 +1137,7 @@ class _EmploiState extends State<Emploi> {
                                                   borderSide: BorderSide.none,gapPadding: 1,
                                                   borderRadius: BorderRadius.all(Radius.circular(10.0)))),
                                           // readOnly: true,
-                                          onTap: () => selectDate(_date),
+                                          onTap: () => selectTime(_date),
                                         ),
 
                                         SizedBox(height: 10),
@@ -1185,24 +1181,28 @@ class _EmploiState extends State<Emploi> {
                                         SizedBox(height: 10),
                                         DropdownButtonFormField<Matiere>(
                                           value: selectedMat,
-                                          items: matiereList.map((matiere) {
+                                          items: (selectedGroup != null && selectedGroup!.semestre != null)
+                                              ? selectedGroup!.semestre!.elements.map((elementId) {
+                                            // Trouver la matière correspondant à l'identifiant dans la liste des matières
+                                            Matiere? matiere = matiereList.firstWhere((mat) => mat.id == elementId, orElse: () => Matiere(id: '', name: '', categorieId: ''));
                                             return DropdownMenuItem<Matiere>(
                                               value: matiere,
-                                              child: Text(matiere.name ?? ''),
+                                              child: Text(matiere?.name ?? ''),
                                             );
-                                          }).toList(),
-                                          onChanged: (value)async {
-                                            setState(()  {
+                                          }).toList()
+                                              : [],
+                                          onChanged: (value) async {
+                                            setState(() {
                                               selectedMat = value;
-                                              selectedProfesseur = null; // Reset the selected professor
-                                              // professeurs = await fetchProfesseursByMatiere(selectedMat!.id); // Clear the professeurs list when a matière is selected
-                                              updateProfesseurList(); // Update the list of professeurs based on the selected matière
+                                              selectedProfesseur = null;
+                                              updateProfesseurList();
                                             });
                                           },
+                                          // Le reste de ton code reste inchangé
                                           decoration: InputDecoration(
                                             filled: true,
                                             // fillColor: Color(0xA3B0AF1),
-                                            hintText: "selection d'une Matiere",
+                                            hintText: "selection d'une Matiere", // Update the hintText
                                             border: OutlineInputBorder(
                                               borderSide: BorderSide.none,gapPadding: 1,
                                               borderRadius: BorderRadius.all(Radius.circular(10.0)),

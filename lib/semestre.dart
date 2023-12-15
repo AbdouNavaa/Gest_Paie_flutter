@@ -529,18 +529,18 @@ class _SemestresState extends State<Semestres> {
 
         builder: (BuildContext context){
           return Container(
-            height: 650,
+            height: 500,
             padding: const EdgeInsets.all(25.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.center,
               // mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Matiere Infos',style: TextStyle(fontSize: 30),),
+                Text('Semestre Infos',style: TextStyle(fontSize: 30),),
                 SizedBox(height: 50),
                 Row(
                   children: [
-                    Text('Numero:',
+                    Text('Nom:',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,
@@ -548,7 +548,7 @@ class _SemestresState extends State<Semestres> {
                         // color: Colors.lightBlue
                       ),),
                     SizedBox(width: 10,),
-                    Text(sem.numero.toString(),
+                    Text('S${sem.numero}',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,
@@ -631,31 +631,79 @@ class _SemestresState extends State<Semestres> {
                   ],
                 ),
                 SizedBox(height: 25),
-                Row(
-                  children: [
-                    Text('matieres:',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                    SizedBox(width: 10,),
-                    InkWell(
-                      child: Text(
-                        '${getMatIdFromNames(sem.elements!.join(", ")) }',
+                SingleChildScrollView(scrollDirection: Axis.horizontal,
+                  child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text('matieres:',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w400,
                           fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                    ),
+                          // color: Colors.lightBlue
+                        ),),
 
-                  ],
+                      SizedBox(width: 10,),
+                      Row(
+                        // mainAxisAlignment: MainAxisAlignment.start,
+                        // crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          for (var matiere in sem.elements!) // Assuming items![index].matieres is a list of matieres for the professor
+                            Row(
+                              children: [
+                                // Text('Matieres: [${getMatIdFromNames(getMatSemIdFromName(semestre['_id']).join(", "))}]',style: TextStyle(fontSize: 18)),
+                                Text(getMatIdFromName(matiere) ?? '',//abdou
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w400,
+                                      fontStyle: FontStyle.italic,
+                                    )),
+                                TextButton(
+                                    onPressed: (){
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return AlertDialog(
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
+                                            title: Text('Supprimer Matiere'),
+                                            content: Text('Voulez vous supprimer: ${getMatIdFromName(matiere)}?'),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.of(context).pop(); // Close the dialog
+                                                },
+                                                child: Text('Cancel'),
+                                              ),
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.of(context).pop(); // Close the dialog
+                                                  // String matiereId = matiere['_id']; // Replace 'matiere' with the actual matiere data
+                                                  deleteMatiereSem(sem.id, matiere);
+                                                  setState(() {
+                                                    Navigator.pop(context);
+                                                  });ScaffoldMessenger.of(context).showSnackBar(
+                                                    SnackBar(
+                                                        content: Text('La matiere est Supprimer avec succès.',)),);
+
+                                                },
+                                                child: Text('Supprimer'),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    },
+                                    child: Icon(Icons.delete_outlined, color: Colors.black26,))
+                              ],
+                            ),
+                        ],
+                      ),
+
+
+                    ],
+                  ),
                 ),
-                SizedBox(height: 25,),
+                SizedBox(height: 35,),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -1075,6 +1123,30 @@ class _SemestresState extends State<Semestres> {
     } else {
       // Handle errors
       print('Failed to add matiere to professeus. Status Code: ${response.statusCode}');
+    }
+  }
+
+  Future<void> deleteMatiereSem(id, String matiereId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString("token")!;
+
+    final url = 'http://192.168.43.73:5000/semestre/$id/$matiereId';
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+
+    final response = await http.delete(Uri.parse(url), headers: headers);
+
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      // You can handle the response data here if needed
+      print('Ok le matiere est supprimer');
+
+      print(responseData);
+    } else {
+      // Handle errors
+      print('Failed to delete matiere from professeur. Status Code: ${response.statusCode}');
     }
   }
 

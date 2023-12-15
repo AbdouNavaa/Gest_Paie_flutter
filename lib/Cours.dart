@@ -415,8 +415,8 @@ class _CoursesPageState extends State<CoursesPage> {
                           // sortColumnIndex: 1,
                           // sortAscending: true,
                           headingRowHeight: 50,
-                          columnSpacing: 13,
-                          horizontalMargin: 3,
+                          columnSpacing:  (!showPaid && !showSigned)?8: 25,
+                          horizontalMargin:  3,
                           // border: TableBorder(verticalInside: BorderSide(width: 1.5)),
                           dataRowHeight: 50,
                           headingTextStyle: TextStyle(
@@ -456,8 +456,10 @@ class _CoursesPageState extends State<CoursesPage> {
                                     // if ( showSigned)
                                     if (!showPaid)
                                       DataCell(
-                                        Icon( widget.courses[index]['isSigned'] =="oui"?  Icons.check:Icons.close_outlined,
-                                          color: widget.courses[index]['isSigned']=="oui"? Colors.green: Colors.red,size: 20,),
+                                        Container(width: 20,color: Colors.black,
+                                          child: Icon( widget.courses[index]['isSigned'] =="oui"?  Icons.check:Icons.close_outlined,
+                                            color: Colors.white,size: 20,),
+                                        ),
                                       ),
                                     if (widget.role == "admin" && !showSigned)
                                     // if (widget.role == "admin")
@@ -472,8 +474,10 @@ class _CoursesPageState extends State<CoursesPage> {
                                             Navigator.pop(context);
                                           });
                                         },
-                                          child: Icon( widget.courses[index]['isPaid']=="oui"? Icons.check:Icons.close_outlined,
-                                              color: widget.courses[index]['isPaid']=="oui"? Colors.green: Colors.red, size: 20),
+                                          child:     Container(width: 20,color: Colors.black,
+                                            child: Icon( widget.courses[index]['isPaid'] =="oui"?  Icons.check:Icons.close_outlined,
+                                              color: Colors.white,size: 20,),
+                                          ),
                                         ),
                                       ),
                                     DataCell(
@@ -497,7 +501,7 @@ class _CoursesPageState extends State<CoursesPage> {
                                       //     _showCourseDetails(context, widget.courses[index])
                                     ),
                                     DataCell(
-                                      Center(child: Container(width: 25, child: Text('${widget.courses[index]['TH']}',style: TextStyle(
+                                      Center(child: Container(width: 20, child: Text('${widget.courses[index]['TH']}',style: TextStyle(
                                         color: Colors.black,
                                       ),))),
                                     ),
@@ -529,38 +533,38 @@ class _CoursesPageState extends State<CoursesPage> {
                                     ),
                                   ],
                                 ),
+                            if (!showPaid && !showSigned)
                             DataRow(
                               cells: [
                                 if (!showPaid)
-                                  DataCell(Icon(Icons.title_outlined)
+                                  DataCell(
+                                      Text('NBC:',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
                                   ),
                                 if (widget.role == "admin"&& !showSigned)
                                   DataCell(
-                                   Icon(Icons.title_outlined)
+                                      (widget.dateDeb != null && widget.dateFin != null)?
+                                  Text('${coursesNum}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),):
+                                  Text('${widget.coursNum}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
                                   ),
 
 
                                 DataCell(
-                                  (widget.dateDeb != null && widget.dateFin != null)?
-                                  Text(' ${coursesNum}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w900,fontStyle: FontStyle.italic),):
-                                  Center(child: Text('NBC: ${widget.coursNum}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w900,fontStyle: FontStyle.italic))),
+                                  Text('Eq. CM: ',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
 
                                 ),
                                 DataCell(
-                                  Text('Eq. CM: ',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w900,fontStyle: FontStyle.italic),),
+                                  Text('${totalType}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),),
 
                                 ),
                                 DataCell(
-                                  Text('${totalType}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w900,fontStyle: FontStyle.italic),),
+                                  Text('MT:',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
 
                                 ),
                                 DataCell(
-                                  // (widget.dateDeb != null && widget.dateFin != null)?
-                                    Text('MT',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w900,fontStyle: FontStyle.italic),)
-                                  // Text('Montant Total : ${widget.sommeTV}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400)),
+                                    Text('${somme}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
                                 ),
                                DataCell(
-                                      Text('${somme}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w900,fontStyle: FontStyle.italic),)
+                                 Text('')
                                   ),
 
                               ],
@@ -702,7 +706,7 @@ class _CoursesPageState extends State<CoursesPage> {
                       ),),
 
                     SizedBox(width: 10,),
-                    Text('${course['matiere']}',
+                    Text('${course['prix']}',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,

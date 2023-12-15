@@ -25,6 +25,7 @@ class ProfesseurInfoPage extends StatefulWidget {
 }
 
 class _ProfesseurInfoPageState extends State<ProfesseurInfoPage> {
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -146,6 +147,29 @@ class ProfessorDetailsWidget extends StatefulWidget {
 }
 
 class _ProfessorDetailsWidgetState extends State<ProfessorDetailsWidget> {
+  List<Matiere> matiereList = [];
+  Matiere getMatIdFromName(String id) {
+    // Assuming you have a list of professeurs named 'professeursList'
+    final mat = matiereList.firstWhere((prof) => '${prof.id}' == id, orElse: () =>Matiere(id: '', name: '',  categorieId: '', categorie_name: '', code: '',));
+    // print(professeur.name);
+    return mat; // Return the ID if found, otherwise an empty string
+
+  }
+
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    fetchMatiere().then((data) {
+      setState(() {
+        matiereList = data; // Assigner la liste renvoyée par emploiesseur à items
+      });
+    }).catchError((error) {
+      print('Erreur: $error');
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListView(
@@ -190,7 +214,7 @@ class _ProfessorDetailsWidgetState extends State<ProfessorDetailsWidget> {
                   Radius.circular(20.0),
                 ),
               ),
-                margin: EdgeInsets.only(left: 10, right: 10),
+                margin: EdgeInsets.only(left: 5, right: 10),
                 padding: EdgeInsets.only(left: 40, right: 38),
                 child: DataTable(
                   showCheckboxColumn: true,
@@ -206,7 +230,7 @@ class _ProfessorDetailsWidgetState extends State<ProfessorDetailsWidget> {
                     DataRow(
                         cells: [
                       DataCell(Text('Name')),
-                      DataCell(Text('${widget.professor['nom']} ${widget.professor['prenom']}')),
+                      DataCell(Text('${widget.professor['nomComplet']} ')),
                     ]),
                     DataRow(
                         cells: [
@@ -216,6 +240,14 @@ class _ProfessorDetailsWidgetState extends State<ProfessorDetailsWidget> {
                     DataRow(cells: [
                       DataCell(Text('Mobile')),
                       DataCell(Text('${widget.professor['mobile']}')),
+                    ]),
+                    DataRow(cells: [
+                      DataCell(Text('Banque')),
+                      DataCell(Text('${widget.professor['banque']}')),
+                    ]),
+                    DataRow(cells: [
+                      DataCell(Text('Compte')),
+                      DataCell(Text('${widget.professor['accountNumero']}')),
                     ]),
                   ],
                 ),
@@ -276,17 +308,17 @@ class _ProfessorDetailsWidgetState extends State<ProfessorDetailsWidget> {
                   dataRowHeight: 50,
                   // headingRowColor: MaterialStateColor.resolveWith((states) =>  Colors.blue,), // Set row background color
                   columns: [
-                    DataColumn(label: Text('Matiere')),
-                    // DataColumn(label: Text('Description')),
-                    // DataColumn(label: Text('Prix')),
+                    DataColumn(label: Text('Code')),
+                    DataColumn(label: Text('Nom')),
+                    DataColumn(label: Text('Prix')),
                     DataColumn(label: Text('Action')),
                   ],
                   rows: [
                     for (var matiere in widget.professor['matieres'])
                       DataRow(cells: [
-                        DataCell(Text(matiere)),
-                        // DataCell(Text('${matiere['description']}')),
-                        // DataCell(Text('${matiere['categorie']['prix']}')),
+                        DataCell(Text(getMatIdFromName(matiere).code!)),
+                        DataCell(Text(getMatIdFromName(matiere).name)),
+                        DataCell(Text(getMatIdFromName(matiere).taux.toString())),
                         DataCell(
                           ElevatedButton(
                             onPressed: () => _showDeleteConfirmationDialog(context, matiere), // Disable button functionality
