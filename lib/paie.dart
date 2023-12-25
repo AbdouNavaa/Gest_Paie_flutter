@@ -26,14 +26,14 @@ class _PaieState extends State<Paie> {
       // If date filters are applied
       totalType = widget.courses.where((course) {
         DateTime courseDate = DateTime.parse(course['date'].toString());
-        return (course['isSigne'] != false) && // Filter courses with signs
+        return (course['isSigned'] != "pas encore") && // Filter courses with signs
             (courseDate.isAtSameMomentAs(widget.dateDeb!.toLocal()) || (courseDate.isAfter(widget.dateDeb!.toLocal()) &&
                 courseDate.isBefore(widget.dateFin!.toLocal().add(Duration(days: 1)))));
       }).map((course) => double.parse(course['nombre_heures'].toString())).fold(0, (prev, amount) => prev + amount);
 
       somme = widget.courses.where((course) {
         DateTime courseDate = DateTime.parse(course['date'].toString());
-        return ( course['isSigne'] != "pas encore") && // Filter courses with signs
+        return ( course['isSigned'] != "pas encore") && // Filter courses with signs
             (courseDate.isAtSameMomentAs(widget.dateDeb!.toLocal()) ||
                 (courseDate.isAfter(widget.dateDeb!.toLocal()) &&
                     courseDate.isBefore(

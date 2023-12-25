@@ -234,6 +234,32 @@ class _EmploiState extends State<Emploi> {
         },
       );
 
+      // Vérification des emplois existants pour le groupe, le professeur ou la matière
+      final List<emploi> existingEmplois = await fetchemploi();
+      bool isOccupied = false;
+      String conflictMessage = '';
+
+      // Vérifie s'il y a un emploi existant pendant le créneau horaire spécifié
+      for (var emploi in existingEmplois) {
+        // Insère ici la logique pour comparer les horaires et détecter les conflits
+        // Tu pourrais utiliser DateTime pour comparer les dates et heures des emplois existants
+        // et le nouvel emploi que tu veux ajouter
+
+        // Exemple : Comparaison des dates pour détecter un conflit
+        if ((emploi.startTime == date &&emploi.professor == ProfId) || (emploi.startTime == date &&emploi.group == GpId) ||
+            (emploi.startTime == date &&emploi.mat == MatId)) {
+          isOccupied = true;
+          conflictMessage = 'Le temps de ce cours n\'est pas disponible car ce groupe est occupé le même jour à ${emploi.startTime} - ${emploi.finishTime}';
+          break;
+        }
+      }
+
+      if (isOccupied) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(conflictMessage)),
+        );
+      }
+      else {
       if (response.statusCode == 200) {
 
 
@@ -252,7 +278,9 @@ class _EmploiState extends State<Emploi> {
           SnackBar(content: Text('Échec de l\'ajout de l\'emploi.')),
         );
       }
-    } catch (error) {
+    }
+    }
+    catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erreur: $error')),
       );
@@ -433,6 +461,7 @@ class _EmploiState extends State<Emploi> {
                     filteredItems = Emplois!.where((emploi) =>
                     getProfesseurIdFromName(emploi.professor!).toLowerCase().contains(value.toLowerCase()) ||
                         getMatIdFromName(emploi.mat)!.toLowerCase().contains(value.toLowerCase()) ||
+                        getGroupIdFromName(emploi.group)!.toLowerCase().contains(value.toLowerCase()) ||
                         (days[emploi.dayNumero]).toLowerCase().contains(value.toLowerCase()) ||
                         (emploi.startTime!).toLowerCase().contains(value.toLowerCase())
                     ).toList();

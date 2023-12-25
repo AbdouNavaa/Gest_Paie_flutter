@@ -546,7 +546,7 @@ class _GroupsState extends State<Groups> {
 
         builder: (BuildContext context){
           return Container(
-            height: 650,
+            height: 450,
             padding: const EdgeInsets.all(25.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,

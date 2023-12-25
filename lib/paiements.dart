@@ -91,7 +91,7 @@ class _PaiementsState extends State<Paiements> {
       DateTime courseDate = DateTime.parse(course['date'].toString());
 
 
-      if (course['isSigned'] != "pas encore" && course['isPaid'] != "pas encore" &&
+      if (course['isSigned'] != "pas encore" && course['isPaid'] != "oui" &&
           (Deb == null || courseDate.isAfter(Deb!.toLocal())) &&
           (Fin == null || courseDate.isBefore(Fin!.toLocal().add(Duration(days: 1))))) {
           if (!professeurData.containsKey(profId)) {

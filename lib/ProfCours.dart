@@ -395,93 +395,93 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                               cells: [
 
                                 DataCell(
-    widget.courses[index]['isSigned'] == "oui"? Icon(Icons.check_box_sharp):CupertinoSwitch(
-                                      activeColor: Colors.black26,
-                                      value:  widget.courses[index]['isSigned'] == "oui"? true: false,
-                                      onChanged: (value) async {
+                                    widget.courses[index]['isSigned'] == "oui"? Icon(Icons.check_box_outlined,size: 27):CupertinoSwitch(
+                                       activeColor: Colors.black26,
+                                       value:  widget.courses[index]['isSigned'] == "oui"? true: false,
+                                       onChanged: (value) async {
 
 
 
-                                        // final typesString = widget.courses[index]['types'];
-                                        // print(widget.courses[index]['types']);
-                                        // final typeParts = typesString.split(':');
+                                         // final typesString = widget.courses[index]['types'];
+                                         // print(widget.courses[index]['types']);
+                                         // final typeParts = typesString.split(':');
 
-                                        // print(typeParts);
-                                        // print(typeParts.length);
-                                        // Check if the "types" string is in the expected format
-                                        // if (typeParts.length > 2) {
-                                        //   // Display an alert or notification here
-                                        //   showDialog(
-                                        //     context: context,
-                                        //     builder: (BuildContext context) {
-                                        //       return AlertDialog(
-                                        //         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25),),elevation: 1,
-                                        //         title: Text('Impossible'),
-                                        //         content: Column(
-                                        //           mainAxisSize: MainAxisSize.min,
-                                        //           crossAxisAlignment: CrossAxisAlignment.start,
-                                        //           children: [
-                                        //             Text("Il y en a plus d'un type"),
-                                        //             Text("Cours Type [${widget.courses[index]['types']}]"),
-                                        //             SizedBox(height: 10,),
-                                        //             Text("Il faut cliquer sur button de Modification",style: TextStyle(color: Colors.blueGrey),),
-                                        //           ],
-                                        //         ),
-                                        //         actions: [
-                                        //           TextButton(
-                                        //             onPressed: () {
-                                        //               Navigator.of(context).pop();
-                                        //             },
-                                        //             child: Text('OK'),
-                                        //           ),
-                                        //         ],
-                                        //       );
-                                        //     },
-                                        //   );
-                                        //   return;
-                                        // }
+                                         // print(typeParts);
+                                         // print(typeParts.length);
+                                         // Check if the "types" string is in the expected format
+                                         // if (typeParts.length > 2) {
+                                         //   // Display an alert or notification here
+                                         //   showDialog(
+                                         //     context: context,
+                                         //     builder: (BuildContext context) {
+                                         //       return AlertDialog(
+                                         //         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25),),elevation: 1,
+                                         //         title: Text('Impossible'),
+                                         //         content: Column(
+                                         //           mainAxisSize: MainAxisSize.min,
+                                         //           crossAxisAlignment: CrossAxisAlignment.start,
+                                         //           children: [
+                                         //             Text("Il y en a plus d'un type"),
+                                         //             Text("Cours Type [${widget.courses[index]['types']}]"),
+                                         //             SizedBox(height: 10,),
+                                         //             Text("Il faut cliquer sur button de Modification",style: TextStyle(color: Colors.blueGrey),),
+                                         //           ],
+                                         //         ),
+                                         //         actions: [
+                                         //           TextButton(
+                                         //             onPressed: () {
+                                         //               Navigator.of(context).pop();
+                                         //             },
+                                         //             child: Text('OK'),
+                                         //           ),
+                                         //         ],
+                                         //       );
+                                         //     },
+                                         //   );
+                                         //   return;
+                                         // }
 
-                                        // Continue with the rest of your onChanged logic if the types string is in the expected format
-                                        setState(() {
-                                          widget.courses[index]['isSigned'] = value;
-                                        });
+                                         // Continue with the rest of your onChanged logic if the types string is in the expected format
+                                         setState(() {
+                                           widget.courses[index]['isSigned'] = value;
+                                         });
 
-                                        Navigator.of(context).pop();
+                                         Navigator.of(context).pop();
 
-                                        final updatedDate = DateFormat('yyyy-MM-ddTHH:mm').parse(widget.courses[index]['date']).toUtc();
-                                        // final typeName = typeParts[0].trim();
-                                        // final typeNbhString = typeParts[1].replaceAll(',', '').trim();
+                                         final updatedDate = DateFormat('yyyy-MM-ddTHH:mm').parse(widget.courses[index]['date']).toUtc();
+                                         // final typeName = typeParts[0].trim();
+                                         // final typeNbhString = typeParts[1].replaceAll(',', '').trim();
 
-                                        // final updatedTypes = [{'name': typeName, 'nbh': typeNbhString}];
+                                         // final updatedTypes = [{'name': typeName, 'nbh': typeNbhString}];
 
-                                        final matiereName = widget.courses[index]['somme'];
-                                        // final matiereId = getMatiereIdFromName(matiereName);
-                                        singeCours(
-                                            widget.courses[index]['_id'],
-                                            value
-                                        );
-                                        // if (widget.courses[index]['matiere_id'] != null) {
-                                        //
-                                        // }
-                                        // else {
-                                        //
-                                        //   updateCours(
-                                        //     widget.courses[index]['_id'],
-                                        //     widget.ProfId,
-                                        //     widget.courses[index]['matiere_id'],
-                                        //     widget.courses[index]['CM'],
-                                        //     widget.courses[index]['TP'],
-                                        //     widget.courses[index]['TD'],
-                                        //     updatedDate,
-                                        //       widget.courses[index]['startTime'],
-                                        //     value
-                                        //   );
-                                        //   print("Matiere not found with name: $matiereName");
-                                        // }
-                                      },
-                                    )
+                                         final matiereName = widget.courses[index]['somme'];
+                                         // final matiereId = getMatiereIdFromName(matiereName);
+                                         singeCours(
+                                             widget.courses[index]['_id'],
+                                             value
+                                         );
+                                         // if (widget.courses[index]['matiere_id'] != null) {
+                                         //
+                                         // }
+                                         // else {
+                                         //
+                                         //   updateCours(
+                                         //     widget.courses[index]['_id'],
+                                         //     widget.ProfId,
+                                         //     widget.courses[index]['matiere_id'],
+                                         //     widget.courses[index]['CM'],
+                                         //     widget.courses[index]['TP'],
+                                         //     widget.courses[index]['TD'],
+                                         //     updatedDate,
+                                         //       widget.courses[index]['startTime'],
+                                         //     value
+                                         //   );
+                                         //   print("Matiere not found with name: $matiereName");
+                                         // }
+                                       },
+                                     )
                                 ),
-                                DataCell(Text('${widget.courses[index]['matiere']}',style: TextStyle(
+                                DataCell(Text('${widget.courses[index]['somme']}',style: TextStyle(
                                   color: Colors.black,
                                 ),),
                                     onTap: () =>
@@ -496,12 +496,12 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                                   ),
                                 ),
                                 DataCell(
-                                  Text('${widget.courses[index]['TH']}',style: TextStyle(
+                                  Text('${widget.courses[index]['nombre_heures']}',style: TextStyle(
                                     color: Colors.black,
                                   ),),
                                 ),
                                 DataCell(
-                                  Text('${widget.courses[index]['somme']}',style: TextStyle(
+                                  Text('${widget.courses[index]['prix']}',style: TextStyle(
                                     color: Colors.black,
                                   ),),
                                 ),
