@@ -1,13 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:gestion_payements/filliere.dart';
+import 'package:gestion_payements/professeures.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import '../Ajout.dart';
+ 
 import '../matieres.dart';
+import 'dart:typed_data';
+
+import 'package:file_picker/file_picker.dart';
+import 'package:excel/excel.dart' as Excel;
+
+import 'dart:io';
+
+import 'element.dart';
 
 
 
@@ -83,11 +92,27 @@ class _SemestresState extends State<Semestres> {
     }
 
   }
+
   String getMatIdFromName(String id) {
     // Assuming you have a list of professeurs named 'professeursList'
     final professeur = matiereList.firstWhere((prof) => '${prof.id}' == id, orElse: () =>Matiere(id: '', name: '',  categorieId: '', categorie_name: '', code: '',));
     // print(professeur.name);
     return professeur.name; // Return the ID if found, otherwise an empty string
+
+  }
+
+  String getFilIdFromName(String nom) {
+    // Assuming you have a list of professeurs named 'professeursList'
+    final professeur = filList.firstWhere((prof) => '${prof.name.toUpperCase()}' == nom, orElse: () =>filliere(id: '', name: '', niveau: ''));
+    // print(professeur.name);
+    return professeur.id; // Return the ID if found, otherwise an empty string
+
+  }
+  String getMatId(String nom) {
+    // Assuming you have a list of professeurs named 'professeursList'
+    final professeur = matiereList.firstWhere((prof) => '${prof.name}' == nom.toLowerCase(), orElse: () =>Matiere(id: '', name: '', categorieId: ''));
+    // print(professeur.name);
+    return professeur.id; // Return the ID if found, otherwise an empty string
 
   }
   String getMatIdFromNames(String elements) {
@@ -354,7 +379,7 @@ class _SemestresState extends State<Semestres> {
           label: Row(
             children: [Icon(Icons.add,color: Colors.black,)],
           ),
-          onPressed: () => _displayTextInputDialog(context),
+          onPressed: () => _importData(context),
 
         ),
 
@@ -364,6 +389,66 @@ class _SemestresState extends State<Semestres> {
 
     );
   }
+
+
+  Future<void> _importData(BuildContext context) async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['xlsx'],
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      File file = File(result.files.first.path!);
+
+      ByteData data = await file.readAsBytes().then((bytes) {
+        return ByteData.sublistView(Uint8List.fromList(bytes));
+      });
+      List<int> bytes = data.buffer.asUint8List();
+      var excel = Excel.Excel.decodeBytes(bytes);
+
+
+      for (var table in excel.tables.keys) {
+        print(table); // Nom de la feuille
+        print(excel.tables[table]!.maxCols);
+        print("hmm: ${excel.tables[table]!.maxCols}");
+        print(excel.tables[table]!.rows[0]); // Lecture de l'en-tête
+
+        // Commencer à traiter à partir de la deuxième ligne (index 1)
+        for (var i = 1; i < 100; i++) {
+          var row = excel.tables[table]!.rows[i];
+
+          print('taille: ${row.length}');
+          // if (row.length >= excel.tables[table]!.maxCols) {  // Vérifiez si la ligne a au moins le nombre maximum de colonnes
+          String num = row[0]?.value?.toString() ?? "";
+          String start = row[1]?.value?.toString() ?? "";
+          String fil = row[2]?.value?.toString() ?? "";
+          String ele = row[3]?.value?.toString() ?? "";
+
+          // Faites quelque chose avec les données, par exemple, ajoutez-les à votre liste de professeurs
+          // print('Code: $nom, Nom $niveau,Desc $desc,');
+          DateTime deb = DateTime.parse(start).toUtc();
+          // print(deb);
+
+          // DateTime deb = DateFormat('yyyy/MM/dd').parse(start).toUtc();
+          //abdou
+          print('Num: $num, Start $deb,Fil ${getFilIdFromName(fil)},');
+          AddSemestre(int.parse(num),deb,getFilIdFromName(fil),getMatId(ele));
+
+// } else {
+          //   print('La ligne $i n\'a pas suffisamment d\'éléments.');
+          // }
+        }
+
+
+      }
+      print("Hello ${excel.tables.values.first}");
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Données importées avec succès depuis le fichier Excel.')),
+      );
+    }
+  }
+
 
   Future<void> _displayTextInputDialog(BuildContext context) async {
 
@@ -631,76 +716,79 @@ class _SemestresState extends State<Semestres> {
                   ],
                 ),
                 SizedBox(height: 25),
-                SingleChildScrollView(scrollDirection: Axis.horizontal,
-                  child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text('matieres:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
+                Container(
+                  width: MediaQuery.of(context).size.width,
+                  child: SingleChildScrollView(scrollDirection: Axis.horizontal,
+                    child: Row(
+                    // mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text('matieres:',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w400,
+                            fontStyle: FontStyle.italic,
+                            // color: Colors.lightBlue
+                          ),),
 
-                      SizedBox(width: 10,),
-                      Row(
-                        // mainAxisAlignment: MainAxisAlignment.start,
-                        // crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          for (var matiere in sem.elements!) // Assuming items![index].matieres is a list of matieres for the professor
-                            Row(
-                              children: [
-                                // Text('Matieres: [${getMatIdFromNames(getMatSemIdFromName(semestre['_id']).join(", "))}]',style: TextStyle(fontSize: 18)),
-                                Text(getMatIdFromName(matiere) ?? '',//abdou
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w400,
-                                      fontStyle: FontStyle.italic,
-                                    )),
-                                TextButton(
-                                    onPressed: (){
-                                      showDialog(
-                                        context: context,
-                                        builder: (context) {
-                                          return AlertDialog(
-                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
-                                            title: Text('Supprimer Matiere'),
-                                            content: Text('Voulez vous supprimer: ${getMatIdFromName(matiere)}?'),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () {
-                                                  Navigator.of(context).pop(); // Close the dialog
-                                                },
-                                                child: Text('Cancel'),
-                                              ),
-                                              TextButton(
-                                                onPressed: () {
-                                                  Navigator.of(context).pop(); // Close the dialog
-                                                  // String matiereId = matiere['_id']; // Replace 'matiere' with the actual matiere data
-                                                  deleteMatiereSem(sem.id, matiere);
-                                                  setState(() {
-                                                    Navigator.pop(context);
-                                                  });ScaffoldMessenger.of(context).showSnackBar(
-                                                    SnackBar(
-                                                        content: Text('La matiere est Supprimer avec succès.',)),);
+                        SizedBox(width: 10,),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            for (var matiere in sem.elements!) // Assuming items![index].matieres is a list of matieres for the professor
+                              Row(
+                                children: [
+                                  // Text('Matieres: [${getMatIdFromNames(getMatSemIdFromName(semestre['_id']).join(", "))}]',style: TextStyle(fontSize: 18)),
+                                  Text(getMatIdFromName(matiere) ?? '',//abdou
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w400,
+                                        fontStyle: FontStyle.italic,
+                                      )),
+                                  TextButton(
+                                      onPressed: (){
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) {
+                                            return AlertDialog(
+                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
+                                              title: Text('Supprimer Matiere'),
+                                              content: Text('Voulez vous supprimer: ${getMatIdFromName(matiere)}?'),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop(); // Close the dialog
+                                                  },
+                                                  child: Text('Cancel'),
+                                                ),
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop(); // Close the dialog
+                                                    // String matiereId = matiere['_id']; // Replace 'matiere' with the actual matiere data
+                                                    deleteMatiereSem(sem.id, matiere);
+                                                    setState(() {
+                                                      Navigator.pop(context);
+                                                    });ScaffoldMessenger.of(context).showSnackBar(
+                                                      SnackBar(
+                                                          content: Text('La matiere est Supprimer avec succès.',)),);
 
-                                                },
-                                                child: Text('Supprimer'),
-                                              ),
-                                            ],
-                                          );
-                                        },
-                                      );
-                                    },
-                                    child: Icon(Icons.delete_outlined, color: Colors.black26,))
-                              ],
-                            ),
-                        ],
-                      ),
+                                                  },
+                                                  child: Text('Supprimer'),
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        );
+                                      },
+                                      child: Icon(Icons.delete_outlined, color: Colors.black26,))
+                                ],
+                              ),
+                          ],
+                        ),
 
 
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 SizedBox(height: 35,),
@@ -891,7 +979,7 @@ class _SemestresState extends State<Semestres> {
                             context: context,
                             builder: (BuildContext context) {
                        return AlertDialog(
-                           insetPadding: EdgeInsets.only(top: 80,),
+                           insetPadding: EdgeInsets.only(top: 400,),
 // backgroundColor: Color(0xB0AFAFA3),
                            shape: RoundedRectangleBorder(
                              borderRadius: BorderRadius.only(
@@ -915,7 +1003,7 @@ class _SemestresState extends State<Semestres> {
                            ),
                            content: Container(
                              width: MediaQuery.of(context).size.width,
-                             height: 700,
+                             height: 250,
                              // color: Color(0xA3B0AF1),
                              child: Column(
                                mainAxisSize: MainAxisSize.max,
@@ -1254,14 +1342,15 @@ Future<List<Semestre>> fetchSemestre() async {
       'Authorization': 'Bearer $token',
     },
   );
-  print(response.statusCode);
+  print("Sem:${response.statusCode}");
+
   if (response.statusCode == 200) {
     // If the server did return a 200 OK response,
     // then parse the JSON.
     Map<String, dynamic> jsonResponse = jsonDecode(response.body);
     List<dynamic> semData = jsonResponse['semestres'];
 
-    print(semData);
+    // print(semData);
     List<Semestre> categories = semData.map((item) {
       return Semestre.fromJson(item);
     }).toList();
@@ -1278,3 +1367,32 @@ Future<List<Semestre>> fetchSemestre() async {
 
 
 
+Future<List<Elem>> fetchElementsBySemestre(String semId) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String token = prefs.getString("token")!;
+
+  String apiUrl = 'http://192.168.43.73:5000/semestre/$semId/elements';
+  var response = await http.get(Uri.parse(apiUrl),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+    // body: jsonEncode(regBody)
+  );
+  // final response = await http.get(Uri.parse(apiUrl));
+  print(response.statusCode);
+  if (response.statusCode == 200) {
+    final Map<String, dynamic> responseData = json.decode(response.body);
+    // if (responseData['professeurs'] is List<dynamic>) {
+    final List<dynamic> professeursData = responseData['elements'];
+    List<Elem> fetchedProfesseurs =
+    professeursData.map((data) => Elem.fromJson(data)).toList();
+    print('Mat Pros${fetchedProfesseurs}');
+    return fetchedProfesseurs;
+    // } else {
+    //   throw Exception('Invalid API response: professeurs data is not a list');
+    // }
+  } else {
+    throw Exception('Failed to fetch elements by semestre');
+  }
+}

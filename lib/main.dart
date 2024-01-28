@@ -1,3 +1,4 @@
+import 'package:gestion_payements/home_screen.dart';
 import 'package:gestion_payements/prof_info.dart';
 import 'package:flutter/material.dart';
 import 'package:gestion_payements/categories.dart';
@@ -6,6 +7,7 @@ import 'package:gestion_payements/profs.dart';
 import 'package:gestion_payements/settings.dart';
 import 'package:gestion_payements/splash_screen.dart';
 import 'package:gestion_payements/theme.dart';
+// import 'package:hexcolor/hexcolor.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
@@ -32,13 +34,21 @@ void main() {
 
 
 class MyApp extends StatelessWidget {
+  Color _primaryColor = Color(0xFF756C6C);
+
+  // Color _accentColor = HexColor('#5AD3BC');
   @override
   Widget build(BuildContext context) {
     final themeChanger = Provider.of<ThemeChanger>(context);
     return MaterialApp(
     //  theme: themeChanger.themeData, // Utilisez le thème actuel
+
       theme: ThemeData(
         brightness: Brightness.light,
+        // primaryColor: _primaryColor,
+        // hintColor: _accentColor,
+        scaffoldBackgroundColor: Colors.grey.shade100,
+        primarySwatch: Colors.grey,
       ),
       darkTheme: ThemeData(
         brightness: Brightness.dark,

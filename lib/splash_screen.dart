@@ -46,6 +46,20 @@ class _SplashScreenState extends State<SplashScreen> {
               duration: Duration(seconds: 2),
               child: Column(
                 children: [
+                  Container(
+                    width: 300,
+                    height: 120,
+                    child: CircleAvatar(backgroundColor: Colors.white,
+                      child:
+                      Image.asset(
+                        'assets/supnum.png',
+                        // color: Colors.white,
+                        width: 130,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 70,),
                   Text(
                     "GP",
                     style: GoogleFonts.italianno(

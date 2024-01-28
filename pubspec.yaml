@@ -51,6 +51,22 @@ dependencies:
   table_calendar: ^3.0.9
   provider: ^6.1.0
   mailer: ^6.0.1
+  excel: ^2.0.4
+  csv:  ^5.0.1
+  file_picker: ^4.0.0
+  open_file:
+  pdf:
+#  xlsio: ^2.1.3
+  flutter_datetime_picker: ^1.5.1
+#  charts_flutter: ^0.12.0
+#  hexcolor: ^2.0.7
+  font_awesome_flutter: ^9.1.0
+  otp_text_field: ^1.1.1
+  google_sign_in: ^5.2.1
+  rflutter_alert: ^2.0.4
+  smooth_page_indicator: ^1.0.0+2
+  dartarabic: ^0.1.2
+  arabic_font: ^0.0.9
 #  flutter_localizations: ^0.1.13
 dev_dependencies:
   flutter_test:
@@ -100,6 +116,11 @@ flutter:
   #       - asset: fonts/TrajanPro.ttf
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
+#  fonts:
+#    - family: Dubai
+#      fonts:
+#        - asset: assets/fonts/Dubai-Regular.ttf
+
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages

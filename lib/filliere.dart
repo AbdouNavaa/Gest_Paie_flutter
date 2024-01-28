@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:gestion_payements/group.dart';
+import 'package:gestion_payements/home_screen.dart';
+import 'package:gestion_payements/professeures.dart';
 import 'package:gestion_payements/semestre.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:typed_data';
 
-import '../Ajout.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:excel/excel.dart' as Excel;
+
+import 'dart:io';
+ 
 import '../matieres.dart';
 
 
@@ -29,6 +37,7 @@ class _FilliereState extends State<Filliere> {
   List<Professeur> professeurList = [];
   List<Matiere> matiereList = [];
   List<Semestre> semList = [];
+  List<Group> grps = [];
 
   void DeleteFilliere(id) async{
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -88,6 +97,24 @@ class _FilliereState extends State<Filliere> {
     }
   }
 
+  Semestre getSemeInfos(String id) {
+    // Assuming you have a list of professeurs named 'professeursList'
+
+    final semes = semList.firstWhere((prof) => '${prof.id}' == id, orElse: () =>
+        Semestre(id: '', filliereName: '',  ));
+    print(semes);
+    return semes; // Return the ID if found, otherwise an empty string
+
+  }
+  Group getGroupInfos(String id) {
+    // Assuming you have a list of professeurs named 'professeursList'
+
+    final grp = grps.firstWhere((prof) => '${prof.id}' == id, orElse: () =>
+        Group(id: '',  groupName: '',  ));
+    print(grp);
+    return grp; // Return the ID if found, otherwise an empty string
+
+  }
 
 
   List<String> getMatiereNamesFromSemestreElements(Semestre semestre) {
@@ -121,6 +148,13 @@ class _FilliereState extends State<Filliere> {
     fetchMatiere().then((data) {
       setState(() {
     matiereList  = data; // Assigner la liste renvoyée par filliereesseur à items
+      });
+    }).catchError((error) {
+      print('Erreur: $error');
+    });
+    fetchGroup().then((data) {
+      setState(() {
+    grps  = data; // Assigner la liste renvoyée par filliereesseur à items
       });
     }).catchError((error) {
       print('Erreur: $error');
@@ -368,7 +402,7 @@ class _FilliereState extends State<Filliere> {
           label: Row(
             children: [Icon(Icons.add,color: Colors.black,)],
           ),
-          onPressed: () => _displayTextInputDialog(context),
+          onPressed: () => _importData(context),
 
         ),
 
@@ -378,6 +412,57 @@ class _FilliereState extends State<Filliere> {
 
     );
   }
+
+  Future<void> _importData(BuildContext context) async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['xlsx'],
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      File file = File(result.files.first.path!);
+
+      ByteData data = await file.readAsBytes().then((bytes) {
+        return ByteData.sublistView(Uint8List.fromList(bytes));
+      });
+      List<int> bytes = data.buffer.asUint8List();
+      var excel = Excel.Excel.decodeBytes(bytes);
+
+
+      for (var table in excel.tables.keys) {
+        print(table); // Nom de la feuille
+        print(excel.tables[table]!.maxCols);
+        print("hmm: ${excel.tables[table]!.maxCols}");
+        print(excel.tables[table]!.rows[0]); // Lecture de l'en-tête
+
+        // Commencer à traiter à partir de la deuxième ligne (index 1)
+        for (var i = 1; i < 100; i++) {
+          var row = excel.tables[table]!.rows[i];
+
+          print('taille: ${row.length}');
+          // if (row.length >= excel.tables[table]!.maxCols) {  // Vérifiez si la ligne a au moins le nombre maximum de colonnes
+          String nom = row[0]?.value?.toString() ?? "";
+          String niveau = row[1]?.value?.toString() ?? "";
+          String desc = row[2]?.value?.toString() ?? "";
+
+          // Faites quelque chose avec les données, par exemple, ajoutez-les à votre liste de professeurs
+          // print('Code: $nom, Nom $niveau,Desc $desc,');
+          Addfilliere(nom,niveau,desc);
+          // } else {
+          //   print('La ligne $i n\'a pas suffisamment d\'éléments.');
+          // }
+        }
+
+
+      }
+      print("Hello ${excel.tables.values.first}");
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Données importées avec succès depuis le fichier Excel.')),
+      );
+    }
+  }
+
 
   Future<void> _displayTextInputDialog(BuildContext context) async {
 
@@ -510,6 +595,141 @@ class _FilliereState extends State<Filliere> {
     );
   }
 
+
+  Future<void> _AjoutGroup(BuildContext context,List<dynamic> data) async {
+
+    String _selectedGN = 'A';
+    String _selectedSem = data.isNotEmpty ? data[0]['_id'] : '';
+
+    return showModalBottomSheet(
+        context: context,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
+            topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
+        isScrollControlled: true, // Rendre le contenu déroulable
+
+        builder: (BuildContext context){
+          return SingleChildScrollView(
+            child: Container(
+              height: 500,
+              padding: const EdgeInsets.all(25.0),
+              child: Column(
+                // mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    // mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text("Ajouter Group", style: TextStyle(fontSize: 25),),
+                      Spacer(),
+                      InkWell(
+                        child: Icon(Icons.close),
+                        onTap: (){
+                          Navigator.pop(context);
+                        },
+                      )
+                    ],
+                  ),
+                  //hmmm
+                  SizedBox(height: 40),
+                  DropdownButtonFormField<String>(
+                    value: _selectedGN,
+                    items: [
+                      DropdownMenuItem<String>(
+                        child: Text('A'),
+                        value: "A",
+                      ),
+                      DropdownMenuItem<String>(
+                        child: Text('B'),
+                        value: "B",
+                      ),
+                      DropdownMenuItem<String>(
+                        child: Text('C'),
+                        value: "C",
+                      ),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedGN = value!;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      filled: true,labelText: 'GNom?',labelStyle: TextStyle(fontSize: 20,color: Colors.black),
+                      // fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide.none,gapPadding: 1,
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(height: 10),
+                      DropdownButtonFormField<String>(
+                    value: _selectedSem,
+                    items: data.map((fil) {
+                      String displayText = 'S${fil['numero']}';
+
+                      return DropdownMenuItem<String>(
+                        value: fil['_id'],
+                        child: Text(displayText ?? ''),
+                      );
+                    }).toList(),
+                    onChanged: (value) async {
+                      setState(() {
+                        _selectedSem = value!;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      filled: true,
+                      hintText: "Sélectionnez le semestre",
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide.none, gapPadding: 1,
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: (){
+                      Navigator.of(context).pop();
+                      fetchGroup();
+                      _name.text = _selectedGN.toString();
+
+                      // Pass the selected types to addCoursToProfesseur method
+                      AddGroup(_name.text, _selectedSem);
+                      // AddGroup(int.parse(_numero.text),date, selectedFil!.id!);
+
+                      // Addfilliere(_name.text, _desc.text);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Le filliere a été ajouter avec succès.')),
+                      );
+                      setState(() {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) =>Groups()));
+                      });
+                    },
+                    child: Text("Ajouter"),
+
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xff0fb2ea),
+                      foregroundColor: Colors.white,
+                      elevation: 10,
+                      minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
+                      // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
+                      //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          );
+
+        }
+
+
+    );
+  }
+  
   void showFetchedDataModal(BuildContext context, Map<String, dynamic> data,String filId ) {
     showModalBottomSheet(
       context: context,
@@ -528,7 +748,7 @@ class _FilliereState extends State<Filliere> {
                 Text('Filliere Infos',style: TextStyle(fontSize: 30),),
                 SizedBox(height: 50),
                 Text(
-                  'Fillière: ${data['filliere']}',
+                  'Fillière: ${data['filliere']}.'.toUpperCase(),
                   style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 10),
@@ -536,11 +756,23 @@ class _FilliereState extends State<Filliere> {
                 SizedBox(height: 10),
                 Text('Niveau: ${data['niveau']}',style: TextStyle(fontSize: 18)),
                 SizedBox(height: 20),
-                Text(
-                  'Semestres:',
-                  style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
+                Row(
+                  children: [
+                    Text(
+                      'Semestres:',
+                      style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(width: 160,),
+                    IconButton(
+                        onPressed: (){
+                          Navigator.push(context, MaterialPageRoute(builder: (context) =>Semestres()));
+                        },
+                        // onPressed: (){},
+                        icon: Icon(Icons.view_list)),
+
+                  ],
                 ),
-                for (var semestre in data['semestres'])
+                for (var semestre in data['semestre_names'])
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -549,28 +781,53 @@ class _FilliereState extends State<Filliere> {
                       Text('Matieres: [${getMatIdFromNames(getMatSemIdFromName(semestre['_id']).join(", "))}]',style: TextStyle(fontSize: 18)),
                       Text('Numéro: S${semestre['numero']}',style: TextStyle(fontSize: 18)),
                       Text( 'Deb Semestre: ${DateFormat('dd/MM/yyyy ').format(
-                        DateTime.parse(semestre['start']).toLocal(),
+                        DateTime.parse(getSemeInfos(semestre['_id']).start.toString()).toLocal(),
                       )}',style: TextStyle(fontSize: 18)),
                       Text( 'Fin Semestre: ${DateFormat('dd/MM/yyyy ').format(
-                        DateTime.parse(semestre['finish']).toLocal(),
+                        DateTime.parse(getSemeInfos(semestre['_id']).finish.toString()).toLocal(),
                       )}',style: TextStyle(fontSize: 18)),
                       SizedBox(height: 10),
                     ],
                   ),
                 SizedBox(height: 20),
-                Text(
-                  'Groupes:',
-                  style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Groupes:',
+                      style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(width: 143,),
+                    IconButton(
+                        onPressed: (){
+                          Navigator.push(context, MaterialPageRoute(builder: (context) =>Groups()));
+                        },
+                        // onPressed: (){},
+                        icon: Icon(Icons.view_list)),
+                    IconButton(
+                        onPressed: ()=> _AjoutGroup(context,data['semestre_names']),
+                        // onPressed: (){},
+                        icon: Icon(Icons.group_add_sharp))
+                  ],
                 ),
-                for (var group in data['groups'])
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                for (var group in data['all_groups'])
+                  Row(
+                    // crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       // Text('ID: ${group['_id']}',style: TextStyle(fontSize: 18)),
                       Text('Nom du groupe: ${group['name']}',style: TextStyle(fontSize: 18)),
-                      // Text('Is One: ${group['isOne']}',style: TextStyle(fontSize: 18)),
-                      Text( 'Deb d\'Emploi: ${DateFormat('dd/MM/yyyy ').format(DateTime.parse(group['startEmploi']).toLocal(),)}',style: TextStyle(fontSize: 18)),
-                      Text( 'Fin d\'Emploi: ${DateFormat('dd/MM/yyyy ').format(DateTime.parse(group['finishEmploi']).toLocal(),)}',style: TextStyle(fontSize: 18)),
+                      SizedBox(width: 100,),
+                      Text('S${group['semestre_numero']}',style: TextStyle(fontSize: 18)),
+                      SizedBox(width: 10,),
+                      IconButton(icon:Icon( Icons.date_range),
+                          onPressed:() {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => GroupEmploiPage(groupId: group['_id'])));
+        }
+        ),//abdou
+                      // Text( 'Deb d\'Emploi: ${DateFormat('dd/MM/yyyy ').format(DateTime.parse(getGroupInfos(group['_id']).startEmploi.toString()).toLocal(),)}',style: TextStyle(fontSize: 18)),
+                      // Text( 'Fin d\'Emploi: ${DateFormat('dd/MM/yyyy ').format(DateTime.parse(getGroupInfos(group['_id']).finishEmploi.toString()).toLocal(),)}',style: TextStyle(fontSize: 18)),
+                      // Text( 'Fin d\'Emploi: ${DateFormat('dd/MM/yyyy ').format(DateTime.parse(group['finishEmploi']).toLocal(),)}',style: TextStyle(fontSize: 18)),
                       SizedBox(height: 10),
                     ],
                   ),
@@ -957,6 +1214,141 @@ Future<List<filliere>> fetchfilliere() async {
   }
 }
 
+
+class GroupEmploiPage extends StatefulWidget {
+  final String groupId; // L'ID du groupe
+
+  GroupEmploiPage({required this.groupId});
+
+  @override
+  _GroupEmploiPageState createState() => _GroupEmploiPageState();
+}
+
+class _GroupEmploiPageState extends State<GroupEmploiPage> {
+  late List<dynamic> emplois =[];
+  late String filliere = '';
+  late String description = '';
+  late String annee = '';
+  late int semestre =0;
+  late String niveau = '';
+  late String group = '';
+
+  @override
+  void initState() {
+    super.initState();
+    fetchGroupEmploi();
+  }
+
+  Future<void> fetchGroupEmploi() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString("token")!;
+
+    String apiUrl = 'http://192.168.43.73:5000/group/${widget.groupId}/emploi';
+    final response = await http.get(Uri.parse(apiUrl),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    print(response.statusCode);
+    if (response.statusCode == 200) {
+      Map<String, dynamic> data = jsonDecode(response.body);
+
+      setState(() {
+        filliere = data['filliere'];
+        description = data['description'];
+        annee = data['annee'];
+        semestre = data['semestre'];
+        niveau = data['niveau'];
+        group = data['group'];
+        emplois = data['emplois'];
+      });
+    } else {
+      throw Exception('Failed to load group emploi');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Emploi du Groupe $group'),
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ListTile(
+          //   title: Text('Filliere: ${filliere.toUpperCase()} ($description)', style: TextStyle(fontSize: 17),),
+          //   subtitle: Text('Nivau: $annee | Semestre: $semestre | Niveau: $niveau', style: TextStyle(fontSize: 17)),
+          // ),
+          Divider(),
+          Expanded(
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              child: DataTable(
+                showCheckboxColumn: true,
+                showBottomBorder: true,
+                headingRowHeight: 50,
+                columnSpacing: 8,
+                dataRowHeight: 50,
+                columns: [
+                  DataColumn(label: Text('Jours')),
+                  DataColumn(label: Text('Prof')),
+                  DataColumn(label: Text('Mat')),
+                  DataColumn(label: Text('Type')),
+                  DataColumn(label: Text('Deb')),
+                  DataColumn(label: Text('Fin')),
+                  // DataColumn(label: Text('Action')),
+                ],
+                rows: [
+                  for (var index = 0; index < (emplois?.length ?? 0); index++)
+                  // for (var categ in emplois!)
+                    DataRow(
+                        cells: [
+                          DataCell(Container(width: 60,
+                            child: Text('${emplois?[index]['day']}',style: TextStyle(
+                              color: Colors.black,
+                            ),),
+                          )),
+                          DataCell(Container(width: 60,
+                            child: Text('${emplois?[index]['professeur']}',style: TextStyle(
+                              color: Colors.black,
+                            ),),
+                          )),
+                          DataCell(Container(width: 60,
+                            child: Text('${emplois?[index]['matiere']}',style: TextStyle(
+                              color: Colors.black,
+                            ),),
+                          )),
+                          DataCell(Container(width: 60,
+                            child: Text('${emplois?[index]['type']}',style: TextStyle(
+                              color: Colors.black,
+                            ),),
+                          )),
+                          DataCell(Container(width: 60,
+                            child: Text('${emplois?[index]['startTime']}',style: TextStyle(
+                              color: Colors.black,
+                            ),),
+                          )),
+                          DataCell(Container(width: 60,
+                            child: Text('${emplois?[index]['finishTime']}',style: TextStyle(
+                              color: Colors.black,
+                            ),),
+                          )),
+
+
+
+                        ]),
+                ],
+              ),
+            )
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 
 

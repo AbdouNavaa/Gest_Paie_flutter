@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:gestion_payements/auth/users.dart';
+import 'package:gestion_payements/home_screen.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:flutter/cupertino.dart';
@@ -42,6 +43,10 @@ class _SignUpSectionState extends State<SignUpSection> {
   String usernameErrorMessage = '';
   String prenomErrorMessage = '';
 
+
+  String selectedRole = 'professeur'; // Par défaut, le rôle est "professeur"
+  bool showBanqueCompteFields = true; // Afficher les champs "Banque" et "Compte" par défaut
+
   bool validateEmail(String value) {
     // Expression régulière pour valider l'email
     final emailRegExp = RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$');
@@ -51,7 +56,7 @@ class _SignUpSectionState extends State<SignUpSection> {
 
   bool validatePassword(String value) {
     // Validation de la longueur minimale du mot de passe
-    return value.length >= 8;
+    return value.length >= 4;
   }
   bool validateName(String value) {
     // Validation de la longueur minimale du mot de passe
@@ -79,14 +84,14 @@ class _SignUpSectionState extends State<SignUpSection> {
               children: [
                 Container(
                   width: MediaQuery.of(context).size.width,
-                  height:  MediaQuery.of(context).size.height / 2.7 ,
+                  height:  MediaQuery.of(context).size.height / 2.2 ,
                   decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          Color(0xFFFFFFFF),
-                          Color(0xFFFFFFFF)
+                          Color(0xff0fb2ea),
+                          Color(0xff0fb2ea)
                         ],
                       ),
                       borderRadius: BorderRadius.only(
@@ -96,7 +101,8 @@ class _SignUpSectionState extends State<SignUpSection> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      SizedBox(height: 60,),
+
+                      SizedBox(height: 70,),
                       Align(
                           alignment: Alignment.topCenter,
                           child:
@@ -126,35 +132,38 @@ class _SignUpSectionState extends State<SignUpSection> {
                   ),
                 ),
 
+
                 Center(
                   child: Card(
 
-                    margin: EdgeInsets.only(top: 130),
+                    margin: EdgeInsets.only(top: 200),
                     elevation: 10,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20),),
 
                     child: Container(
-                      height: MediaQuery.of(context).size.height/ 1.25 ,
+                      height: MediaQuery.of(context).size.height/ 1.55 ,
                       width: MediaQuery.of(context).size.width / 1.12,
                       // margin: EdgeInsets.only(top: 300),
                       padding: EdgeInsets.only(top: 12),
 
                       decoration: BoxDecoration(
-                        shape: BoxShape.circle,
+                        // shape: BoxShape.circle,
+                        borderRadius: BorderRadius.circular(20),
+
                         color: Colors.white,
                       ),
                       child: SingleChildScrollView(scrollDirection: Axis.vertical,
                         child: Column(
                           children: <Widget>[
                             Container(
-                              width: MediaQuery.of(context).size.width / 1.2,
+                              width: MediaQuery.of(context).size.width / 1.3,
                                 height: 45,
                               padding: EdgeInsets.only(
                                   top: 4, left: 16, right: 16, bottom: 4
                               ),
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.all(
-                                      Radius.circular(50)
+                                      Radius.circular(10)
                                   ),
                                   color: Colors.white,
                                   boxShadow: [
@@ -203,7 +212,7 @@ class _SignUpSectionState extends State<SignUpSection> {
                               width: MediaQuery
                                   .of(context)
                                   .size
-                                  .width / 1.2,
+                                  .width / 1.3,
                                 height: 45,
                               margin: EdgeInsets.only(top: 20),
                               padding: EdgeInsets.only(
@@ -211,7 +220,7 @@ class _SignUpSectionState extends State<SignUpSection> {
                               ),
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.all(
-                                      Radius.circular(50)
+                                      Radius.circular(10)
                                   ),
                                   color: Colors.white,
                                   boxShadow: [
@@ -251,7 +260,7 @@ class _SignUpSectionState extends State<SignUpSection> {
                               width: MediaQuery
                                   .of(context)
                                   .size
-                                  .width / 1.2,
+                                  .width / 1.3,
                                 height: 45,
                               margin: EdgeInsets.only(top: 20),
                               padding: EdgeInsets.only(
@@ -259,7 +268,7 @@ class _SignUpSectionState extends State<SignUpSection> {
                               ),
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.all(
-                                      Radius.circular(50)
+                                      Radius.circular(10)
                                   ),
                                   color: Colors.white,
                                   boxShadow: [
@@ -303,7 +312,7 @@ class _SignUpSectionState extends State<SignUpSection> {
                               width: MediaQuery
                                   .of(context)
                                   .size
-                                  .width / 1.2,
+                                  .width / 1.3,
                                 height: 45,
                               margin: EdgeInsets.only(top: 20),
                               padding: EdgeInsets.only(
@@ -311,7 +320,7 @@ class _SignUpSectionState extends State<SignUpSection> {
                               ),
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.all(
-                                      Radius.circular(50)
+                                      Radius.circular(10)
                                   ),
                                   color: Colors.white,
                                   boxShadow: [
@@ -342,7 +351,7 @@ class _SignUpSectionState extends State<SignUpSection> {
                                         value); // Appeler une fonction de validation pour le mot de passe
                                     if (!isPasswordValid) {
                                       passwordErrorMessage =
-                                      '8 caractères minimum.';
+                                      '4 caractères minimum.';
                                     }
                                     else {
                                       passwordErrorMessage = '';
@@ -359,7 +368,7 @@ class _SignUpSectionState extends State<SignUpSection> {
                               width: MediaQuery
                                   .of(context)
                                   .size
-                                  .width / 1.2,
+                                  .width / 1.3,
                                 height: 45,
                               margin: EdgeInsets.only(top: 20),
                               padding: EdgeInsets.only(
@@ -367,7 +376,7 @@ class _SignUpSectionState extends State<SignUpSection> {
                               ),
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.all(
-                                      Radius.circular(50)
+                                      Radius.circular(10)
                                   ),
                                   color: Colors.white,
                                   boxShadow: [
@@ -399,7 +408,7 @@ class _SignUpSectionState extends State<SignUpSection> {
                                         value); // Appeler une fonction de validation pour le mot de passe
                                     if (!isPasswordValid) {
                                       passwordErrorMessage =
-                                      '8 caractères minimum.';
+                                      '4 caractères minimum.';
                                     }
                                     else {
                                       passwordErrorMessage = '';
@@ -415,7 +424,7 @@ class _SignUpSectionState extends State<SignUpSection> {
                               width: MediaQuery
                                   .of(context)
                                   .size
-                                  .width / 1.2,
+                                  .width / 1.3,
                                 height: 45,
                               margin: EdgeInsets.only(top: 20),
                               padding: EdgeInsets.only(
@@ -423,7 +432,7 @@ class _SignUpSectionState extends State<SignUpSection> {
                               ),
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.all(
-                                      Radius.circular(50)
+                                      Radius.circular(10)
                                   ),
                                   color: Colors.white,
                                   boxShadow: [
@@ -461,82 +470,105 @@ class _SignUpSectionState extends State<SignUpSection> {
                                 emailErrorMessage,
                                 style: TextStyle(color: Colors.red),
                               ),
-                            Container(
-                              width: MediaQuery
-                                  .of(context)
-                                  .size
-                                  .width / 1.2,
-                                height: 45,
-                              margin: EdgeInsets.only(top: 20),
-                              padding: EdgeInsets.only(
-                                  top: 4, left: 16, right: 16, bottom: 4
-                              ),
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.all(
-                                      Radius.circular(50)
-                                  ),
-                                  color: Colors.white,
-                                  boxShadow: [
-                                    BoxShadow(
-                                        color: Colors.black12,
-                                        blurRadius: 5
-                                    )
-                                  ]
-                              ),
-                              child: TextField(style: TextStyle(
-                                color: Colors.black,
-                              ),
-                                decoration: InputDecoration(
-                                  border: InputBorder.none,
-                                  icon: Icon(Icons.account_balance,
-                                    color: Colors.grey,
-                                  ),
-                                  hintText: 'Banque',
-                                ),
-                                onChanged: (value) {
-                                  Banque = value;
-                                },
+                            // Champs de sélection de rôle
+                            // Row(
+                            //   mainAxisAlignment: MainAxisAlignment.center,
+                            //   children: [
+                            //     Radio(
+                            //       value: 'professeur',
+                            //       groupValue: selectedRole,
+                            //       onChanged: (value) {
+                            //         setState(() {
+                            //           selectedRole = value.toString();
+                            //           showBanqueCompteFields = true; // Afficher les champs "Banque" et "Compte" pour le rôle "professeur"
+                            //         });
+                            //       },
+                            //     ),
+                            //     Text('Professeur'),
+                            //
+                            //     SizedBox(width: 20),
+                            //
+                            //     Radio(
+                            //       value: 'responsable',
+                            //       groupValue: selectedRole,
+                            //       onChanged: (value) {
+                            //         setState(() {
+                            //           selectedRole = value.toString();
+                            //           showBanqueCompteFields = false; // Masquer les champs "Banque" et "Compte" pour le rôle "responsable"
+                            //         });
+                            //       },
+                            //     ),
+                            //     Text('Responsable'),
+                            //   ],
+                            // ),
 
-                              ),
-                            ),
-                            Container(
-                              width: MediaQuery
-                                  .of(context)
-                                  .size
-                                  .width / 1.2,
-                                height: 45,
-                              margin: EdgeInsets.only(top: 20),
-                              padding: EdgeInsets.only(
-                                  top: 8, left: 16, right: 16, bottom: 4
-                              ),
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.all(
-                                      Radius.circular(50)
-                                  ),
-                                  color: Colors.white,
-                                  boxShadow: [
-                                    BoxShadow(
-                                        color: Colors.black12,
-                                        blurRadius: 5
-                                    )
-                                  ]
-                              ),
-                              child: TextField(style: TextStyle(
-                                color: Colors.black,
-                              ),
-                                  decoration: InputDecoration(
-                                    border: InputBorder.none,
-                                    icon: Icon(Icons.switch_account_outlined,
-                                      color: Colors.grey,
-                                    ),
-                                    hintText: 'Compte',
-                                  ),
-                                  onChanged: (value) {
-                                    account = value;
-                                  }
-                              ),
-                            ),
+                            // Champ "Banque" (affiché ou masqué en fonction du rôle sélectionné)
+                            // if (showBanqueCompteFields)
+                            //   Container(
+                            //     width: MediaQuery.of(context).size.width / 1.3,
+                            //     height: 45,
+                            //     margin: EdgeInsets.only(top: 20),
+                            //     padding: EdgeInsets.only(
+                            //         top: 4, left: 16, right: 16, bottom: 4
+                            //     ),
+                            //     decoration: BoxDecoration(
+                            //         borderRadius: BorderRadius.all(
+                            //             Radius.circular(10)
+                            //         ),
+                            //         color: Colors.white,
+                            //         boxShadow: [
+                            //           BoxShadow(
+                            //               color: Colors.black12,
+                            //               blurRadius: 5
+                            //           )
+                            //         ]
+                            //     ),
+                            //     child: TextField(
+                            //       style: TextStyle(color: Colors.black,),
+                            //       decoration: InputDecoration(
+                            //         border: InputBorder.none,
+                            //         icon: Icon(Icons.account_balance, color: Colors.grey,),
+                            //         hintText: 'Banque',
+                            //       ),
+                            //       onChanged: (value) {
+                            //         Banque = value;
+                            //       },
+                            //     ),
+                            //   ),
 
+                            // Champ "Compte" (affiché ou masqué en fonction du rôle sélectionné)
+                            // if (showBanqueCompteFields)
+                            //   Container(
+                            //     width: MediaQuery.of(context).size.width / 1.3,
+                            //     height: 45,
+                            //     margin: EdgeInsets.only(top: 20),
+                            //     padding: EdgeInsets.only(
+                            //         top: 8, left: 16, right: 16, bottom: 4
+                            //     ),
+                            //     decoration: BoxDecoration(
+                            //         borderRadius: BorderRadius.all(
+                            //             Radius.circular(10)
+                            //         ),
+                            //         color: Colors.white,
+                            //         boxShadow: [
+                            //           BoxShadow(
+                            //               color: Colors.black12,
+                            //               blurRadius: 5
+                            //           )
+                            //         ]
+                            //     ),
+                            //     child: TextField(
+                            //       style: TextStyle(color: Colors.black,),
+                            //       decoration: InputDecoration(
+                            //         border: InputBorder.none,
+                            //         icon: Icon(Icons.switch_account_outlined, color: Colors.grey,),
+                            //         hintText: 'Compte',
+                            //       ),
+                            //       onChanged: (value) {
+                            //         account = value;
+                            //       },
+                            //     ),
+                            //   ),
                             SizedBox(height: 30,),
 
                           Row(
@@ -565,8 +597,8 @@ class _SignUpSectionState extends State<SignUpSection> {
 
                                     setState(() {
                                       // isLoginFailed = false; // Réinitialisation de la variable d'erreur
-                                      AddProfesseur("${username} ${prenom}",Banque, email,
-                                          num.parse(mobile) ,num.parse(account));
+                                      // AddProf("${username} ${prenom}",Banque, email,
+                                      //     num.parse(mobile) ,num.parse(account));
                                     });
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(content: Text('Le Prof est ajoute avec succès.')),
@@ -581,32 +613,50 @@ class _SignUpSectionState extends State<SignUpSection> {
                                     String id = prefs.getString("id")!;
                                     String name = prefs.getString("nom")!;
                                     print(name);
-                                    print(email1);
-                                    if (!isLoginFailed) { // Vérifiez si l'authentification a réussi
+                                    print(id);
+                                    // if (!isLoginFailed) { // Vérifiez si l'authentification a réussi
+
+
                                       if (token != null && role == "professeur") {
-                                        Navigator.push(context, MaterialPageRoute(
-                                          builder: (context) =>
-                                              ProfesseurInfoPage(
-                                                  id: id, email: email, role: role),
-                                          // builder: (context) => LandingScreen(role: role,name: nom,), // Passer le rôle ici
-                                        ),);
+                                        String? profId = await getProfId(token, id)!;
+
+                                        print("AbdouId: ${profId}");
+                                        if (profId != null) {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              // builder: (context) => HomeScreen(
+                                              //   role: role,
+                                              //   name: name,
+                                              //   email: email1,
+                                              //   profId: profId, // Passer l'ID du professeur à la page HomeScreen
+                                              // ),
+                                              builder: (context) => LoginSection(),
+                                            ),
+                                          );
+                                        } else {
+                                          // Gérer le cas où l'ID du prof n'est pas disponible
+                                          // Peut-être afficher un message d'erreur ou rediriger vers une autre page
+                                        }
                                       }
                                       else if (token != null && role == "responsable") {
                                         Navigator.push(
                                             context, MaterialPageRoute(
-                                            builder: (context) => Categories()));
+                                            // builder: (context) => Categories()));
+                                            builder: (context) => LoginSection()));
                                       }
                                       else if (token != null && role == "admin") {
                                         Navigator.push(
                                             context, MaterialPageRoute(
-                                            builder: (context) => Users()));
+                                            builder: (context) => LoginSection()));
                                       }
-                                    } else {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text(
-                                            'Entrer des Donnees Valides')),
-                                      );
-                                    }
+                                    // }
+                                    // else {
+                                    //   ScaffoldMessenger.of(context).showSnackBar(
+                                    //     SnackBar(content: Text(
+                                    //         'Entrer des Donnees Valides')),
+                                    //   );
+                                    // }
                                   },
 
                                   style: ElevatedButton.styleFrom(
@@ -698,32 +748,34 @@ class _SignUpSectionState extends State<SignUpSection> {
         'email': email,
       }),
     );
-    print(response.body);
-    if (response.statusCode == 200) {
+    print(response.statusCode);
+    if (response.statusCode == 201) {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       var parse = jsonDecode(response.body);
 
-      var nom = parse["data"]["user"]["nom"];
+      // var nom = parse["data"]["user"]["nom"];
       var role = parse["data"]["user"]["role"];
       var id = parse["data"]["user"]["_id"];
-      var email1 = parse["data"]["user"]["email"];
+      // var email1 = parse["data"]["user"]["email"];
       await prefs.setString('token', parse["token"]);
       await prefs.setString('role', role);
       await prefs.setString('id', id);
-      await prefs.setString('email', email1);
-      await prefs.setString('nom', nom);
-      print('Welcom $nom');
-      setState(() {
-        // isLoginFailed = false; // Réinitialisation de la variable d'erreur
-        AddProfesseur("${nom} ${prenom}",banque, email,
-            num.parse(mobile) ,num.parse(compte));
-      });
+      // await prefs.setString('email', email1);
+      // await prefs.setString('nom', nom);
+     // if(role == "proffesseur"){
+     //   setState(() {
+     //     // isLoginFailed = false; // Réinitialisation de la variable d'erreur
+     //     AddProf(id, Banque,
+     //         num.parse(account));
+     //   });
+     // }
+      print('Welcom $id');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Le Prof est ajoute avec succès.')),
       );
     } else {
       // Authentification échouée
-      isLoginFailed = true;
+      // isLoginFailed = true;
       errorMessage = 'Email ou mot de passe incorrect.';
       // Mettez à jour l'état de l'interface utilisateur
       setState(() {});

@@ -1,9 +1,15 @@
+import 'dart:typed_data';
+
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:excel/excel.dart' as Excel;
 
+import 'dart:io';
 import '../Dashboard.dart';
 
 
@@ -61,9 +67,14 @@ class _UsersState extends State<Users> {
   TextEditingController _searchController = TextEditingController();
 
   TextEditingController _name = TextEditingController();
-  TextEditingController _desc = TextEditingController();
-  TextEditingController _taux = TextEditingController();
-  num _selectedTaux = 500;
+  TextEditingController _prenom = TextEditingController();
+  TextEditingController _mobile = TextEditingController();
+  TextEditingController _pass = TextEditingController();
+  TextEditingController _confpass = TextEditingController();
+  TextEditingController _email = TextEditingController();
+  TextEditingController _banque = TextEditingController();
+  TextEditingController _role = TextEditingController();
+  TextEditingController _compte = TextEditingController();
 
 
   @override
@@ -419,8 +430,8 @@ class _UsersState extends State<Users> {
           label: Row(
             children: [Icon(Icons.add,color: Colors.black,)],
           ),
-          // onPressed: () => _displayTextInputDialog(context),
-          onPressed: () {},
+          onPressed: () => _importData(context),
+          // onPressed: () {},
 
         ),
 
@@ -432,11 +443,64 @@ class _UsersState extends State<Users> {
   }
 
 
+  Future<void> _importData(BuildContext context) async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['xlsx'],
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      File file = File(result.files.first.path!);
+
+      ByteData data = await file.readAsBytes().then((bytes) {
+        return ByteData.sublistView(Uint8List.fromList(bytes));
+      });
+      List<int> bytes = data.buffer.asUint8List();
+      var excel = Excel.Excel.decodeBytes(bytes);
+
+
+      for (var table in excel.tables.keys) {
+        print(table); // Nom de la feuille
+        print(excel.tables[table]!.maxCols);
+        print("hmm: ${excel.tables[table]!.maxCols}");
+        print(excel.tables[table]!.rows[0]); // Lecture de l'en-tête
+
+        // Commencer à traiter à partir de la deuxième ligne (index 1)
+        for (var i = 1; i < 100; i++) {
+          var row = excel.tables[table]!.rows[i];
+
+          print('taille: ${row.length}');
+          // if (row.length >= excel.tables[table]!.maxCols) {  // Vérifiez si la ligne a au moins le nombre maximum de colonnes
+          String nom = row[0]?.value?.toString() ?? "";
+          String prenom = row[1]?.value?.toString() ?? "";
+          String mobile = row[2]?.value?.toString() ?? "";
+
+          String email = row[3]?.value?.toString() ?? "";
+          String pass = row[4]?.value?.toString() ?? "";
+          String banque = row[5]?.value?.toString() ?? "";
+
+          String role = row[6]?.value?.toString() ?? "";
+          String compte = row[7]?.value?.toString() ?? "";
+
+          // Faites quelque chose avec les données, par exemple, ajoutez-les à votre liste de professeurs
+          // print('Code: $nom, Nom $niveau,Desc $desc,');
+          AddUser(nom,prenom,int.parse(mobile),email,pass,pass,banque,role,int.parse(compte));
+          // } else {
+          //   print('La ligne $i n\'a pas suffisamment d\'éléments.');
+          // }
+        }
+
+
+      }
+      print("Hello ${excel.tables.values.first}");
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Données importées avec succès depuis le fichier Excel.')),
+      );
+    }
+  }
+
   Future<void> _displayTextInputDialog(BuildContext context) async {
-    // TextEditingController _name = TextEditingController();
-    // TextEditingController _description = TextEditingController();
-    // TextEditingController _prix = TextEditingController();
-    // num _selectedTaux = 500;
 
 
     return showDialog(
@@ -459,48 +523,94 @@ class _UsersState extends State<Users> {
                               borderRadius: BorderRadius.all(Radius.circular(10.0)))),
                     ),
                     TextField(
-                      controller: _desc,
+                      controller: _prenom,
                       keyboardType: TextInputType.text,
                       decoration: InputDecoration(
                           filled: true,
                           fillColor: Colors.white,
-                          hintText: "description",
+                          hintText: "Prenom",
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.all(Radius.circular(10.0)))),
                     ),
-                    DropdownButtonFormField<num>(
-                      value: _selectedTaux,
-                      items: [
-                        DropdownMenuItem<num>(
-                          child: Text('500'),
-                          value: 500,
-                        ),
-                        DropdownMenuItem<num>(
-                          child: Text('900'),
-                          value: 900,
-                        ),
-                      ],
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedTaux = value!;
-                        });
-                      },
+                    TextField(
+                      controller: _mobile,
+                      keyboardType: TextInputType.text,
                       decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white,
-                        hintText: "taux",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                        ),
-                      ),
+                          filled: true,
+                          fillColor: Colors.white,
+                          hintText: "Mobile",
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                    ),
+                    TextField(
+                      controller: _email,
+                      keyboardType: TextInputType.text,
+                      decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          hintText: "email",
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                    ),
+
+
+                    TextField(
+                      controller: _pass,
+                      keyboardType: TextInputType.text,
+                      decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          hintText: "Mot de Passe",
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                    ),
+                    TextField(
+                      controller: _confpass,
+                      keyboardType: TextInputType.text,
+                      decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          hintText: "Confirmation",
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                    ),
+                    TextField(
+                      controller: _banque,
+                      keyboardType: TextInputType.text,
+                      decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          hintText: "Banque",
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                    ),
+
+                    TextField(
+                      controller: _role,
+                      keyboardType: TextInputType.text,
+                      decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          hintText: "Role",
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                    ),
+                    TextField(
+                      controller: _compte,
+                      keyboardType: TextInputType.text,
+                      decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          hintText: "Compte",
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(10.0)))),
                     ),
 
 
                     ElevatedButton(onPressed: (){
                       Navigator.of(context).pop();
                       fetchUser();
-                      _taux.text = _selectedTaux.toString();
-                      AddUser(_name.text,_desc.text,num.parse(_taux.text));
+                      AddUser(_name.text,_prenom.text,int.parse(_mobile.text),_email.text,_pass.text,_confpass.text,_banque.text,_role.text,int.parse(_compte.text));
                       // AddUser(_name.text, _desc.text);
                       ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Le User a été ajouter avec succès.')),
@@ -525,29 +635,37 @@ class _UsersState extends State<Users> {
   }
 
 
-  void AddUser (String name,String description,[num? prix]) async {
+  void AddUser (String name,String prenom,int mobile,String email,String pass,String confPass,String banque,String role,int compte) async {
+    final Map<String, dynamic> data = {
+      "nom":name,
+      "prenom":prenom ,
+      "mobile": mobile ,
+      "email":email,
+      "password":pass ,
+      "passwordConfirm": confPass ,
+      "banque":banque ,
+      "role": role ,
+      "accountNumero":compte,
+    };
 
     // Check if the prix parameter is provided, otherwise use the default value of 100
-    if (prix == null) {
-      prix = 100;
-    }
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token")!;
-    print(token);
+    // print(token);
     final response = await http.post(
-      Uri.parse('http://192.168.43.73:5000/categorie/'),
+      Uri.parse('http://192.168.43.73:5000/user/'),
       headers: <String, String>{
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
+        // 'Authorization': 'Bearer $token',
       },
-      body: jsonEncode(<String, dynamic>{
-        "name":name,
-        "description":description ,
-        "prix": prix ,
-      }),
+      body: jsonEncode(data),
     );
+    print(response.statusCode);
     if (response.statusCode == 200) {
       print('User ajouter avec succes');
+      setState(() {
+        Navigator.pop(context);
+      });
     } else {
       print("SomeThing Went Wrong");
     }

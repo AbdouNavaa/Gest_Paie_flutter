@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:gestion_payements/professeures.dart';
-  
+
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -15,7 +15,7 @@ import 'matieres.dart';
 // import 'package:multi_select_flutter/multi_select_flutter.dart';
 
 
-class ProfCoursesPage extends StatefulWidget {
+class ProfCoursesNonSigne extends StatefulWidget {
   final List<dynamic> courses;
 
   final String ProfId;
@@ -26,15 +26,15 @@ class ProfCoursesPage extends StatefulWidget {
   DateTime? dateFin;
 // Calculate the sums for filtered courses
 
-  ProfCoursesPage({required this.courses, required this.ProfId}) {}
+  ProfCoursesNonSigne({required this.courses, required this.ProfId}) {}
 
 
 
   @override
-  State<ProfCoursesPage> createState() => _ProfCoursesPageState();
+  State<ProfCoursesNonSigne> createState() => _ProfCoursesNonSigneState();
 }
 
-class _ProfCoursesPageState extends State<ProfCoursesPage> {
+class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
   bool isCourseSigned = false; // État pour suivre si le cours est signé ou non
   double totalType = 0;
   double somme = 0;
@@ -87,7 +87,6 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
   }
 
 
-
   void singeCours( id,bool isSigned) async {
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -100,7 +99,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
         'Authorization': 'Bearer $token',
       },
       body: jsonEncode(<String, dynamic>{
-      'isSigned':isSigned? "oui": "pas encore"
+        'isSigned':isSigned? "oui": "pas encore"
       }),
     );
     print(response.statusCode);
@@ -147,8 +146,8 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
     DateTime courseDate = DateTime.parse(course['date'].toString());
     bool isMatch = (
         course['matiere'].toLowerCase().contains(searchQuery.toLowerCase()) ||
-        course['professeur'].toLowerCase().contains(searchQuery.toLowerCase()) ||
-        course['isSigned'].toString().contains(searchQuery.toLowerCase()));
+            course['professeur'].toLowerCase().contains(searchQuery.toLowerCase()) ||
+            course['isSigned'].toString().contains(searchQuery.toLowerCase()));
 
     // Check if the course date falls within the selected date range
     if ((widget.dateDeb == null || courseDate.isAtSameMomentAs(widget.dateDeb!.toLocal()) ||
@@ -200,7 +199,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                   ),
                 ),
                 SizedBox(width: 50,),
-                Text("Mes Cours Signé",style: TextStyle(fontSize: 25),)
+                Text("Cours Non Signé",style: TextStyle(fontSize: 25),)
               ],
             ),
           ),
@@ -317,8 +316,8 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
 
               ],          ),
           ),
-          // Display the calculated sums
 
+          // Display the calculated sums
 
 
 // Define the pagination variables
@@ -327,7 +326,6 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
 
           Expanded(
             child: Container(
-              margin: EdgeInsets.only(top: 30),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.only(
@@ -355,7 +353,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                           horizontalMargin: 1,
                           headingRowHeight: 50,
                           columnSpacing: 18,
-                          dataRowHeight: 60,
+                          dataRowHeight: 50,
                           headingTextStyle: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.black, // Set header text color
@@ -363,11 +361,11 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                           // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
                           columns: [
                             DataColumn(label: Text('Signe')),
-                            DataColumn(label: Text('Payé')),
+                            // DataColumn(label: Text('Payé')),
                             DataColumn(label: Text('Matiere')),
                             DataColumn(label: Text('Date')),
                             DataColumn(label: Text('Eq.CM')),
-                            DataColumn(label: Text('MT')),
+                            DataColumn(label: Text('Prix')),
                             DataColumn(label: Text('Action')),
                           ],
                           rows: [
@@ -381,12 +379,34 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                                   cells: [
 
                                     DataCell(
-                                        Icon(Icons.check_box_outlined,size: 27)
+                                        widget.courses[index]['isSigned'] == "oui"? Icon(Icons.check_box_outlined,size: 27):CupertinoSwitch(
+                                          activeColor: Colors.black26,
+                                          value:  widget.courses[index]['isSigned'] == "oui"? true: false,
+                                          onChanged: (value) async {
+
+
+
+                                            setState(() {
+                                              widget.courses[index]['isSigned'] = value;
+                                            });
+
+                                            Navigator.of(context).pop();
+
+                                            final updatedDate = DateFormat('yyyy-MM-ddTHH:mm').parse(widget.courses[index]['date']).toUtc();
+
+                                            final matiereName = widget.courses[index]['somme'];
+                                            // final matiereId = getMatiereIdFromName(matiereName);
+                                            singeCours(
+                                                widget.courses[index]['_id'],
+                                                value
+                                            );
+                                          },
+                                        )
                                     ),
-                                    DataCell(
-                                        widget.courses[index]['isPaid'] == "oui"||widget.courses[index]['isPaid'] == "préparée"? Container(child: Icon(Icons.check_box_outlined,size: 27))
-                                            :Container(child: Icon(Icons.check_box_outline_blank,size: 27))
-                                    ),
+                                    // DataCell(
+                                    //     widget.courses[index]['isPaid'] == "oui"||widget.courses[index]['isPaid'] == "préparée"? Icon(Icons.check_box_outlined,size: 27)
+                                    //         :Icon(Icons.check_box_outline_blank,size: 27)
+                                    // ),
                                     DataCell(Container(
                                       width: 60,
                                       child: Text('${widget.courses[index]['matiere']}',style: TextStyle(
@@ -410,7 +430,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                                       ),),
                                     ),
                                     DataCell(
-                                      Text('${widget.courses[index]['somme']}',style: TextStyle(
+                                      Text('${widget.courses[index]['prix']}',style: TextStyle(
                                         color: Colors.black,
                                       ),),
                                     ),
@@ -439,7 +459,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                                 ),
                             DataRow(cells: [
                               DataCell(Text('totals')),
-                              DataCell(Text('')),
+                              // DataCell(Text('')),
                               DataCell((widget.dateDeb != null && widget.dateFin != null)?
                               Center(child: Text('${coursesNum} Cours',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400)))
                                   :Text('${widget.courses.length} Cours',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
@@ -457,10 +477,13 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
 
                               DataCell(Text('')),
                             ])
+
                           ],
                         ),
+
                       ],
                     ),
+
                   ),
                 ),
               ),
@@ -550,7 +573,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
 
         builder: (BuildContext context){
           return Container(
-            height: 650,
+            height: 620,
             padding: const EdgeInsets.all(25.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,

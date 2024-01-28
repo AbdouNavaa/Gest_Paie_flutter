@@ -1,14 +1,15 @@
-import 'dart:math';
+import 'dart:typed_data';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:excel/excel.dart' as Excel;
 
-import 'Dashboard.dart';
+import 'dart:io';
 import 'categories.dart';
-import 'main.dart';
 
 
 
@@ -39,6 +40,10 @@ class _MatieresState extends State<Matieres> {
     final category = categories.firstWhere((c) => c.id == categoryId, orElse: () => Category(id: '', name: '')); // Replace 'Category' with your actual Category class
     return category.name;
   }
+  String getCategoryId(String code) {
+    final category = categs.firstWhere((c) => c.code == code, orElse: () => Category(id: '', name: '')); // Replace 'Category' with your actual Category class
+    return category.id!;
+  }
 
 
   void DeleteMatiere(id) async{
@@ -60,6 +65,33 @@ class _MatieresState extends State<Matieres> {
       fetchMatiere().then((data) {
         setState(() {
           filteredItems = data;
+        });
+      }).catchError((error) {
+        print('Erreur lors de la récupération des Matieres: $error');
+      });
+
+    }
+
+  }
+  void DeleteAll() async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString("token")!;
+    print(token);
+
+    var response = await http.delete(Uri.parse('http://192.168.43.73:5000/matiere/' ),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      // body: jsonEncode(regBody)
+    );
+
+    var jsonResponse = jsonDecode(response.body);
+    print(response.statusCode);
+    if(response.statusCode ==200){
+      fetchMatiere().then((data) {
+        setState(() {
+          filteredItems = data!;
         });
       }).catchError((error) {
         print('Erreur lors de la récupération des Matieres: $error');
@@ -156,12 +188,20 @@ class _MatieresState extends State<Matieres> {
     }
   }
 
+  List<Category> categs = [];
   @override
   void initState() {
     super.initState();
     fetchMatiere().then((data) {
       setState(() {
         filteredItems = data; // Assigner la liste renvoyée par Matiereesseur à items
+      });
+    }).catchError((error) {
+      print('Erreur: $error');
+    });
+    fetchCategory().then((data) {
+      setState(() {
+        categs = data; // Assigner la liste renvoyée par Matiereesseur à items
       });
     }).catchError((error) {
       print('Erreur: $error');
@@ -279,7 +319,7 @@ class _MatieresState extends State<Matieres> {
                 },
                 decoration: InputDecoration(
                   prefixIcon: Icon(Icons.search, color: Colors.grey),
-                  hintText: 'Search by matiere ',
+                  hintText: 'Rechercher ',
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 ),
@@ -385,16 +425,75 @@ class _MatieresState extends State<Matieres> {
                 ),
               ),
             ),
+
           ],
         ),
-        floatingActionButton: FloatingActionButton.extended(
-          // heroTag: 'uniqueTag',
-          tooltip: 'Ajouter une matiere',backgroundColor: Colors.white,
-          label: Row(
-            children: [Icon(Icons.add,color: Colors.black,)],
-          ),
-          onPressed: () => _displayTextInputDialog(context),
+        floatingActionButton: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(width: 18,),
+            FloatingActionButton.extended(
+              // heroTag: 'uniqueTag',
+              tooltip: 'Supprimer Tous',backgroundColor: Colors.white,
+              label: Row(
+                children: [Icon(Icons.delete_outlined,color: Colors.black,)],
+              ),
+              // onPressed: () => DeleteAll(),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
+                      title: Text("Alert"),
+                      content: Text(
+                          "Êtes-vous sûr de vouloir supprimer tous les éléments ?"),
+                      actions: <Widget>[
+                        TextButton(
+                          child: Text("ANNULER"),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                        TextButton(
+                          child: Text(
+                            "SUPPRIMER",
+                            // style: TextStyle(color: Colors.red),
+                          ),
+                          onPressed: () {
 
+                            DeleteAll();
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Les Categories sont Supprimer avec succès.')),
+                            );
+
+                            setState(() {
+                              Navigator.of(context).pop();
+                              fetchMatiere();
+                            });
+
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+
+            ),
+            SizedBox(width: 210,),
+            FloatingActionButton.extended(
+              // heroTag: 'uniqueTag',
+              tooltip: 'Ajouter une matiere',backgroundColor: Colors.white,
+              label: Row(
+                children: [Icon(Icons.add,color: Colors.black,)],
+              ),
+              onPressed: () => _importData(context),
+
+            ),
+          ],
         ),
 
       ),
@@ -402,6 +501,81 @@ class _MatieresState extends State<Matieres> {
 
     );
   }
+
+
+  String separateCharactersAndNumbers(String input) {
+    // Initialiser une instance de StringBuffer pour stocker le résultat
+    StringBuffer result = StringBuffer();
+
+    // Parcourir chaque caractère de la chaîne d'entrée
+    for (int i = 0; i < input.length; i++) {
+      String currentChar = input[i];
+
+      // Vérifier si le caractère est une lettre
+      if (currentChar.contains(RegExp(r'[A-Za-z]'))) {
+        // Si c'est une lettre, l'ajouter au résultat
+        result.write(currentChar);
+      }
+    }
+
+    // Retourner la chaîne résultante
+    return result.toString();
+  }
+
+
+
+
+
+  Future<void> _importData(BuildContext context) async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['xlsx'],
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      File file = File(result.files.first.path!);
+
+      ByteData data = await file.readAsBytes().then((bytes) {
+        return ByteData.sublistView(Uint8List.fromList(bytes));
+      });
+      List<int> bytes = data.buffer.asUint8List();
+      var excel = Excel.Excel.decodeBytes(bytes);
+
+
+      for (var table in excel.tables.keys) {
+        print(table); // Nom de la feuille
+        print(excel.tables[table]!.maxCols);
+        print("hmm: ${excel.tables[table]!.maxCols}");
+        print(excel.tables[table]!.rows[0]); // Lecture de l'en-tête
+
+        // Commencer à traiter à partir de la deuxième ligne (index 1)
+        for (var i = 1; i < 100; i++) {
+          var row = excel.tables[table]!.rows[i];
+
+          print('taille: ${row.length}');
+          // if (row.length >= excel.tables[table]!.maxCols) {  // Vérifiez si la ligne a au moins le nombre maximum de colonnes
+          String code = row[0]?.value?.toString() ?? "";
+          String nom = row[1]?.value?.toString() ?? "";
+          String desc = row[2]?.value?.toString() ?? "";
+
+          // Faites quelque chose avec les données, par exemple, ajoutez-les à votre liste de professeurs
+          print('Code: $code, Nom $nom,Desc $desc,');
+          AddMatiere(nom,desc, getCategoryId(separateCharactersAndNumbers(code)));
+          // } else {
+          //   print('La ligne $i n\'a pas suffisamment d\'éléments.');
+          // }
+        }
+
+
+      }
+      print("Hello ${excel.tables.values.first}");
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Données importées avec succès depuis le fichier Excel.')),
+      );
+    }
+  }
+
 
   Future<void> _displayTextInputDialog(BuildContext context) async {
     TextEditingController _name = TextEditingController();
@@ -541,7 +715,7 @@ class _MatieresState extends State<Matieres> {
 
         builder: (BuildContext context){
           return Container(
-            height: 500,
+            height: 450,
             padding: const EdgeInsets.all(25.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -856,8 +1030,8 @@ Future<List<Matiere>> fetchMatiere() async {
       'Authorization': 'Bearer $token',
     },);
 
-  print(response.statusCode);
-  // print(response.body);
+  print("mat::${response.statusCode}");
+
 
   if (response.statusCode == 200) {
     Map<String, dynamic> jsonResponse = jsonDecode(response.body);

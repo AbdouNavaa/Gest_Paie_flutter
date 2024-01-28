@@ -1,17 +1,22 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Paie extends StatefulWidget {
-  final List<dynamic> courses;
+  final List<dynamic> paies;
 
   final String ProfId;
+  final String Id;
   final String ProfName;
   DateTime? dateDeb;
   DateTime? dateFin;
 // Calculate the sums for filtered courses
 
-  Paie({required this.courses, required this.ProfName,
-    required this.ProfId}) {}
+  Paie({required this.paies, required this.ProfName,
+    required this.ProfId, required this.Id}) {}
 
 
   @override
@@ -21,64 +26,110 @@ class Paie extends StatefulWidget {
 class _PaieState extends State<Paie> {
   double totalType = 0;
   double somme = 0;
-  void calculateTotalType() {
-    if (widget.dateDeb != null && widget.dateFin != null) {
-      // If date filters are applied
-      totalType = widget.courses.where((course) {
-        DateTime courseDate = DateTime.parse(course['date'].toString());
-        return (course['isSigned'] != "pas encore") && // Filter courses with signs
-            (courseDate.isAtSameMomentAs(widget.dateDeb!.toLocal()) || (courseDate.isAfter(widget.dateDeb!.toLocal()) &&
-                courseDate.isBefore(widget.dateFin!.toLocal().add(Duration(days: 1)))));
-      }).map((course) => double.parse(course['nombre_heures'].toString())).fold(0, (prev, amount) => prev + amount);
 
-      somme = widget.courses.where((course) {
-        DateTime courseDate = DateTime.parse(course['date'].toString());
-        return ( course['isSigned'] != "pas encore") && // Filter courses with signs
-            (courseDate.isAtSameMomentAs(widget.dateDeb!.toLocal()) ||
-                (courseDate.isAfter(widget.dateDeb!.toLocal()) &&
-                    courseDate.isBefore(
-                        widget.dateFin!.toLocal().add(Duration(days: 1)))));
-      }).map((course) => double.parse(course['TH'].toString())).fold(0, (prev, amount) => prev + amount);
-    } else if ((widget.dateDeb != null && widget.dateFin == null) || (widget.dateDeb == null && widget.dateFin != null)) {
-      // If date filters are applied
-      totalType = 0;
-      somme = 0;
+  bool showPaid = true;
+   List<dynamic> paies = [];
+
+  Future<void> fetchPaiements(id) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString("token")!;
+
+    var url = Uri.parse('http://192.168.43.73:5000/paiement/$id/professeur');
+
+    var responseInitialise = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json', // Ajoutez le type de contenu
+      },
+      body: jsonEncode({"notification": ""}), // Encodez votre corps en JSON
+    );
+
+
+    if (responseInitialise.statusCode == 200) {
+      Map<String, dynamic> jsonResponse = jsonDecode(responseInitialise.body);
+      paies = jsonResponse['paiements'];
+      // print('Paiements avec status "initialisé": ${paies.length}');
     } else {
-      // If no date filters are applied
-      int startIndex = (currentPage - 1) * coursesPerPage;
-      int endIndex = startIndex + coursesPerPage - 1;
-      totalType = widget.courses.skip(startIndex).take(coursesPerPage).where((course) =>
-      (course['signe'] != null && course['signe'] != '')).map((course) => double.parse(course['TH'].toString())).fold(0, (prev, amount) => prev + amount);
-      somme = widget.courses.skip(startIndex).take(coursesPerPage).where((course) =>
-      (course['signe'] != null && course['signe'] != '')).map((course) => double.parse(course['TH'].toString())).fold(0, (prev, amount) => prev + amount);
+      print('Request for "initialisé" failed with status: ${responseInitialise.statusCode}');
     }
+
   }
+  void Confirm(id) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString("token")!;
+
+    var url = Uri.parse('http://192.168.43.73:5000/paiement/$id/confirmation');
+
+
+    var reponse = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json', // Ajoutez le type de contenu
+      },
+      body: jsonEncode({}), // Ou d'autres valeurs pour "validé"
+    );
+
+    if (reponse.statusCode == 200) {
+      // Map<String, dynamic> jsonResponse = jsonDecode(responseInitialise.body);
+      // paies = jsonResponse['paiements'];
+      print('Paiement est confirmer avec status ');
+      setState(() {
+        Navigator.pop(context);
+      });
+    } else {
+      print('Request for "validé" failed with status: ${reponse.statusCode}');
+    }
+
+  }
+  void Refuse(id) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString("token")!;
+
+    var url = Uri.parse('http://192.168.43.73:5000/paiement/$id/confirmation');
+
+    var reponse = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json', // Ajoutez le type de contenu
+      },
+      body: jsonEncode({"refuse": ""}), // Encodez votre corps en JSON
+    );
+
+
+
+    if (reponse.statusCode == 200) {
+      // Map<String, dynamic> jsonResponse = jsonDecode(responseInitialise.body);
+      // paies = jsonResponse['paiements'];
+      print('Paiement est refuser avec success ');
+      setState(() {
+        Navigator.pop(context);
+      });
+    } else {
+      print('Request for "initialisé" failed with status: ${reponse.statusCode}');
+    }
+
+  }
+
+
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    widget.courses;
+    // widget.courses;
+    // fetchPaiements(widget.Id);
   }
 
-  TextEditingController _date = TextEditingController();
-
-  int currentPage = 1;
-  int coursesPerPage = 5;
-  String searchQuery = '';
-  bool sortByDateAscending = true;
-  bool isSigned = false;
 
 
 
 
   @override
   Widget build(BuildContext context) {
-    calculateTotalType();
     return Scaffold(
-      // appBar: AppBar(title:
-      // Center(child: Text('${widget.coursNum} Courses',
-      //   style: TextStyle(fontStyle: FontStyle.italic,fontWeight: FontWeight.bold,color: Colors.white),),)),
       body: Column(
         children: [
           SizedBox(height: 30,),
@@ -86,75 +137,37 @@ class _PaieState extends State<Paie> {
             height: 50,
             child: Row(
               children: [
-                TextButton(onPressed: (){
-                  Navigator.pop(context);
-                }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,),
-                  style: TextButton.styleFrom(
-                    backgroundColor:Colors.white ,
-                    foregroundColor:Colors.black ,
-                    // elevation: 10,
-                    // shape: RoundedRectangleBorder(side: BorderSide(color: Colors.black26)),
+                Container(
+                  height: 45,
+                  width: 45,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.all(Radius.circular(50)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 5,
+                      ),
+                    ],
+                  ),
+                  child: InkWell(
+                    onTap: (){
+                      Navigator.pop(context);
+                    }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,color: Colors.black,),
+
                   ),
                 ),
-                SizedBox(width: 30,),
+                SizedBox(width: 50,),
                 Text("Etat de Paiement",style: TextStyle(fontSize: 25),)
               ],
             ),
           ),
 
-
-          Padding(padding: EdgeInsets.all(10)),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ElevatedButton(
-                onPressed: () async {
-                  DateTime? selectedDateDeb = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2030),
-                  );
-
-                  if (selectedDateDeb != null) {
-                    setState(() {
-                      widget.dateDeb = selectedDateDeb.toUtc();
-                      // totalType = 0; // Reset the totalId
-                    });
-                  }
-                },
-                child: Text(widget.dateDeb != null ? DateFormat('yyyy/MM/dd').format(widget.dateDeb!) : 'Date Deb'),
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xff0fb2ea),foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  DateTime? selectedDateFin = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2030),
-                  );
-
-                  if (selectedDateFin != null) {
-                    setState(() {
-                      widget.dateFin = selectedDateFin.toUtc();
-                      // totalType = 0; // Reset the totalId
-                    });
-                  }
-                },
-                child: Text(widget.dateFin != null ? DateFormat('yyyy/MM/dd').format(widget.dateFin!) : 'Date Fin'),
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xff0fb2ea),foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-              ),
-            ],          ),
-
-          Padding(padding: EdgeInsets.all(20)),
+          // showPaid?
           Expanded(
             child: Container(
+              width: MediaQuery.of(context).size.width,
+              margin: EdgeInsets.only(top: 30),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.only(
@@ -167,72 +180,163 @@ class _PaieState extends State<Paie> {
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Container(
+                    width: MediaQuery.of(context).size.width ,
                     decoration: BoxDecoration(
                       color: Colors.white12,
                       borderRadius: BorderRadius.all(
                         Radius.circular(20.0),
                       ),
                     ),
-                    margin: EdgeInsets.only(left: 10),
+                    // margin: EdgeInsets.only(left: 10),
                     child: DataTable(
                       showCheckboxColumn: true,
                       showBottomBorder: true,
-                      horizontalMargin: 1,
                       headingRowHeight: 50,
-                      columnSpacing: 18,
+                      columnSpacing: 8,
                       dataRowHeight: 50,
-                      headingTextStyle: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black, // Set header text color
-                      ),
-                      // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
                       columns: [
-                        DataColumn(label: Text('Enseignant')),
-                        DataColumn(label: Text('Volume Horaire')),
-                        DataColumn(label: Text('Montant')),
+                        DataColumn(label: Text('De')),
+                        DataColumn(label: Text('Vers')),
+                        // DataColumn(label: Text('Prof')),
+                        // DataColumn(label: Text('Banq')),
+                        DataColumn(label: Text('Status')),
+                        DataColumn(label: Text('confirmation')),
+                        DataColumn(label: Text('Action')),
                       ],
                       rows: [
-                            DataRow(
+                        for (var index = 0; index < (widget.paies?.length ?? 0); index++)
+                        // for (var categ in filteredItems!)
+                          DataRow(
                               cells: [
-                                DataCell(Text('${widget.ProfName}',style: TextStyle(
+                                DataCell(Text('${DateFormat('dd/MM ').format(DateTime.parse(widget.paies![index]["fromDate"].toString()).toLocal())}',style: TextStyle(
                                   color: Colors.black,
-                                ),),///hmmm
-                                ),
-                                DataCell(
-                                  Text('${totalType.toStringAsFixed(2)}',style: TextStyle(
-                                    color: Colors.black,
-                                  ),),
-                                ),
-                                DataCell(
-                                  Text('${somme.toStringAsFixed(2)}',style: TextStyle(
-                                    color: Colors.black,
-                                  ),),
-                                ),
-                              ],
-                            ),
-                            DataRow(
-                              cells: [
-                                DataCell(Text('Montant Totale (MRU)',style: TextStyle(
+                                ),)),
+                                DataCell(Text('${DateFormat('dd/MM ').format(DateTime.parse(widget.paies![index]["toDate"].toString()).toLocal())}',style: TextStyle(
                                   color: Colors.black,
-                                ),),///hmmm
-                                ),
-                                DataCell(
-                                  Text(''),
-                                ),
-                                DataCell(
-                                  Text('${somme.toStringAsFixed(2)}',style: TextStyle(
+                                ),)),
+                                DataCell(Text('${widget.paies![index]["status"].toString()}',style: TextStyle(
                                   color: Colors.black,
-                                ),),
+                                ),)),
+                                DataCell(Text('${widget.paies![index]["confirmation"].toString()}',style: TextStyle(
+                                  color: Colors.black,
+                                ),)),
+                                DataCell(
+                                  Row(
+                                    children: [
+                                      Container(
+                                        width: 35,
+                                        child: TextButton(
+                                          onPressed: () {
+                                            showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return AlertDialog(
+                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
+                                                  title: Text("Confirmer la Refusion"),
+                                                  content: Text(
+                                                      "Êtes-vous sûr de vouloir refuser cet paiement ?"),
+                                                  actions: <Widget>[
+                                                    TextButton(
+                                                      child: Text("ANNULER"),
+                                                      onPressed: () {
+                                                        Navigator.of(context).pop();
+                                                      },
+                                                    ),
+                                                    TextButton(
+                                                      child: Text(
+                                                        "OK",
+                                                        // style: TextStyle(color: Colors.red),
+                                                      ),
+                                                      onPressed: () {
+                                                        Navigator.of(context).pop();
+
+                                                        // fetchCategory();
+                                                        Refuse(widget.paies![index]["_id"]);
+                                                        // print(filteredItems?[index].id!);
+                                                        // Navigator.of(context).pop();
+                                                        ScaffoldMessenger.of(context).showSnackBar(
+                                                          SnackBar(content: Text('Le Paiement a été Rfuser avec succès.')),
+                                                        );
+                                                        setState(() {
+                                                          // Navigator.pop(context);
+                                                        });
+                                                      },
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                            );
+                                          }, // Disable button functionality
+                                          child: Icon(Icons.refresh_outlined, color: Colors.black,),
+
+                                        ),
+                                      ),
+                                      Container(
+                                        width: 35,
+                                        child: TextButton(
+                                          onPressed: () {
+                                            showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return AlertDialog(
+                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
+                                                  title: Text("Confimation"),
+                                                  content: Text(
+                                                      "Êtes-vous sûr de vouloir confirmer cet paiement ?"),
+                                                  actions: <Widget>[
+                                                    TextButton(
+                                                      child: Text("ANNULER"),
+                                                      onPressed: () {
+                                                        Navigator.of(context).pop();
+                                                      },
+                                                    ),
+                                                    TextButton(
+                                                      child: Text(
+                                                        "OK",
+                                                        // style: TextStyle(color: Colors.red),
+                                                      ),
+                                                      onPressed: () {
+                                                        Navigator.of(context).pop();
+
+                                                        // fetchCategory();
+                                                        Confirm(widget.paies![index]["_id"]);
+                                                        // print(filteredItems?[index].id!);
+                                                        // Navigator.of(context).pop();
+                                                        ScaffoldMessenger.of(context).showSnackBar(
+                                                          SnackBar(content: Text('Le Paiement a été Confirmer avec succès.')),
+                                                        );
+                                                        setState(() {
+                                                          // Navigator.pop(context);
+                                                        });
+                                                      },
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                            );
+                                          }, // Disable button functionality
+                                          child: Icon(Icons.check_box_outlined, color: Colors.black,),
+
+                                        ),
+                                      ),
+
+                                    ],
+                                  ),
                                 ),
-                              ],
-                            ),
+                                // DataCell(Container(width: 105,
+                                //     child: Text('${categ.description}',)),),
+
+
+                              ]),
                       ],
                     ),
+
                   ),
                 ),
               ),
             ),
-          ),
+          )
+              // :Container()
 
 
 

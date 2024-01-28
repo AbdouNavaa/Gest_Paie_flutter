@@ -6,6 +6,7 @@ import 'package:gestion_payements/settings.dart';
 import 'Dashboard.dart';
 import 'auth/profile.dart';
 import 'categories.dart';
+import 'group.dart';
 import 'matieres.dart';
 
 class MoreOptionsPage extends StatefulWidget {
@@ -25,9 +26,25 @@ class _MoreOptionsPageState extends State<MoreOptionsPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: widget.isDark? Color(0xD5464640): Colors.white,
-        title: Text('More Options',style: TextStyle(
-          color: widget.isDark?  Colors.white: Color(0xD5464640),
-        ),),
+        title: Row(
+          children: [
+            SizedBox(width: 50,),
+            Text('Autres',style: TextStyle(
+              color: widget.isDark?  Colors.white: Color(0xD5464640),
+            ),),
+          ],
+        ),leading:
+      TextButton(onPressed: (){
+        Navigator.pop(context);
+      }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,),
+        style: TextButton.styleFrom(
+          backgroundColor:Colors.white ,
+          foregroundColor:Colors.black ,
+          // elevation: 10,
+          // shape: RoundedRectangleBorder(side: BorderSide(color: Colors.black26)),
+        ),
+      ),
+
       ),
       backgroundColor: widget.isDark? Color(0xD5464640): Colors.white,
       body: Column(
@@ -42,7 +59,7 @@ class _MoreOptionsPageState extends State<MoreOptionsPage> {
                   height: 100,child: Row(
                   children: [
                     SizedBox(width: 150,),
-                    Icon(Icons.manage_accounts_outlined, size: 80,),
+                    Icon(Icons.description_outlined, size: 80,),
                   ],
                 ),),
                 SwitchListTile(
@@ -170,7 +187,7 @@ class _MoreOptionsPageState extends State<MoreOptionsPage> {
                 height: 100,child: Row(
                 children: [
                  SizedBox(width: 150,),
-                  Icon(Icons.manage_accounts_outlined, size: 80,),
+                  Icon(Icons.description_outlined, size: 70,color: Colors.black26,),
                 ],
               ),),
                SwitchListTile(
@@ -197,7 +214,7 @@ class _MoreOptionsPageState extends State<MoreOptionsPage> {
                      // Navigate to LogoutScreen
                      Navigator.push(
                        context,
-                       MaterialPageRoute(builder: (context) => Filliere()),
+                       MaterialPageRoute(builder: (context) => Groups()),
                      );
                    },
                    child: Row(
@@ -205,7 +222,7 @@ class _MoreOptionsPageState extends State<MoreOptionsPage> {
                      children: [
                        Icon(Icons.file_copy_outlined, color: widget.isDark? Colors.green : Colors.black,),
                        SizedBox(width: 10,),
-                       Text('Filliere'),
+                       Text('Groups'),
                      ],
                    ),
                  ),

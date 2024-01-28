@@ -1,19 +1,27 @@
+// import 'dart:html';
+
+import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
+import 'package:gestion_payements/auth/users.dart';
 import 'package:gestion_payements/matieres.dart';
 import 'package:gestion_payements/prof_info.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import '../Dashboard.dart';
-import 'Ajout.dart';
+   
 import 'Cours.dart';
 import 'categories.dart';
+// import 'package:flutter/material.dart' hide Border;
+import 'package:excel/excel.dart' as Excel;
+import 'dart:typed_data';
+import 'package:path_provider/path_provider.dart';
 
-
-
-
+import 'package:file_picker/file_picker.dart';
+import 'dart:io';
 
 class Professeures extends StatefulWidget {
   Professeures({Key ? key}) : super(key: key);
@@ -24,7 +32,6 @@ class Professeures extends StatefulWidget {
 
 class _ProfesseuresState extends State<Professeures> {
 
-  Future<List<Professeur>>? futureProfesseur;
 
   List<Professeur>? filteredItems;
 
@@ -52,7 +59,7 @@ class _ProfesseuresState extends State<Professeures> {
     }
   }
 
-  void DeleteProfesseur(id) async{
+  void DeleteProf(id) async{
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token")!;
     print(token);
@@ -113,16 +120,19 @@ class _ProfesseuresState extends State<Professeures> {
 
     if (response.statusCode == 200) {
       Map<String, dynamic> professeursData = jsonDecode(response.body);
-      // List<dynamic> professeursData = jsonResponse['professeur'];
-      _showDetails(context, professeursData);
-      print(professeursData);
+      Map<String, dynamic> professeurData = professeursData['professeur'];
+      List<dynamic> matieres = professeursData['matieres'];
+      _showDetails(context, professeurData,matieres);
+      print("professeursData: ${professeursData}");
 
     } else {
-      throw Exception('Failed to load Matiere');
+      throw Exception('Failed to load Matieres');
     }
   }
 
   List<Matiere> matiereList = [];
+  List<User> users = [];
+  List<Professeur> profs = [];
 
 
   @override
@@ -130,7 +140,7 @@ class _ProfesseuresState extends State<Professeures> {
     super.initState();
     fetchProfs().then((data) {
       setState(() {
-        filteredItems = data; // Assigner la liste renvoyée par Professeuresseur à items
+        filteredItems = data; // Assigner la liste renvoyée par Professeur à items
       });
 
     }).catchError((error) {
@@ -144,14 +154,40 @@ class _ProfesseuresState extends State<Professeures> {
     }).catchError((error) {
       print('Erreur: $error');
     });
+    // fetchProfs().then((data) {
+    //   setState(() {
+    //     profs = data; // Assigner la liste renvoyée par emploiesseur à items
+    //   });
+    // }).catchError((error) {
+    //   print('Erreur: $error');
+    // });
+    fetchUser().then((data) {
+      setState(() {
+        users = data; // Assigner la liste renvoyée par emploiesseur à items
+      });
+    }).catchError((error) {
+      print('Erreur: $error');
+    });
 
     fetchCategories();
   }
 
   String getMatIdFromName(String id) {
     final professeur = matiereList.firstWhere((prof) => '${prof.id}' == id, orElse: () =>Matiere(id: '', name: 'blbla', categorieId: '', categorie_name: '', code: '',));
-    print('MatID: ${matiereList}');
+    // print('MatID: ${matiereList}');
     return professeur.name; // Return the ID if found, otherwise an empty string
+
+  }
+  // Professeur getProfInfos(String id) {
+  //   final professeur = profs.firstWhere((prof) => '${prof.id}' == id, orElse: () =>Professeur(id: ''));
+  //   // print('MatID: ${matiereList}');
+  //   return professeur; // Return the ID if found, otherwise an empty string
+  //
+  // }
+  num? getUserMob(String name) {
+    final user = users.firstWhere((user) => '${user.name}' == name, orElse: () =>User(id: '', name: 'blbla', prenom: '', email: '', mobile: 0, role: '',));
+    // print('MatID: ${matiereList}');
+    return user.mobile!; // Return the ID if found, otherwise an empty string
 
   }
   String getMatIdFromNames(String elements) {
@@ -163,19 +199,17 @@ class _ProfesseuresState extends State<Professeures> {
       result += getMatIdFromName((id)) + '   '; // Traitez chaque ID avec getMatIdFromName
     }
 
-    print(result);
+    // print(result);
     return result.isNotEmpty ? result.substring(0, result.length - 2) : '';
   }
 
   TextEditingController _searchController = TextEditingController();
 
   TextEditingController _name = TextEditingController();
-  TextEditingController _prenom = TextEditingController();
   TextEditingController _Banque = TextEditingController();
   TextEditingController _account = TextEditingController();
   TextEditingController _email = TextEditingController();
   TextEditingController _mobile = TextEditingController();
-  TextEditingController _matieres = TextEditingController();
 
 
   @override
@@ -209,7 +243,7 @@ class _ProfesseuresState extends State<Professeures> {
                   ),
                 ),
                 SizedBox(width: 50,),
-                Text("Liste de Professeures",style: TextStyle(fontSize: 25),)
+                Text("Liste de Profes",style: TextStyle(fontSize: 25),)
               ],
             ),
           ),
@@ -230,12 +264,12 @@ class _ProfesseuresState extends State<Professeures> {
             child: TextField(
               controller: _searchController,
               onChanged: (value) async {
-                List<Professeur> Professeurs = await fetchProfs();
+                List<Professeur> Profs = await fetchProfs();
 
                 setState(() {
                   // Implémentez la logique de filtrage ici
-                  // Par exemple, filtrez les Professeuresseurs dont le name ou le préname contient la valeur saisie
-                  filteredItems = Professeurs!.where((professeur) =>
+                  // Par exemple, filtrez les Professeurs dont le name ou le préname contient la valeur saisie
+                  filteredItems = Profs!.where((professeur) =>
                   professeur.nom!.toLowerCase().contains(value.toLowerCase())
                       // ||
                       // professeur.prenom!.toLowerCase().contains(value.toLowerCase())
@@ -275,7 +309,7 @@ class _ProfesseuresState extends State<Professeures> {
 
                         return
                           ListView.builder(
-                            itemCount: filteredItems?.length ?? 0,
+                            itemCount: filteredItems?.length ?? items!.length,
                             itemBuilder: (BuildContext context, int index) {
                               return Container(
                                 height: 100,
@@ -290,7 +324,7 @@ class _ProfesseuresState extends State<Professeures> {
                                       Column(
                                         children: [
                                           InkWell(
-                                            onTap: () => fetchProfDatails(filteredItems?[index].id),// Disable button functionality
+                                            onTap: () => fetchProfDatails(filteredItems?[index].id ?? items?[index].id!),// Disable button functionality
 
                                             child: Padding(
                                               padding: const EdgeInsets.only(top: 8.0),
@@ -309,13 +343,13 @@ class _ProfesseuresState extends State<Professeures> {
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Text('${filteredItems?[index].nom} ',style: TextStyle(
+                                          Text('${filteredItems?[index].nom ?? items?[index].nom!} ',style: TextStyle(
                                             color: Colors.black,
                                           ),),
                                           SizedBox(height: 10),
-                                          Text(' ${filteredItems?[index].banque}',style: TextStyle(color: Colors.black38),),
+                                          Text(' ${filteredItems?[index].banque ?? items?[index].banque!}',style: TextStyle(color: Colors.black38),),
                                          SizedBox(height: 10),
-                                          Text(' ${filteredItems?[index].email}',style: TextStyle(color: Colors.black38),),
+                                          Text(' ${filteredItems?[index].email ?? items?[index].email!}',style: TextStyle(color: Colors.black38),),
                                         ],
                                       ),
                                     ],
@@ -340,12 +374,12 @@ class _ProfesseuresState extends State<Professeures> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         // heroTag: 'uniqueTag',
-        tooltip: 'Ajouter un Professeur',
+        tooltip: 'Ajouter un Prof',
         backgroundColor: Colors.white,
         label: Row(
           children: [Icon(Icons.add,color: Colors.black,)],
         ),
-        onPressed: () => _displayTextInputDialog(context),
+        onPressed: () => _importData(context),
 
       ),
 
@@ -354,11 +388,83 @@ class _ProfesseuresState extends State<Professeures> {
     );
   }
 
+  String extractEmail(var cell) {
+    // Utilisation d'une regex simple pour valider le format de l'e-mail
+    RegExp regex = RegExp(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b');
+
+    // Extraction de la valeur de la cellule
+    String? cellValue = cell?.value?.toString();
+
+    // Validation de l'e-mail avec la regex
+    if (cellValue != null && regex.hasMatch(cellValue)) {
+      return cellValue;
+    } else {
+      // Gérer le cas où l'e-mail n'est pas dans un format valide
+      return ""; // Ou une autre valeur par défaut
+    }
+  }
+
+  Future<void> _importData(BuildContext context) async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['xlsx'],
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      File file = File(result.files.first.path!);
+
+      // String directoryPath = (await getApplicationDocumentsDirectory()).path;
+      // String filePath = '$directoryPath/${basename(file.path)}';
+      // await file.copy(filePath);
+
+      ByteData data = await file.readAsBytes().then((bytes) {
+        return ByteData.sublistView(Uint8List.fromList(bytes));
+      });
+      List<int> bytes = data.buffer.asUint8List();
+      var excel = Excel.Excel.decodeBytes(bytes);
+
+
+      for (var table in excel.tables.keys) {
+        print(table); // Nom de la feuille
+        print(excel.tables[table]!.maxCols);
+        print("hmm: ${excel.tables[table]!.maxCols}");
+        print(excel.tables[table]!.rows[0]); // Lecture de l'en-tête
+
+        // Commencer à traiter à partir de la deuxième ligne (index 1)
+        for (var i = 1; i < 100; i++) {
+          var row = excel.tables[table]!.rows[i];
+
+          print('taille: ${row.length}');
+          // if (row.length >= excel.tables[table]!.maxCols) {  // Vérifiez si la ligne a au moins le nombre maximum de colonnes
+            String nom = row[0]?.value?.toString() ?? "";
+            String banque = row[1]?.value?.toString() ?? "";
+            String compte = row[2]?.value?.toString() ?? "0";
+            String mobile = row[3]?.value?.toString() ?? "0";
+            // String email = extractEmail(row[5]);
+            String email = row[4]?.value?.toString() ?? "";
+            String password = row[5]?.value?.toString() ?? "";
+          String user = row[6]?.value?.toString() ?? "";
+
+            // Faites quelque chose avec les données, par exemple, ajoutez-les à votre liste de professeurs
+            print('les infos: $nom, Banque $compte');
+            AddProf(user,nom, num.parse(mobile), email, password, banque, num.parse(compte));
+          // } else {
+          //   print('La ligne $i n\'a pas suffisamment d\'éléments.');
+          // }
+        }
+
+
+      }
+      print("Hello ${excel.tables.values.first}");
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Données importées avec succès depuis le fichier Excel.')),
+      );
+    }
+  }
+
+
   Future<void> _displayTextInputDialog(BuildContext context) async {
-    // TextEditingController _name = TextEditingController();
-    // TextEditingController _description = TextEditingController();
-    // TextEditingController _prix = TextEditingController();
-    // num _selectedTaux = 500;
 
     return showModalBottomSheet(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
@@ -370,7 +476,7 @@ class _ProfesseuresState extends State<Professeures> {
               builder: (BuildContext context) {
                 return SingleChildScrollView(
                   child: Container(
-                    height: 650,
+                    height: 590,
                     padding: const EdgeInsets.all(25.0),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -379,7 +485,7 @@ class _ProfesseuresState extends State<Professeures> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           // mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            Text("Ajouter un Professeur", style: TextStyle(fontSize: 25),),
+                            Text("Ajouter un Prof", style: TextStyle(fontSize: 25),),
                             Spacer(),
                             InkWell(
                               child: Icon(Icons.close),
@@ -482,15 +588,14 @@ class _ProfesseuresState extends State<Professeures> {
                         ElevatedButton(onPressed: () {
                           Navigator.of(context).pop();
                           fetchProfs();
-                          AddProfesseur(_name.text, _Banque.text, _email.text,
-                              num.parse(_mobile.text),num.parse(_account.text));
-                          // AddProfesseur(_name.text, _desc.text);
+                          // AddProf(_name.text, _Banque.text, _account.text);
+                          // AddProf(_name.text, _desc.text);
                           setState(() {
                             Navigator.pop(context);
                           });
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text(
-                                'Le Professeur a été ajouter avec succès.')),
+                                'Le Prof a été ajouter avec succès.')),
                           );
                           setState(() {
                             Navigator.of(context).pop();
@@ -513,7 +618,7 @@ class _ProfesseuresState extends State<Professeures> {
                 );
               });
   }
-  Future<void> _showDetails(BuildContext context, Map<String, dynamic> prof) {
+  Future<void> _showDetails(BuildContext context, Map<String, dynamic> prof,List<dynamic> mat) {
     return showModalBottomSheet(
         context: context,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
@@ -522,7 +627,7 @@ class _ProfesseuresState extends State<Professeures> {
 
         builder: (BuildContext context){
           return Container(
-            height: 600,
+            height: 550,
             padding: const EdgeInsets.all(25.0),
             child: SingleChildScrollView(
               child: Column(
@@ -558,7 +663,7 @@ class _ProfesseuresState extends State<Professeures> {
                               fontStyle: FontStyle.italic,
                             ),),
                           SizedBox(width: 10,),
-                          Text('${prof['professeur']['nomComplet']} ',
+                          Text('${prof['nom']} ${prof['prenom']} ',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w400,
@@ -576,7 +681,7 @@ class _ProfesseuresState extends State<Professeures> {
                               fontStyle: FontStyle.italic,
                             ),),
                           SizedBox(width: 10,),
-                          Text('${prof['professeur']['email']}',
+                          Text('${prof['email']}',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w400,
@@ -594,7 +699,7 @@ class _ProfesseuresState extends State<Professeures> {
                               fontStyle: FontStyle.italic,
                             ),),
                           SizedBox(width: 10,),
-                          Text('${prof['professeur']['mobile']}',
+                          Text('${getUserMob(prof['nom'])}',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w400,
@@ -612,12 +717,13 @@ class _ProfesseuresState extends State<Professeures> {
                               fontStyle: FontStyle.italic,
                             ),),
                           SizedBox(width: 10,),
-                          Text('${prof['professeur']['banque']}',
+                          Text('${prof['banque']}',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w400,
                               fontStyle: FontStyle.italic,
                             ),),
+
                         ],
                       ),
                       SizedBox(height: 25),
@@ -630,81 +736,84 @@ class _ProfesseuresState extends State<Professeures> {
                               fontStyle: FontStyle.italic,
                             ),),
                           SizedBox(width: 10,),
-                          Text('${prof['professeur']['accountNumero']}',
+                          Text('${prof['compte']}',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w400,
                               fontStyle: FontStyle.italic,
                             ),),
+
                         ],
                       ),
                       SizedBox(height: 25),
-                      Row(
-                        children: [
-                          Text('Matieres:',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.italic,
-                            ),),
-                          SizedBox(width: 10,),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              for (var matiere in prof['matieres']) // Assuming items![index].matieres is a list of matieres for the professor
-                                Row(
-                                  children: [
-                                    // Text('Matieres: [${getMatIdFromNames(getMatSemIdFromName(semestre['_id']).join(", "))}]',style: TextStyle(fontSize: 18)),
-                                    Text(matiere['name'] ?? '',//abdou
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w400,
-                                          fontStyle: FontStyle.italic,
-                                        )),
-                                    TextButton(
-                                    onPressed: (){
-                                          showDialog(
-                                            context: context,
-                                            builder: (context) {
-                                              return AlertDialog(
-                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
-                                                title: Text('Supprimer Matiere'),
-                                                content: Text('Voulez vous supprimer: ${matiere['name']}?'),
-                                                actions: [
-                                                  TextButton(
-                                                    onPressed: () {
-                                                      Navigator.of(context).pop(); // Close the dialog
-                                                    },
-                                                    child: Text('Cancel'),
-                                                  ),
-                                                  TextButton(
-                                                    onPressed: () {
-                                                      Navigator.of(context).pop(); // Close the dialog
-                                                      String profId = prof['professeur']['id']!;
-                                                      String matiereId = matiere['_id']; // Replace 'matiere' with the actual matiere data
-                                                      deleteMatiereFromProfesseur(profId, matiereId);
-                                                      setState(() {
-                                                        Navigator.pop(context);
-                                                      });ScaffoldMessenger.of(context).showSnackBar(
-                                                        SnackBar(
-                                                            content: Text('La matiere est Supprimer avec succès.',)),);
+                      SingleChildScrollView(scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            Text('Matieres:',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w400,
+                                fontStyle: FontStyle.italic,
+                              ),),
+                            SizedBox(width: 10,),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                for (var matiere in mat) // Assuming items![index].matieres is a list of matieres for the professor
+                                  Row(
+                                    children: [
+                                      // Text('Matieres: [${getMatIdFromNames(getMatSemIdFromName(semestre['_id']).join(", "))}]',style: TextStyle(fontSize: 18)),
+                                      Text(matiere['name'] ?? '',//abdou
+                                          style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w400,
+                                            fontStyle: FontStyle.italic,
+                                          )),
+                                      TextButton(
+                                      onPressed: (){
+                                            showDialog(
+                                              context: context,
+                                              builder: (context) {
+                                                return AlertDialog(
+                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
+                                                  title: Text('Supprimer Matiere'),
+                                                  content: Text('Voulez vous supprimer: ${matiere['name']}?'),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        Navigator.of(context).pop(); // Close the dialog
+                                                      },
+                                                      child: Text('Cancel'),
+                                                    ),
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        Navigator.of(context).pop(); // Close the dialog
+                                                        String profId = prof['_id']!;
+                                                        String matiereId = matiere['_id']; // Replace 'matiere' with the actual matiere data
+                                                        deleteMatiereFromProfesseur(profId, matiereId);
+                                                        setState(() {
+                                                          Navigator.pop(context);
+                                                        });ScaffoldMessenger.of(context).showSnackBar(
+                                                          SnackBar(
+                                                              content: Text('La matiere est Supprimer avec succès.',)),);
 
-                                                    },
-                                                    child: Text('Supprimer'),
-                                                  ),
-                                                ],
-                                              );
-                                            },
-                                          );
-                                        },
-                                        child: Icon(Icons.delete, color: Colors.red,))
-                                  ],
-                                ),
-                            ],
-                          ),
+                                                      },
+                                                      child: Text('Supprimer'),
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                            );
+                                          },
+                                          child: Icon(Icons.delete, color: Colors.red,))
+                                    ],
+                                  ),
+                              ],
+                            ),
 
-                        ],
+                          ],
+                        ),
                       ),
                       // SizedBox(height: 40,),
                       // ElevatedButton(
@@ -734,7 +843,7 @@ class _ProfesseuresState extends State<Professeures> {
                             style: ElevatedButton.styleFrom(
                               padding: EdgeInsets.only(left: 20,right: 20),
                               foregroundColor: Colors.lightGreen,
-                              backgroundColor: Colors.white,
+                              // backgroundColor: Colors.lightGreen,
                               // side: BorderSide(color: Colors.black,),
                               elevation: 3,
                               // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
@@ -744,18 +853,18 @@ class _ProfesseuresState extends State<Professeures> {
                           ElevatedButton(
                             onPressed:() {
                             Navigator.pop(context);
-                              _AddProfMatriere(context,prof['professeur']['_id']!);
+                              _AddProfMatriere(context,prof['_id']!);
 
                             setState(() {
-                              fetchMatiere();
+                              fetchProfs();
                             });
                               },
 
                             child: Text('Ajout Mat'),
                             style: ElevatedButton.styleFrom(
                               padding: EdgeInsets.only(left: 20,right: 20),
-                              foregroundColor: Colors.blue,
-                              backgroundColor: Colors.white,
+                              // foregroundColor: Colors.black,
+                              foregroundColor: Color(0xff0fb2ea),
                               // side: BorderSide(color: Colors.black,),
                               elevation: 3,
                               // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
@@ -784,7 +893,7 @@ class _ProfesseuresState extends State<Professeures> {
                                         onPressed: () {
                                           Navigator.of(context).pop();
 
-                                          DeleteProfesseur(prof['professeur']['_id']!);
+                                          DeleteProf(prof['professeur']['_id']!);
                                           setState(() {
                                             Navigator.pop(context);
                                           });
@@ -802,7 +911,7 @@ class _ProfesseuresState extends State<Professeures> {
                             style: ElevatedButton.styleFrom(
                               padding: EdgeInsets.only(left: 20,right: 20),
                               foregroundColor: Colors.redAccent,
-                              backgroundColor: Colors.white,
+                              // backgroundColor: Colors.redAccent,
                               // side: BorderSide(color: Colors.black,),
                               elevation: 3,
                               // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
@@ -827,7 +936,7 @@ class _ProfesseuresState extends State<Professeures> {
     setState(() {
       fetchProfs().then((data) {
         setState(() {
-          filteredItems = data; // Assigner la liste renvoyée par Professeuresseur à items
+          filteredItems = data; // Assigner la liste renvoyée par Professeur à items
         });
 
       }).catchError((error) {
@@ -913,12 +1022,12 @@ class _ProfesseuresState extends State<Professeures> {
   }
 
 }
-void AddProfesseur (String name,String Banque,String email,num mobile,[num? account]) async {
+void AddProf (String user,String nom,num mobile,String email,String password,String Banque, num account) async {
 
   // Check if the prix parameter is provided, otherwise use the default value of 100
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String token = prefs.getString("token")!;
-  print(token);
+  // print(token);
   final response = await http.post(
     Uri.parse('http://192.168.43.73:5000/professeur/'),
     headers: <String, String>{
@@ -926,13 +1035,19 @@ void AddProfesseur (String name,String Banque,String email,num mobile,[num? acco
       'Authorization': 'Bearer $token',
     },
     body: jsonEncode(<String, dynamic>{
-      "nomComplet":name,
+      "user":user,
+      "nom":nom,
+      // "prenom":prenom ,
+      "mobile": mobile ,
+      "email":email,
+      "password":password,
       "banque":Banque ,
-      "mobile": mobile,
-      "email": email ,
       "accountNumero": account ,
+      "matieres": [],
     }),
   );
+
+  print(response.statusCode);
   if (response.statusCode == 200) {
     print('Professeur ajouter avec succes');
     // setState(() {
@@ -943,52 +1058,7 @@ void AddProfesseur (String name,String Banque,String email,num mobile,[num? acco
   }
 }
 
-class Professeur {
-  String id;
-  String nom;
-  // String prenom;
-  int mobile;
-  String? banque;
-  int? compte;
-  num nbh;
-  num nbc;
-  num th;
-  num somme;
-  String email;
-  // List matieres; // Change this field to be of type List<String>
 
-  Professeur({
-    required this.id,
-    required this.nom,
-     this.banque,
-     this.compte,
-    required this.mobile,
-    required this.nbh,
-    required this.nbc,
-    required this.th,
-    required this.somme,
-    required this.email,
-    // required this.matieres, // Update the constructor parameter
-  });
-
-  // Add a factory method to create a Professeur object from a JSON map
-  factory Professeur.fromJson(Map<String, dynamic> json) {
-    return Professeur(
-      id: json['_id'],
-      nom: json['nomComplet'],
-      // prenom: json['prenom'],
-      mobile: json['mobile'],
-      nbh: json['nbh'],
-      nbc: json['nbc'],
-      th: json['th'],
-      somme: json['somme'],
-      email: json['email'],
-      banque: json['banque'],
-      compte: json['accountNumero'],
-      // matieres: List.from(json['matieres']), // Convert the 'matieres' list to List<String>
-    );
-  }
-}
 
 class AddProfMat extends StatefulWidget {
   final String profId;
@@ -1035,7 +1105,7 @@ class _AddProfMatState extends State<AddProfMat> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-        insetPadding: EdgeInsets.only(top: 80,),
+        insetPadding: EdgeInsets.only(top: 280,),
 // backgroundColor: Color(0xB0AFAFA3),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
@@ -1059,7 +1129,7 @@ class _AddProfMatState extends State<AddProfMat> {
         ),
         content: Container(
 width: MediaQuery.of(context).size.width,
-          height: 700,
+          height: 350,
           // color: Color(0xA3B0AF1),
           child: Column(
             mainAxisSize: MainAxisSize.max,
@@ -1115,7 +1185,7 @@ width: MediaQuery.of(context).size.width,
                 onChanged: (value)async {
                   setState(()  {
                     selectedMat = value;
-                    // professeurs = await fetchProfesseursByMatiere(selectedMat!.id); // Clear the professeurs list when a matière is selected
+                    // professeurs = await fetchProfsByMatiere(selectedMat!.id); // Clear the professeurs list when a matière is selected
                   });
                 },
                 decoration: InputDecoration(
@@ -1134,8 +1204,6 @@ width: MediaQuery.of(context).size.width,
               ElevatedButton(
                 onPressed: () async {
                   Navigator.of(context).pop();
-                  SharedPreferences prefs = await SharedPreferences.getInstance();
-                  String token = prefs.getString("token")!;
 
                   print(widget.profId); // Use the professor's ID in the addMatiereToProfesseus method
                   print(selectedMat!.id!);
@@ -1167,7 +1235,54 @@ width: MediaQuery.of(context).size.width,
 
   }
 }
+class Professeur {
+  String id;
+  String? nom;
+  String? prenom;
+  String? email;
+  int? mobile;
+  String? banque;
+  String? user;
+  int? compte;
+  num? nbh;
+  num? nbc;
+  num? th;
+  num? somme;
+  List? matieres; // Change this field to be of type List<String>
 
+  Professeur({
+    required this.id,
+    this.nom,
+    this.prenom,
+    this.banque,
+    this.compte,
+    this.user,
+    this.email,
+    this.nbh,
+    this.nbc,
+    this.th,
+    this.somme,
+    this.matieres, // Update the constructor parameter
+  });
+
+  // Add a factory method to create a Professeur object from a JSON map
+  factory Professeur.fromJson(Map<String, dynamic> json) {
+    return Professeur(
+      id: json['_id'],
+      nom: json['nom'],
+      prenom: json['prenom'],
+      banque: json['banque'],
+      user: json['user']?? '',
+      compte: json['accountNumero'],
+      email: json['email'],
+      nbh: json['nbh'],
+      nbc: json['nbc'],
+      th: json['th'],
+      somme: json['somme'],
+      matieres: List.from(json['matieres']?? []), // Convert the 'matieres' list to List<String>
+    );
+  }
+}
 Future<List<Professeur>> fetchProfs() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String token = prefs.getString("token")!;
@@ -1181,22 +1296,41 @@ Future<List<Professeur>> fetchProfs() async {
     },
   );
 
-  print(response.statusCode);
+  print("Prof ${response.statusCode}");
   // print(response.body);
 
   if (response.statusCode == 200) {
     Map<String, dynamic> jsonResponse = jsonDecode(response.body);
     List<dynamic> professeursData = jsonResponse['professeurs'];
 
-    // print(matieresData);
+    // print("Profs${professeursData}");
     List<Professeur> profs = professeursData.map((item) {
       return Professeur.fromJson(item);
     }).toList();
 
-    print("Prof List: $profs");
+    // print("Prof List: $profs");
     return profs;
   } else {
     throw Exception('Failed to load Matiere');
+  }
+}
+Future<List<Professeur>> fetchProfesseursByMatiere(String matiereId) async {
+  String apiUrl = 'http://192.168.43.73:5000/matiere/$matiereId/professeurs';
+
+  final response = await http.get(Uri.parse(apiUrl));
+  if (response.statusCode == 200) {
+    final Map<String, dynamic> responseData = json.decode(response.body);
+    // if (responseData['professeurs'] is List<dynamic>) {
+    final List<dynamic> professeursData = responseData['professeurs'];
+    List<Professeur> fetchedProfesseurs =
+    professeursData.map((data) => Professeur.fromJson(data)).toList();
+    print('Mat Pros${fetchedProfesseurs}');
+    return fetchedProfesseurs;
+    // } else {
+    //   throw Exception('Invalid API response: professeurs data is not a list');
+    // }
+  } else {
+    throw Exception('Failed to fetch professeurs by matière');
   }
 }
 

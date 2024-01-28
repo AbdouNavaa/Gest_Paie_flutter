@@ -1,33 +1,38 @@
 import 'dart:convert';
-import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
-import 'package:gestion_payements/auth/users.dart';
 import 'package:gestion_payements/home_screen.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:gestion_payements/auth/profile.dart';
-import 'package:gestion_payements/auth/signup.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../Dashboard.dart';
-import '../categories.dart';
-import '../main.dart';
-import '../prof_info.dart';
-import 'package:provider/provider.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
+import '../theme_helper.dart';
+import 'forgot_password_page.dart';
+import 'header_widget.dart';
+
+GoogleSignIn _googleSignIn = GoogleSignIn(
+  // Optional clientId
+  // clientId: '479882132969-9i9aqik3jfjd7qhci1nqf0bm2g71rm1u.apps.googleusercontent.com',
+  scopes: <String>[
+    'email',
+    'https://www.googleapis.com/auth/contacts.readonly',
+  ],
+);
 
 class LoginSection extends StatefulWidget {
-  static const String id = "LoginSection";
+  const LoginSection({Key? key}) : super(key: key);
 
   @override
-  State<LoginSection> createState() => _LoginSectionState();
+  _LoginSectionState createState() => _LoginSectionState();
 }
 
 class _LoginSectionState extends State<LoginSection> {
-  var email;
-
-  var password;
-  int i = 0;
+  double _headerHeight = 350;
+  Key _formKey = GlobalKey<FormState>();
+  late TextEditingController _emailController;
+  late TextEditingController _passwordController;
 
   bool hidePassword = true;
   bool isLoginFailed = false;
@@ -42,358 +47,356 @@ class _LoginSectionState extends State<LoginSection> {
     return emailRegExp.hasMatch(value);
   }
 
+  bool showFirstContainer = true; // Add this line to manage the visibility
 
   bool validatePassword(String value) {
     // Validation de la longueur minimale du mot de passe
-    return value.length >= 8;
+    return value.length >= 4;
   }
-  bool showFirstContainer = true; // Add this line to manage the visibility
+  @override
+  void initState() {
+    super.initState();
+    _emailController = TextEditingController();
+    _passwordController = TextEditingController();
+  }
 
   @override
   Widget build(BuildContext context) {
-    // final bool isKeyboardVisible = KeyboardVisibilityProvider.isKeyboardVisible(context);
     return Scaffold(
-
-      body: SingleChildScrollView(scrollDirection: Axis.vertical,
+      backgroundColor: Colors.white,
+      body: SingleChildScrollView(
         child: Column(
           children: [
-            Stack(
-              children:[
-              Container(
-                width: MediaQuery.of(context).size.width,
-                height:  MediaQuery.of(context).size.height / 2.5 ,
-                decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Color(0xFFFFFFFF),
-                        Color(0xFFFFFFFF)
-                      ],
-                    ),
-                    borderRadius: BorderRadius.only(
-                        // bottomLeft: Radius.circular(90),
-                    )
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Spacer(),
-                    Align(
-                      alignment: Alignment.topCenter,
-                      child:
-                      // Icon(Icons.person,
-                      //   size: 90,
-                      //   color: Colors.white,
+            Container(
+              height: _headerHeight,
+              child: HeaderWidget(_headerHeight, true, 'assets/supnum.png'),
+            ),
+            SafeArea(
+              child: Container(
+                  padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                  margin: EdgeInsets.fromLTRB(
+                      10, 10, 10, 10), // This will be the login form
+                  child: Column(
+                    children: [
+                      // Text(
+                      //   'Welcome GoPlanners!',
+                      //   style: TextStyle(
+                      //       fontSize: 60,
+                      //       color: Colors.indigoAccent,
+                      //       fontWeight: FontWeight.bold),
                       // ),
-                    Text('LOGIN', style: TextStyle(color: Colors.black,fontSize: 40),)),
-                    Spacer(),
+                      // Text(
+                      //   '',
+                      //   style: TextStyle(color: Colors.grey),
+                      // ),
+                      SizedBox(height: 30.0),
+                      Form(
+                          key: _formKey,
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Card(
+                                    elevation: 5,
+                                    shadowColor: Colors.black,
+                                    // color: Colors.black87,
+                                    // shape: OutlineInputBorder(borderRadius: BorderRadius.circular(20),),
+                                    child: Center(
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        width:MediaQuery.of(context).size.width /6.2,
 
-                    // Align(
-                    //   alignment: Alignment.topRight,
-                    //   child: Padding(
-                    //     padding: const EdgeInsets.only(
-                    //         bottom: 32,
-                    //         right: 32
-                    //     ),
-                    //     child: Text('Login',
-                    //       style: TextStyle(
-                    //           color: Colors.white,
-                    //           fontSize: 18
-                    //       ),
-                    //     ),
-                    //   ),
-                    // ),
-                  ],
-                ),
-              ),
-                Center(
-                  child: Card(
-                    margin: EdgeInsets.only(top: 230),
-                    elevation: 18,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(55),side: BorderSide(color: Colors.black12)),
+                                        child: IconButton(
+                                          onPressed: () {
 
-                    child: Container(
-                      height: MediaQuery.of(context).size.height/ 1.7 ,
-                      width: MediaQuery.of(context).size.width / 1.12,
-                      // margin: EdgeInsets.only(top: 300),
-                      padding: EdgeInsets.only(top: 12),
+                                          },
+                                          icon: Icon(
+                                                Icons.email_outlined,
+                                          ),padding: EdgeInsets.only(right: 15),
 
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white,
-                      ),
-                      child: Column(
-                        children: <Widget>[
-                          CircleAvatar(maxRadius: 50,
-                            backgroundColor: Colors.white,
-                            child: Icon(Icons.account_circle,size: 70),
-                          ),
-                          SizedBox(height: 20,),
-                          Container(
-                            width: MediaQuery.of(context).size.width/1.2,
-                            height: 45,
+                                        ),
 
-                            padding: EdgeInsets.only(
-                              top: 4, left: 16, right: 16, bottom: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.all(Radius.circular(50)),
-                              color: Colors.white,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 5,
-                                ),
-                              ],
-                            ),
-                            child: TextField(style: TextStyle(
-                            color: Colors.black,
-                            ),
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
 
-                                icon: Icon(
-                                  Icons.email,
-                                  color: Colors.grey,
-                                ),
-                                hintText: 'Email',
-                              ),
-                              onChanged: (value) {
-                                email = value;
-                                isEmailValid = validateEmail(value); // Appeler une fonction de validation pour l'email//abdou
-                                if (!isEmailValid) {
-                                  emailErrorMessage = 'Email invalide.';
-                                } else {
-                                  emailErrorMessage = '';
-                                }
-                              },
-                              onTap: () {
-                                setState(() {
-                                  showFirstContainer = false; // Hide the first container
-                                });
-                              },
-                            ),
-                          ),
-                          if (!isEmailValid)
-                            Text(
-                              emailErrorMessage,
-                              style: TextStyle(color: Colors.red),
-                            ),
-                          Container(
-                            width: MediaQuery.of(context).size.width/1.2,
-                            height: 45,
-                            margin: EdgeInsets.only(top: 32),
-                            padding: EdgeInsets.only(
-                              top: 4, left: 16, right: 16, bottom: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.all(Radius.circular(50)),
-                              color: Colors.white,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 5,
-                                ),
-                              ],
-                            ),
-                            child: TextField(
-                              style: TextStyle(
-                            color: Colors.black,
-                            ),
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                icon: IconButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      hidePassword = !hidePassword;
-                                    });
-                                  },
-                                  icon: Icon(
-                                    hidePassword
-                                        ? Icons.visibility_off_outlined
-                                        : Icons.visibility_outlined,
+                                      ),
+                                    ),
                                   ),
-
-                                ),
-                                // hintText: "Password",
+                                  Container(
+                                    width:MediaQuery.of(context).size.width /1.5,
+                                    child: TextField(
+                                      controller: _emailController!,
+                                      decoration: ThemeHelper().textInputDecoration(
+                                          'E-mail', ''),
+                                      onChanged: (value) {
+                                        _emailController.text = value;
+                                        isEmailValid = validateEmail(value); // Appeler une fonction de validation pour l'email//abdou
+                                        if (!isEmailValid) {
+                                          emailErrorMessage = 'Email invalide.';
+                                        } else {
+                                          emailErrorMessage = '';
+                                        }
+                                      },
+                                      onTap: () {
+                                        setState(() {
+                                          showFirstContainer = false; // Hide the first container
+                                        });
+                                      },
+                                    ),
+                                    decoration:
+                                    ThemeHelper().inputBoxDecorationShaddow(),
+                                  ),
+                                ],
                               ),
-                              obscureText: hidePassword,
-                              maxLength: 8, // Limiter la longueur du texte à 8 caractères
+                              if (!isEmailValid)
+                                Text(
+                                  emailErrorMessage,
+                                  style: TextStyle(color: Colors.red),
+                                ),      SizedBox(height: 30.0),
+                              Row(
+                                children: [
+                                  Card(
+                                    elevation: 5,
+                                    shadowColor: Colors.black,
+                                    // color: Colors.black87,
+                                    // shape: OutlineInputBorder(borderRadius: BorderRadius.circular(20),),
+                                    child: Center(
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        width:MediaQuery.of(context).size.width /6.2,
+
+                                        child: IconButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              hidePassword = !hidePassword;
+                                            });
+                                          },
+                                          icon: Icon(
+                                            hidePassword
+                                                ? Icons.visibility_off_outlined
+                                                : Icons.visibility_outlined,
+                                          ),padding: EdgeInsets.only(right: 15),
+
+                                        ),
 
 
-                              onChanged: (value) {
-                                if (value.length > 8) {
-                                  password.text = value.substring(0, 8); // Limiter la longueur à 8 caractères
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    width:MediaQuery.of(context).size.width /1.5,
+                                    child: TextField(
+                                      controller: _passwordController,
+                                      obscureText: hidePassword,
+                                      decoration: ThemeHelper().textInputDecoration(
+                                          'Mot de Passe', ''),
 
-                                  password.selection = TextSelection.collapsed(offset: 8);
-                                }
-                                password = value;
-                                isPasswordValid = validatePassword(value); // Appeler une fonction de validation pour le mot de passe
-                                if (!isPasswordValid) {
-                                  passwordErrorMessage = 'Mot de passe invalide (8 caractères minimum).';
-                                }
-                                else {
-                                  passwordErrorMessage = '';
-                                }
-                              },
-                              onTap: () {
-                                setState(() {
-                                  showFirstContainer = false; // Hide the first container
-                                });
-                              },                    ),
-                          ),
-                          if (!isPasswordValid)
-                            Text(
-                              passwordErrorMessage,
-                              style: TextStyle(color: Colors.red),
-                            ),
-                          SizedBox(height: 30,),
+                                      onChanged: (value) {
+                                        _passwordController.text = value;
+                                        isPasswordValid = validatePassword(value); // Appeler une fonction de validation pour le m  de passe
+                                        if (!isPasswordValid) {
+                                          passwordErrorMessage = 'Mot de passe invalide (4 caractères minimum).';
+                                        }
+                                        else {
+                                          passwordErrorMessage = '';
+                                        }
+                                      },
+                                      onTap: () {
+                                        setState(() {
+                                          showFirstContainer = false; // Hide the first container
+                                        });
+                                      },
+                                    ),
 
-                          Container(
-                            height: 45,
-                            width: MediaQuery.of(context).size.width / 1.2,
-                            decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Color(0xFFf45d27),
-                                    Color(0xFFf5851f)
-                                  ],
+                                    decoration:
+                                    ThemeHelper().inputBoxDecorationShaddow(),
+
+                                  ),
+                                ],
+                              ),
+                              if (!isPasswordValid)
+                                Text(
+                                  passwordErrorMessage,
+                                  style: TextStyle(color: Colors.red),
+                                ),    SizedBox(height: 15.0),
+                              Container(
+                                margin: EdgeInsets.fromLTRB(10, 0, 10, 20),
+                                alignment: Alignment.topRight,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              ForgotPasswordPage()),
+                                    );
+                                  },
+                                  child: Text(
+                                    "Mot de passe oublie?",
+                                    style: TextStyle(
+                                      color: Colors.lightBlue,
+                                    ),
+                                  ),
                                 ),
-                                borderRadius: BorderRadius.all(
-                                    Radius.circular(50)
-                                )
-                            ),
-                            child: Center(
-                              child: ElevatedButton(
-                                onPressed: () async {
-                                  setState(() {
-                                    isLoginFailed = false; // Réinitialisation de la variable d'erreur
-                                  });
-                                  // if (isEmailValid && isPasswordValid) {
-                                  await login(email, password);
-                                  SharedPreferences prefs = await SharedPreferences
-                                      .getInstance();
-                                  String token = prefs.getString("token")!;
-                                  String role = prefs.getString("role")!;
-                                  String email1 = prefs.getString("email")!;
-                                  String id = prefs.getString("id")!;
-                                  String name = prefs.getString("nom")!;
-                                  // String lastname = prefs.getString("prenom")!;
-                                  print(name);
-                                  print(email1);
+                              ),
+                              Container(
+                                decoration:
+                                ThemeHelper().buttonBoxDecoration(context),
+                                child: ElevatedButton(
+                                  style: ThemeHelper().buttonStyle(),
+                                  child: Padding(
+                                    padding:
+                                    EdgeInsets.fromLTRB(40, 10, 40, 10),
+                                    child: Text(
+                                      'Log In'.toUpperCase(),
+                                      style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white),
+                                    ),
+                                  ),
+                                  onPressed: () async {
+                                    setState(() {
+                                      isLoginFailed = false; // Réinitialisation de la variable d'erreur
+                                    });
+                                    // if (isEmailValid && isPasswordValid) {
+                                    await login(_emailController.text, _passwordController.text);
+                                    SharedPreferences prefs = await SharedPreferences
+                                        .getInstance();
+                                    String token = prefs.getString("token")!;
+                                    String role = prefs.getString("role")!;
+                                    String email1 = prefs.getString("email")!;
+                                    String id = prefs.getString("id")!;
+                                    String name = prefs.getString("nom")!;
+                                    // String lastname = prefs.getString("prenom")!;
+                                    print(name);
+                                    print(email1);
 
-                                  if (!isLoginFailed) { // Vérifiez si l'authentification a réussi
-                                    if (token != null && role == "professeur") {
-                                      Navigator.push(context, MaterialPageRoute(
-                                        builder: (context) =>
+                                    if (!isLoginFailed) { // Vérifiez si l'authentification a réussi
+                                      if (token != null && role == "professeur") {
+                                        String? profId = await getProfId(token, id)!;
+
+                                        int? notif = await fetchPaiements(profId,token);
+                                        int? CNS = await CoursNS(profId,token);
+
+                                        print("AbdouId: ${notif}");
+                                        if (profId != null) {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => HomeScreen(
+                                                role: role,
+                                                name: name,
+                                                email: email1,
+                                                profId: profId, // Passer l'ID du professeur à la page HomeScreen
+                                                notif: notif, // Passer l'ID du professeur à la page HomeScreen
+                                                CNS: CNS, // Passer l'ID du professeur à la page HomeScreen
+                                              ),
+                                            ),
+                                          );
+                                        } else {
+                                          // Gérer le cas où l'ID du prof n'est pas disponible
+                                          // Peut-être afficher un message d'erreur ou rediriger vers une autre page
+                                        }
+                                      }
+                                      else if (token != null && role == "responsable") {
+                                        // Navigator.push(
+                                        //     context, MaterialPageRoute(
+                                        //     builder: (context) => Categories()));
+
+                                        Navigator.push(context, MaterialPageRoute(
+                                            builder: (context) =>
                                             // ProfesseurInfoPage(
                                             //     id: id, email: email, role: role),
-                                        // builder: (context) => LandingScreen(role: role,name: nom,), // Passer le rôle ici
-                                      HomeScreen(role: role,name: name,email: email1,)),);
-                                    }
-                                    else if (token != null && role == "responsable") {
-                                      // Navigator.push(
-                                      //     context, MaterialPageRoute(
-                                      //     builder: (context) => Categories()));
+                                            // builder: (context) => LandingScreen(role: role,name: nom,), // Passer le rôle ici
+                                            HomeScreen(role: role,name: name,email: email1,)),);
 
-                                      Navigator.push(context, MaterialPageRoute(
-                                          builder: (context) =>
-                                          // ProfesseurInfoPage(
-                                          //     id: id, email: email, role: role),
-                                          // builder: (context) => LandingScreen(role: role,name: nom,), // Passer le rôle ici
-                                          HomeScreen(role: role,name: name,email: email1,)),);
-
-                                    }
-                                    else if (token != null && role == "admin") {
-                                      // Navigator.push(
-                                      //     context, MaterialPageRoute(
-                                      //     builder: (context) => Users()));
-                                      Navigator.push(context, MaterialPageRoute(
-                                          builder: (context) =>
-                                          // ProfesseurInfoPage(
-                                          //     id: id, email: email, role: role),
-                                          // builder: (context) => LandingScreen(role: role,name: nom,), // Passer le rôle ici
-                                          HomeScreen(role: role,name: name,email: email1,)),);
-                                    }
-                                  }else{
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text(' Email ou Password Incorrectes')),
-                                    );}
-                                  // }
-                                },
-
-                                style: ElevatedButton.styleFrom(
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(15)),
-                                    padding: EdgeInsets.only(left: 117, right: 117),
-                                    // backgroundColor:  Color(0xFFf5851f)),
-                                    backgroundColor: Color(0xff0fb2ea)
+                                      }
+                                      else if (token != null && role == "admin") {
+                                        // Navigator.push(
+                                        //     context, MaterialPageRoute(
+                                        //     builder: (context) => Users()));
+                                        Navigator.push(context, MaterialPageRoute(
+                                            builder: (context) =>
+                                            // ProfesseurInfoPage(
+                                            //     id: id, email: email, role: role),
+                                            // builder: (context) => LandingScreen(role: role,name: nom,), // Passer le rôle ici
+                                            HomeScreen(role: role,name: name,email: email1,)),);
+                                      }
+                                    }else{
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text(' Email ou Password Incorrectes')),
+                                      );}
+                                    // }
+                                  },
                                 ),
-                                // icon: Icon(Icons.save),
-                                child: Center(
-                                  child: Text('Login'.toUpperCase(),
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold
-                                    ),
-                                  ),
-                                ),),
-                            ),
-                          ),
-                          SizedBox(height: 15,),
-
-                          Container(
-                            height: 45,
-                            width: MediaQuery
-                                .of(context)
-                                .size
-                                .width / 1.2,
-                            decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Color(0xFFf45d27),
-                                    Color(0xFFf5851f)
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.all(
-                                    Radius.circular(50)
-                                )
-                            ),
-                            child: Center(
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  Navigator.push(context, MaterialPageRoute(
-                                      builder: (context) => SignUpSection()));
-                                },
-
-                                style: ElevatedButton.styleFrom(
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(15)),
-                                    padding: EdgeInsets.only(left: 117, right: 117),
-                                    backgroundColor: Colors.white,
-                                    foregroundColor: Colors.black87),
-                                // icon: Icon(Icons.save),
-                                child: Center(
-                                  child: Text('Sign Up'.toUpperCase(),
-                                    style: TextStyle(
-                                      // color: Colors.white,
-                                        fontWeight: FontWeight.bold
-                                    ),
-                                  ),
-                                ),),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                )
-              ]
+                              ),
+                              // Container(
+                              //   margin: EdgeInsets.fromLTRB(10, 20, 10, 20),
+                              //   //child: Text('Don\'t have an account? Create'),
+                              //   child: Text.rich(TextSpan(children: [
+                              //     TextSpan(text: "Don\'t have an account? "),
+                              //     TextSpan(
+                              //       text: 'signup',
+                              //       // recognizer: TapGestureRecognizer()
+                              //       //   ..onTap = () {
+                              //       //     Navigator.push(
+                              //       //         context,
+                              //       //         MaterialPageRoute(
+                              //       //             builder: (context) =>
+                              //       //                 RegistrationPage()));
+                              //       //   },
+                              //       style: TextStyle(
+                              //           fontWeight: FontWeight.bold,
+                              //           color: Theme.of(context).primaryColor),
+                              //     ),
+                              //   ])),
+                              // ),
+                            ],
+                          )),
+                    ],
+                  )),
             ),
           ],
         ),
       ),
+    );
+
+  }
+  void showAlertDialog(BuildContext context) {
+    // set up the button
+    Widget okButton = TextButton(
+      child: const Text("you have logged in successfully"),
+      onPressed: () {
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => HomeScreen()));
+      },
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: const Text(
+        "wrong username or password",
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      content: const Text("please put correct credentials"),
+      actions: [
+        okButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
     );
   }
 
@@ -411,20 +414,20 @@ class _LoginSectionState extends State<LoginSection> {
     );
     print(response.body);
     if (response.statusCode == 200) {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    var parse = jsonDecode(response.body);
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      var parse = jsonDecode(response.body);
 
-    var nom = parse["data"]["user"]["nom"];
-    var role = parse["data"]["user"]["role"];
-    var id = parse["data"]["user"]["_id"];
-    var email1 = parse["data"]["user"]["email"];
-    await prefs.setString('token', parse["token"]);
-    await prefs.setString('role', role);
-    await prefs.setString('id', id);
-    await prefs.setString('email', email1);
-    await prefs.setString('nom', nom);
-    print('Welcom $email1');
-  }
+      var nom = parse["data"]["user"]["nom"];
+      var role = parse["data"]["user"]["role"];
+      var id = parse["data"]["user"]["_id"];
+      var email1 = parse["data"]["user"]["email"];
+      await prefs.setString('token', parse["token"]);
+      await prefs.setString('role', role);
+      await prefs.setString('id', id);
+      await prefs.setString('email', email1);
+      await prefs.setString('nom', nom);
+      print('Welcom $email1');
+    }
     else {
       // Authentification échouée
       isLoginFailed = true;
@@ -432,4 +435,104 @@ class _LoginSectionState extends State<LoginSection> {
       // Mettez à jour l'état de l'interface utilisateur
       setState(() {});
     }
-}}
+  }
+
+}
+
+Future<String?> getProfId(String token,String id) async {
+  var url = "http://192.168.43.73:5000/user/$id/professeur"; // L'URL de ton endpoint pour récupérer l'ID du prof
+  final response = await http.get(
+    Uri.parse(url),
+    headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+  );
+
+  if (response.statusCode == 200) {
+    Map<String, dynamic> data = jsonDecode(response.body);
+    String profId = data['prof']['id'];
+    print("PID:${profId}");
+    return profId;
+  } else {
+    return null;
+  }
+}
+List<dynamic> paies = [];
+List<dynamic> courses = [];
+
+Future<int?> fetchPaiements(id, String token) async {
+  // SharedPreferences prefs = await SharedPreferences.getInstance();
+  // String token = prefs.getString("token")!;
+
+  var url = Uri.parse('http://192.168.43.73:5000/paiement/$id/professeur');
+
+  var responseInitialise = await http.post(
+    url,
+    headers: {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json', // Ajoutez le type de contenu
+    },
+    body: jsonEncode({"notification": ""}), // Encodez votre corps en JSON
+  );
+
+  // var responseValide = await http.post(
+  //   url,
+  //   headers: {
+  //     'Authorization': 'Bearer $token',
+  //     'Content-Type': 'application/json', // Ajoutez le type de contenu
+  //   },
+  //   body: jsonEncode({}), // Ou d'autres valeurs pour "validé"
+  // );
+
+  if (responseInitialise.statusCode == 200) {
+    Map<String, dynamic> jsonResponse = jsonDecode(responseInitialise.body);
+    paies = jsonResponse['paiements'];
+    print('Paiements avec status "initialisé": ${paies.length}');
+    return paies.length;
+  } else {
+    print('Request for "initialisé" failed with status: ${responseInitialise.statusCode}');
+  }
+
+  // if (responseValide.statusCode == 200) {
+  //   Map<String, dynamic> jsonResponse = jsonDecode(responseValide.body);
+  //   paies = jsonResponse['paiements'];
+  //   print('Paiements avec status "validé": $paies');
+  // }
+  // else {
+  //   print('Request for "validé" failed with status: ${responseValide.statusCode}');
+  // }
+}
+Future<int?> CoursNS(id, String token) async {
+  // SharedPreferences prefs = await SharedPreferences.getInstance();
+  // String token = prefs.getString("token")!;
+
+  var url = Uri.parse('http://192.168.43.73:5000/professeur/${id}/cours-non');
+
+  var responseInitialise = await http.get(
+    url,
+    headers: {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json', // Ajoutez le type de contenu
+    },
+  );
+
+  if (responseInitialise.statusCode == 200) {
+    Map<String, dynamic> jsonResponse = jsonDecode(responseInitialise.body);
+    courses = jsonResponse['cours'];
+    print('${courses.length} Cours Non Signe');
+    return courses.length;
+  } else {
+    print('Request for "initialisé" failed with status: ${responseInitialise.statusCode}');
+  }
+
+  // if (responseValide.statusCode == 200) {
+  //   Map<String, dynamic> jsonResponse = jsonDecode(responseValide.body);
+  //   paies = jsonResponse['paiements'];
+  //   print('Paiements avec status "validé": $paies');
+  // }
+  // else {
+  //   print('Request for "validé" failed with status: ${responseValide.statusCode}');
+  // }
+}
+
