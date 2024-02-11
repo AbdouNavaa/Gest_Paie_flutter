@@ -4,6 +4,8 @@ import 'package:gestion_payements/semestre.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:mailer/mailer.dart';
+import 'package:mailer/smtp_server/gmail.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'categories.dart';
@@ -128,7 +130,7 @@ class _CoursesPageState extends State<CoursesPage> {
 
   Elem getEls(String id) {
     // Assuming you have a list of professeurs named 'professeursList'
-    final element = elLis.firstWhere((g) => '${g.id}' == id, orElse: () => Elem(id: '', SemId: '', MatId: '', ProCMId: '', ProTPId: '', ProTDId: ''));
+    final element = elLis.firstWhere((g) => '${g.id}' == id, orElse: () => Elem(id: '', filId: '', MatId: '', ));
     print( "Els:${element}");
     return element!; // Return the ID if found, otherwise an empty string
 
@@ -211,7 +213,7 @@ class _CoursesPageState extends State<CoursesPage> {
 
 
 
-
+bool showFloat = false;
   @override
   Widget build(BuildContext context) {
     // Call the method to calculate totalType
@@ -293,135 +295,6 @@ class _CoursesPageState extends State<CoursesPage> {
 
 
 
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ElevatedButton(
-                onPressed: () async {
-                  DateTime? selectedDateDeb = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2030),
-                  );
-
-                  if (selectedDateDeb != null) {
-                    setState(() {
-                      widget.dateDeb = selectedDateDeb.toUtc();
-                      // totalType = 0; // Reset the totalId
-                    });
-                  }
-                },
-                child: Text(widget.dateDeb != null ? DateFormat('yyyy/MM/dd').format(widget.dateDeb!) : 'Date Deb'),
-                style: ElevatedButton.styleFrom(backgroundColor: Color(0xff0fb2ea)
-                    ,foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-
-              ),
-              // Container(width: 50,
-              //   child:Text('total: ${totalType.toStringAsFixed(2)}'),
-              // ),
-              ElevatedButton(
-                onPressed: () async {
-                  DateTime? selectedDateFin = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2030),
-                  );
-
-                  if (selectedDateFin != null) {
-                    setState(() {
-                      widget.dateFin = selectedDateFin.toUtc();
-                      // totalType = 0; // Reset the totalId
-                    });
-                  }
-                },
-                child: Text(widget.dateFin != null ? DateFormat('yyyy/MM/dd').format(widget.dateFin!) : 'Date Fin'),
-                style: ElevatedButton.styleFrom(backgroundColor: Color(0xff0fb2ea),foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-              ),
-            ],          ),
-          // Display the calculated sums
-          // Padding(
-          //   padding: const EdgeInsets.all(2.0),
-          //   child: SizedBox(
-          //     child: Row(
-          //       mainAxisAlignment: MainAxisAlignment.center,
-          //       children: [
-          //         Row(
-          //           children: [
-          //             ElevatedButton(
-          //               onPressed: () {
-          //                 setState(() {
-          //                   showSigned = !showSigned;
-          //                 });
-          //               },
-          //               style: ElevatedButton.styleFrom(
-          //                   shape: RoundedRectangleBorder(
-          //                       borderRadius: BorderRadius.circular(10)),
-          //                   padding: EdgeInsets.only(left: 30, right: 30),
-          //                   backgroundColor: showSigned? Colors.black12:Colors.white,foregroundColor: showSigned? Colors.white:Colors.black,side: BorderSide(color: Colors.black12,width: 1)),
-          //               child: Row(
-          //                 children: [
-          //                   Text('Signé'),
-          //                   Icon(Icons.border_color_outlined)
-          //                 ],
-          //               ),
-          //             ),
-          //             SizedBox(width: 10),
-          //             ElevatedButton(
-          //               onPressed: () {
-          //                 setState(() {
-          //                   showPaid = !showPaid;
-          //                   // showSigned
-          //                 });
-          //               },
-          //               style: ElevatedButton.styleFrom(
-          //                   shape: RoundedRectangleBorder(
-          //                       borderRadius: BorderRadius.circular(10)),
-          //                   padding: EdgeInsets.only(left: 30, right: 30),
-          //                   backgroundColor: showPaid? Colors.black12:Colors.white,foregroundColor: showPaid? Colors.white:Colors.black,side: BorderSide(color: Colors.black12,width: 1)),
-          //               child: Row(
-          //                 children: [
-          //                   Text('Paié'),
-          //                   Icon(Icons.published_with_changes)
-          //                 ],
-          //               ),
-          //             ),
-          //           ],
-          //         ),
-          //         SizedBox(width: 10),
-          //         Container(width: MediaQuery.of(context).size.width /8,height: 45,
-          //           child: Card(
-          //             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          //             color: Colors.white,
-          //             child: TextButton(
-          //               onPressed: () {
-          //                 setState(() {
-          //                   totalType =0;
-          //                   sortByDateAscending = !sortByDateAscending;
-          //                   // Reverse the sorting order when the button is tapped
-          //                   widget.courses.sort((a, b) {
-          //                     DateTime dateA = DateTime.parse(a['date'].toString());
-          //                     DateTime dateB = DateTime.parse(b['date'].toString());
-          //
-          //                     // Sort in ascending order if sortByDateAscending is true,
-          //                     // otherwise sort in descending order
-          //                     return sortByDateAscending ? dateA.compareTo(dateB) : dateB.compareTo(dateA);
-          //                   });
-          //                 });
-          //               },
-          //               child: Icon(sortByDateAscending ? Icons.arrow_upward : Icons.arrow_downward,color: sortByDateAscending ? Colors.black26: Colors.black87,),
-          //             ),
-          //           ),
-          //         ),
-          //
-          //       ],
-          //     ),
-          //   ),
-          // ),
-
           Container(
             width: 300,
             height: 50,
@@ -476,6 +349,7 @@ class _CoursesPageState extends State<CoursesPage> {
                               showBottomBorder: true,
                               // sortColumnIndex: 1,
                               // sortAscending: true,
+                              // headingRowColor: MaterialStateColor.resolveWith((states) => Colors.lightBlueAccent.shade100), // Couleur de la ligne d'en-tête
                               headingRowHeight: 50,
                               columnSpacing:  (!showPaid && !showSigned)?8: 25,
                               horizontalMargin:  3,
@@ -490,41 +364,41 @@ class _CoursesPageState extends State<CoursesPage> {
                                 // if ( showSigned)
                                 if (!showPaid)
                                   DataColumn(label: InkWell(
-                                      onTap: (){
-                                        setState(() {
-                                          showSigned = !showSigned;
-                                        });
-
-                                      },
+                                      // onTap: (){
+                                      //   setState(() {
+                                      //     showSigned = !showSigned;
+                                      //   });
+                                      //
+                                      // },
                                       child: Text('Signé'))),
                                 // if (widget.role == "admin" && showPaid)
                                 if (widget.role == "admin"&& !showSigned )
                                   DataColumn(label: InkWell(
-                                      onTap: (){
-                                        setState(() {
-                                          showPaid = !showPaid;
-                                        });
-
-                                      },
+                                      // onTap: (){
+                                      //   setState(() {
+                                      //     showPaid = !showPaid;
+                                      //   });
+                                      //
+                                      // },
                                       child: Text('Paié'))),
                                 DataColumn(label: InkWell(
-                                    onTap: (){
-                                      setState(() {
-                                        totalType =0;
-                                        sortByDateAscending = !sortByDateAscending;
-                                        // Reverse the sorting order when the button is tapped
-                                        widget.courses.sort((a, b) {
-                                          DateTime dateA = DateTime.parse(a['date'].toString());
-                                          DateTime dateB = DateTime.parse(b['date'].toString());
-
-                                          // Sort in ascending order if sortByDateAscending is true,
-                                          // otherwise sort in descending order
-                                          return sortByDateAscending ? dateA.compareTo(dateB) : dateB.compareTo(dateA);
-                                        });
-                                      });
-
-
-                                    },
+                                    // onTap: (){
+                                    //   setState(() {
+                                    //     totalType =0;
+                                    //     sortByDateAscending = !sortByDateAscending;
+                                    //     // Reverse the sorting order when the button is tapped
+                                    //     widget.courses.sort((a, b) {
+                                    //       DateTime dateA = DateTime.parse(a['date'].toString());
+                                    //       DateTime dateB = DateTime.parse(b['date'].toString());
+                                    //
+                                    //       // Sort in ascending order if sortByDateAscending is true,
+                                    //       // otherwise sort in descending order
+                                    //       return sortByDateAscending ? dateA.compareTo(dateB) : dateB.compareTo(dateA);
+                                    //     });
+                                    //   });
+                                    //
+                                    //
+                                    // },
                                     child: Text('Date'))),
                                 DataColumn(label: Text('Prof')),
                                 DataColumn(label: Text('Matiere')),
@@ -561,16 +435,6 @@ class _CoursesPageState extends State<CoursesPage> {
                                           // if (widget.role == "admin")
                                             DataCell(
                                               InkWell(
-                                                onTap: (){
-                                                  // payeCours(
-                                                  //     widget.courses[index]['_id'],
-                                                  //     'oui'
-                                                  // );
-                                                  //
-                                                  // setState(() {
-                                                  //   Navigator.pop(context);
-                                                  // });
-                                                },
                                                 child:     Container(
                                                   margin: EdgeInsets.only(right: 5),
                                                   width: 20,
@@ -596,12 +460,13 @@ class _CoursesPageState extends State<CoursesPage> {
                                           ),
                                           DataCell(Container(width: 50,child: Text('${widget.courses[index]['professeur']}',style: TextStyle(
                                             color: Colors.black,
-                                          ),)),),
+                                          ),)),
+                                              onTap: () => _showCourseDetails(context, widget.courses[index])
+                                          ),
                                           DataCell(Container(width: 55,child: Text('${widget.courses[index]['matiere']}',style: TextStyle(
                                             color: Colors.black,
                                           ),)),
-                                            // onTap: () =>
-                                            //     _showCourseDetails(context, widget.courses[index])
+                                            onTap: () => _showCourseDetails(context, widget.courses[index])
                                           ),
                                           DataCell(
                                             Center(child: Container(width: 20, child: Text('${widget.courses[index]['TH']}',style: TextStyle(
@@ -829,13 +694,94 @@ class _CoursesPageState extends State<CoursesPage> {
         ],
       ),
 
-      floatingActionButton: FloatingActionButton.extended(
-        // heroTag: 'uniqueTag',
-        tooltip: 'Ajouter une Cours',backgroundColor: Colors.white,
-        label: Row(
-          children: [Icon(Icons.add,color: Colors.black,)],
+      floatingActionButton: showFloat ?
+      Container(
+          width: 320,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.all(Radius.circular(50)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 5,
+            ),
+          ],
         ),
-        onPressed: () => _displayTextInputDialog(context),
+
+          margin: EdgeInsets.only(left: 40,right: 5),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // SizedBox(width: 18,),
+            TextButton(
+              child: Row(
+                children: [
+                  Icon(Icons.add, color: Colors.black,),
+                  Text('Ajouter',style: TextStyle(color: Colors.black),),
+                ],
+              ),
+              onPressed: () => _displayTextInputDialog(context),
+
+            ),
+            TextButton(
+              child: Row(
+                children: [
+                  Icon(Icons.filter_list_alt, color: Colors.black,),
+                  Text('Filtrer',style: TextStyle(color: Colors.black),),
+                ],
+              ),
+              onPressed: () => _filtrer(context),
+
+            ),
+
+            // SizedBox(width: 210,),
+            TextButton(
+              child: Row(
+                children: [
+                  Icon(Icons.sort, color: Colors.black,),
+                  Text('Trier',style: TextStyle(color: Colors.black),),
+                ],
+              ),
+              onPressed: () => _trier(context),
+
+            ),
+            TextButton(
+              child: Icon(Icons.close_outlined, color: Colors.black,),
+              onPressed: () {
+                setState(() {
+                  showFloat = false;
+                });
+              },
+
+            ),
+          ],
+        ),
+      )
+          :Container(
+        width: 60,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.all(Radius.circular(50)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 5,
+            ),
+          ],
+        ),
+
+        // margin: EdgeInsets.only(left: 90,right: 60),
+        child:
+        TextButton(
+          child: Icon(Icons.add, color: Colors.black,),
+          onPressed: () {
+            setState(() {
+              showFloat = true;
+            });
+          },
+
+        ),
 
       ),
 
@@ -846,7 +792,7 @@ class _CoursesPageState extends State<CoursesPage> {
 
   Future<void> _showCourseDetails(BuildContext context, Map<String, dynamic> course) {
     return showModalBottomSheet(
-        context: context,
+        context: context,backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
             topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
         isScrollControlled: true, // Rendre le contenu déroulable
@@ -1162,7 +1108,8 @@ class _CoursesPageState extends State<CoursesPage> {
                           context: context,
                           builder: (BuildContext context) {
                             return AlertDialog(
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
+                                      surfaceTintColor: Color(0xB0AFAFA3),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
                               title: Text("Confirmer la suppression"),
                               content: Text(
                                   "Êtes-vous sûr de vouloir supprimer cet élément ?"),
@@ -1219,15 +1166,276 @@ class _CoursesPageState extends State<CoursesPage> {
   }
 
   Future<void> _displayTextInputDialog(BuildContext context) async {
-    setState(() {
-      Navigator.pop(context);
-    });
+    // setState(() {
+    //   Navigator.pop(context);
+    // });
     return showDialog(
       context: context,
       builder: (context) {
         return AddCoursScreen();
       },
     );
+  }
+  Future<void> _filtrer(BuildContext context) async {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return Container(
+            child: AlertDialog(
+                insetPadding: EdgeInsets.only(top: 250,),
+
+
+                        surfaceTintColor: Color(0xB0AFAFA3),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(20),
+                    topLeft: Radius.circular(20),
+                    bottomRight: Radius.circular(20),
+                    bottomLeft: Radius.circular(20),
+                  ),
+                ),
+                title: Text('Ajouter un Filter'),
+                content: Container(
+                  width: MediaQuery.of(context).size.width,
+                  height: 390,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Text('Date', style: TextStyle(fontWeight: FontWeight.w400,fontSize: 15 ),),
+                          ],
+                        ),
+
+                        SizedBox(height: 10,),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            ElevatedButton(
+                              onPressed: () async {
+                                DateTime? selectedDateDeb = await showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.now(),
+                                  firstDate: DateTime(2000),
+                                  lastDate: DateTime(2030),
+                                );
+
+                                if (selectedDateDeb != null) {
+                                  setState(() {
+                                    widget.dateDeb = selectedDateDeb.toUtc();
+                                   Navigator.pop(context);
+                                    // totalType = 0; // Reset the totalId
+                                  });
+                                }
+                              },
+                              child: Row(
+                                children: [
+                                  Text(widget.dateDeb != null ? DateFormat('yyyy/MM/dd').format(widget.dateDeb!) : 'Date Deb'),
+                                  Icon(Icons.calendar_month_outlined)
+                                ],
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                          surfaceTintColor: Color(0xB0AFAFA3),
+                                  foregroundColor: Colors.black,
+                                  side: BorderSide(color: Colors.black38),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+
+                            ),
+                            // Container(width: 50,
+                            //   child:Text('total: ${totalType.toStringAsFixed(2)}'),
+                            // ),
+                            ElevatedButton(
+                              onPressed: () async {
+                                DateTime? selectedDateFin = await showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.now(),
+                                  firstDate: DateTime(2000),
+                                  lastDate: DateTime(2030),
+                                );
+
+                                if (selectedDateFin != null) {
+                                  setState(() {
+                                    widget.dateFin = selectedDateFin.toUtc();
+                                   Navigator.pop(context);
+                                    // totalType = 0; // Reset the totalId
+                                  });
+                                }
+                              },
+                              child: Row(
+                                children: [
+                                  Text(widget.dateFin != null ? DateFormat('yyyy/MM/dd').format(widget.dateFin!) : 'Date Fin'),
+                                  Icon(Icons.calendar_month_outlined)
+                                ],
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                          surfaceTintColor: Color(0xB0AFAFA3),
+                                  foregroundColor: Colors.black,
+                                  side: BorderSide(color: Colors.black38),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                            ),
+                          ],          ),
+
+                        SizedBox(height: 50,),
+                        Row(
+                         mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Text('Type', style: TextStyle(fontWeight: FontWeight.w400,fontSize: 15 ),),
+                          ],
+                        ),
+                        SizedBox(height: 10,),
+                        Row(
+
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            ElevatedButton(onPressed: (){
+                              setState(() {
+                                showSigned = !showSigned;
+                                Navigator.of(context).pop();
+                              });
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Le filtre est appliquer avec succès.')),
+                              );
+
+                            }
+                            , child: Row(
+                              children: [
+                                Icon(Icons.check_circle_outline),
+                                Text("Signé"),
+                              ],
+                            ),
+                              style: ElevatedButton.styleFrom(
+                                // backgroundColor: Color(0xff0fb2ea),
+                                //         surfaceTintColor: Color(0xB0AFAFA3),
+                                surfaceTintColor: showSigned?  Colors.lightGreenAccent: Colors.white,
+                                foregroundColor: Colors.black,
+                                side: BorderSide(color: Colors.black38),
+                                elevation: 10,
+                                padding: EdgeInsets.only(left: 40, right: 40),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              ),
+                            ),
+                          SizedBox(width: 10,),
+                          ElevatedButton(onPressed: (){
+                              // Navigator.of(context).pop();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Le filtre est appliquer avec succès.')),
+                              );
+                              setState(() {
+                                showPaid = !showPaid;
+                                Navigator.of(context).pop();
+                              });
+                            }
+                            , child: Row(
+                              children: [
+                                Icon(Icons.check_circle_outline),
+                                Text("Paié"),
+                              ],
+                            ),
+                              style: ElevatedButton.styleFrom(
+                                surfaceTintColor: showPaid?  Colors.lightGreenAccent: Colors.white,
+                                foregroundColor: Colors.black,
+                                side: BorderSide(color: Colors.black38),
+                                elevation: 10,
+                                padding: EdgeInsets.only(left: 40, right: 40),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              ),
+                            )
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+            ),
+          );
+        });
+  }
+
+  Future<void> _trier(BuildContext context) async {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+                      surfaceTintColor: Color(0xB0AFAFA3),
+              insetPadding: EdgeInsets.only(top: 300,),
+// backgroundColor: Color(0xB0AFAFA3),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(20),
+                  topLeft: Radius.circular(20),
+                ),
+              ),
+              title: Text('Trier les Cours'),
+              content: Container(
+                width: MediaQuery.of(context).size.width,
+                height: 330,
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      SizedBox(height: 30,),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Text('Date: Ancienne à Récente', style: TextStyle(fontWeight: FontWeight.w400,fontSize: 15 ),),
+                          SizedBox(width: 100,),
+                          Radio(
+                            value: 'responsable',
+                            groupValue: sortByDateAscending,
+                            onChanged: (value) {
+                              setState(() {
+                                totalType =0;
+                                sortByDateAscending = !sortByDateAscending;
+                                // Reverse the sorting order when the button is tapped
+                                widget.courses.sort((a, b) {
+                                  DateTime dateA = DateTime.parse(a['date'].toString());
+                                  DateTime dateB = DateTime.parse(b['date'].toString());
+
+                                  // Sort in ascending order if sortByDateAscending is true,
+                                  // otherwise sort in descending order
+
+                                  return dateA.compareTo(dateB) ;
+                                });
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                      Divider(color: Colors.black38,),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Text('Date: Récente à Ancienne', style: TextStyle(fontWeight: FontWeight.w400,fontSize: 15 ),),
+                          SizedBox(width: 100,),
+                          Radio(
+                            value: '',hoverColor: Colors.black,activeColor: Colors.green,
+                            groupValue: sortByDateAscending,
+                            onChanged: (value) {
+                              setState(() {
+                                // sortByDateAscending = !sortByDateAscending;
+                                // Reverse the sorting order when the button is tapped
+                                widget.courses.sort((a, b) {
+                                  DateTime dateA = DateTime.parse(a['date'].toString());
+                                  DateTime dateB = DateTime.parse(b['date'].toString());
+
+                                  // Sort in ascending order if sortByDateAscending is true,
+                                  // otherwise sort in descending order
+
+                                  return dateB.compareTo(dateA);
+                                });
+                              });
+                            },
+
+                          ),
+                        ],
+                      ),
+
+                    ],
+                  ),
+                ),
+              )
+          );
+        });
   }
 
 
@@ -1254,12 +1462,74 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
 
   Group? selectedGroup;
   Elem? selectedElem;
+  filliere? selectedFil;
+  Semestre? selectedSem;
   Matiere? selectedMat;
   Professeur? selectedProfesseur;
   List<Professeur> professeurs = [];
   DateTime? selectedDateTime;
 
+  Future<void> updateProfesseurList() async {
+    if (selectedElem != null) {
+      List<Professeur> fetchedProfesseurs = await fetchProfesseursByMatiere(selectedElem!.MatId);
+      setState(() {
+        professeurs = fetchedProfesseurs;
+        selectedProfesseur = null;
+      });
+    } else {
+      List<Professeur> fetchedProfesseurs = await fetchProfs();
+      setState(() {
+        professeurs = fetchedProfesseurs;
+        selectedProfesseur = null;
+      });
+    }
+  }
 
+  List<Professeur> professeurList = [];
+  List<Group> grpList = [];
+  List<Group> grpList1 = [];
+  List<Elem> elList = [];
+  List<Elem> elList1 = [];
+  List<Matiere> matiereList = [];
+  List<filliere> filList = [];
+  List<Semestre> SemList = [];
+  List<Semestre> SemList1 = [];
+
+  Future<void> updateElementList(String semestreId) async {
+    // try {
+    // Utilisez l'ID du semestre pour récupérer les éléments correspondants
+    List<Elem> elements = await fetchElementsBySemestre(semestreId);
+
+    setState(() {
+      elList = elements;
+      selectedElem = null; // Réinitialiser la sélection de l'élément
+    });
+    // } catch (error) {
+    //   print('Erreur lors de la récupération des éléments: $error');
+    // }
+  }
+
+  List<Semestre> filterItemsByFil(filliere? fil, List<Semestre> allItems) {
+    if (fil == null) {
+      return allItems;
+    } else {
+      return allItems.where((emp) => emp!.filliereId == fil.id).toList();
+    }
+  }
+  List<Group> filterItemsBySem(Semestre? sem, List<Group> allItems) {
+    if (sem == null) {
+      return allItems;
+    } else {
+      return allItems.where((emp) => emp.semestre!.id == sem!.id).toList();
+    }
+  }
+  List<Elem> filterElsbySem(String FilId, int sem,List<Elem> allItems) {
+    if (FilId == null) {
+      return [];
+    } else {
+      return allItems.where((emp) => emp.filId == FilId && emp.SemNum == sem).toList();
+    }
+  }
 
   TextEditingController _time = TextEditingController();
 
@@ -1282,33 +1552,13 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
 
   Elem getEls(String id) {
     // Assuming you have a list of professeurs named 'professeursList'
-    final element = elList.firstWhere((g) => '${g.id}' == id, orElse: () => Elem(id: '', SemId: '', MatId: '', ProCMId: '', ProTPId: '', ProTDId: ''));
+    final element = elList.firstWhere((g) => '${g.id}' == id, orElse: () => Elem(id: '', filId: '', MatId: '', ));
     print( "Els:${element}");
     return element!; // Return the ID if found, otherwise an empty string
 
   }
 
-  Future<void> updateProfesseurList() async {
-    if (selectedMat != null) {
-      List<Professeur> fetchedProfesseurs = await fetchProfesseursByMatiere(selectedMat!.id);
-      setState(() {
-        professeurs = fetchedProfesseurs;
-        selectedProfesseur = null;
-      });
-    } else {
-      List<Professeur> fetchedProfesseurs = await fetchProfs();
-      setState(() {
-        professeurs = fetchedProfesseurs;
-        selectedProfesseur = null;
-      });
-    }
-  }
 
-  List<Professeur> professeurList = [];
-  List<Group> grpList = [];
-  List<Elem> elList = [];
-  List<Matiere> matiereList = [];
-  List<filliere> filList = [];
   String getFilIdFromName(String id) {
     // Assuming you have a list of professeurs named 'professeursList'
     final fil = filList.firstWhere((f) => '${f.id}' == id, orElse: () =>filliere(id: '', name: '', description: '', niveau: ''));
@@ -1332,27 +1582,40 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
     }
   }
 
+  String getProfEmailFromName(String id) {
+    // Assuming you have a list of professeurs named 'professeursList'
+    final prof = professeurList.firstWhere((f) => '${f.id}' == id, orElse: () =>Professeur(id: 'id'));
+    // print("ProfMail${professeurList}");
+    print("ProfMail${prof.email!}");
+    return prof.email!; // Return the ID if found, otherwise an empty string
+
+  }
+
 
   @override
   void initState() {
     super.initState();
-    // fetchElems().then((data) {
-    //   setState(() {
-    //     elList = data; // Assigner la liste renvoyée par emploiesseur à items
-    //   });
-    // }).catchError((error) {
-    //   print('Erreur: $error');
-    // });
+    fetchElems().then((data) {
+      setState(() {
+        elList = data; // Assigner la liste renvoyée par emploiesseur à items
+      });
+    }).catchError((error) {
+      print('Erreur: $error');
+    });
     fetchGroup().then((data) {
       setState(() {
         grpList = data; // Assigner la liste renvoyée par emploiesseur à items
       });
 
-      // fetchElems().then((data) {
-      //   setState(() {
-      //     elList = data; // Assigner la liste renvoyée par emploiesseur à items
-      //   });
-      // });
+      fetchProfs().then((data) {
+        setState(() {
+          professeurList = data; // Assigner la liste renvoyée par emploiesseur à items
+          print('Hello');
+        });
+      }).catchError((error) {
+        print('Erreur: $error');
+      });
+
       fetchMatiere().then((data) {
         setState(() {
           matiereList = data; // Assigner la liste renvoyée par emploiesseur à items
@@ -1365,17 +1628,19 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
       print('Erreur: $error');
     });
 
-    fetchProfs().then((data) {
-      setState(() {
-        professeurList = data; // Assigner la liste renvoyée par emploiesseur à items
-        print('Hello');
-      });
-    }).catchError((error) {
-      print('Erreur: $error');
-    });
     fetchfilliere().then((data) {
       setState(() {
         filList = data; // Assigner la liste renvoyée par emploiesseur à items
+      });
+
+
+
+    }).catchError((error) {
+      print('Erreur: $error');
+    });
+    fetchSemestre().then((data) {
+      setState(() {
+        SemList = data; // Assigner la liste renvoyée par emploiesseur à items
       });
 
 
@@ -1388,25 +1653,12 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
 
   Elem getElem(String id) {
     // Assuming you have a list of professeurs named 'professeursList'
-    final elem = elList.firstWhere((f) => '${f.id}' == id, orElse: () =>Elem(id: '', SemId: '', MatId: '', ProCMId: '', ProTPId:'' , ProTDId: ''));
+    final elem = elList.firstWhere((f) => '${f.id}' == id, orElse: () =>Elem(id: '', filId: '', MatId: '', ));
     print(elem.id);
     return elem; // Return the ID if found, otherwise an empty string
 
   }
 
-  Future<void> updateElementList(String semestreId) async {
-    // try {
-    // Utilisez l'ID du semestre pour récupérer les éléments correspondants
-    List<Elem> elements = await fetchElementsBySemestre(semestreId);
-
-    setState(() {
-      elList = elements;
-      selectedElem = null; // Réinitialiser la sélection de l'élément
-    });
-    // } catch (error) {
-    //   print('Erreur lors de la récupération des éléments: $error');
-    // }
-  }
   Future<void> updateElemList() async {
     if (selectedGroup != null) {
       Elem fetchedmatieres = getElem(selectedGroup!.id);
@@ -1426,7 +1678,8 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
   Widget build(BuildContext context) {
     return AlertDialog(
         insetPadding: EdgeInsets.only(top: 80,),
-// backgroundColor: Color(0xB0AFAFA3),
+
+        surfaceTintColor: Color(0xB0AFAFA3),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
             topRight: Radius.circular(20),
@@ -1451,242 +1704,326 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
           width: MediaQuery.of(context).size.width,
           // height: 600,
           // color: Color(0xA3B0AF1),
-          child: Column(
-            // mainAxisSize: MainAxisSize.min,
-            children: [
-              // _buildTypesInput(),
-              SizedBox(height: 30),
-
-              Row(
-                children: [
-                  Container(
-                    width: 147.5,
-                    child: DropdownButtonFormField<String>(
-                      value: _selectedType,
-                      items: [
-                        DropdownMenuItem<String>(
-                          child: Text('CM'),
-                          value: 'CM',
+          child: SingleChildScrollView(
+            child: Column(
+              // mainAxisSize: MainAxisSize.min,
+              children: [
+                // _buildTypesInput(),
+                SizedBox(height: 30),
+            
+                Row(
+                  children: [
+                    Container(
+                      width: 147.5,
+                      child: DropdownButtonFormField<String>(
+                        value: _selectedType,
+                        items: [
+                          DropdownMenuItem<String>(
+                            child: Text('CM'),
+                            value: 'CM',
+                          ),
+                          DropdownMenuItem<String>(
+                            child: Text('TP'),
+                            value: 'TP',
+                          ),
+                          DropdownMenuItem<String>(
+                            child: Text('TD'),
+                            value: 'TD',
+                          ),
+                        ],
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedType = value!;
+                          });
+                        },
+                        decoration: InputDecoration(
+                          filled: true,
+                          // fillColor: Colors.white,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide.none,gapPadding: 1,
+                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                          ),
                         ),
-                        DropdownMenuItem<String>(
-                          child: Text('TP'),
-                          value: 'TP',
+                      ),
+            
+                    ),
+                    SizedBox(width: 10),
+                    Container(
+                      width: 147.5,
+                      child: DropdownButtonFormField<num>(
+                        value: _selectedNbh,
+                        items: [
+                          DropdownMenuItem<num>(
+                            child: Text('1.5'),
+                            value: 1.5,
+                          ),
+                          DropdownMenuItem<num>(
+                            child: Text('2'),
+                            value: 2,
+                          ),
+                        ],
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedNbh = value!;
+                          });
+                        },
+                        decoration: InputDecoration(
+                          filled: true,
+                          // fillColor: Colors.white,
+                          fillColor: Colors.white,
+                          hintText: "taux",
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide.none,gapPadding: 1,
+                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                          ),
                         ),
-                        DropdownMenuItem<String>(
-                          child: Text('TD'),
-                          value: 'TD',
-                        ),
-                      ],
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedType = value!;
-                        });
-                      },
-                      decoration: InputDecoration(
-                        filled: true,
-                        // fillColor: Colors.white,
-                        border: OutlineInputBorder(
+                      ),
+            
+                    ),
+                  ],
+                ),
+                SizedBox(height: 10),
+                TextFormField(
+                  controller: _date,
+                  decoration: InputDecoration(
+                      filled: true,
+                      // fillColor: Colors.white,
+                      fillColor: Colors.white,
+                      hintText: "Date",
+                      border: OutlineInputBorder(
                           borderSide: BorderSide.none,gapPadding: 1,
-                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                          borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                  // readOnly: true,
+                  onTap: () => selectDate(_date),
+                ),
+            
+            
+                SizedBox(height: 10),
+                TextFormField(
+                  controller: _time,
+                  decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      hintText: "Deb",
+                      border: OutlineInputBorder(
+                          borderSide: BorderSide.none,gapPadding: 1,
+                          borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                  // readOnly: true,
+                  onTap: () => selectTime(_time),
+                ),
+            
+            
+                SizedBox(height: 10),
+                Row(
+                  children: [
+                    Container(
+                      width: MediaQuery.of(context).size.width / 1.8,
+                      child: DropdownButtonFormField<filliere>(
+                        value: selectedFil,
+                        items: filList.map((fil) {
+                          return DropdownMenuItem<filliere>(
+                            value: fil,
+                            child: Text(fil.name ),
+                          );
+                        }).toList(),
+                        onChanged: (value) async{
+                          setState(() {
+                            selectedFil = value;
+                            selectedSem = null; // Reset the selected matière
+                            selectedGroup = null; // Reset the selected matière
+                            selectedElem = null; // Reset the selected matière
+                            SemList1 = filterItemsByFil(selectedFil, SemList!);
+
+                            print("Sems1${SemList1}");
+
+                          });
+                        },
+                        decoration: InputDecoration(
+                          filled: true,
+                          // fillColor: Color(0xA3B0AF1),
+                          fillColor: Colors.white,
+                          hintText: "selection d'un flliere",
+
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide.none,gapPadding: 1,
+                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Container(
+                      width: MediaQuery.of(context).size.width / 3.6,
+                      child: DropdownButtonFormField<Semestre>(
+                        value: selectedSem,
+                        items: SemList1.map((sem) {
+                          return DropdownMenuItem<Semestre>(
+                            value: sem,
+                            child: Text("S${sem.numero}" ),
+                          );
+                        }).toList(),
+                        onChanged: (value) async{
+                          setState(() {
+                            selectedSem = value;
+                            selectedGroup = null;
+                            selectedElem = null;
+                            // updateElemList(selectedFil!.id, selectedSem!.numero!); // Mettre à jour la liste des éléments en fonction du semestre du groupe sélectionné
+                            elList1 = filterElsbySem(selectedFil!.id!,selectedSem!.numero!, elList!);
+                            grpList1 = filterItemsBySem(selectedSem, grpList!);
+
+                          });
+                        },
+                        decoration: InputDecoration(
+                          filled: true,
+                          // fillColor: Color(0xA3B0AF1),
+                          fillColor: Colors.white,
+                          hintText: "...",
+
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide.none,gapPadding: 1,
+                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                          ),
                         ),
                       ),
                     ),
 
-                  ),
-                  SizedBox(width: 10),
-                  Container(
-                    width: 147.5,
-                    child: DropdownButtonFormField<num>(
-                      value: _selectedNbh,
-                      items: [
-                        DropdownMenuItem<num>(
-                          child: Text('1.5'),
-                          value: 1.5,
-                        ),
-                        DropdownMenuItem<num>(
-                          child: Text('2'),
-                          value: 2,
-                        ),
-                      ],
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedNbh = value!;
-                        });
-                      },
-                      decoration: InputDecoration(
-                        filled: true,
-                        // fillColor: Colors.white,
-                        hintText: "taux",
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide.none,gapPadding: 1,
-                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                        ),
-                      ),
+                  ],
+                ),
+                SizedBox(height: 10),
+                DropdownButtonFormField<Group>(
+                  value: selectedGroup,
+                  items: grpList1.map((grp) {
+                    return DropdownMenuItem<Group>(
+                      value: grp,
+                      child: Text('${getFilIdFromName(grp.filliereId!).toUpperCase()}${grp.numero}-${grp.type}' ),
+                    );
+                  }).toList(),
+                  onChanged: (value) async{
+                    setState(() {
+                      selectedGroup = value;
+                      // selectedElem = null;
+
+                    });
+                  },
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    hintText: "selection d'une Group",
+
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,gapPadding: 1,
+                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
                     ),
-
                   ),
-                ],
-              ),
-              SizedBox(height: 10),
-              TextFormField(
-                controller: _date,
-                decoration: InputDecoration(
+                ),
+
+                SizedBox(height: 10),
+                DropdownButtonFormField<Elem>(
+                  value: selectedElem,
+                  items: elList1.map((ele) {
+                    return DropdownMenuItem<Elem>(
+                        value: ele,
+                        child: Text('${getEls(ele.id).nameMat}' )
+                    );
+                  }).toList(),
+                  onChanged: (value) async{
+                    setState(() {
+                      selectedElem = value;
+                      selectedProfesseur = null; // Reset the selected matière
+                      updateProfesseurList();
+
+                      // print("PL${professeurs}");
+                    });
+                  },
+                  decoration: InputDecoration(
                     filled: true,
-                    // fillColor: Color(0xA3B0AF1),
-                    hintText: "Date",
+                    fillColor: Colors.white,
+                    hintText: "selection d'un Element",
+
                     border: OutlineInputBorder(
-                        borderSide: BorderSide.none,gapPadding: 1,
-                        borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                // readOnly: true,
-                onTap: () => selectDate(_date),
-              ),
-
-
-              SizedBox(height: 10),
-              TextFormField(
-                controller: _time,
-                decoration: InputDecoration(
-                    filled: true,
-                    // fillColor: Color(0xA3B0AF1),
-                    hintText: "Deb",
-                    border: OutlineInputBorder(
-                        borderSide: BorderSide.none,gapPadding: 1,
-                        borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                // readOnly: true,
-                onTap: () => selectTime(_time),
-              ),
-
-
-              SizedBox(height: 10),
-              DropdownButtonFormField<Group>(
-                value: selectedGroup,
-                items: grpList.map((grp) {
-                  return DropdownMenuItem<Group>(
-                    value: grp,
-                    child: Text('${getFilIdFromName(grp.filliereId!).toUpperCase()}${grp.semestre!.numero}-${grp.groupName}' ),
-                  );
-                }).toList(),
-                onChanged: (value) async{
-                  setState(() {
-                    selectedGroup = value;
-                    selectedElem = null; // Reset the selected matière
-                    updateElementList(selectedGroup!.semestre!.id); // Mettre à jour la liste des éléments en fonction du semestre du groupe sélectionné
-
-                  });
-                },
-                decoration: InputDecoration(
-                  filled: true,
-                  // fillColor: Color(0xA3B0AF1),
-                  hintText: "selection d'une Group",
-
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,gapPadding: 1,
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      borderSide: BorderSide.none,gapPadding: 1,
+                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    ),
                   ),
                 ),
-              ),
 
-              SizedBox(height: 10),
-              DropdownButtonFormField<Elem>(
-                value: selectedElem,
-                // hint: Text('${widget.EM}'),
-                items: elList.map((ele) {
-                  return DropdownMenuItem<Elem>(
-                      value: ele,
-                      child: Text('${getEls(ele.id).nameMat}' )
-                  );
-                }).toList(),
-                onChanged: (value) async{
-                  setState(() {
-                    selectedElem = value;
-                    // selectedMat = null; // Reset the selected matière
 
-                  });
-                },
-                decoration: InputDecoration(
-                  filled: true,
-                  // fillColor: Color(0xA3B0AF1),
-                  hintText: "selection d'une Matiere",
-
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,gapPadding: 1,
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                SizedBox(height: 10),
+                // DropdownButtonFormField<Elem>(
+                //   value: selectedElem,
+                //   // hint: Text('${widget.EP}'),
+                //   items: elList.map((ele) {
+                //     return DropdownMenuItem<Elem>(
+                //       value: ele,
+                //       child: _selectedType == "CM" ? Text('${getEls(ele.id).ProfCM}' )
+                //           :(_selectedType == "TP" ? Text('${getEls(ele.id).ProfTP}' ):Text('${getEls(ele.id).ProfTD}' )),
+                //     );
+                //   }).toList(),
+                //   onChanged: (value) async{
+                //     setState(() {
+                //       selectedElem = value;
+                //       // selectedMat = null; // Reset the selected matière
+                //
+                //     });
+                //   },
+                //   decoration: InputDecoration(
+                //     filled: true,
+                //     fillColor: Colors.white,
+                //     hintText: "selection d'un Prof",
+                //
+                //     border: OutlineInputBorder(
+                //       borderSide: BorderSide.none,gapPadding: 1,
+                //       borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                //     ),
+                //   ),
+                // ),
+            
+                SizedBox(height:20),
+                ElevatedButton(
+                  onPressed: (){
+            
+                    DateTime date = DateFormat('yyyy/MM/dd').parse(_date.text).toUtc();
+            
+                    // String email =  getProfEmailFromName(selectedElem!.ProCMId);
+                        // _selectedType == "TP" ? getProfEmailFromName(selectedElem!.ProTPId):getProfEmailFromName(selectedElem!.ProTDId));
+                    // print("MatId${selectedElem!.MatId}");
+                    // String Prof = _selectedType == "CM" ? selectedElem!.ProCMId:( _selectedType == "TP" ? selectedElem!.ProTPId: selectedElem!.ProTDId);
+                    // print("ProfId${Prof}");
+                    addCours(_selectedType,_selectedNbh,date,_time.text,selectedElem!.id,selectedGroup!.id);
+                    // Addemploi(_name.text, _desc.text);
+            
+                    // addCours(_selectedType,_selectedNbh,date,_time.text,selectedProfesseur!.id,selectedMat!.id);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Le Cours a été ajouter avec succès.')),
+                    );
+            
+                    setState(() {
+                      Navigator.of(context).pop();
+                    });
+            
+                  },
+                  child: Text("Ajouter"),
+            
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xff0fb2ea),
+                    foregroundColor: Colors.white,
+                    elevation: 10,
+                    minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
+                    // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
+                    //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                   ),
-                ),
-              ),
-
-              SizedBox(height: 10),
-              DropdownButtonFormField<Elem>(
-                value: selectedElem,
-                // hint: Text('${widget.EP}'),
-                items: elList.map((ele) {
-                  return DropdownMenuItem<Elem>(
-                    value: ele,
-                    child: _selectedType == "CM" ? Text('${getEls(ele.id).ProfCM}' )
-                        :(_selectedType == "TP" ? Text('${getEls(ele.id).ProfTP}' ):Text('${getEls(ele.id).ProfTD}' )),
-                  );
-                }).toList(),
-                onChanged: (value) async{
-                  setState(() {
-                    selectedElem = value;
-                    // selectedMat = null; // Reset the selected matière
-
-                  });
-                },
-                decoration: InputDecoration(
-                  filled: true,
-                  // fillColor: Color(0xA3B0AF1),
-                  hintText: "selection d'un Prof",
-
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,gapPadding: 1,
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                  ),
-                ),
-              ),
-
-              SizedBox(height:20),
-              ElevatedButton(
-                onPressed: (){
-
-                  DateTime date = DateFormat('yyyy/MM/dd').parse(_date.text).toUtc();
-
-                  print("MatId${selectedElem!.MatId}");
-                  String Prof = _selectedType == "CM" ? selectedElem!.ProCMId:( _selectedType == "TP" ? selectedElem!.ProTPId: selectedElem!.ProTDId);
-                  print("ProfId${Prof}");
-                  addCours(_selectedType,_selectedNbh,date,_time.text,Prof,selectedElem!.MatId);
-                  // Addemploi(_name.text, _desc.text);
-
-                  // addCours(_selectedType,_selectedNbh,date,_time.text,selectedProfesseur!.id,selectedMat!.id);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Le Cours a été ajouter avec succès.')),
-                  );
-
-                  setState(() {
-                    Navigator.of(context).pop();
-                  });
-
-                },
-                child: Text("Ajouter"),
-
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xff0fb2ea),
-                  foregroundColor: Colors.white,
-                  elevation: 10,
-                  minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
-                  // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
-                  //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                ),
-              )
-            ],
+                )
+              ],
+            ),
           ),
         )
     );
 
   }
 
-  Future<void> addCours(String type, num nbh,DateTime date,String time, String ProfId,String matId) async {
+  Future<void> addCours(String type, num nbh,DateTime date,String time, String ElemId,String GrpId,) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token")!;
     print(token);
@@ -1700,11 +2037,11 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
       "date": date!.toIso8601String(),
       "startTime": time,
       // "dayNumero": days,
-      "professeur": ProfId,
-      "matiere": matId
+      "element": ElemId,
+      "group": GrpId
     };
 
-    try {
+    // try {
       final response = await http.post(
         uri,
         body: jsonEncode(emploiData),
@@ -1718,7 +2055,8 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
       if (response.statusCode == 200) {
 
 
-        print('Emploi ajouter avec succes');
+        print('Cour ajouter avec succes');
+        // await sendEmailNotification(profEmail, type, date, time); // Send email
         setState(() {
           Navigator.pop(context);
         });
@@ -1730,14 +2068,290 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
         );
       }
 
-    }
-    catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur: $error')),
-      );
-    }
+    // }
+    // catch (error) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(content: Text('Erreur: $error')),
+    //   );
+    // }
   }
 
+  Future<void> sendEmailNotification(
+      String recipientEmail,
+      String coursType,
+      DateTime coursDate,
+      String coursTime,
+      ) async {
+    try {
+      String username = 'i17201.etu@iscae.mr';
+      String password = '26986690';
+
+      final smtpServer = gmail(username, password);
+      final message = Message()
+        ..from = Address(username, 'Emploi du Temps')
+        ..recipients.add(recipientEmail)
+        ..subject = 'Nouveau cours créé : $coursType'
+        ..text = 'Bonjour,\n\nUn nouveau cours de type $coursType a été créé pour vous.\n'
+            'Date: ${DateFormat('EEEE, d MMMM yyyy').format(coursDate)}\n'
+            'Heure: $coursTime\n\nCordialement,\nEmploi du Temps';
+
+      await send(message, smtpServer);
+      print('Email notification sent successfully');
+    } catch (error) {
+      print('Error sending email: $error');
+      // Handle email sending errors gracefully, e.g., display a user-friendly message
+    }
+  }
+}
+
+class Filtrer extends StatefulWidget {
+  late DateTime dateDeb;
+  late DateTime dateFin;
+  late  bool showSigned ;
+  late bool showPaid ;
+
+  Filtrer({required this.showPaid, required this.showSigned, required this.dateDeb,required this.dateFin,}){}
+  
+  @override
+  _FiltrerState createState() => _FiltrerState();
+}
+
+class _FiltrerState extends State<Filtrer> {
+  
+  // Déclarez vos variables ici
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+                surfaceTintColor: Color(0xB0AFAFA3),
+        insetPadding: EdgeInsets.only(top: 80,),
+// backgroundColor: Color(0xB0AFAFA3),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            topRight: Radius.circular(20),
+            topLeft: Radius.circular(20),
+          ),
+        ),
+        title: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          // mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Text("Ajouter une Filtre", style: TextStyle(fontSize: 25),),
+            Spacer(),
+            InkWell(
+              child: Icon(Icons.close),
+              onTap: (){
+                Navigator.pop(context);
+              },
+            )
+          ],
+        ),
+        content: Container(
+          width: MediaQuery.of(context).size.width,
+          // height: 600,
+          // color: Color(0xA3B0AF1),
+          child: Column(
+            // mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    onPressed: () async {
+                      DateTime? selectedDateDeb = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2030),
+                      );
+
+                      if (selectedDateDeb != null) {
+                        setState(() {
+                          widget.dateDeb = selectedDateDeb.toUtc();
+                          // totalType = 0; // Reset the totalId
+                        });
+                      }
+                    },
+                    child: Text(widget.dateDeb != null ? DateFormat('yyyy/MM/dd').format(widget.dateDeb!) : 'Date Deb'),
+                    style: ElevatedButton.styleFrom(backgroundColor: Color(0xff0fb2ea)
+                        ,foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+
+                  ),
+                  // Container(width: 50,
+                  //   child:Text('total: ${totalType.toStringAsFixed(2)}'),
+                  // ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      DateTime? selectedDateFin = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2030),
+                      );
+
+                      if (selectedDateFin != null) {
+                        setState(() {
+                          widget.dateFin = selectedDateFin.toUtc();
+                          // totalType = 0; // Reset the totalId
+                        });
+                      }
+                    },
+                    child: Text(widget.dateFin != null ? DateFormat('yyyy/MM/dd').format(widget.dateFin!) : 'Date Fin'),
+                    style: ElevatedButton.styleFrom(backgroundColor: Color(0xff0fb2ea),foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                  ),
+                ],
+                  ),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Text('Type', style: TextStyle(fontWeight: FontWeight.w400,fontSize: 15 ),),
+                ],
+              ),
+              Row(
+
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton(onPressed: (){
+                    setState(() {
+                      widget.showSigned = !widget.showSigned;
+                      Navigator.of(context).pop();
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Le filtre est appliquer avec succès.')),
+                    );
+
+                  }
+                    , child: Row(
+                      children: [
+                        Icon(Icons.check_circle_outline),
+                        Text("Signé"),
+                      ],
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      // backgroundColor: Color(0xff0fb2ea),
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
+                      side: BorderSide(color: Colors.black38),
+                      elevation: 10,
+                      padding: EdgeInsets.only(left: 40, right: 40),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                  ),
+                  SizedBox(width: 10,),
+                  ElevatedButton(onPressed: (){
+                    Navigator.of(context).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Le filtre est appliquer avec succès.')),
+                    );
+                    setState(() {
+                      widget.showPaid = !widget.showPaid;
+                    });
+                  }
+                    , child: Row(
+                      children: [
+                        Icon(Icons.check_circle_outline),
+                        Text("Paié"),
+                      ],
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
+                      side: BorderSide(color: Colors.black38),
+                      elevation: 10,
+                      padding: EdgeInsets.only(left: 40, right: 40),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                  )
+                ],
+              ),
+            ],
+          ),
+        )
+    );
+
+  }
+
+  Future<void> addCours(String type, num nbh,DateTime date,String time, String ElemId,String GrpId,String profEmail) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString("token")!;
+    print(token);
+
+    final Uri uri = Uri.parse('http://192.168.43.73:5000/cours');
+
+
+    final Map<String, dynamic> emploiData = {
+      "type": type,
+      "nbh": nbh,
+      "date": date!.toIso8601String(),
+      "startTime": time,
+      // "dayNumero": days,
+      "element": ElemId,
+      "group": GrpId
+    };
+
+    // try {
+      final response = await http.post(
+        uri,
+        body: jsonEncode(emploiData),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      print(response.statusCode);
+      if (response.statusCode == 200) {
+
+
+        print('Cour ajouter avec succes');
+        await sendEmailNotification(profEmail, type, date, time); // Send email
+        setState(() {
+          Navigator.pop(context);
+        });
+
+
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Échec de l\'ajout de l\'emploi.')),
+        );
+      }
+
+    // }
+    // catch (error) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(content: Text('Erreur: $error')),
+    //   );
+    // }
+  }
+
+  Future<void> sendEmailNotification(
+      String recipientEmail,
+      String coursType,
+      DateTime coursDate,
+      String coursTime,
+      ) async {
+    try {
+      String username = 'i17201.etu@iscae.mr';
+      String password = '26986690';
+
+      final smtpServer = gmail(username, password);
+      final message = Message()
+        ..from = Address(username, 'Emploi du Temps')
+        ..recipients.add(recipientEmail)
+        ..subject = 'Nouveau cours créé : $coursType'
+        ..text = 'Bonjour,\n\nUn nouveau cours de type $coursType a été créé pour vous.\n'
+            'Date: ${DateFormat('EEEE, d MMMM yyyy').format(coursDate)}\n'
+            'Heure: $coursTime\n\nCordialement,\nEmploi du Temps';
+
+      await send(message, smtpServer);
+      print('Email notification sent successfully');
+    } catch (error) {
+      print('Error sending email: $error');
+      // Handle email sending errors gracefully, e.g., display a user-friendly message
+    }
+  }
 }
 
 
@@ -1840,7 +2454,7 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
 
   Elem getEls(String id) {
     // Assuming you have a list of professeurs named 'professeursList'
-    final element = elList.firstWhere((g) => '${g.id}' == id, orElse: () => Elem(id: '', SemId: '', MatId: '', ProCMId: '', ProTPId: '', ProTDId: ''));
+    final element = elList.firstWhere((g) => '${g.id}' == id, orElse: () => Elem(id: '', filId: '', MatId: '', ));
     print( "Els:${element}");
     return element!; // Return the ID if found, otherwise an empty string
 
@@ -1895,6 +2509,7 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
       print('Erreur: $error');
     });
 
+    _date.text = DateFormat('dd/MM/yyyy').format(DateTime.parse(widget.date.toString()));
     selectedNbhValue = widget.TH;
     selectedTypeName = widget.TN;
   }
@@ -1902,8 +2517,9 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+                surfaceTintColor: Color(0xB0AFAFA3),
         insetPadding: EdgeInsets.only(top: 60,),
-// backgroundColor: Color(0xB0AFAFA3),
+        
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
             topRight: Radius.circular(20),
@@ -1928,286 +2544,289 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
           width: MediaQuery.of(context).size.width,
           // height: 600,
           // color: Color(0xA3B0AF1),
-          child: Column(
-            // mainAxisSize: MainAxisSize.min,
-            children: [
-              //hmmm
-              SizedBox(height: 10),
-              // _buildTypesInput(),
-              Row(
-                children: [
-                  Container(
-                    width: 147.5,
-                    child: DropdownButtonFormField<String>(
-                      value: selectedTypeName,
-                      items: typeNames.map((typeName) {
-                        return DropdownMenuItem<String>(
-                          child: Text(typeName),
-                          value: typeName,
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          selectedTypeName = value ?? 'CM';
-                          showType = true;
-                          showElem = true;
-                        });
-                      },
-                      decoration: InputDecoration(
-                        filled: true,
-                        // fillColor: Color(0xA3B0AF1),
-                        hintText: "selection d'une Group",
+          child: SingleChildScrollView(
+            child: Column(
+              // mainAxisSize: MainAxisSize.min,
+              children: [
+                //hmmm
+                SizedBox(height: 10),
+                // _buildTypesInput(),
+                Row(
+                  children: [
+                    Container(
+                      width: 147.5,
+                      child: DropdownButtonFormField<String>(
+                        value: selectedTypeName,
+                        items: typeNames.map((typeName) {
+                          return DropdownMenuItem<String>(
+                            child: Text(typeName),
+                            value: typeName,
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            selectedTypeName = value ?? 'CM';
+                            showType = true;
+                            showElem = true;
+                          });
+                        },
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          hintText: "selection d'une Group",
 
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide.none,gapPadding: 1,
-                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide.none,gapPadding: 1,
+                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                          ),
                         ),
-                      ),
 
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Container(
+                      width: 147.5,
+                      child: DropdownButtonFormField<num>(
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide.none,gapPadding: 1,
+                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                          ),
+                        ),
+                        value: selectedNbhValue,
+                        items: nbhValues.map((nbhValue) {
+                          return DropdownMenuItem<num>(
+                            child: Text(nbhValue.toString()),
+                            value: nbhValue,
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            selectedNbhValue = value ?? 1.5;
+                            showNum = true;
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 10),
+                TextFormField(
+                  controller: _date,
+                  onChanged: (value) {
+                    setState(() {
+                      showDate = true;
+                    });
+                  },
+
+                  decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      hintText: widget.date,
+                      border: OutlineInputBorder(
+                          borderSide: BorderSide.none,gapPadding: 1,
+                          borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                  // readOnly: true,
+                  onTap: () => selectDate(_date),
+                ),
+
+
+                SizedBox(height: 10),
+                TextFormField(
+                  controller: _time,
+                  onChanged: (value) {
+                    setState(() {
+                      showTime = true;
+                    });
+                  },
+                  decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      hintText: widget.start!,
+                      border: OutlineInputBorder(
+                          borderSide: BorderSide.none,gapPadding: 1,
+                          borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                  // readOnly: true,
+                  onTap: () => selectTime(_time),
+                ),
+
+
+
+                SizedBox(height: 10),
+                DropdownButtonFormField<Group>(
+                  value: selectedGroup,
+                  hint: Text(widget.GN),
+                  items: grpList.map((grp) {
+                    return DropdownMenuItem<Group>(
+                      value: grp,
+                      child: Text('${getFilIdFromName(grp.filliereId!).toUpperCase()}${grp.semestre!.numero}-${grp.type}' ),
+                    );
+                  }).toList(),
+                  onChanged: (value) async{
+                    setState(() {
+                      selectedGroup = value;
+                      selectedElem = null; // Reset the selected matière
+                      updateElementList(selectedGroup!.semestre!.id); // Mettre à jour la liste des éléments en fonction du semestre du groupe sélectionné
+                      showgroup = true;
+
+                    });
+                  },
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    hintText: "selection d'une Group",
+
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,gapPadding: 1,
+                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
                     ),
                   ),
-                  SizedBox(width: 10),
-                  Container(
-                    width: 147.5,
-                    child: DropdownButtonFormField<num>(
-                      decoration: InputDecoration(
-                        filled: true,
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide.none,gapPadding: 1,
-                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                        ),
-                      ),
-                      value: selectedNbhValue,
-                      items: nbhValues.map((nbhValue) {
-                        return DropdownMenuItem<num>(
-                          child: Text(nbhValue.toString()),
-                          value: nbhValue,
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          selectedNbhValue = value ?? 1.5;
-                          showNum = true;
-                        });
-                      },
+                ),
+
+                SizedBox(height: 10),
+                DropdownButtonFormField<String>(
+                  value: selectedMat,
+                  hint: showElem ? Text(''):Text('${widget.EM}'),
+                  items: elList.map((ele) {
+                    return DropdownMenuItem<String>(
+                      value: ele.id,
+                      child: Text('${getEls(ele.id).nameMat}' )
+                    );
+                  }).toList(),
+                  onChanged: (value) async{
+                    setState(() {
+                      selectedMat = value;
+                      // selectedMat = null; // Reset the selected matière
+                      showElem = true;
+
+                    });
+                  },
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    hintText: "selection d'un Element",
+
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,gapPadding: 1,
+                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
                     ),
                   ),
-                ],
-              ),
-              SizedBox(height: 10),
-              TextFormField(
-                controller: _date,
-                onChanged: (value) {
-                  setState(() {
-                    showDate = true;
-                  });
-                },
+                ),
 
-                decoration: InputDecoration(
+                SizedBox(height: 10),
+                // DropdownButtonFormField<Elem>(
+                //   value: selectedElem,
+                //   hint: Text('${widget.EP}'),
+                //   items: elList.map((ele) {
+                //     return DropdownMenuItem<Elem>(
+                //       value: ele,
+                //       child: selectedTypeName == "CM" ? Text('${getEls(ele.id).ProfCM}' )
+                //           :(selectedTypeName == "TP" ? Text('${getEls(ele.id).ProfTP}' ):Text('${getEls(ele.id).ProfTD}' )),
+                //     );
+                //   }).toList(),
+                //   onChanged: (value) async{
+                //     setState(() {
+                //       selectedElem = value;
+                //       // selectedMat = null; // Reset the selected matière
+                //       showElem = true;
+                //
+                //     });
+                //   },
+                //   decoration: InputDecoration(
+                //     filled: true,
+                //     fillColor: Colors.white,
+                //     hintText: "selection d'un Element",
+                //
+                //     border: OutlineInputBorder(
+                //       borderSide: BorderSide.none,gapPadding: 1,
+                //       borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                //     ),
+                //   ),
+                // ),
+
+                SizedBox(height: 10),
+
+                DropdownButtonFormField<String>(
+                  value: signe,
+                  items: [
+                    DropdownMenuItem<String>(
+                      child: Text('True'),
+                      value: "oui",
+                    ),
+                    DropdownMenuItem<String>(
+                      child: Text('False'),
+                      value: "pas encore",
+                    ),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      signe = value!;
+                    });
+                  },
+                  decoration: InputDecoration(
                     filled: true,
-                    // fillColor: Color(0xA3B0AF1),
-                    hintText: widget.date,
+                    fillColor: Colors.white,
+                    hintText: "Est Signe",
+
                     border: OutlineInputBorder(
-                        borderSide: BorderSide.none,gapPadding: 1,
-                        borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                // readOnly: true,
-                onTap: () => selectDate(_date),
-              ),
-
-
-              SizedBox(height: 10),
-              TextFormField(
-                controller: _time,
-                onChanged: (value) {
-                  setState(() {
-                    showTime = true;
-                  });
-                },
-                decoration: InputDecoration(
-                    filled: true,
-                    // fillColor: Color(0xA3B0AF1),
-                    hintText: widget.start!,
-                    border: OutlineInputBorder(
-                        borderSide: BorderSide.none,gapPadding: 1,
-                        borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                // readOnly: true,
-                onTap: () => selectTime(_time),
-              ),
-
-
-
-              SizedBox(height: 10),
-              DropdownButtonFormField<Group>(
-                value: selectedGroup,
-                hint: Text(widget.GN),
-                items: grpList.map((grp) {
-                  return DropdownMenuItem<Group>(
-                    value: grp,
-                    child: Text('${getFilIdFromName(grp.filliereId!).toUpperCase()}${grp.semestre!.numero}-${grp.groupName}' ),
-                  );
-                }).toList(),
-                onChanged: (value) async{
-                  setState(() {
-                    selectedGroup = value;
-                    selectedElem = null; // Reset the selected matière
-                    updateElementList(selectedGroup!.semestre!.id); // Mettre à jour la liste des éléments en fonction du semestre du groupe sélectionné
-                    showgroup = true;
-
-                  });
-                },
-                decoration: InputDecoration(
-                  filled: true,
-                  // fillColor: Color(0xA3B0AF1),
-                  hintText: "selection d'une Group",
-
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,gapPadding: 1,
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      borderSide: BorderSide.none,gapPadding: 1,
+                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    ),
                   ),
-                ),
-              ),
 
-              SizedBox(height: 10),
-              DropdownButtonFormField<String>(
-                value: selectedMat,
-                hint: showElem ? Text(''):Text('${widget.EM}'),
-                items: elList.map((ele) {
-                  return DropdownMenuItem<String>(
-                    value: ele.id,
-                    child: Text('${getEls(ele.id).nameMat}' )
-                  );
-                }).toList(),
-                onChanged: (value) async{
-                  setState(() {
-                    selectedMat = value;
-                    // selectedMat = null; // Reset the selected matière
-                    showElem = true;
-
-                  });
-                },
-                decoration: InputDecoration(
-                  filled: true,
-                  // fillColor: Color(0xA3B0AF1),
-                  hintText: "selection d'un Element",
-
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,gapPadding: 1,
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                  ),
-                ),
-              ),
-
-              SizedBox(height: 10),
-              DropdownButtonFormField<Elem>(
-                value: selectedElem,
-                hint: Text('${widget.EP}'),
-                items: elList.map((ele) {
-                  return DropdownMenuItem<Elem>(
-                    value: ele,
-                    child: selectedTypeName == "CM" ? Text('${getEls(ele.id).ProfCM}' )
-                        :(selectedTypeName == "TP" ? Text('${getEls(ele.id).ProfTP}' ):Text('${getEls(ele.id).ProfTD}' )),
-                  );
-                }).toList(),
-                onChanged: (value) async{
-                  setState(() {
-                    selectedElem = value;
-                    // selectedMat = null; // Reset the selected matière
-                    showElem = true;
-
-                  });
-                },
-                decoration: InputDecoration(
-                  filled: true,
-                  // fillColor: Color(0xA3B0AF1),
-                  hintText: "selection d'un Element",
-
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,gapPadding: 1,
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                  ),
-                ),
-              ),
-
-              SizedBox(height: 10),
-
-              DropdownButtonFormField<String>(
-                value: signe,
-                items: [
-                  DropdownMenuItem<String>(
-                    child: Text('True'),
-                    value: "oui",
-                  ),
-                  DropdownMenuItem<String>(
-                    child: Text('False'),
-                    value: "pas encore",
-                  ),
-                ],
-                onChanged: (value) {
-                  setState(() {
-                    signe = value!;
-                  });
-                },
-                decoration: InputDecoration(
-                  filled: true,
-                  // fillColor: Color(0xA3B0AF1),
-                  hintText: "Est Signe",
-
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,gapPadding: 1,
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                  ),
                 ),
 
-              ),
+                SizedBox(height:20),
+                ElevatedButton(
+                  onPressed: () {
+                    // Navigator.of(context).pop();
 
-              SizedBox(height:20),
-              ElevatedButton(
-                onPressed: () {
-                  // Navigator.of(context).pop();
+                    // DateTime date = showDate ? DateFormat('yyyy/MM/dd').parse(_date.text).toUtc():DateFormat('yyyy/MM/dd').parse(widget.date).toUtc();
+                    DateTime date =DateFormat('yyyy/MM/dd').parse(_date.text).toUtc();
+                    String time = showTime ? _time.text:widget.start;
 
-                  // DateTime date = showDate ? DateFormat('yyyy/MM/dd').parse(_date.text).toUtc():DateFormat('yyyy/MM/dd').parse(widget.date).toUtc();
-                  DateTime date =DateFormat('yyyy/MM/dd').parse(_date.text).toUtc();
-                  String time = showTime ? _time.text:widget.start;
+                    print("MatId${showElem? selectedElem!.MatId: widget.MId}");
+                    // String Prof = showElem?(selectedTypeName == "CM" ? selectedElem!.ProCMId:( selectedTypeName == "TP" ? selectedElem!.ProTPId: selectedElem!.ProTDId))
+                    // :widget.PId;
+                    // print("ProfId${Prof}");
 
-                  print("MatId${showElem? selectedElem!.MatId: widget.MId}");
-                  String Prof = showElem?(selectedTypeName == "CM" ? selectedElem!.ProCMId:( selectedTypeName == "TP" ? selectedElem!.ProTPId: selectedElem!.ProTDId))
-                  :widget.PId;
-                  print("ProfId${Prof}");
+                    String type = showType ? selectedTypeName : widget.TN;
+                    num nbh = showNum ? selectedNbhValue : widget.TH;
+                    String mat = showElem ? selectedElem!.MatId : widget.MId;
+                    UpdatCours(
+                        widget.empId,
+                        type,
+                        nbh,date,
+                        time
+                        ,selectedElem!.id,selectedGroup!.id,
+                      signe
+                    );
 
-                  String type = showType ? selectedTypeName : widget.TN;
-                  num nbh = showNum ? selectedNbhValue : widget.TH;
-                  String mat = showElem ? selectedElem!.MatId : widget.MId;
-                  UpdatCours(
-                      widget.empId,
-                      type,
-                      nbh,date,
-                      time
-                      ,Prof,mat,
-                    signe
-                  );
+                    setState(() {
+                      Navigator.pop(context);
+                    });
 
-                  setState(() {
-                    Navigator.pop(context);
-                  });
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Le Type est mis à jour avec succès.')),
+                    );
+                  },
+                  child: Text("Modifier"),
 
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Le Type est mis à jour avec succès.')),
-                  );
-                },
-                child: Text("Modifier"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xff0fb2ea),
+                    foregroundColor: Colors.white,
+                    elevation: 10,
+                    minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
+                    // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
+                    //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                  ),
+                )
 
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xff0fb2ea),
-                  foregroundColor: Colors.white,
-                  elevation: 10,
-                  minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
-                  // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
-                  //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                ),
-              )
-
-            ],
+              ],
+            ),
           ),
 
         )
@@ -2216,7 +2835,7 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
   }
 
 
-  Future<void> UpdatCours (id,String TN,num TH,DateTime date,String time, String ProfId,String matId,String isSigned) async {
+  Future<void> UpdatCours (id,String TN,num TH,DateTime date,String time, String ElemId,String GrpId,String isSigned) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token")!;
     final url = 'http://192.168.43.73:5000/cours/'  + '/$id';
@@ -2230,8 +2849,8 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
       "nbh": TH,
       'date': date.toIso8601String(),
       "startTime": time,
-      "professeur": ProfId,
-      "matiere": matId,
+      "element": ElemId,
+      "group": GrpId,
       "isSigned": isSigned,
     };
 

@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
@@ -25,9 +26,10 @@ class Matieres extends StatefulWidget {
 class _MatieresState extends State<Matieres> {
 
   Future<List<Matiere>>? futureMatiere;
-  // Categories myNewClass = Categories();
+  int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
+  // int _rowsPerPage = 5;
 
-
+  bool sort = false;
   List<Matiere>? filteredItems;
   String generateMatiereCode(String? semestre, String categoryCode, int newCodeNumber) {
     final semesterCode = semestre?.substring(1); // Get the second character of the semestre (e.g., "1" from "S1")
@@ -192,6 +194,8 @@ class _MatieresState extends State<Matieres> {
   @override
   void initState() {
     super.initState();
+
+
     fetchMatiere().then((data) {
       setState(() {
         filteredItems = data; // Assigner la liste renvoyée par Matiereesseur à items
@@ -208,6 +212,7 @@ class _MatieresState extends State<Matieres> {
     });
 
   }
+
   TextEditingController _searchController = TextEditingController();
   TextEditingController _name = TextEditingController();
   TextEditingController _semestre = TextEditingController();
@@ -255,245 +260,222 @@ class _MatieresState extends State<Matieres> {
         // appBar: AppBar(
         //   title: Center(child: Text(' ${filteredItems?.length} Matiere')),
         // ),
-        body: Column(
-          children: [
-            SizedBox(height: 40,),
-            Container(
-              height: 50,
-              child: Row(
-                children: [
-                  Container(
-                    height: 45,
-                    width: 45,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.all(Radius.circular(50)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 5,
-                        ),
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              SizedBox(height: 40,),
+              Container(
+                height: 50,
+                child: Row(
+                  children: [
+                    Container(
+                      height: 45,
+                      width: 45,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.all(Radius.circular(50)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 5,
+                          ),
+                        ],
+                      ),
+                      child: InkWell(
+                        onTap: (){
+                          Navigator.pop(context);
+                        }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,color: Colors.black,),
+          
+                      ),
+                    ),
+                    SizedBox(width: 50,),
+                    Text("Liste de Matieres",style: TextStyle(fontSize: 25),)
+                  ],
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.3),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: TextField(
+                  style: TextStyle(
+                  color: Colors.black,
+                ),
+                  controller: _searchController,
+                  onChanged: (value) async {
+                    List<Matiere> Matieres = await fetchMatiere();
+          
+                    setState(() {
+                      // Implémentez la logique de filtrage ici
+                      // Par exemple, filtrez les Matiereesseurs dont le name ou le préname contient la valeur saisie
+                      filteredItems = Matieres!.where((Matiere) =>
+                      Matiere.name!.toLowerCase().contains(value.toLowerCase())
+                          // Matiere.description!.toLowerCase().contains(value.toLowerCase())
+                      ).toList();
+                    });
+                  },
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(Icons.search, color: Colors.grey),
+                    hintText: 'Rechercher ',
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  ),
+                )
+                ,
+              ),
+              Container(
+                height: 500,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                  child: Theme(
+                    data: ThemeData(
+                      // Modifiez les couleurs de DataTable ici
+                      dataTableTheme: DataTableThemeData(
+                        dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white), // Couleur des lignes de données
+                        // headingRowColor: MaterialStateColor.resolveWith((states) => Colors.lightBlueAccent.shade100), // Couleur de la ligne d'en-tête
+
+                      ),
+                    ),
+                    child: PaginatedDataTable(
+                      rowsPerPage: _rowsPerPage,
+                      showFirstLastButtons: _rowsPerPage > 10 ? true: false,
+                      availableRowsPerPage: [5, 7,9,10, 20],
+                      onRowsPerPageChanged: (value) {
+                        setState(() {
+                          _rowsPerPage = value ?? _rowsPerPage;
+                        });
+                      },
+                      columns: [
+                        DataColumn(label: Text('Code EM')),
+                        DataColumn(label: Text('Element de Module')),
+                        DataColumn(label: Text('Action')),
                       ],
-                    ),
-                    child: InkWell(
-                      onTap: (){
-                        Navigator.pop(context);
-                      }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,color: Colors.black,),
-
+                      source: YourDataSource(filteredItems ?? [],
+                        onTapCallback: (index) {
+                        _showMatDetails(context, filteredItems![index],); // Appel de showMatDetails avec l'objet Matiere correspondant
+                      },),
                     ),
                   ),
-                  SizedBox(width: 50,),
-                  Text("Liste de Matieres",style: TextStyle(fontSize: 25),)
-                ],
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.3),
-                    spreadRadius: 2,
-                    blurRadius: 5,
-                    offset: Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: TextField(style: TextStyle(
-                color: Colors.black,
-              ),
-                controller: _searchController,
-                onChanged: (value) async {
-                  List<Matiere> Matieres = await fetchMatiere();
-
-                  setState(() {
-                    // Implémentez la logique de filtrage ici
-                    // Par exemple, filtrez les Matiereesseurs dont le name ou le préname contient la valeur saisie
-                    filteredItems = Matieres!.where((Matiere) =>
-                    Matiere.name!.toLowerCase().contains(value.toLowerCase())
-                        // Matiere.description!.toLowerCase().contains(value.toLowerCase())
-                    ).toList();
-                  });
-                },
-                decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.search, color: Colors.grey),
-                  hintText: 'Rechercher ',
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          
                 ),
               )
-              ,
-            ),
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(20),
-                        topRight: Radius.circular(20))),
-                child: Padding(
-                  padding: const EdgeInsets.all(1.0),
-                  child: FutureBuilder<List<Matiere>>(
-                    future: fetchMatiere(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
-                      }
-                      else {
-                        if (snapshot.hasError) {
-                          return Text('Error: ${snapshot.error}');
-                        } else {
-                          List<Matiere>? items = snapshot.data;
-
-                          return  SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Container(
-                              width: MediaQuery.of(context).size.width,
-                              decoration: BoxDecoration(
-                                color: Colors.white12,
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(20.0),
-                                ),
-                              ),
-                              margin: EdgeInsets.only(left: 10),
-                              child: DataTable(
-                                showCheckboxColumn: true,
-                                showBottomBorder: true,
-                                headingRowHeight: 50,
-                                columnSpacing: 8,
-                                dataRowHeight: 50,
-                                // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
-                                columns: [
-                                  // DataColumn(label: Text('Semestre')),
-                                  DataColumn(label: Text('Code EM')),
-                                  DataColumn(label: Text('Element de Module')),
-                                  // DataColumn(label: Text('Catégorie')),
-                                  DataColumn(label: Text('Action')),
-                                ],
-                                rows: [
-                                  for (var index = 0; index < (filteredItems?.length ?? 0); index++)
-                                    DataRow(
-                                      cells: [
-                                        // DataCell(Text('${filteredItems?[index].semestre}')),
-                                        DataCell(Text('${filteredItems?[index].code}',style: TextStyle(
-                            color: Colors.black,
-                          ),)),
-                                        // DataCell(Text(generateMatiereCode(
-                                        //   filteredItems![index].categoriecode, // Replace with actual property name
-                                        //   filteredItems![index]!.semestre!,
-                                        //   index, // Use index as matiereCount
-                                        // ))),
-                                        // DataCell(Text('${filteredItems?[index].description}')),
-                                        DataCell(Container(width: 120,
-                                            child: Text('${filteredItems?[index].name}',style: TextStyle(
-                      color: Colors.black,
-                      ),)),),
-
-                                        DataCell(
-                                          Row(
-                                            children: [
-                                              Container(
-                                                width: 30,
-                                                child: TextButton(
-                                                  onPressed: () =>_showCourseDetails(context, filteredItems![index],filteredItems![index].id),// Disable button functionality
-
-                                                  child: Icon(Icons.more_horiz, color: Colors.black54),
-                                                  style: TextButton.styleFrom(
-                                                    primary: Colors.white,
-                                                    elevation: 0,
-                                                    // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                ],
-                              ),
-                            ),
-                          );
-
-
-                        }
-                      }
-                    },
-                  ),
-                ),
-              ),
-            ),
-
-          ],
+          
+          
+            ],
+          ),
         ),
-        floatingActionButton: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SizedBox(width: 18,),
-            FloatingActionButton.extended(
-              // heroTag: 'uniqueTag',
-              tooltip: 'Supprimer Tous',backgroundColor: Colors.white,
-              label: Row(
-                children: [Icon(Icons.delete_outlined,color: Colors.black,)],
+
+        floatingActionButton: Container(
+          width: 400,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(50)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 5,
               ),
-              // onPressed: () => DeleteAll(),
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
-                      title: Text("Alert"),
-                      content: Text(
-                          "Êtes-vous sûr de vouloir supprimer tous les éléments ?"),
-                      actions: <Widget>[
-                        TextButton(
-                          child: Text("ANNULER"),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                        TextButton(
-                          child: Text(
-                            "SUPPRIMER",
-                            // style: TextStyle(color: Colors.red),
-                          ),
-                          onPressed: () {
+            ],
+          ),
 
-                            DeleteAll();
+          // margin: EdgeInsets.only(left: 25,right: 5),
+          margin: EdgeInsets.only(left: 60,right: 55),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // SizedBox(width: 18,),
+              TextButton(
+                child: Row(
+                  children: [
+                    Icon(Icons.add, color: Colors.black,),
+                    Text('Ajouter',style: TextStyle(color: Colors.black),),
+                  ],
+                ),
+                onPressed: () => _displayTextInputDialog(context),
 
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Les Categories sont Supprimer avec succès.')),
-                            );
-
-                            setState(() {
-                              Navigator.of(context).pop();
-                              fetchMatiere();
-                            });
-
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
-
-            ),
-            SizedBox(width: 210,),
-            FloatingActionButton.extended(
-              // heroTag: 'uniqueTag',
-              tooltip: 'Ajouter une matiere',backgroundColor: Colors.white,
-              label: Row(
-                children: [Icon(Icons.add,color: Colors.black,)],
               ),
-              onPressed: () => _importData(context),
+              // TextButton(
+              //   child: Row(
+              //     children: [
+              //       Icon(Icons.delete_outlined, color: Colors.black,),
+              //       Text('Supprimer Tous',style: TextStyle(color: Colors.black),),
+              //     ],
+              //   ),
+              //   onPressed: () {
+              //                         showDialog(
+              //                           context: context,
+              //                           builder: (BuildContext context) {
+              //                             return AlertDialog(
+              //                                       surfaceTintColor: Color(0xB0AFAFA3),
+              //                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+              //                               title: Text("Confirmer la suppression"),
+              //                               content: Text(
+              //                                   "Êtes-vous sûr de vouloir supprimer tous les  éléments ?"),
+              //                               actions: <Widget>[
+              //                                 TextButton(
+              //                                   child: Text("ANNULER"),
+              //                                   onPressed: () {
+              //                                     Navigator.of(context).pop();
+              //                                   },
+              //                                 ),
+              //                                 TextButton(
+              //                                   child: Text(
+              //                                     "SUPPRIMER",
+              //                                     // style: TextStyle(color: Colors.red),
+              //                                   ),
+              //                                   onPressed: () {
+              //                                     Navigator.of(context).pop();
+              //
+              //                                     fetchMatiere();
+              //                                     DeleteAll();
+              //
+              //                                     ScaffoldMessenger.of(context).showSnackBar(
+              //                                       SnackBar(content: Text('Le Category a été Supprimer avec succès.')),
+              //                                     );
+              //
+              //                                     setState(() {
+              //                                       Navigator.of(context).pop();
+              //                                       fetchMatiere();
+              //                                     });
+              //
+              //                                   },
+              //                                 ),
+              //                               ],
+              //                             );
+              //                           },
+              //                         );
+              //                       }, // Disable button functionality
+              // ),
 
-            ),
-          ],
+              // SizedBox(width: 210,),
+              TextButton(
+                child: Row(
+                  children: [
+                    Icon(Icons.cloud_download_outlined, color: Colors.black,),
+                    Text('Importer',style: TextStyle(color: Colors.black),),
+                  ],
+                ),
+                onPressed: () async {
+                  String? filePath = await pickExcelFile();
+                  if (filePath != null) {
+                    uploadFileToBackend(filePath);
+                  }
+                },
+
+              ),
+            ],
+          ),
         ),
 
       ),
@@ -577,6 +559,45 @@ class _MatieresState extends State<Matieres> {
   }
 
 
+
+  Future<String?> pickExcelFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['xlsx'],
+    );
+
+    if (result != null) {
+      return result.files.single.path;
+    } else {
+      return null;
+    }
+  }
+
+  Future<void> uploadFileToBackend(String? filePath) async {
+    if (filePath != null) {
+      try {
+        Uri url = Uri.parse('http://192.168.43.73:5000/matiere/upload');
+        var request = http.MultipartRequest('POST', url);
+        request.files.add(await http.MultipartFile.fromPath('file', filePath));
+
+        var response = await request.send();
+        if (response.statusCode == 200) {
+          var jsonResponse = await response.stream.bytesToString();
+          print('Réponse du serveur: $jsonResponse');
+        } else {
+          print('Échec de la requête: ${response.statusCode}');
+        }
+      } catch (e) {
+        print('Erreur lors de la requête: $e');
+      }
+    } else {
+      print('Aucun fichier sélectionné');
+    }
+  }
+
+
+
+
   Future<void> _displayTextInputDialog(BuildContext context) async {
     TextEditingController _name = TextEditingController();
     TextEditingController _description = TextEditingController();
@@ -584,131 +605,141 @@ class _MatieresState extends State<Matieres> {
     Category? selectedCateg; // initialiser le type sélectionné à null
 
     List<Category> types =await fetchCategory();
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            insetPadding: EdgeInsets.only(top: 190,),
+            surfaceTintColor: Color(0xB0AFAFA3),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                topRight: Radius.circular(20),
+                topLeft: Radius.circular(20),
+              ),
+            ),
+            title: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              // mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Text("Ajouter une Matiere", style: TextStyle(fontSize: 25),),
+                Spacer(),
+                InkWell(
+                  child: Icon(Icons.close),
+                  onTap: (){
+                    Navigator.pop(context);
+                  },
+                )
+              ],
+            ),
 
-
-          return showModalBottomSheet(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
-              isScrollControlled: true, // Rendre le contenu déroulable
-
-
-              context: context,
-            builder: (BuildContext context){
-                return SingleChildScrollView(
-                  child: Container(
-                    height: 450,
-                    padding: const EdgeInsets.all(25.0),
-                    child: Column(
-                      // mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          // mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Text("Ajouter une Matiere", style: TextStyle(fontSize: 25),),
-                            Spacer(),
-                            InkWell(
-                              child: Icon(Icons.close),
-                              onTap: (){
-                                Navigator.pop(context);
-                              },
-                            )
-                          ],
-                        ),
-                        SizedBox(height: 40),
-                        TextField(
-                          controller: _name,
-                          keyboardType: TextInputType.text,
-                          decoration: InputDecoration(
-                              filled: true,
-                              // fillColor: Colors.white,
-                              hintText: "Nom",
-                              border: OutlineInputBorder(
-                                  borderSide: BorderSide.none,gapPadding: 1,
-                                  borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                        ),
-                        SizedBox(height: 10),
-                        DropdownButtonFormField<Category>(
-                          value: selectedCateg,
-                          items: types.map((type) {
-                            return DropdownMenuItem<Category>(
-                              value: type,
-                              child: Text(type.name ?? ''),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              selectedCateg = value;
-                            });
-                          },
-                          decoration: InputDecoration(
-                            filled: true,
-                            // fillColor: Colors.white,
-                            hintText: "Categorie",
-                            border: OutlineInputBorder(
+            content: Container(
+              height: 450,
+              width: MediaQuery.of(context).size.width,
+              // padding: const EdgeInsets.all(25.0),
+              child: SingleChildScrollView(
+                child: Column(
+                  // mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(height: 40),
+                    TextField(
+                      controller: _name,
+                      keyboardType: TextInputType.text,
+                      decoration: InputDecoration(
+                          filled: true,
+                          // fillColor: Color(0xA3B0AF1),
+                          fillColor: Colors.white,
+                          hintText: "Nom",
+                          border: OutlineInputBorder(
                               borderSide: BorderSide.none,gapPadding: 1,
-                              borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                            ),
-                          ),
-                        ),
-                        // String? selectedType; // Variable pour suivre l'élément sélectionné
-
-                        SizedBox(height: 10),
-                        TextFormField(
-                          controller: _description,
-                          keyboardType: TextInputType.text,
-                          maxLines: 3,
-                          decoration: InputDecoration(
-                              filled: true,
-
-                              // fillColor: Colors.white,
-                              hintText: "description",
-                              border: OutlineInputBorder(
-                                  borderSide: BorderSide.none,gapPadding: 1,
-                                  borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                        ),
-
-
-
-                        SizedBox(height: 10),
-
-                        ElevatedButton(
-                          onPressed: (){
-                          Navigator.of(context).pop();
-
-                          // fetchMatiere();
-                          AddMatiere(_name.text, _description.text,selectedCateg!.id!);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Le Maitiere a été ajouter avec succès.')),
-
-                          );
-                          setState(() {
-                            fetchMatiere();
-                          });
-                        }, child: Text("Ajouter"),
-
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xff0fb2ea),
-                            foregroundColor: Colors.white,
-                            elevation: 10,
-                            minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
-                            // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
-                            //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                          ),
-                        )
-                      ],
+                              borderRadius: BorderRadius.all(Radius.circular(10.0)))),
                     ),
-                  ),
-                );
 
-            }
+
+                    SizedBox(height: 30),
+                    DropdownButtonFormField<Category>(
+                      dropdownColor: Colors.white,
+                      value: selectedCateg,
+                      items: types.map((type) {
+                        return DropdownMenuItem<Category>(
+                          value: type,
+                          child: Text(type.name ?? ''),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          selectedCateg = value;
+                        });
+                      },
+                      decoration: InputDecoration(
+                        filled: true,
+                        // fillColor: Color(0xA3B0AF1),
+                        fillColor: Colors.white,
+                        hintText: "Categorie",
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide.none,gapPadding: 1,
+                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                        ),
+                      ),
+                    ),
+                    // String? selectedType; // Variable pour suivre l'élément sélectionné
+
+                    SizedBox(height: 30),
+                    TextFormField(
+                      controller: _description,
+                      keyboardType: TextInputType.text,
+                      maxLines: 3,
+                      decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+
+                          // fillColor: Color(0xA3B0AF1),
+                          hintText: "description",
+                          border: OutlineInputBorder(
+                              borderSide: BorderSide.none,gapPadding: 1,
+                              borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                    ),
+
+
+
+                    SizedBox(height: 30),
+
+                    ElevatedButton(
+                      onPressed: (){
+                        Navigator.of(context).pop();
+
+                        // fetchMatiere();
+                        AddMatiere(_name.text, _description.text,selectedCateg!.id!);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Le Maitiere a été ajouter avec succès.')),
+
+                        );
+                        setState(() {
+                          fetchMatiere();
+                        });
+                      }, child: Text("Ajouter"),
+
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xff0fb2ea),
+                        foregroundColor: Colors.white,
+                        elevation: 10,
+                        minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
+                        // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
+                        //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ),
+
           );
+        });
 
   }
-  Future<void> _showCourseDetails(BuildContext context, Matiere mat,String MatId) {
+  Future<void> _showMatDetails(BuildContext context, Matiere mat) {
     return showModalBottomSheet(
-        context: context,
+        context: context,backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
             topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
         isScrollControlled: true, // Rendre le contenu déroulable
@@ -734,13 +765,16 @@ class _MatieresState extends State<Matieres> {
                         // color: Colors.lightBlue
                       ),),
                     SizedBox(width: 10,),
-                    Text(mat.name.toUpperCase(),
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
+                    Container(
+                      width: 200,
+                      child: Text(mat.name.toUpperCase(),
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                          // color: Colors.lightBlue
+                        ),),
+                    ),
                   ],
                 ),
                 SizedBox(height: 25),
@@ -825,117 +859,131 @@ class _MatieresState extends State<Matieres> {
                         // _selectedSemestre = filteredItems![index].semestre!;
                         List<Category?> selectedCategories = List.generate(matieres.length, (_) => null);
 
-                        showModalBottomSheet(
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
-                                topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
-                            isScrollControlled: true, // Rendre le contenu déroulable
-
-
+                        showDialog(
                             context: context,
-                            builder: (BuildContext context){
-                              return SingleChildScrollView(
-                                child: Container(
-                                  height: 450,
-                                  padding: const EdgeInsets.all(25.0),
-                                  child: Column(
-                                    // mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Row(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        // mainAxisAlignment: MainAxisAlignment.start,
-                                        children: [
-                                          Text("Modifier une Matiere", style: TextStyle(fontSize: 20),),
-                                          Spacer(),
-                                          InkWell(
-                                            child: Icon(Icons.close),
-                                            onTap: (){
-                                              Navigator.pop(context);
-                                            },
-                                          )
-                                        ],
-                                      ),
-                                      SizedBox(height: 40),
-                                      TextField(
-                                        controller: _name,
-                                        keyboardType: TextInputType.text,
-                                        decoration: InputDecoration(
-                                            filled: true,
-                                            // fillColor: Colors.white,
-                                            border: OutlineInputBorder(
-                                                borderSide: BorderSide.none,gapPadding: 1,
-                                                borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                                      ),
-                                      SizedBox(height: 10),
-                                      DropdownButtonFormField<Category>(
-                                        value: selectedCateg,//getCategoryNameFromId
-
-                                        hint: Text('${mat.code}'),
-                                        items: types.map((type) {
-                                          return DropdownMenuItem<Category>(
-                                            value: type,
-                                            child: Text(type.name ?? ''),
-                                          );
-                                        }).toList(),
-
-                                        onChanged: (value) {
-                                          setState(() {
-                                            selectedCateg = value;
-                                          });
-                                        },
-                                        decoration: InputDecoration(
-                                          filled: true,
-                                          // fillColor: Colors.white,
-                                          border: OutlineInputBorder(
-                                            borderSide: BorderSide.none,gapPadding: 1,
-                                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                                          ),
-                                        ),
-                                      ),
-                                      // String? selectedType; // Variable pour suivre l'élément sélectionné
-
-
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-
-
-                                          fetchMatiere();
-                                          // Check if you're updating an existing matiere or creating a new one
-                                          UpdateMatiere(
-                                              mat.id!,
-                                              _name.text,
-                                              // _desc.text,
-                                            selectedCateg!.id!
-                                          );
-
-
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(content: Text('Le Type est mis à jour avec succès.')),
-                                          );
-                                          setState(() {
-                                            Navigator.pop(context);
-                                            // fetchMatiere();
-                                          });
-                                        },
-                                        child: Text("Modifier"),
-
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Color(0xff0fb2ea),
-                                          foregroundColor: Colors.white,
-                                          elevation: 10,
-                                          minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
-                                          // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
-                                          //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                                        ),
-                                      )
-                                    ],
+                            builder: (context) {
+                              return AlertDialog(
+                                insetPadding: EdgeInsets.only(top: 190,),
+                                surfaceTintColor: Color(0xB0AFAFA3),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.only(
+                                    topRight: Radius.circular(20),
+                                    topLeft: Radius.circular(20),
                                   ),
                                 ),
-                              );
+                                title:
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  // mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Text("Modifier une Matiere", style: TextStyle(fontSize: 20),),
+                                    Spacer(),
+                                    InkWell(
+                                      child: Icon(Icons.close),
+                                      onTap: (){
+                                        Navigator.pop(context);
+                                      },
+                                    )
+                                  ],
+                                ),
 
-                            }
-                        );
+                                content: Container(
+                                  height: 450,
+                                  width: MediaQuery.of(context).size.width,
+                                  // padding: const EdgeInsets.all(25.0),
+                                  child: SingleChildScrollView(
+                                    child: Column(
+                                      // mainAxisSize: MainAxisSize.min,
+                                      children: [
+
+                                        SizedBox(height: 40),
+                                        TextField(
+                                          controller: _name,
+                                          keyboardType: TextInputType.text,
+                                          decoration: InputDecoration(
+                                              filled: true,
+                                              // fillColor: Color(0xA3B0AF1),
+                                              fillColor: Colors.white,
+                                              border: OutlineInputBorder(
+                                                  borderSide: BorderSide.none,gapPadding: 1,
+                                                  borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                                        ),
+
+                                        SizedBox(height: 30),
+                                        DropdownButtonFormField<Category>(
+                                          dropdownColor: Colors.white,
+                                          value: selectedCateg,//getCategoryNameFromId
+
+                                          hint: Text('${mat.code}'),
+                                          items: types.map((type) {
+                                            return DropdownMenuItem<Category>(
+                                              value: type,
+                                              child: Text(type.name ?? ''),
+                                            );
+                                          }).toList(),
+
+                                          onChanged: (value) {
+                                            setState(() {
+                                              selectedCateg = value;
+                                            });
+                                          },
+                                          decoration: InputDecoration(
+                                            filled: true,
+                                            // fillColor: Color(0xA3B0AF1),
+                                            fillColor: Colors.white,
+                                            border: OutlineInputBorder(
+                                              borderSide: BorderSide.none,gapPadding: 1,
+                                              borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                                            ),
+                                          ),
+                                        ),
+
+                                        SizedBox(height: 35),
+
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+
+
+                                            fetchMatiere();
+                                            // Check if you're updating an existing matiere or creating a new one
+                                            UpdateMatiere(
+                                                mat.id!,
+                                                _name.text,
+                                                // _desc.text,
+                                                selectedCateg!.id!
+                                            );
+
+
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(content: Text('Le Type est mis à jour avec succès.')),
+                                            );
+                                            setState(() {
+                                              Navigator.pop(context);
+                                              // fetchMatiere();
+                                            });
+                                          },
+                                          child: Text("Modifier"),
+
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Color(0xff0fb2ea),
+                                            foregroundColor: Colors.white,
+                                            elevation: 10,
+                                            minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
+                                            // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
+                                            //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+
+
+                                  ),
+                                ),
+
+                              );
+                            });
                       },
 
 
@@ -956,7 +1004,8 @@ class _MatieresState extends State<Matieres> {
                           context: context,
                           builder: (BuildContext context) {
                             return AlertDialog(
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                                      surfaceTintColor: Color(0xB0AFAFA3),
                               title: Text("Confirmer la suppression"),
                               content: Text(
                                   "Êtes-vous sûr de vouloir supprimer cet élément ?"),
@@ -1018,6 +1067,44 @@ class _MatieresState extends State<Matieres> {
 
     );
   }
+
+
+}
+
+
+class YourDataSource extends DataTableSource {
+  List<Matiere> _items;
+  Function(int) onTapCallback; // La fonction prendra un index comme paramètre
+
+  YourDataSource(this._items, {required this.onTapCallback});
+
+  @override
+  DataRow? getRow(int index) {
+
+    final item = _items[index];
+    return DataRow(cells: [
+      DataCell(Container(width: 40,
+          child: Text(item.code!))),
+      DataCell(Container(width: 150,
+          child: Text(item.name!))),DataCell(
+        IconButton(
+          icon: Icon(Icons.more_horiz),
+          onPressed: () {
+            onTapCallback(index); // Appel de la fonction de callback avec l'index
+          },
+        ),
+      ),
+    ]);
+  }
+
+  @override
+  int get rowCount => _items.length;
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get selectedRowCount => 0;
 }
 
 Future<List<Matiere>> fetchMatiere() async {
@@ -1037,7 +1124,7 @@ Future<List<Matiere>> fetchMatiere() async {
     Map<String, dynamic> jsonResponse = jsonDecode(response.body);
     List<dynamic> matieresData = jsonResponse['matieres'];
 
-    // print(matieresData);
+    print(matieresData);
     List<Matiere> matieres = matieresData.map((item) {
       return Matiere.fromJson(item);
     }).toList();

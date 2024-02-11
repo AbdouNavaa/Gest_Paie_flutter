@@ -67,7 +67,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   CircleAvatar(
-                    radius: 80,
+                    radius: 80,backgroundColor: Colors.white,
                     backgroundImage: AssetImage(
                         'assets/user1.png'),
                   ),
@@ -76,6 +76,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     margin: EdgeInsets.all(5),
                     height: 350,
                     child: Card(
+                      color: Colors.white,
+                              surfaceTintColor: Color(0xB0AFAFA3),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                       elevation: 5,
                       child: Padding(

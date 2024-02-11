@@ -34,11 +34,13 @@ class _SemestresState extends State<Semestres> {
   Future<List<Semestre>>? futureSemestre;
 
   List<Semestre>? filteredItems;
+  int _rowsPerPage = 5;
 
   List<Professeur> professeurList = [];
   List<Matiere> matiereList = [];
   List<filliere> filList = [];
   TextEditingController _date = TextEditingController();
+  TextEditingController _finish = TextEditingController();
   Matiere? selectedMat;
   filliere? selectedFil;
 
@@ -187,7 +189,7 @@ class _SemestresState extends State<Semestres> {
   // TextEditingController _code = TextEditingController();
   TextEditingController _desc = TextEditingController();
   TextEditingController _taux = TextEditingController();
-  num _selectedTaux = 500;
+  int _selectedNbh = 1;
 
 
   @override
@@ -197,191 +199,167 @@ class _SemestresState extends State<Semestres> {
         // appBar: AppBar(
         //   title: Center(child: Text(' ${filteredItems?.length} ')),
         // ),
-        body: Column(
-          children: [
-            SizedBox(height: 40,),
-            Container(
-              height: 50,
-              child: Row(
-                children: [
-                  Container(
-                    height: 45,
-                    width: 45,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.all(Radius.circular(50)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 5,
-                        ),
-                      ],
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              SizedBox(height: 40,),
+              Container(
+                height: 50,
+                child: Row(
+                  children: [
+                    Container(
+                      height: 45,
+                      width: 45,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.all(Radius.circular(50)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 5,
+                          ),
+                        ],
+                      ),
+                      child: InkWell(
+                        onTap: (){
+                          Navigator.pop(context);
+                        }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,color: Colors.black,),
+          
+                      ),
                     ),
-                    child: InkWell(
-                      onTap: (){
-                        Navigator.pop(context);
-                      }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,color: Colors.black,),
-
-                    ),
-                  ),
-                  SizedBox(width: 50,),
-                  Text("Liste de Semestres",style: TextStyle(fontSize: 25),)
-                ],
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.3),
-                    spreadRadius: 2,
-                    blurRadius: 5,
-                    offset: Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: TextField(style: TextStyle(
-                color: Colors.black,
-              ),
-                controller: _searchController,
-                onChanged: (value) async {
-                  List<Semestre> Semestress = await fetchSemestre();
-
-                  setState(() {
-                    // Implémentez la logique de filtrage ici
-                    // Par exemple, filtrez les Semestreesseurs dont le name ou le préname contient la valeur saisie
-                    filteredItems = Semestress!.where((sem) =>
-                    sem.numero!.toString().toLowerCase().contains(value.toLowerCase()) ||
-                        (sem.start!.toString()).toLowerCase().contains(value.toLowerCase()) ||
-                        (sem.finish!.toString()).toLowerCase().contains(value.toLowerCase()) ||
-                        sem.filliereName!.toLowerCase().contains(value.toLowerCase())).toList();
-                  });
-                },
-                decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.search, color: Colors.grey),
-                  hintText: 'Rechercher  ',
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    SizedBox(width: 50,),
+                    Text("Liste de Semestres",style: TextStyle(fontSize: 25),)
+                  ],
                 ),
-
-              )
-              ,
-            ),
-
-            Expanded(
-              child: Container(
+              ),
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(20),
-                        topRight: Radius.circular(20))),
-                child: Padding(
-                  padding: const EdgeInsets.all(1.0),
-                  child: FutureBuilder<List<Semestre>>(
-                    future: fetchSemestre(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
-                      } else {
-                        if (snapshot.hasError) {
-                          return Text('Error: ${snapshot.error}');
-                        } else {
-                          List<Semestre>? items = snapshot.data;
-
-                          return SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Container(
-                              width: MediaQuery.of(context).size.width,
-                              decoration: BoxDecoration(
-                                color: Colors.white12,
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(20.0),
-                                ),
-                              ),
-                              // margin: EdgeInsets.only(left: 10),
-                              child:
-                              DataTable(
-                                showCheckboxColumn: true,
-                                showBottomBorder: true,
-                                headingRowHeight: 50,
-                                columnSpacing: 15,
-                                dataRowHeight: 50,
-                                // border: TableBorder.all(color: Colors.black12, width: 2),
-                                headingTextStyle: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black, // Set header text color
-                                ),
-                                // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
-                                columns: [
-                                  DataColumn(label: Text('Nom')),
-                                  DataColumn(label: Text('Fillieres')),
-                                  DataColumn(label: Text('Deb')),
-                                  DataColumn(label: Text('Fin')),
-                                  DataColumn(label: Text('Action')),
-                                  // DataColumn(label: Text('Descrition')),
-                                ],
-                                rows: [
-                                  for (var sem in filteredItems!)
-                                    DataRow(
-                                        cells: [
-                                          DataCell(Container(child: Text('S${sem.numero}')),
-
-                                            // onTap:() => _showcategDetails(context, categ)
-                                          ),
-                                          DataCell(Container(child: Text('${sem.filliereName.toUpperCase()}'))),
-                                          DataCell(Container(child: Text( '${DateFormat('dd/MM/yyyy ').format(
-                                            DateTime.parse(sem.start.toString()).toLocal(),
-                                          )}',))),
-                                          DataCell(Container(child: Text( '${DateFormat('dd/MM/yyyy ').format(
-                                            DateTime.parse(sem.finish.toString()).toLocal(),
-                                          )}',))),
-
-                                          DataCell(
-                                            Container(
-                                              width: 35,
-                                              child: TextButton(
-                                                onPressed: () =>_showSemDetails(context, sem),// Disable button functionality
-
-                                                child: Icon(Icons.more_horiz, color: Colors.black54),
-                                                style: TextButton.styleFrom(
-                                                  primary: Colors.white,
-                                                  elevation: 0,
-                                                  // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          // DataCell(Container(width: 105,
-                                          //     child: Text('${sem.description}',)),),
-
-
-                                        ]),
-                                ],
-                              ),
-                            ),
-                          );
-                        }
-                      }
-                    },
-                  ),
+                  borderRadius: BorderRadius.circular(10),
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.3),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: Offset(0, 3),
+                    ),
+                  ],
                 ),
+                child: TextField(style: TextStyle(
+                  color: Colors.black,
+                ),
+                  controller: _searchController,
+                  onChanged: (value) async {
+                    List<Semestre> Semestress = await fetchSemestre();
+          
+                    setState(() {
+                      // Implémentez la logique de filtrage ici
+                      // Par exemple, filtrez les Semestreesseurs dont le name ou le préname contient la valeur saisie
+                      filteredItems = Semestress!.where((sem) =>
+                      sem.numero!.toString().toLowerCase().contains(value.toLowerCase()) ||
+                          (sem.start!.toString()).toLowerCase().contains(value.toLowerCase()) ||
+                          (sem.finish!.toString()).toLowerCase().contains(value.toLowerCase()) ||
+                          sem.filliereName!.toLowerCase().contains(value.toLowerCase())).toList();
+                    });
+                  },
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(Icons.search, color: Colors.grey),
+                    hintText: 'Rechercher  ',
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  ),
+          
+                )
+                ,
               ),
-            ),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton.extended(
-          // heroTag: 'uniqueTag',
-          tooltip: 'Ajouter une categorie',
-          backgroundColor: Colors.white,
-          label: Row(
-            children: [Icon(Icons.add,color: Colors.black,)],
+          
+              Container(
+                height: 500,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                  child: Theme(
+                    data: ThemeData(
+                      // Modifiez les couleurs de DataTable ici
+                      dataTableTheme: DataTableThemeData(
+                        dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white), // Couleur des lignes de données
+                        // headingRowColor: MaterialStateColor.resolveWith((states) => Colors.lightBlueAccent.shade100), // Couleur de la ligne d'en-tête
+                      ),
+                    ),
+                    child: PaginatedDataTable(
+                      rowsPerPage: _rowsPerPage,
+                      showFirstLastButtons: _rowsPerPage > 10 ? true: false,
+                      availableRowsPerPage: [5, 7,9,10, 20],
+                      onRowsPerPageChanged: (value) {
+                        setState(() {
+                          _rowsPerPage = value ?? _rowsPerPage;
+                        });
+                      },
+                      columns: [
+                        DataColumn(label: Text('Nom')),
+                        DataColumn(label: Text('Fillieres')),
+                        DataColumn(label: Text('Deb')),
+                        DataColumn(label: Text('Fin')),
+                        DataColumn(label: Text('Action')),
+                        // DataColumn(label: Text('Descrition')),
+                      ],
+                      source: YourDataSource(filteredItems ?? [],
+                        onTapCallback: (index) {
+                          _showSemDetails(context, filteredItems![index],); // Appel de showMatDetails avec l'objet Matiere correspondant
+                        },),
+                    ),
+                  ),
+          
+                ),
+              )
+            ],
           ),
-          onPressed: () => _importData(context),
-
         ),
+        floatingActionButton: Container(
+          width: 400,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(50)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 5,
+              ),
+            ],
+          ),
+
+          margin: EdgeInsets.only(left: 60,right: 55),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // SizedBox(width: 18,),
+              TextButton(
+                child: Row(
+                  children: [
+                    Icon(Icons.add, color: Colors.black,),
+                    Text('Ajouter',style: TextStyle(color: Colors.black),),
+                  ],
+                ),
+                onPressed: () => _displayTextInputDialog(context),
+
+              ),
+
+              // SizedBox(width: 210,),
+              TextButton(
+                child: Row(
+                  children: [
+                    Icon(Icons.cloud_download_outlined, color: Colors.black,),
+                    Text('Importer',style: TextStyle(color: Colors.black),),
+                  ],
+                ),
+                onPressed: () => _importData(context),
+
+              ),
+            ],
+          ),
+        ),
+
 
 
       ),
@@ -432,7 +410,7 @@ class _SemestresState extends State<Semestres> {
           // DateTime deb = DateFormat('yyyy/MM/dd').parse(start).toUtc();
           //abdou
           print('Num: $num, Start $deb,Fil ${getFilIdFromName(fil)},');
-          AddSemestre(int.parse(num),deb,getFilIdFromName(fil),getMatId(ele));
+          AddSemestre(int.parse(num),deb,deb.add(Duration(days: 4 * 30)),getFilIdFromName(fil));
 
 // } else {
           //   print('La ligne $i n\'a pas suffisamment d\'éléments.');
@@ -452,162 +430,171 @@ class _SemestresState extends State<Semestres> {
 
   Future<void> _displayTextInputDialog(BuildContext context) async {
 
-    return showModalBottomSheet(
+    return showDialog(
         context: context,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
-            topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
-        isScrollControlled: true, // Rendre le contenu déroulable
-
-        builder: (BuildContext context){
-          return SingleChildScrollView(
-            child: Container(
-              height: 480,
-              padding: const EdgeInsets.all(25.0),
-              child: Column(
-                // mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    // mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text("Ajouter Semestre", style: TextStyle(fontSize: 25),),
-                      Spacer(),
-                      InkWell(
-                        child: Icon(Icons.close),
-                        onTap: (){
-                          Navigator.pop(context);
-                        },
-                      )
-                    ],
-                  ),
-                  //hmmm
-                  SizedBox(height: 40),
-                  TextField(
-                    controller: _numero,
-                    keyboardType: TextInputType.text,
-                    decoration: InputDecoration(
-                        filled: true,
-                        // fillColor: Colors.white,
-                        hintText: "Numero",
-                        border: OutlineInputBorder(
-                            borderSide: BorderSide.none,gapPadding: 1,
-                            borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                  ),
-
-                  SizedBox(height: 10),
-                  TextFormField(
-                    controller: _date,
-                    decoration: InputDecoration(
-                        filled: true,
-                        // fillColor: Color(0xA3B0AF1),
-                        hintText: "Date",
-                        border: OutlineInputBorder(
-                            borderSide: BorderSide.none,gapPadding: 1,
-                            borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                    // readOnly: true,
-                    onTap: () => selectDate(_date),
-                  ),
-
-
-                  SizedBox(height: 10),
-                  DropdownButtonFormField<filliere>(
-                    value: selectedFil,
-                    items: filList.map((fil) {
-                      return DropdownMenuItem<filliere>(
-                        value: fil,
-                        child: Text(fil.name?? ''),
-                      );
-                    }).toList(),
-                    onChanged: (value)async {
-                      setState(()  {
-                        selectedFil = value;
-                      });
-                    },
-                    decoration: InputDecoration(
-                      filled: true,
-                      // fillColor: Color(0xA3B0AF1),
-                      hintText: "selection d'un Filliere",
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide.none,gapPadding: 1,
-                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                      ),
-                    ),
-                  ),
-
-   SizedBox(height: 10),
-
-                  DropdownButtonFormField<Matiere>(
-                    value: selectedMat,
-                    items: matiereList.map((matiere) {
-                      return DropdownMenuItem<Matiere>(
-                        value: matiere,
-                        child: Text(matiere.name ?? ''),
-                      );
-                    }).toList(),
-                    onChanged: (value)async {
-                      setState(()  {
-                        selectedMat = value;
-                        // selectedProfesseur = null; // Reset the selected professor
-                        // professeurs = await fetchProfesseursByMatiere(selectedMat!.id); // Clear the professeurs list when a matière is selected
-                        // updateProfesseurList(); // Update the list of professeurs based on the selected matière
-                      });
-                    },
-                    decoration: InputDecoration(
-                      filled: true,
-                      // fillColor: Color(0xA3B0AF1),
-                      hintText: "selection d'une Matiere",
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide.none,gapPadding: 1,
-                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                      ),
-                    ),
-                  ),
-
-                  SizedBox(height: 15),
-                  ElevatedButton(
-                    onPressed: (){
-                      Navigator.of(context).pop();
-                      fetchSemestre();
-                      DateTime date = DateFormat('yyyy/MM/dd').parse(_date.text).toUtc();
-
-                      // Pass the selected types to addCoursToProfesseur method
-                      AddSemestre(int.parse(_numero.text),date, selectedFil!.id!,selectedMat!.id!);
-                      // AddSemestre(int.parse(_numero.text),date, selectedFil!.id!);
-
-                      // Addfilliere(_name.text, _desc.text);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Le filliere a été ajouter avec succès.')),
-                      );
-                      setState(() {
-                      fetchSemestre();
-                      });
-                    },
-                    child: Text("Ajouter"),
-
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xff0fb2ea),
-                      foregroundColor: Colors.white,
-                      elevation: 10,
-                      minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
-                      // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
-                      //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                    ),
-                  )
-                ],
+        builder: (context) {
+          return AlertDialog(
+            insetPadding: EdgeInsets.only(top: 190,),
+            surfaceTintColor: Color(0xB0AFAFA3),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                topRight: Radius.circular(20),
+                topLeft: Radius.circular(20),
               ),
             ),
+            title: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              // mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Text("Ajouter Semestre", style: TextStyle(fontSize: 25),),
+                Spacer(),
+                InkWell(
+                  child: Icon(Icons.close),
+                  onTap: (){
+                    Navigator.pop(context);
+                  },
+                )
+              ],
+            ),
+
+            content: Container(
+              height: 450,
+              width: MediaQuery.of(context).size.width,
+              // padding: const EdgeInsets.all(25.0),
+              child: SingleChildScrollView(
+                child: Column(
+                  // mainAxisSize: MainAxisSize.min,
+                  children: [
+                    //hmmm
+                    SizedBox(height: 40),
+                    DropdownButtonFormField<int>(
+                      value: _selectedNbh,
+                      items: [
+                        DropdownMenuItem<int>(
+                          child: Text('S1'),
+                          value: 1,
+                        ),
+                        DropdownMenuItem<int>(
+                          child: Text('S2'),
+                          value: 2,
+                        ),
+                       DropdownMenuItem<int>(
+                          child: Text('S3'),
+                          value: 3,
+                        ),
+                        DropdownMenuItem<int>(
+                          child: Text('S4'),
+                          value: 4,
+                        ),
+                       DropdownMenuItem<int>(
+                          child: Text('S5'),
+                          value: 5,
+                        ),
+                        DropdownMenuItem<int>(
+                          child: Text('S6'),
+                          value: 6,
+                        ),
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedNbh = value!;
+                        });
+                      },
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        hintText: "numero",
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide.none,gapPadding: 1,
+                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 30),
+                    TextFormField(
+                      controller: _date,
+                      decoration: InputDecoration(
+                          filled: true,
+                          // fillColor: Color(0xA3B0AF1),
+                          fillColor: Colors.white,
+                          hintText: "Date Deb",
+                          border: OutlineInputBorder(
+                              borderSide: BorderSide.none,gapPadding: 1,
+                              borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                      // readOnly: true,
+                      onTap: () => selectDate(_date),
+                    ),
+
+
+                    SizedBox(height: 30),
+                    DropdownButtonFormField<filliere>(
+                      value: selectedFil,
+                      items: filList.map((fil) {
+                        return DropdownMenuItem<filliere>(
+                          value: fil,
+                          child: Text(fil.name?? ''),
+                        );
+                      }).toList(),
+                      onChanged: (value)async {
+                        setState(()  {
+                          selectedFil = value;
+                        });
+                      },
+                      decoration: InputDecoration(
+                        filled: true,
+                        // fillColor: Color(0xA3B0AF1),
+                        fillColor: Colors.white,
+                        hintText: "selection d'un Filliere",
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide.none,gapPadding: 1,
+                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: 30),
+                    ElevatedButton(
+                      onPressed: (){
+                        Navigator.of(context).pop();
+                        fetchSemestre();
+                        DateTime date = DateFormat('yyyy/MM/dd').parse(_date.text).toUtc();
+
+                        // Pass the selected types to addCoursToProfesseur method
+                        AddSemestre(_selectedNbh,date,date.add(Duration(days: 4 * 30)), selectedFil!.id!);
+                        // AddSemestre(int.parse(_numero.text),date, selectedFil!.id!);
+
+                        // Addfilliere(_name.text, _desc.text);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Le filliere a été ajouter avec succès.')),
+                        );
+                        setState(() {
+                          fetchSemestre();
+                        });
+                      },
+                      child: Text("Ajouter"),
+
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xff0fb2ea),
+                        foregroundColor: Colors.white,
+                        elevation: 10,
+                        minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
+                        // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
+                        //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ),
+
           );
-
-        }
-
-
-    );
+        });
   }
 
   Future<void> _showSemDetails(BuildContext context, Semestre sem) {
     return showModalBottomSheet(
-        context: context,
+        context: context,backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
             topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
         isScrollControlled: true, // Rendre le contenu déroulable
@@ -715,82 +702,6 @@ class _SemestresState extends State<Semestres> {
 
                   ],
                 ),
-                SizedBox(height: 25),
-                Container(
-                  width: MediaQuery.of(context).size.width,
-                  child: SingleChildScrollView(scrollDirection: Axis.horizontal,
-                    child: Row(
-                    // mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Text('matieres:',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w400,
-                            fontStyle: FontStyle.italic,
-                            // color: Colors.lightBlue
-                          ),),
-
-                        SizedBox(width: 10,),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            for (var matiere in sem.elements!) // Assuming items![index].matieres is a list of matieres for the professor
-                              Row(
-                                children: [
-                                  // Text('Matieres: [${getMatIdFromNames(getMatSemIdFromName(semestre['_id']).join(", "))}]',style: TextStyle(fontSize: 18)),
-                                  Text(getMatIdFromName(matiere) ?? '',//abdou
-                                      style: TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w400,
-                                        fontStyle: FontStyle.italic,
-                                      )),
-                                  TextButton(
-                                      onPressed: (){
-                                        showDialog(
-                                          context: context,
-                                          builder: (context) {
-                                            return AlertDialog(
-                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
-                                              title: Text('Supprimer Matiere'),
-                                              content: Text('Voulez vous supprimer: ${getMatIdFromName(matiere)}?'),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () {
-                                                    Navigator.of(context).pop(); // Close the dialog
-                                                  },
-                                                  child: Text('Cancel'),
-                                                ),
-                                                TextButton(
-                                                  onPressed: () {
-                                                    Navigator.of(context).pop(); // Close the dialog
-                                                    // String matiereId = matiere['_id']; // Replace 'matiere' with the actual matiere data
-                                                    deleteMatiereSem(sem.id, matiere);
-                                                    setState(() {
-                                                      Navigator.pop(context);
-                                                    });ScaffoldMessenger.of(context).showSnackBar(
-                                                      SnackBar(
-                                                          content: Text('La matiere est Supprimer avec succès.',)),);
-
-                                                  },
-                                                  child: Text('Supprimer'),
-                                                ),
-                                              ],
-                                            );
-                                          },
-                                        );
-                                      },
-                                      child: Icon(Icons.delete_outlined, color: Colors.black26,))
-                                ],
-                              ),
-                          ],
-                        ),
-
-
-                      ],
-                    ),
-                  ),
-                ),
                 SizedBox(height: 35,),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -812,153 +723,161 @@ class _SemestresState extends State<Semestres> {
                         // _selectedSemestre = filteredItems![index].semestre!;
                         List<filliere?> selectedCategories = List.generate(matiereList.length, (_) => null);
 
-                        showModalBottomSheet(
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
-                                topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
-                            isScrollControlled: true, // Rendre le contenu déroulable
-
-
+                        return showDialog(
                             context: context,
-                            builder: (BuildContext context){
-                              return SingleChildScrollView(
-                                child: Container(
+                            builder: (context) {
+                              return AlertDialog(
+                                insetPadding: EdgeInsets.only(top: 190,),
+                                surfaceTintColor: Color(0xB0AFAFA3),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.only(
+                                    topRight: Radius.circular(20),
+                                    topLeft: Radius.circular(20),
+                                  ),
+                                ),
+                                title:
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  // mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Text("Modifier Semestre", style: TextStyle(fontSize: 20),),
+                                    Spacer(),
+                                    InkWell(
+                                      child: Icon(Icons.close),
+                                      onTap: (){
+                                        Navigator.pop(context);
+                                      },
+                                    )
+                                  ],
+                                ),
+
+                                content: Container(
                                   height: 450,
-                                  padding: const EdgeInsets.all(25.0),
-                                  child: Column(
-                                    // mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Row(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        // mainAxisAlignment: MainAxisAlignment.start,
-                                        children: [
-                                          Text("Modifier Semestre", style: TextStyle(fontSize: 20),),
-                                          Spacer(),
-                                          InkWell(
-                                            child: Icon(Icons.close),
-                                            onTap: (){
-                                              Navigator.pop(context);
-                                            },
-                                          )
-                                        ],
-                                      ),
-                                      SizedBox(height: 40),
-                                      // SizedBox(height: 10),
-                                      DropdownButtonFormField<filliere>(
-                                        value: selectedFil,
-                                        items: filList.map((fil) {
-                                          return DropdownMenuItem<filliere>(
-                                            value: fil,
-                                            child: Text(fil.name?? ''),
-                                          );
-                                        }).toList(),
-                                        onChanged: (value)async {
-                                          setState(()  {
-                                            selectedFil = value;
-                                          });
-                                        },
-                                        decoration: InputDecoration(
-                                          filled: true,
-                                          // fillColor: Color(0xA3B0AF1),
-                                          hintText: "selection d'un Filliere",
-                                          border: OutlineInputBorder(
-                                            borderSide: BorderSide.none,gapPadding: 1,
-                                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                                          ),
-                                        ),
-                                      ),
-
-
-                                      SizedBox(height: 10),
-                                      DropdownButtonFormField<Matiere>(
-                                        value: selectedMat,
-                                        items: matiereList.map((matiere) {
-                                          return DropdownMenuItem<Matiere>(
-                                            value: matiere,
-                                            child: Text(matiere.name ?? ''),
-                                          );
-                                        }).toList(),
-                                        onChanged: (value)async {
-                                          setState(()  {
-                                            selectedMat = value;
-                                            // professeurs = await fetchProfesseursByMatiere(selectedMat!.id); // Clear the professeurs list when a matière is selected
-                                          });
-                                        },
-                                        decoration: InputDecoration(
-                                          filled: true,
-                                          hintText: "....",hintStyle: TextStyle(fontSize: 20),
-                                          // fillColor: Color(0xA3B0AF1),
-                                          border: OutlineInputBorder(
-                                            borderSide: BorderSide.none,gapPadding: 1,
-                                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                                          ),
-                                        ),
-                                      ),
-
-                                      // String? selectedType; // Variable pour suivre l'élément sélectionné
-
-
-                                      SizedBox(height: 10),
-                                      TextFormField(
-                                        controller: _date,
-                                        decoration: InputDecoration(
+                                  width: MediaQuery.of(context).size.width,
+                                  // padding: const EdgeInsets.all(25.0),
+                                  child: SingleChildScrollView(
+                                    child: Column(
+                                      // mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        SizedBox(height: 40),
+                                        // SizedBox(height: 10),
+                                        DropdownButtonFormField<filliere>(
+                                          value: selectedFil,
+                                          items: filList.map((fil) {
+                                            return DropdownMenuItem<filliere>(
+                                              value: fil,
+                                              child: Text(fil.name?? ''),
+                                            );
+                                          }).toList(),
+                                          onChanged: (value)async {
+                                            setState(()  {
+                                              selectedFil = value;
+                                            });
+                                          },
+                                          decoration: InputDecoration(
                                             filled: true,
                                             // fillColor: Color(0xA3B0AF1),
-                                            hintText: "Date",
+                                            fillColor: Colors.white,
+                                            hintText: "selection d'un Filliere",
                                             border: OutlineInputBorder(
-                                                borderSide: BorderSide.none,gapPadding: 1,
-                                                borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                                        // readOnly: true,
-                                        onTap: () => selectDate(_date),
-                                      ),
+                                              borderSide: BorderSide.none,gapPadding: 1,
+                                              borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                                            ),
+                                          ),
+                                        ),
 
 
+                                        SizedBox(height: 30),
+                                        DropdownButtonFormField<Matiere>(
+                                          value: selectedMat,
+                                          items: matiereList.map((matiere) {
+                                            return DropdownMenuItem<Matiere>(
+                                              value: matiere,
+                                              child: Text(matiere.name ?? ''),
+                                            );
+                                          }).toList(),
+                                          onChanged: (value)async {
+                                            setState(()  {
+                                              selectedMat = value;
+                                              // professeurs = await fetchProfesseursByMatiere(selectedMat!.id); // Clear the professeurs list when a matière is selected
+                                            });
+                                          },
+                                          decoration: InputDecoration(
+                                            filled: true,
+                                            hintText: "....",
+                                            // hintStyle: TextStyle(fontSize: 15),
+                                            // fillColor: Color(0xA3B0AF1),
+                                            fillColor: Colors.white,
+                                            border: OutlineInputBorder(
+                                              borderSide: BorderSide.none,gapPadding: 1,
+                                              borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                                            ),
+                                          ),
+                                        ),
 
-                                      SizedBox(height: 10),
+                                        SizedBox(height: 30),
+                                        TextFormField(
+                                          controller: _date,
+                                          decoration: InputDecoration(
+                                              filled: true,
+                                              // fillColor: Color(0xA3B0AF1),
+                                              fillColor: Colors.white,
+                                              hintText: "Date",
+                                              border: OutlineInputBorder(
+                                                  borderSide: BorderSide.none,gapPadding: 1,
+                                                  borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                                          // readOnly: true,
+                                          onTap: () => selectDate(_date),
+                                        ),
 
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
+                                        SizedBox(height: 30),
 
-                                          fetchSemestre();
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
 
-                                          DateTime date = DateFormat('yyyy/MM/dd').parse(_date.text).toUtc();
+                                            fetchSemestre();
 
-                                          // Check if you're updating an existing matiere or creating a new one
-                                          UpdateSemestre(
-                                            sem.id!,
+                                            DateTime date = DateFormat('yyyy/MM/dd').parse(_date.text).toUtc();
+
+                                            // Check if you're updating an existing matiere or creating a new one
+                                            UpdateSemestre(
+                                              sem.id!,
                                               int.parse(_numero.text),
                                               date,
                                               selectedFil!.id!,
                                               selectedMat!.id!,
-                                          );
+                                            );
 
 
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(content: Text('Le Type est mis à jour avec succès.')),
-                                          );
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(content: Text('Le Type est mis à jour avec succès.')),
+                                            );
 
-                                          setState(() {
-                                            fetchSemestre();
-                                          });                                        },
-                                        child: Text("Modifier"),
+                                            setState(() {
+                                              fetchSemestre();
+                                            });                                        },
+                                          child: Text("Modifier"),
 
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Color(0xff0fb2ea),
-                                          foregroundColor: Colors.white,
-                                          elevation: 10,
-                                          minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
-                                          // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
-                                          //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                                        ),
-                                      )
-                                    ],
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Color(0xff0fb2ea),
+                                            foregroundColor: Colors.white,
+                                            elevation: 10,
+                                            minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
+                                            // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
+                                            //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+
+
                                   ),
                                 ),
-                              );
 
-                            }
-                        );
+                              );
+                            });
                       },
 
 
@@ -979,6 +898,7 @@ class _SemestresState extends State<Semestres> {
                             context: context,
                             builder: (BuildContext context) {
                        return AlertDialog(
+                                   surfaceTintColor: Color(0xB0AFAFA3),
                            insetPadding: EdgeInsets.only(top: 400,),
 // backgroundColor: Color(0xB0AFAFA3),
                            shape: RoundedRectangleBorder(
@@ -1026,8 +946,9 @@ class _SemestresState extends State<Semestres> {
                                    },
                                    decoration: InputDecoration(
                                      filled: true,
-                                     hintText: "....",hintStyle: TextStyle(fontSize: 20),
-                                     // fillColor: Color(0xA3B0AF1),
+                                     hintText: "....",
+                                     // hintStyle: TextStyle(fontSize: 20),
+                                     fillColor: Color(0xA3B0AF1),
                                      border: OutlineInputBorder(
                                        borderSide: BorderSide.none,gapPadding: 1,
                                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
@@ -1088,7 +1009,8 @@ class _SemestresState extends State<Semestres> {
                           context: context,
                           builder: (BuildContext context) {
                             return AlertDialog(
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
+                                      surfaceTintColor: Color(0xB0AFAFA3),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
                               title: Text("Confirmer la suppression"),
                               content: Text(
                                   "Êtes-vous sûr de vouloir supprimer cet élément ?"),
@@ -1150,7 +1072,7 @@ class _SemestresState extends State<Semestres> {
   }
 
 
-  void AddSemestre (int numero,DateTime? date,String filId,String elements) async {
+  void AddSemestre (int numero,DateTime? date,DateTime? fin,String filId) async {
 
     // Check if the prix parameter is provided, otherwise use the default value of 100
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -1166,7 +1088,7 @@ class _SemestresState extends State<Semestres> {
         "numero":numero,
         "filliere": filId ,
         'start': date?.toIso8601String(),
-        "elements":[elements] ,
+        'finish': fin?.toIso8601String(),
       }),
     );
     if (response.statusCode == 200) {
@@ -1290,6 +1212,44 @@ class _SemestresState extends State<Semestres> {
 
 }
 
+class YourDataSource extends DataTableSource {
+  List<Semestre> _items;
+  Function(int) onTapCallback; // La fonction prendra un index comme paramètre
+
+  YourDataSource(this._items, {required this.onTapCallback});
+
+  @override
+  DataRow? getRow(int index) {
+
+    final item = _items[index];
+    return DataRow(cells: [
+      DataCell(Text("S${item.numero!}")),
+      DataCell(Text(item.filliereName.toUpperCase()!)),
+      DataCell(Container(child: Text( '${DateFormat('dd/MM/yyyy ').format(
+        DateTime.parse(item.start.toString()).toLocal(),
+      )}',))),
+      DataCell(Container(child: Text( '${DateFormat('dd/MM/yyyy ').format(
+        DateTime.parse(item.finish.toString()).toLocal(),
+      )}',))),DataCell(
+        IconButton(
+          icon: Icon(Icons.more_horiz),
+          onPressed: () {
+            onTapCallback(index); // Appel de la fonction de callback avec l'index
+          },
+        ),
+      ),
+    ]);
+  }
+
+  @override
+  int get rowCount => _items.length;
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get selectedRowCount => 0;
+}
 
 class Semestre {
   String id;

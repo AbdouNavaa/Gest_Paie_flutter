@@ -513,67 +513,39 @@ class _PaiementsState extends State<Paiements> {
   }
 
 
-  Future<List<ExcelData>> readFirstSheetExcelData(String path) async {
+  Future<List<List<String>>> readExcelData(String path) async {
+    // Ouvrez le fichier Excel.
     var bytes = await File(path).readAsBytes();
     var exc = excel.Excel.decodeBytes(bytes);
 
-
+    // Accédez à la première feuille de calcul.
+    var firstSheet = exc.tables.keys.first;
+    var table = exc.tables[firstSheet]!;
 
     // Créez une liste pour stocker les données.
-    List<ExcelData> data = [];
+    List<List<String>> data = [];
 
-    for (var table in exc.tables.keys) {
-      var firstSheet = exc.tables.keys.first;
-      var sheet = exc.tables[firstSheet]!;
-
+    // Parcourir les tableaux.
+    for (var row in table.rows) {
       // Ignorer les premières lignes jusqu'à la ligne "Heure:"
-      int rowIndex = 0;
-      while (rowIndex < sheet.maxRows && sheet.cell(excel.CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex)).value?.toString() != "Heure:") {
-        rowIndex++;
+      if (row == table.rows.first) continue;
+
+      // Créer une nouvelle liste pour stocker les données du tableau.
+      List<String> rowData = [];
+
+      // Ajouter les données du tableau à la liste.
+      for (var cell in row) {
+        rowData.add(cell?.value?.toString() ?? '');
       }
 
-      // Parcourir les tableaux
-      for (int i = 0; i < 5; i++) {
-        rowIndex++; // Ignorer la ligne vide entre les tableaux
-
-        // Extraire le temps (première colonne de chaque tableau)
-        String time = sheet.cell(excel.CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex)).value?.toString() ?? '';
-
-        // Parcourir les lignes du tableau
-        for (int j = 2; j <= 27; j++) {
-          // Ignorer les colonnes vides (E, I, M, Q)
-          if (j % 5 == 0) continue;
-
-          // Extraire les données
-          String day = sheet.cell(excel.CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: j)).value?.toString() ?? '';
-          String code = sheet.cell(excel.CellIndex.indexByColumnRow(columnIndex: 2, rowIndex: j)).value?.toString() ?? '';
-          String type = sheet.cell(excel.CellIndex.indexByColumnRow(columnIndex: 3, rowIndex: j)).value?.toString() ?? '';
-          String salle = sheet.cell(excel.CellIndex.indexByColumnRow(columnIndex: 4, rowIndex: j)).value?.toString() ?? '';
-          String matiere = sheet.cell(excel.CellIndex.indexByColumnRow(columnIndex: 2, rowIndex: j + 1)).value?.toString() ?? '';
-          String enseignant = sheet.cell(excel.CellIndex.indexByColumnRow(columnIndex: 3, rowIndex: j + 2)).value?.toString() ?? '';
-
-          // Ignorer les lignes où le type est "#N/A"
-          if (code == "#N/A" &&  type== "#N/A" && salle == "#N/A" && matiere == "#N/A" && enseignant == "#N/A" ) {
-            continue;
-          }
-
-          // Ajouter l'objet à la liste.
-          data.add(ExcelData(
-            time: time,
-            day: day,
-            code: code,
-            type: type,
-            salle: salle,
-            matiere: matiere,
-            enseignant: enseignant,
-          ));
-        }
-      }
+      // Ajouter la liste de données à la liste principale.
+      data.add(rowData);
     }
 
-    // Retourner la liste.
+    // Retourner la liste de données.
     return data;
   }
+
 
 
 
@@ -830,7 +802,6 @@ class _PaiementsState extends State<Paiements> {
                 ),
               ),
               ElevatedButton(
-// Dans n'importe quelle partie de votre application, par exemple, dans la fonction onPressed d'un bouton
                 onPressed: () async {
                   // Ouvrez une boîte de dialogue pour permettre à l'utilisateur de sélectionner un fichier
                   FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -843,19 +814,17 @@ class _PaiementsState extends State<Paiements> {
                     String path = result.files.first.path!;
 
                     // Lisez les données du fichier Excel.
-                    final List<ExcelData> data = await readFirstSheetExcelData(path);
+                    final List<List<String>> data = await readExcelData(path);
 
                     // Afficher les données dans la console
-                    for (ExcelData excelData in data) {
-                      print('Jour: ${excelData.day}');
-                      print('Code: ${excelData.code}');
-                      print('Matiere: ${excelData.matiere}');
-                      print('Enseignant: ${excelData.enseignant}');
-                      // print('Heure: ${excelData.heure}');
-                      print('Type: ${excelData.type}');
+                    for (List<String> rowData in data) {
+                      for (String data in rowData) {
+                        print(data);
+                      }
                       print('---------------------');
                     }
                   }
+
                 },
                 child: Text('Lire le fichier Excel'),
               ),],
@@ -1214,7 +1183,8 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                                                context: context,
                                                builder: (BuildContext context) {
                                                  return AlertDialog(
-                                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
+                                                           surfaceTintColor: Color(0xB0AFAFA3),
+                                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
                                                    title: Text("Confirmer la suppression"),
                                                    content: Text(
                                                        "Êtes-vous sûr de vouloir supprimer cet élément ?"),
@@ -1355,7 +1325,8 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                                                  context: context,
                                                  builder: (BuildContext context) {
                                                    return AlertDialog(
-                                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
+                                                             surfaceTintColor: Color(0xB0AFAFA3),
+                                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
                                                      title: Text("Confirmer la suppression"),
                                                      content: Text(
                                                          "Êtes-vous sûr de vouloir supprimer cet élément ?"),
@@ -1497,7 +1468,8 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                                                  context: context,
                                                  builder: (BuildContext context) {
                                                    return AlertDialog(
-                                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
+                                                             surfaceTintColor: Color(0xB0AFAFA3),
+                                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
                                                      title: Text("Confirmer la suppression"),
                                                      content: Text(
                                                          "Êtes-vous sûr de vouloir supprimer cet élément ?"),

@@ -55,13 +55,13 @@ class _MoreOptionsPageState extends State<MoreOptionsPage> {
 
             Column(
               children: [
-                Container(
-                  height: 100,child: Row(
-                  children: [
-                    SizedBox(width: 150,),
-                    Icon(Icons.description_outlined, size: 80,),
-                  ],
-                ),),
+                // Container(
+                //   height: 100,child: Row(
+                //   children: [
+                //     SizedBox(width: 150,),
+                //     Icon(Icons.description_outlined, size: 80,),
+                //   ],
+                // ),),
                 SwitchListTile(
                     title: const Text('Dark Mode?',style: TextStyle(
                       color: Colors.green,),),
@@ -183,13 +183,14 @@ class _MoreOptionsPageState extends State<MoreOptionsPage> {
              crossAxisAlignment: CrossAxisAlignment.start,
              mainAxisSize: MainAxisSize.max,
              children: [
-              Container(
-                height: 100,child: Row(
-                children: [
-                 SizedBox(width: 150,),
-                  Icon(Icons.description_outlined, size: 70,color: Colors.black26,),
-                ],
-              ),),
+              // Container(
+              //   height: 100,child: Row(
+              //   children: [
+              //    SizedBox(width: 150,),
+              //     Icon(Icons.description_outlined, size: 70,color: Colors.black26,),
+              //   ],
+              // ),),
+               SizedBox(height: 100,),
                SwitchListTile(
                    title: const Text('Dark Mode?',style: TextStyle(
                      color: Colors.green,),),

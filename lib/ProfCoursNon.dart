@@ -566,7 +566,7 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
 
   Future<void> _showCourseDetails(BuildContext context, Map<String, dynamic> course) {
     return showModalBottomSheet(
-        context: context,
+        context: context,backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
             topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
         isScrollControlled: true, // Rendre le contenu déroulable

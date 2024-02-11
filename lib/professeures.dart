@@ -185,9 +185,15 @@ class _ProfesseuresState extends State<Professeures> {
   //
   // }
   num? getUserMob(String name) {
-    final user = users.firstWhere((user) => '${user.name}' == name, orElse: () =>User(id: '', name: 'blbla', prenom: '', email: '', mobile: 0, role: '',));
+    final user = users.firstWhere((user) => '${user.name}' == name, orElse: () =>User(id: '', name: 'blbla', prenom: '', email: '', mobile: 0, role: '', banque: '',));
     // print('MatID: ${matiereList}');
     return user.mobile!; // Return the ID if found, otherwise an empty string
+
+  }
+  String? getProfBanq(String name) {
+    final user = filteredItems!.firstWhere((user) => '${user.nom}' == name, orElse: () =>Professeur(id: 'id'));
+    // print('MatID: ${matiereList}');
+    return user.banque!; // Return the ID if found, otherwise an empty string
 
   }
   String getMatIdFromNames(String elements) {
@@ -370,6 +376,10 @@ class _ProfesseuresState extends State<Professeures> {
               ),
             ),
           ),
+          // Align(
+          //   alignment: Alignment.centerRight,
+          //   child: FoldableOptions(),
+          // ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -377,17 +387,62 @@ class _ProfesseuresState extends State<Professeures> {
         tooltip: 'Ajouter un Prof',
         backgroundColor: Colors.white,
         label: Row(
-          children: [Icon(Icons.add,color: Colors.black,)],
+          children: [
+            Icon(Icons.add,color: Colors.black,),
+
+          ],
         ),
-        onPressed: () => _importData(context),
+        onPressed: () async {
+          String? filePath = await pickExcelFile();
+          if (filePath != null) {
+            uploadFileToBackend(filePath);
+          }
+        },
 
       ),
 
-      // bottomNavigationBar: BottomNav(),
 
     );
   }
 
+
+  Future<String?> pickExcelFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['xlsx'],
+    );
+
+    if (result != null) {
+      return result.files.single.path;
+    } else {
+      return null;
+    }
+  }
+
+  Future<void> uploadFileToBackend(String? filePath) async {
+    if (filePath != null) {
+      try {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        String token = prefs.getString("token")!;
+        Uri url = Uri.parse('http://192.168.43.73:5000/professeur/upload');
+        var request = http.MultipartRequest('POST', url,);
+        request.headers['Authorization'] = 'Bearer $token';
+        request.files.add(await http.MultipartFile.fromPath('file', filePath));
+
+        var response = await request.send();
+        if (response.statusCode == 200) {
+          var jsonResponse = await response.stream.bytesToString();
+          print('Réponse du serveur: $jsonResponse');
+        } else {
+          print('Échec de la requête: ${response.statusCode}');
+        }
+      } catch (e) {
+        print('Erreur lors de la requête: $e');
+      }
+    } else {
+      print('Aucun fichier sélectionné');
+    }
+  }
   String extractEmail(var cell) {
     // Utilisation d'une regex simple pour valider le format de l'e-mail
     RegExp regex = RegExp(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b');
@@ -404,223 +459,9 @@ class _ProfesseuresState extends State<Professeures> {
     }
   }
 
-  Future<void> _importData(BuildContext context) async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['xlsx'],
-    );
-
-    if (result != null && result.files.isNotEmpty) {
-      File file = File(result.files.first.path!);
-
-      // String directoryPath = (await getApplicationDocumentsDirectory()).path;
-      // String filePath = '$directoryPath/${basename(file.path)}';
-      // await file.copy(filePath);
-
-      ByteData data = await file.readAsBytes().then((bytes) {
-        return ByteData.sublistView(Uint8List.fromList(bytes));
-      });
-      List<int> bytes = data.buffer.asUint8List();
-      var excel = Excel.Excel.decodeBytes(bytes);
-
-
-      for (var table in excel.tables.keys) {
-        print(table); // Nom de la feuille
-        print(excel.tables[table]!.maxCols);
-        print("hmm: ${excel.tables[table]!.maxCols}");
-        print(excel.tables[table]!.rows[0]); // Lecture de l'en-tête
-
-        // Commencer à traiter à partir de la deuxième ligne (index 1)
-        for (var i = 1; i < 100; i++) {
-          var row = excel.tables[table]!.rows[i];
-
-          print('taille: ${row.length}');
-          // if (row.length >= excel.tables[table]!.maxCols) {  // Vérifiez si la ligne a au moins le nombre maximum de colonnes
-            String nom = row[0]?.value?.toString() ?? "";
-            String banque = row[1]?.value?.toString() ?? "";
-            String compte = row[2]?.value?.toString() ?? "0";
-            String mobile = row[3]?.value?.toString() ?? "0";
-            // String email = extractEmail(row[5]);
-            String email = row[4]?.value?.toString() ?? "";
-            String password = row[5]?.value?.toString() ?? "";
-          String user = row[6]?.value?.toString() ?? "";
-
-            // Faites quelque chose avec les données, par exemple, ajoutez-les à votre liste de professeurs
-            print('les infos: $nom, Banque $compte');
-            AddProf(user,nom, num.parse(mobile), email, password, banque, num.parse(compte));
-          // } else {
-          //   print('La ligne $i n\'a pas suffisamment d\'éléments.');
-          // }
-        }
-
-
-      }
-      print("Hello ${excel.tables.values.first}");
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Données importées avec succès depuis le fichier Excel.')),
-      );
-    }
-  }
-
-
-  Future<void> _displayTextInputDialog(BuildContext context) async {
-
-    return showModalBottomSheet(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
-              isScrollControlled: true, // Rendre le contenu déroulable
-
-
-              context: context,
-              builder: (BuildContext context) {
-                return SingleChildScrollView(
-                  child: Container(
-                    height: 590,
-                    padding: const EdgeInsets.all(25.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          // mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Text("Ajouter un Prof", style: TextStyle(fontSize: 25),),
-                            Spacer(),
-                            InkWell(
-                              child: Icon(Icons.close),
-                              onTap: (){
-                                Navigator.pop(context);
-                              },
-                            )
-                          ],
-                        ),
-                        SizedBox(height: 40),
-                        TextField(
-                          controller: _name,
-                          keyboardType: TextInputType.text,
-                          decoration: InputDecoration(
-                              filled: true,
-                              // fillColor: Color(0xA3B0AF1),
-                              // fillColor: Colors.white,
-                              hintText: "name",
-                              border: OutlineInputBorder(
-                                  borderSide: BorderSide.none,gapPadding: 1,
-                                  borderRadius: BorderRadius.all(
-                                      Radius.circular(10.0)))),
-                        ),
-
-                        // SizedBox(height: 10),
-                        // TextField(
-                        //   controller: _prenom,
-                        //   keyboardType: TextInputType.text,
-                        //   decoration: InputDecoration(
-                        //       filled: true,
-                        //       // fillColor: Color(0xA3B0AF1),
-                        //       // fillColor: Colors.white,
-                        //       hintText: "Prenom",
-                        //       border: OutlineInputBorder(
-                        //           borderSide: BorderSide.none,gapPadding: 1,
-                        //           borderRadius: BorderRadius.all(
-                        //               Radius.circular(10.0)))),
-                        // ),
-
-                        SizedBox(height: 10),
-                        TextField(
-                          controller: _mobile,
-                          keyboardType: TextInputType.text,
-                          decoration: InputDecoration(
-                              filled: true,
-                              // fillColor: Color(0xA3B0AF1),
-                              // fillColor: Colors.white,
-                              hintText: "Mobile",
-                              border: OutlineInputBorder(
-                                  borderSide: BorderSide.none,gapPadding: 1,
-                                  borderRadius: BorderRadius.all(
-                                      Radius.circular(10.0)))),
-                        ),
-
-                        SizedBox(height: 10),
-                        TextField(
-                          controller: _email,
-                          keyboardType: TextInputType.text,
-                          decoration: InputDecoration(
-                              filled: true,
-                              // fillColor: Color(0xA3B0AF1),
-                              // fillColor: Colors.white,
-                              hintText: "Email",
-                              border: OutlineInputBorder(
-                                  borderSide: BorderSide.none,gapPadding: 1,
-                                  borderRadius: BorderRadius.all(
-                                      Radius.circular(10.0)))),
-                        ),
-
-                        SizedBox(height: 10),
-                        TextField(
-                          controller: _Banque,
-                          keyboardType: TextInputType.text,
-                          decoration: InputDecoration(
-                              filled: true,
-                              // fillColor: Color(0xA3B0AF1),
-                              // fillColor: Colors.white,
-                              hintText: "Banque",
-                              border: OutlineInputBorder(
-                                  borderSide: BorderSide.none,gapPadding: 1,
-                                  borderRadius: BorderRadius.all(
-                                      Radius.circular(10.0)))),
-                        ),
-
-                        SizedBox(height: 10),
-                        TextField(
-                          controller: _account,
-                          keyboardType: TextInputType.text,
-                          decoration: InputDecoration(
-                              filled: true,
-                              // fillColor: Color(0xA3B0AF1),
-                              // fillColor: Colors.white,
-                              hintText: "Compte",
-                              border: OutlineInputBorder(
-                                  borderSide: BorderSide.none,gapPadding: 1,
-                                  borderRadius: BorderRadius.all(
-                                      Radius.circular(10.0)))),
-                        ),
-                        SizedBox(height: 30),
-                        ElevatedButton(onPressed: () {
-                          Navigator.of(context).pop();
-                          fetchProfs();
-                          // AddProf(_name.text, _Banque.text, _account.text);
-                          // AddProf(_name.text, _desc.text);
-                          setState(() {
-                            Navigator.pop(context);
-                          });
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(
-                                'Le Prof a été ajouter avec succès.')),
-                          );
-                          setState(() {
-                            Navigator.of(context).pop();
-                          });
-                        }, child: Text("Ajouter"),
-
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xff0fb2ea),
-                            foregroundColor: Colors.white,
-                            elevation: 10,
-                            minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
-                            // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
-                            //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                );
-              });
-  }
   Future<void> _showDetails(BuildContext context, Map<String, dynamic> prof,List<dynamic> mat) {
     return showModalBottomSheet(
-        context: context,
+        context: context,backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
             topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
         isScrollControlled: true, // Rendre le contenu déroulable
@@ -690,24 +531,24 @@ class _ProfesseuresState extends State<Professeures> {
                         ],
                       ),
                       SizedBox(height: 25),
-                      Row(
-                        children: [
-                          Text('mobile:',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.italic,
-                            ),),
-                          SizedBox(width: 10,),
-                          Text('${getUserMob(prof['nom'])}',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.italic,
-                            ),),
-                        ],
-                      ),
-                      SizedBox(height: 25),
+                      // Row(
+                      //   children: [
+                      //     Text('mobile:',
+                      //       style: TextStyle(
+                      //         fontSize: 20,
+                      //         fontWeight: FontWeight.w400,
+                      //         fontStyle: FontStyle.italic,
+                      //       ),),
+                      //     SizedBox(width: 10,),
+                      //     Text('${getUserMob(prof['nom'])}',
+                      //       style: TextStyle(
+                      //         fontSize: 20,
+                      //         fontWeight: FontWeight.w400,
+                      //         fontStyle: FontStyle.italic,
+                      //       ),),
+                      //   ],
+                      // ),
+                      // SizedBox(height: 25),
                       Row(
                         children: [
                           Text('Banque:',
@@ -717,26 +558,7 @@ class _ProfesseuresState extends State<Professeures> {
                               fontStyle: FontStyle.italic,
                             ),),
                           SizedBox(width: 10,),
-                          Text('${prof['banque']}',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.italic,
-                            ),),
-
-                        ],
-                      ),
-                      SizedBox(height: 25),
-                      Row(
-                        children: [
-                          Text('Compte:',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.italic,
-                            ),),
-                          SizedBox(width: 10,),
-                          Text('${prof['compte']}',
+                          Text('${getProfBanq(prof['nom'])}',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w400,
@@ -877,8 +699,8 @@ class _ProfesseuresState extends State<Professeures> {
                                 context: context,
                                 builder: (BuildContext context) {
                                   return AlertDialog(
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                                    elevation: 1,
+                                            surfaceTintColor: Color(0xB0AFAFA3),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
                                     title: Text("Confirmer la suppression"),
                                     content: Text("Êtes-vous sûr de vouloir supprimer cet élément ?"),
                                     actions: <Widget>[
@@ -952,76 +774,8 @@ class _ProfesseuresState extends State<Professeures> {
   }
 
 
-  void updateProf( id,String name,String prenom, String email,[num? mobile]) async {
-
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString("token")!;
-    print(token);
-    final response = await http.patch(
-      Uri.parse("http://192.168.43.73:5000/professeur" + "/$id"),
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode(<String, dynamic>{
-        "nom":name,
-        "prenom":prenom ,
-        "mobile": mobile ,
-        "email": email ,
-      }),
-    );
-    print(response.statusCode);
-    if (response.statusCode == 201) {
-      // Fetch the updated list of Matieres and update the UI
-      fetchProfs().then((data) {
-        setState(() {
-          filteredItems = data;
-        });
-      }).catchError((error) {
-        print('Erreur lors de la récupération des Matieres: $error');
-      });
-    } else {
-      return Future.error('Server Error');
-      print(
-          '4e 5asser sa77bi mad5al======================================');
-    }
-  }
-  void UpdateProf( id,String name,String description,[num? prix]) async {
-
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString("token")!;
-    print(token);
-    final response = await http.patch(
-      Uri.parse("http://192.168.43.73:5000/categorie" + "/$id"),
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode(<String, dynamic>{
-        "name":name,
-        // "code":code ,
-        "description":description ,
-        "prix": prix ,
-      }),
-    );
-    print(response.statusCode);
-    if (response.statusCode == 201) {
-      // Fetch the updated list of Matieres and update the UI
-      fetchProfs().then((data) {
-        setState(() {
-          filteredItems = data;
-        });
-      }).catchError((error) {
-        print('Erreur lors de la récupération des Matieres: $error');
-      });
-    } else {
-      return Future.error('Server Error');
-      print(
-          '4e 5asser sa77bi mad5al======================================');
-    }
-  }
-
 }
+
 void AddProf (String user,String nom,num mobile,String email,String password,String Banque, num account) async {
 
   // Check if the prix parameter is provided, otherwise use the default value of 100
@@ -1058,7 +812,367 @@ void AddProf (String user,String nom,num mobile,String email,String password,Str
   }
 }
 
+class FoldableOptions extends StatefulWidget {
+  @override
+  _FoldableOptionsState createState() => _FoldableOptionsState();
+}
 
+class _FoldableOptionsState extends State<FoldableOptions>
+    with SingleTickerProviderStateMixin {
+  final List<IconData> options = [
+    Icons.cloud_download_outlined,
+    Icons.person_add_alt_outlined,
+  ];
+
+
+
+  TextEditingController _name = TextEditingController();
+  TextEditingController _Banque = TextEditingController();
+  TextEditingController _account = TextEditingController();
+  TextEditingController _email = TextEditingController();
+  TextEditingController _mobile = TextEditingController();
+  
+  late Animation<Alignment> firstAnim;
+  late Animation<Alignment> secondAnim;
+  late Animation<Alignment> thirdAnim;
+  late Animation<double> verticalPadding;
+  late AnimationController controller;
+  final duration = Duration(milliseconds: 190);
+
+  Widget getItem(IconData source,VoidCallback onPress) {
+    final size = 45.0;
+    return GestureDetector(
+      onTap: () {
+        controller.reverse();
+      },
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: Colors.blue,
+          borderRadius: BorderRadius.all(
+            Radius.circular(40),
+          ),
+        ),
+        child: IconButton(
+          icon: Icon(source,size: 20),
+          color: Colors.white.withOpacity(1.0),
+          onPressed: onPress,
+        ),
+      ),
+    );
+  }
+
+  Widget buildPrimaryItem(IconData source) {
+    final size = 45.0;
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: Colors.blue,
+        borderRadius: BorderRadius.all(
+          Radius.circular(40),
+        ),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.blue.withOpacity(0.8),
+              blurRadius: verticalPadding.value),
+        ],
+      ),
+      child: Icon(
+        source,
+        color: Colors.white.withOpacity(1),
+        size: 20,
+      ),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    controller = AnimationController(vsync: this, duration: duration);
+
+    final anim = CurvedAnimation(parent: controller, curve: Curves.linear);
+    firstAnim =
+        Tween<Alignment>(begin: Alignment.centerRight, end: Alignment.topRight)
+            .animate(anim);
+    secondAnim =
+        Tween<Alignment>(begin: Alignment.centerRight, end: Alignment.topLeft)
+            .animate(anim);
+    verticalPadding = Tween<double>(begin: 0, end: 26).animate(anim);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 160,
+      height: 120,
+      margin: EdgeInsets.only(top: 15,right: 15),
+      child: AnimatedBuilder(
+        animation: controller,
+        builder: (context, child) {
+          return Stack(
+            children: <Widget>[
+              Align(
+                alignment: firstAnim.value,
+                child:Container(
+                  padding: EdgeInsets.only(
+                       bottom: verticalPadding.value),
+                  child: getItem(
+                    options.elementAt(0),
+                          ()=>_importData(context)
+                  ),
+                )
+              ),
+              Align(
+                alignment: secondAnim.value,
+                child:Container(
+                  padding: EdgeInsets.only(
+                      left: 73, top: verticalPadding.value),
+                  child: getItem(
+                    options.elementAt(1),
+                      ()=>_displayTextInputDialog(context)
+                  ),
+                )
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: GestureDetector(
+                  onTap: () {
+                    controller.isCompleted
+                        ? controller.reverse()
+                        : controller.forward();
+                  },
+                  child: buildPrimaryItem(
+                    controller.isCompleted || controller.isAnimating
+                        ? Icons.close
+                        : Icons.add,
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+
+  Future<void> _importData(BuildContext context) async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['xlsx'],
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      File file = File(result.files.first.path!);
+
+      // String directoryPath = (await getApplicationDocumentsDirectory()).path;
+      // String filePath = '$directoryPath/${basename(file.path)}';
+      // await file.copy(filePath);
+
+      ByteData data = await file.readAsBytes().then((bytes) {
+        return ByteData.sublistView(Uint8List.fromList(bytes));
+      });
+      List<int> bytes = data.buffer.asUint8List();
+      var excel = Excel.Excel.decodeBytes(bytes);
+
+
+      for (var table in excel.tables.keys) {
+        print(table); // Nom de la feuille
+        print(excel.tables[table]!.maxCols);
+        print("hmm: ${excel.tables[table]!.maxCols}");
+        print(excel.tables[table]!.rows[0]); // Lecture de l'en-tête
+
+        // Commencer à traiter à partir de la deuxième ligne (index 1)
+        for (var i = 1; i < 100; i++) {
+          var row = excel.tables[table]!.rows[i];
+
+          print('taille: ${row.length}');
+          // if (row.length >= excel.tables[table]!.maxCols) {  // Vérifiez si la ligne a au moins le nombre maximum de colonnes
+          String nom = row[0]?.value?.toString() ?? "";
+          String banque = row[1]?.value?.toString() ?? "";
+          String compte = row[2]?.value?.toString() ?? "0";
+          String mobile = row[3]?.value?.toString() ?? "0";
+          // String email = extractEmail(row[5]);
+          String email = row[4]?.value?.toString() ?? "";
+          String password = row[5]?.value?.toString() ?? "";
+          String user = row[6]?.value?.toString() ?? "";
+
+          // Faites quelque chose avec les données, par exemple, ajoutez-les à votre liste de professeurs
+          print('les infos: $nom, Banque $compte');
+          AddProf(user,nom, num.parse(mobile), email, password, banque, num.parse(compte));
+          // } else {
+          //   print('La ligne $i n\'a pas suffisamment d\'éléments.');
+          // }
+        }
+
+
+      }
+      print("Hello ${excel.tables.values.first}");
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Données importées avec succès depuis le fichier Excel.')),
+      );
+    }
+  }
+
+
+  Future<void> _displayTextInputDialog(BuildContext context) async {
+
+    return showModalBottomSheet(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
+            topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
+        isScrollControlled: true, // Rendre le contenu déroulable
+
+
+        context: context,
+        builder: (BuildContext context) {
+          return SingleChildScrollView(
+            child: Container(
+              height: 590,
+              padding: const EdgeInsets.all(25.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    // mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text("Ajouter un Prof", style: TextStyle(fontSize: 25),),
+                      Spacer(),
+                      InkWell(
+                        child: Icon(Icons.close),
+                        onTap: (){
+                          Navigator.pop(context);
+                        },
+                      )
+                    ],
+                  ),
+                  SizedBox(height: 40),
+                  TextField(
+                    controller: _name,
+                    keyboardType: TextInputType.text,
+                    decoration: InputDecoration(
+                        filled: true,
+                        // fillColor: Color(0xA3B0AF1),
+                        // fillColor: Colors.white,
+                        hintText: "name",
+                        border: OutlineInputBorder(
+                            borderSide: BorderSide.none,gapPadding: 1,
+                            borderRadius: BorderRadius.all(
+                                Radius.circular(10.0)))),
+                  ),
+
+                  // SizedBox(height: 10),
+                  // TextField(
+                  //   controller: _prenom,
+                  //   keyboardType: TextInputType.text,
+                  //   decoration: InputDecoration(
+                  //       filled: true,
+                  //       // fillColor: Color(0xA3B0AF1),
+                  //       // fillColor: Colors.white,
+                  //       hintText: "Prenom",
+                  //       border: OutlineInputBorder(
+                  //           borderSide: BorderSide.none,gapPadding: 1,
+                  //           borderRadius: BorderRadius.all(
+                  //               Radius.circular(10.0)))),
+                  // ),
+
+                  SizedBox(height: 10),
+                  TextField(
+                    controller: _mobile,
+                    keyboardType: TextInputType.text,
+                    decoration: InputDecoration(
+                        filled: true,
+                        // fillColor: Color(0xA3B0AF1),
+                        // fillColor: Colors.white,
+                        hintText: "Mobile",
+                        border: OutlineInputBorder(
+                            borderSide: BorderSide.none,gapPadding: 1,
+                            borderRadius: BorderRadius.all(
+                                Radius.circular(10.0)))),
+                  ),
+
+                  SizedBox(height: 10),
+                  TextField(
+                    controller: _email,
+                    keyboardType: TextInputType.text,
+                    decoration: InputDecoration(
+                        filled: true,
+                        // fillColor: Color(0xA3B0AF1),
+                        // fillColor: Colors.white,
+                        hintText: "Email",
+                        border: OutlineInputBorder(
+                            borderSide: BorderSide.none,gapPadding: 1,
+                            borderRadius: BorderRadius.all(
+                                Radius.circular(10.0)))),
+                  ),
+
+                  SizedBox(height: 10),
+                  TextField(
+                    controller: _Banque,
+                    keyboardType: TextInputType.text,
+                    decoration: InputDecoration(
+                        filled: true,
+                        // fillColor: Color(0xA3B0AF1),
+                        // fillColor: Colors.white,
+                        hintText: "Banque",
+                        border: OutlineInputBorder(
+                            borderSide: BorderSide.none,gapPadding: 1,
+                            borderRadius: BorderRadius.all(
+                                Radius.circular(10.0)))),
+                  ),
+
+                  SizedBox(height: 10),
+                  TextField(
+                    controller: _account,
+                    keyboardType: TextInputType.text,
+                    decoration: InputDecoration(
+                        filled: true,
+                        // fillColor: Color(0xA3B0AF1),
+                        // fillColor: Colors.white,
+                        hintText: "Compte",
+                        border: OutlineInputBorder(
+                            borderSide: BorderSide.none,gapPadding: 1,
+                            borderRadius: BorderRadius.all(
+                                Radius.circular(10.0)))),
+                  ),
+                  SizedBox(height: 30),
+                  ElevatedButton(onPressed: () {
+                    Navigator.of(context).pop();
+                    fetchProfs();
+                    // AddProf(_name.text, _Banque.text, _account.text);
+                    // AddProf(_name.text, _desc.text);
+                    setState(() {
+                      Navigator.pop(context);
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(
+                          'Le Prof a été ajouter avec succès.')),
+                    );
+                    setState(() {
+                      Navigator.of(context).pop();
+                    });
+                  }, child: Text("Ajouter"),
+
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xff0fb2ea),
+                      foregroundColor: Colors.white,
+                      elevation: 10,
+                      minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
+                      // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
+                      //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          );
+        });
+  }
+}
 
 class AddProfMat extends StatefulWidget {
   final String profId;
@@ -1105,6 +1219,7 @@ class _AddProfMatState extends State<AddProfMat> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+                surfaceTintColor: Color(0xB0AFAFA3),
         insetPadding: EdgeInsets.only(top: 280,),
 // backgroundColor: Color(0xB0AFAFA3),
         shape: RoundedRectangleBorder(
@@ -1160,7 +1275,7 @@ width: MediaQuery.of(context).size.width,
                 decoration: InputDecoration(
                   filled: true,
                   // fillColor: Colors.white,
-                  // fillColor: Color(0xA3B0AF1),
+                  fillColor: Color(0xA3B0AF1),
                   hintText: "....",hintStyle: TextStyle(fontSize: 20),
                   border: OutlineInputBorder(
                     borderSide: BorderSide.none,gapPadding: 1,
@@ -1191,7 +1306,7 @@ width: MediaQuery.of(context).size.width,
                 decoration: InputDecoration(
                   filled: true,
                   hintText: "....",hintStyle: TextStyle(fontSize: 20),
-                  // fillColor: Color(0xA3B0AF1),
+                  fillColor: Color(0xA3B0AF1),
                   border: OutlineInputBorder(
                     borderSide: BorderSide.none,gapPadding: 1,
                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
@@ -1271,7 +1386,7 @@ class Professeur {
       id: json['_id'],
       nom: json['nom'],
       prenom: json['prenom'],
-      banque: json['banque'],
+      banque: json['info']['banque'],
       user: json['user']?? '',
       compte: json['accountNumero'],
       email: json['email'],

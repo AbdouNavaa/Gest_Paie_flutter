@@ -29,7 +29,9 @@ class _UsersState extends State<Users> {
 
   List<User>? filteredItems;
   bool _userIsActive = false; // Variable pour suivre l'état de l'utilisateur
+  int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
 
+  bool showFloat = false;
   void DeleteUser(id) async{
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token")!;
@@ -154,6 +156,7 @@ class _UsersState extends State<Users> {
               ,
             ),
 
+
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
@@ -172,246 +175,49 @@ class _UsersState extends State<Users> {
                         if (snapshot.hasError) {
                           return Text('Error: ${snapshot.error}');
                         } else {
+
                           List<User>? items = snapshot.data;
 
-                          return  SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white12,
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(20.0),
-                                ),
-                              ),
-                              margin: EdgeInsets.only(left: 10),
-                              child: DataTable(
-                                showCheckboxColumn: true,
-                                showBottomBorder: true,
-                                headingRowHeight: 50,
-                                horizontalMargin: 2,
-                                columnSpacing: 3,
-                                dataRowHeight: 50,
-                                // border: TableBorder.all(color: Colors.black12, width: 2),
-                                headingTextStyle: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black, // Set header text color
-                                ),
-                                // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
-                                columns: [
-                                  DataColumn(label: Text('Active')),
-                                  DataColumn(label: Text('Nom')),
-                                  DataColumn(label: Text('Email')),
-                                  DataColumn(label: Text('Mobile')),
-                                  DataColumn(label: Text('Role')),
-                                  // DataColumn(label: Text('Catégorie')),
-                                  // DataColumn(label: Text('Action')),
-                                ],
-                                rows: [
-                                  for (var index = 0; index < (filteredItems?.length ?? 0); index++)
-//                                    if(filteredItems?[index].role != 'admin')
-                                    DataRow(
-                                      cells: [
-                                        // DataCell(Text('${index + 1}',style: TextStyle(fontSize: 15),)), // Numbering cell
-                                        DataCell(
-                                            CupertinoSwitch(
-                                              activeColor: Colors.black26,
-                                              // thumbColor: Colors.blueAccent,
-                                              value: filteredItems![index].isActive!,
-                                              onChanged: (value) async {
-                                                // Continue with the rest of your onChanged logic if the types string is in the expected format
-                                                setState(() {
-                                                  // filteredItems![index].isActive = value;
-                                                  // fetchUser();
-                                                });
 
-                                                Navigator.of(context).pop();
+                          //abou
+                          return
+                            Container(
+                              height: 500,
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.vertical,
+                                child: Theme(
+                                  data: ThemeData(
+                                    // Modifiez les couleurs de DataTable ici
+                                    dataTableTheme: DataTableThemeData(
+                                      dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white), // Couleur des lignes de données
+                                      // headingRowColor: MaterialStateColor.resolveWith((states) => Colors.black), // Couleur de la ligne d'en-tête
 
-                      fetchUser().then((data) {
-                      setState(() {
-                      filteredItems = data; // Assigner la liste renvoyée par Useresseur à items
-                      });});
-
-                                                  ActiveUser(
-                                                    filteredItems![index].id,
-                                                  );
-                                              },
-                                            )
-
-                                        ), DataCell(Container(width: 70,
-                                            child: Text('${filteredItems?[index].name } ${filteredItems?[index].prenom}',style: TextStyle(
-                                              color: Colors.black,
-                                            ),))),
-                                        DataCell(Container(width: 150,
-                                            child: Text('${filteredItems?[index].email}',style: TextStyle(
-                                              color: Colors.black,
-                                            ),)),),
-                                        DataCell(Container(width: 68,
-                                            child: Text('${filteredItems?[index].mobile}',style: TextStyle(
-                                              color: Colors.black,
-                                            ),)),),
-                                        DataCell(Container(width: 80,
-                                            child: Text('${filteredItems?[index].role}',style: TextStyle(
-                                              color: Colors.black,
-                                            ),)),),
-
-                                        // DataCell(Container(width: 105,
-                                        //     child: Text('${filteredItems?[index].description}',)),),
-                                        // DataCell(Text('${filteredItems?[index].categorie}')),
-                                        // DataCell(
-                                        //   Row(
-                                        //     children: [
-                                        //       Container(
-                                        //         width: 35,
-                                        //         child: TextButton(
-                                        //           onPressed: () {
-                                        //             _name.text = items![index].name!;
-                                        //             _desc.text = items![index].prenom!;
-                                        //             // _selectedTaux = items![index].email!;
-                                        //             showDialog(
-                                        //               context: context,
-                                        //               builder: (BuildContext context) {
-                                        //                 return AlertDialog(
-                                        //                   title: Text("Mise à jour de la tâche"),
-                                        //                   content: Form(
-                                        //                     child: SingleChildScrollView(
-                                        //                       child: Column(
-                                        //                         mainAxisSize: MainAxisSize.min,
-                                        //                         children: [
-                                        //                           TextFormField(
-                                        //                             controller: _name,
-                                        //                             decoration: InputDecoration(labelText: 'Name'),
-                                        //                           ),
-                                        //                           TextFormField(
-                                        //                             controller: _desc,
-                                        //                             decoration: InputDecoration(labelText: 'Descreption'),
-                                        //                           ),
-                                        //                           DropdownButtonFormField<num>(
-                                        //                             value: _selectedTaux,
-                                        //                             items: [
-                                        //                               DropdownMenuItem<num>(
-                                        //                                 child: Text('500'),
-                                        //                                 value: 500,
-                                        //                               ),
-                                        //                               DropdownMenuItem<num>(
-                                        //                                 child: Text('900'),
-                                        //                                 value: 900,
-                                        //                               ),
-                                        //                             ],
-                                        //                             onChanged: (value) {
-                                        //                               setState(() {
-                                        //                                 _selectedTaux = value!;
-                                        //                               });
-                                        //                             },
-                                        //                             decoration: InputDecoration(
-                                        //                               filled: true,
-                                        //                               fillColor: Colors.white,
-                                        //                               hintText: "taux",
-                                        //                               border: OutlineInputBorder(
-                                        //                                 borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                                        //                               ),
-                                        //                             ),
-                                        //                           ),
-                                        //                         ],
-                                        //                       ),
-                                        //                     ),
-                                        //                   ),
-                                        //                   actions: [
-                                        //                     TextButton(
-                                        //                       child: Text("ANNULER"),
-                                        //                       onPressed: () {
-                                        //                         Navigator.of(context).pop();
-                                        //                       },
-                                        //                     ),
-                                        //                     TextButton(
-                                        //                       child: Text(
-                                        //                         "MISE À JOUR",
-                                        //                         style: TextStyle(color: Colors.blue),
-                                        //                       ),
-                                        //                       onPressed: () {
-                                        //                         Navigator.of(context).pop();
-                                        //                         _taux.text = _selectedTaux.toString();
-                                        //
-                                        //                         fetchUser();
-                                        //                         // AddUser(_name.text, _desc.text);
-                                        //                         print(items![index].id!);
-                                        //                         UpdateCateg(items![index].id!, _name.text, _desc.text, _selectedTaux,);
-                                        //                         ScaffoldMessenger.of(context).showSnackBar(
-                                        //                           SnackBar(content: Text('Le Type est mis à jour avec succès.')),
-                                        //                         );
-                                        //
-                                        //                         setState(() {
-                                        //                           fetchUser();
-                                        //                         });
-                                        //                       },
-                                        //                     ),
-                                        //                   ],
-                                        //                 );
-                                        //               },
-                                        //             );
-                                        //           },
-                                        //           child: Icon(Icons.edit, color: Colors.black),
-                                        //           style: TextButton.styleFrom(
-                                        //             primary: Colors.white,
-                                        //             elevation: 0,
-                                        //             // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
-                                        //           ),
-                                        //         ),
-                                        //       ),
-                                        //       Container(
-                                        //         width: 35,
-                                        //         child: TextButton(
-                                        //           onPressed: () {
-                                        //             showDialog(
-                                        //               context: context,
-                                        //               builder: (BuildContext context) {
-                                        //                 return AlertDialog(
-                                        //                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
-                                        //                   title: Text("Confirmer la suppression"),
-                                        //                   content: Text(
-                                        //                       "Êtes-vous sûr de vouloir supprimer cet élément ?"),
-                                        //                   actions: <Widget>[
-                                        //                     TextButton(
-                                        //                       child: Text("ANNULER"),
-                                        //                       onPressed: () {
-                                        //                         Navigator.of(context).pop();
-                                        //                       },
-                                        //                     ),
-                                        //                     TextButton(
-                                        //                       child: Text(
-                                        //                         "SUPPRIMER",
-                                        //                         // style: TextStyle(color: Colors.red),
-                                        //                       ),
-                                        //                       onPressed: () {
-                                        //                         Navigator.of(context).pop();
-                                        //                         DeleteUser(snapshot.data![index].id);
-                                        //                         ScaffoldMessenger.of(context).showSnackBar(
-                                        //                           SnackBar(content: Text('Le User a été Supprimer avec succès.')),
-                                        //                         );
-                                        //                       },
-                                        //                     ),
-                                        //                   ],
-                                        //                 );
-                                        //               },
-                                        //             );
-                                        //           },
-                                        //
-                                        //           child: Icon(Icons.delete, color: Colors.black),
-                                        //           style: TextButton.styleFrom(
-                                        //             primary: Colors.white,
-                                        //             elevation: 0,
-                                        //             // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
-                                        //           ),
-                                        //         ),
-                                        //       ),
-                                        //     ],
-                                        //   ),
-                                        // ),
-                                      ],
                                     ),
-                                ],
+                                  ),
+                                  child: PaginatedDataTable(
+                                    columnSpacing: 10,dataRowHeight: 55,
+                                    rowsPerPage: _rowsPerPage,
+                                    showFirstLastButtons: _rowsPerPage >= 10 ? true: false,
+                                    availableRowsPerPage: [5, 7,9,10, 20],
+                                    onRowsPerPageChanged: (value) {
+                                      setState(() {
+                                        _rowsPerPage = value ?? _rowsPerPage;
+                                      });
+                                    },
+                                    columns: [
+                                      DataColumn(label: Text('Active')),
+                                      DataColumn(label: Text('Nom')),
+                                      DataColumn(label: Text('Email')),
+                                      DataColumn(label: Text('Role')),
+                                      DataColumn(label: Text('Banque')),
+                                      // DataColumn(label: Text('Action')),
+                                    ],
+                                    source: YourDataSource(filteredItems ?? items!,),
+                                  ),
+                                ),
+
                               ),
-                            ),
-                          );
+                            );
 
 
                         }
@@ -421,17 +227,89 @@ class _UsersState extends State<Users> {
                 ),
               ),
             ),
+
           ],
         ),
-        floatingActionButton: FloatingActionButton.extended(
-          // heroTag: 'uniqueTag',
-          tooltip: 'Ajouter un Utilisateur',
-          backgroundColor: Colors.white,
-          label: Row(
-            children: [Icon(Icons.add,color: Colors.black,)],
+        floatingActionButton:
+        showFloat?
+        Container(
+          width: 300,
+
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(50)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 5,
+              ),
+            ],
           ),
-          onPressed: () => _importData(context),
-          // onPressed: () {},
+
+          margin: EdgeInsets.only(left: 80,right: 25),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // SizedBox(width: 18,),
+              TextButton(
+                child: Row(
+                  children: [
+                    Icon(Icons.add, color: Colors.black,),
+                    Text('Ajouter',style: TextStyle(color: Colors.black),),
+                  ],
+                ),
+                onPressed: () => _displayTextInputDialog(context),
+
+              ),
+              TextButton(
+                child: Row(
+                  children: [
+                    Icon(Icons.cloud_download_outlined, color: Colors.black,),
+                    Text('Importer',style: TextStyle(color: Colors.black),),
+                  ],
+                ),
+                onPressed: () => _importData(context),
+
+              ),
+              TextButton(
+                child: Icon(Icons.close_outlined, color: Colors.black,),
+                onPressed: () {
+                  setState(() {
+                    showFloat = false;
+                  });
+                },
+
+              ),
+
+
+            ],
+          ),
+        )
+        :Container(
+          width: 60,
+          decoration: BoxDecoration(
+            color: Colors.lightGreen,
+            borderRadius: BorderRadius.all(Radius.circular(50)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 5,
+              ),
+            ],
+          ),
+
+          // margin: EdgeInsets.only(left: 90,right: 60),
+          child:
+          TextButton(
+            child: Icon(Icons.add, color: Colors.white,),
+            onPressed: () {
+              setState(() {
+                showFloat = true;
+              });
+            },
+
+          ),
 
         ),
 
@@ -507,127 +385,161 @@ class _UsersState extends State<Users> {
         context: context,
         builder: (context) {
           return AlertDialog(
+              insetPadding: EdgeInsets.only(top: 60,),
+              surfaceTintColor: Color(0xB0AFAFA3),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(20),
+                  topLeft: Radius.circular(20),
+                ),
+              ),
               title: Text('Ajouter un Utilisateur'),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: _name,
-                      keyboardType: TextInputType.text,
-                      decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          hintText: "name",
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                    ),
-                    TextField(
-                      controller: _prenom,
-                      keyboardType: TextInputType.text,
-                      decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          hintText: "Prenom",
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                    ),
-                    TextField(
-                      controller: _mobile,
-                      keyboardType: TextInputType.text,
-                      decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          hintText: "Mobile",
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                    ),
-                    TextField(
-                      controller: _email,
-                      keyboardType: TextInputType.text,
-                      decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          hintText: "email",
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                    ),
+              content: Container(
+                width: MediaQuery.of(context).size.width,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      TextField(
+                        controller: _name,
+                        keyboardType: TextInputType.text,
+                        decoration: InputDecoration(
+                            filled: true,
+                            // fillColor: Color(0xA3B0AF1),
+                            fillColor: Colors.white,
+                            hintText: "Nom",
+                            border: OutlineInputBorder(
+                                borderSide: BorderSide.none,gapPadding: 1,
+                                borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+
+                      ),
+                      SizedBox(height: 10),
+                      TextField(
+                        controller: _prenom,
+                        keyboardType: TextInputType.text,
+                        decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            hintText: "Prenom",
+                            border: OutlineInputBorder(
+                                borderSide: BorderSide.none,gapPadding: 1,
+                                borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                      ),
+                      SizedBox(height: 10),
+                      TextField(
+                        controller: _mobile,
+                        keyboardType: TextInputType.text,
+                        decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            hintText: "Mobile",
+                            border: OutlineInputBorder(
+                                borderSide: BorderSide.none,gapPadding: 1,
+                                borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                      ),
+                      SizedBox(height: 10),
+                      TextField(
+                        controller: _email,
+                        keyboardType: TextInputType.text,
+                        decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            hintText: "email",
+                            border: OutlineInputBorder(
+                                borderSide: BorderSide.none,gapPadding: 1,
+                                borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                      ),
 
 
-                    TextField(
-                      controller: _pass,
-                      keyboardType: TextInputType.text,
-                      decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          hintText: "Mot de Passe",
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                    ),
-                    TextField(
-                      controller: _confpass,
-                      keyboardType: TextInputType.text,
-                      decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          hintText: "Confirmation",
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                    ),
-                    TextField(
-                      controller: _banque,
-                      keyboardType: TextInputType.text,
-                      decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          hintText: "Banque",
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                    ),
+                      SizedBox(height: 10),
+                      TextField(
+                        controller: _pass,
+                        keyboardType: TextInputType.text,
+                        decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            hintText: "Mot de Passe",
+                            border: OutlineInputBorder(
+                                borderSide: BorderSide.none,gapPadding: 1,
+                                borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                      ),
+                      SizedBox(height: 10),
+                      TextField(
+                        controller: _confpass,
+                        keyboardType: TextInputType.text,
+                        decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            hintText: "Confirmation",
+                            border: OutlineInputBorder(
+                                borderSide: BorderSide.none,gapPadding: 1,
+                                borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                      ),
+                      SizedBox(height: 10),
+                      TextField(
+                        controller: _banque,
+                        keyboardType: TextInputType.text,
+                        decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            hintText: "Banque",
+                            border: OutlineInputBorder(
+                                borderSide: BorderSide.none,gapPadding: 1,
+                                borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                      ),
 
-                    TextField(
-                      controller: _role,
-                      keyboardType: TextInputType.text,
-                      decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          hintText: "Role",
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                    ),
-                    TextField(
-                      controller: _compte,
-                      keyboardType: TextInputType.text,
-                      decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          hintText: "Compte",
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                    ),
+                      SizedBox(height: 10),
+                      TextField(
+                        controller: _role,
+                        keyboardType: TextInputType.text,
+                        decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            hintText: "Role",
+                            border: OutlineInputBorder(
+                                borderSide: BorderSide.none,gapPadding: 1,
+                                borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                      ),
+                      SizedBox(height: 10),
+                      TextField(
+                        controller: _compte,
+                        keyboardType: TextInputType.text,
+                        decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            hintText: "Compte",
+                            border: OutlineInputBorder(
+                                borderSide: BorderSide.none,gapPadding: 1,
+                                borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                      ),
 
 
-                    ElevatedButton(onPressed: (){
-                      Navigator.of(context).pop();
-                      fetchUser();
-                      AddUser(_name.text,_prenom.text,int.parse(_mobile.text),_email.text,_pass.text,_confpass.text,_banque.text,_role.text,int.parse(_compte.text));
-                      // AddUser(_name.text, _desc.text);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Le User a été ajouter avec succès.')),
-                      );
-                      // setState(() {
-                      //   fetchUser();
-                      // });
-                    }, child: Text("Ajouter"),
+                      SizedBox(height: 20),
+                      ElevatedButton(onPressed: (){
+                        Navigator.of(context).pop();
+                        fetchUser();
+                        AddUser(_name.text,_prenom.text,int.parse(_mobile.text),_email.text,_pass.text,_confpass.text,_banque.text,_role.text,int.parse(_compte.text));
+                        // AddUser(_name.text, _desc.text);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Le User a été ajouter avec succès.')),
+                        );
+                        // setState(() {
+                        //   fetchUser();
+                        // });
+                      }, child: Text("Ajouter"),
 
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xff0fb2ea),
-                        foregroundColor: Colors.white,
-                        elevation: 10,
-                        padding: EdgeInsets.only(left: 90, right: 90),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                      ),)
-                  ],
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xff0fb2ea),
+                          foregroundColor: Colors.white,
+                          elevation: 10,
+                          minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
+                          // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
+                          //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                        ),
+                      )
+                    ],
+                  ),
                 ),
               )
           );
@@ -706,13 +618,83 @@ class _UsersState extends State<Users> {
   }
 }
 
+class YourDataSource extends DataTableSource {
+  List<User> _items;
+  // Function(int) onTapCallback; // La fonction prendra un index comme paramètre
+
+  YourDataSource(this._items,);
+
+  @override
+  DataRow? getRow(int index) {
+
+    final item = _items[index];
+    return DataRow(cells: [
+      DataCell(
+          CupertinoSwitch(
+            activeColor: Colors.black26,
+            // thumbColor: Colors.blueAccent,
+            value: item.isActive!,
+            onChanged: (value) async {
+              // Continue with the rest of your onChanged logic if the types string is in the expected format
+              // setState(() {
+                // filteredItems![index].isActive = value;
+                // fetchUser();
+              // });
+
+              // Navigator.of(context).pop();
+
+              // fetchUser().then((data) {
+              //   setState(() {
+              //     filteredItems = data; // Assigner la liste renvoyée par Useresseur à items
+              //   });});
+
+              ActiveUser(
+                item.id,
+              );
+            },
+          )
+
+      ),
+      DataCell(Container(width: 70,
+          child: Text('${item.name } ${item.prenom}',style: TextStyle(
+            color: Colors.black,
+          ),))),
+      DataCell(Container(width: 150,
+          child: Text('${item.email}',style: TextStyle(
+            color: Colors.black,
+          ),)),),
+      DataCell(Container(width: 80, child: Text('${item.role}',style: TextStyle(
+            color: Colors.black,
+          ),)),),
+      DataCell(Container(width: 68,
+          child: Text('${item.banque}',style: TextStyle(
+            color: Colors.black,
+          ),)),),
+
+
+
+    ]);
+  }
+
+  @override
+  int get rowCount => _items.length;
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get selectedRowCount => 0;
+}
+
+
 class User {
   late final String id;
   final String name;
   final String prenom;
-  final num mobile;
+  final num? mobile;
   final String email;
   final String role;
+  final String banque;
    late final bool? isActive;
 
 
@@ -721,8 +703,9 @@ class User {
     required this.name,
     required this.prenom,
     required this.email,
-    required this.mobile,
+     this.mobile,
     required this.role,
+    required this.banque,
      this.isActive,
   });
 
@@ -734,6 +717,7 @@ class User {
       email: json['email'],
       mobile: json['mobile'],
       role: json['role'],
+      banque: json['banque'],
       isActive: json['active'],
     );
   }
@@ -757,7 +741,7 @@ Future<List<User>> fetchUser() async {
     Map<String, dynamic> jsonResponse = jsonDecode(response.body);
     List<dynamic> UsersData = jsonResponse['users'];
 
-    // print(UsersData);
+    print(UsersData);
     List<User> Users = UsersData.map((item) {
       return User.fromJson(item);
     }).toList();

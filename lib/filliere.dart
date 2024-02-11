@@ -73,7 +73,7 @@ class _FilliereState extends State<Filliere> {
     print(token);
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.43.73:5000/group/filliere-groups/$filliereId'),
+        Uri.parse('http://192.168.43.73:5000/filliere/$filliereId'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -83,12 +83,6 @@ class _FilliereState extends State<Filliere> {
       if (response.statusCode == 200) {
         Map<String, dynamic> data = json.decode(response.body);
          showFetchedDataModal(context, data,filliereId);
-        List<dynamic> semestreNames = data['semestre_names'];
-        List<dynamic> allGroups = data['all_groups'];
-        List<dynamic> groups = data['groups'];
-        List<dynamic> groupNames = data['group_names'];
-        List<dynamic> semestres = data['semestres'];
-
       } else {
         print('Failed to fetch data. Error ${response.statusCode}');
       }
@@ -110,7 +104,7 @@ class _FilliereState extends State<Filliere> {
     // Assuming you have a list of professeurs named 'professeursList'
 
     final grp = grps.firstWhere((prof) => '${prof.id}' == id, orElse: () =>
-        Group(id: '',  groupName: '',  ));
+        Group(id: '',  type: '', numero: 0,  ));
     print(grp);
     return grp; // Return the ID if found, otherwise an empty string
 
@@ -324,6 +318,7 @@ class _FilliereState extends State<Filliere> {
                                 showCheckboxColumn: true,
                                 showBottomBorder: true,
                                 headingRowHeight: 50,
+                                headingRowColor: MaterialStateColor.resolveWith((states) => Colors.lightBlueAccent.shade100), // Couleur de la ligne d'en-tête
                                 columnSpacing: 15,
                                 dataRowHeight: 50,
                                 // border: TableBorder.all(color: Colors.black12, width: 2),
@@ -358,7 +353,7 @@ class _FilliereState extends State<Filliere> {
                                                   TextButton(
                                                     onPressed: (){
                                                       print(fil.id);
-                                                      fetchData(fil.id!);
+                                                      _showFilDetails(context,fil);
                                                     },
 
                                                     // onPressed: () =>showFetchedDataModal(context, fetchData(fil.id!)),// Disable button functionality
@@ -395,15 +390,49 @@ class _FilliereState extends State<Filliere> {
             ),
           ],
         ),
-        floatingActionButton: FloatingActionButton.extended(
-          // heroTag: 'uniqueTag',
-          tooltip: 'Ajouter une categorie',
-          backgroundColor: Colors.white,
-          label: Row(
-            children: [Icon(Icons.add,color: Colors.black,)],
+        floatingActionButton: Container(
+          width: 400,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(50)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 5,
+              ),
+            ],
           ),
-          onPressed: () => _importData(context),
 
+          margin: EdgeInsets.only(left: 60,right: 55),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // SizedBox(width: 18,),
+              TextButton(
+                child: Row(
+                  children: [
+                    Icon(Icons.add, color: Colors.black,),
+                    Text('Ajouter',style: TextStyle(color: Colors.black),),
+                  ],
+                ),
+                onPressed: () => _displayTextInputDialog(context),
+
+              ),
+
+              // SizedBox(width: 210,),
+              TextButton(
+                child: Row(
+                  children: [
+                    Icon(Icons.cloud_download_outlined, color: Colors.black,),
+                    Text('Importer',style: TextStyle(color: Colors.black),),
+                  ],
+                ),
+                onPressed: () => _importData(context),
+
+              ),
+            ],
+          ),
         ),
 
 
@@ -466,34 +495,44 @@ class _FilliereState extends State<Filliere> {
 
   Future<void> _displayTextInputDialog(BuildContext context) async {
 
-    return showModalBottomSheet(
-        context: context,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
-            topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
-        isScrollControlled: true, // Rendre le contenu déroulable
 
-        builder: (BuildContext context){
-          return SingleChildScrollView(
-            child: Container(
-              height: 450,
-              padding: const EdgeInsets.all(25.0),
-              child: Column(
-                // mainAxisSize: MainAxisSize.min,
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+              insetPadding: EdgeInsets.only(top: 190,),
+              surfaceTintColor: Color(0xB0AFAFA3),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(20),
+                  topLeft: Radius.circular(20),
+                ),
+              ),
+              title:
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                // mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    // mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text("Ajouter un Filliere", style: TextStyle(fontSize: 25),),
-                      Spacer(),
-                      InkWell(
-                        child: Icon(Icons.close),
-                        onTap: (){
-                          Navigator.pop(context);
-                        },
-                      )
-                    ],
-                  ),
+                  Text("Ajouter un Filliere", style: TextStyle(fontSize: 25),),
+                  Spacer(),
+                  InkWell(
+                    child: Icon(Icons.close),
+                    onTap: (){
+                      Navigator.pop(context);
+                    },
+                  )
+                ],
+              ),
+
+            content:
+              Container(
+            height: 450,
+                width: MediaQuery.of(context).size.width,
+            // padding: const EdgeInsets.all(25.0),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                children: [
                   //hmmm
                   SizedBox(height: 40),
                   TextField(
@@ -501,13 +540,14 @@ class _FilliereState extends State<Filliere> {
                     keyboardType: TextInputType.text,
                     decoration: InputDecoration(
                         filled: true,
-                        // fillColor: Colors.white,
+                        // fillColor: Color(0xA3B0AF1),
+                        fillColor: Colors.white,
                         hintText: "Nom",
                         border: OutlineInputBorder(
                             borderSide: BorderSide.none,gapPadding: 1,
                             borderRadius: BorderRadius.all(Radius.circular(10.0)))),
                   ),
-
+              
                   SizedBox(height: 10),
                   DropdownButtonFormField<String>(
                     value: _selectedNiveau,
@@ -532,15 +572,16 @@ class _FilliereState extends State<Filliere> {
                     },
                     decoration: InputDecoration(
                       filled: true,
-                      // fillColor: Colors.white,
+                      // fillColor: Color(0xA3B0AF1),
+                      fillColor: Colors.white,
                       border: OutlineInputBorder(
                         borderSide: BorderSide.none,gapPadding: 1,
                         borderRadius: BorderRadius.all(Radius.circular(10.0)),
                       ),
                     ),
                   ),
-
-
+              
+              
                   SizedBox(height: 10),
                   TextFormField(
                     controller: _desc,
@@ -548,32 +589,33 @@ class _FilliereState extends State<Filliere> {
                     maxLines: 3,
                     decoration: InputDecoration(
                         filled: true,
-
-                        // fillColor: Colors.white,
+              
+                        // fillColor: Color(0xA3B0AF1),
+                        fillColor: Colors.white,
                         hintText: "description",
                         border: OutlineInputBorder(
                             borderSide: BorderSide.none,gapPadding: 1,
                             borderRadius: BorderRadius.all(Radius.circular(10.0)))),
                   ),
-
+              
                   SizedBox(height: 15),
                   ElevatedButton(
                     onPressed: (){
                       Navigator.of(context).pop();
                       fetchfilliere();
                       _niveau.text = _selectedNiveau.toString();
-
+              
                       Addfilliere(_name.text,_niveau.text,_desc.text);
                       // Addfilliere(_name.text, _desc.text);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Le filliere a été ajouter avec succès.')),
                       );
                       setState(() {
-                      fetchfilliere();
+                        fetchfilliere();
                       });
                     },
                     child: Text("Ajouter"),
-
+              
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xff0fb2ea),
                       foregroundColor: Colors.white,
@@ -587,152 +629,212 @@ class _FilliereState extends State<Filliere> {
                 ],
               ),
             ),
+          ),
+
           );
+        });
 
-        }
-
-
-    );
   }
+
+
 
 
   Future<void> _AjoutGroup(BuildContext context,List<dynamic> data) async {
 
-    String _selectedGN = 'A';
+    TextEditingController _numero = TextEditingController();
+    String _selectedGT = 'CM';
     String _selectedSem = data.isNotEmpty ? data[0]['_id'] : '';
 
-    return showModalBottomSheet(
+    return showDialog(
         context: context,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
-            topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
-        isScrollControlled: true, // Rendre le contenu déroulable
-
-        builder: (BuildContext context){
-          return SingleChildScrollView(
-            child: Container(
-              height: 500,
-              padding: const EdgeInsets.all(25.0),
-              child: Column(
-                // mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    // mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text("Ajouter Group", style: TextStyle(fontSize: 25),),
-                      Spacer(),
-                      InkWell(
-                        child: Icon(Icons.close),
-                        onTap: (){
-                          Navigator.pop(context);
-                        },
-                      )
-                    ],
-                  ),
-                  //hmmm
-                  SizedBox(height: 40),
-                  DropdownButtonFormField<String>(
-                    value: _selectedGN,
-                    items: [
-                      DropdownMenuItem<String>(
-                        child: Text('A'),
-                        value: "A",
-                      ),
-                      DropdownMenuItem<String>(
-                        child: Text('B'),
-                        value: "B",
-                      ),
-                      DropdownMenuItem<String>(
-                        child: Text('C'),
-                        value: "C",
-                      ),
-                    ],
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedGN = value!;
-                      });
-                    },
-                    decoration: InputDecoration(
-                      filled: true,labelText: 'GNom?',labelStyle: TextStyle(fontSize: 20,color: Colors.black),
-                      // fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide.none,gapPadding: 1,
-                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                      ),
-                    ),
-                  ),
-
-                  SizedBox(height: 10),
-                      DropdownButtonFormField<String>(
-                    value: _selectedSem,
-                    items: data.map((fil) {
-                      String displayText = 'S${fil['numero']}';
-
-                      return DropdownMenuItem<String>(
-                        value: fil['_id'],
-                        child: Text(displayText ?? ''),
-                      );
-                    }).toList(),
-                    onChanged: (value) async {
-                      setState(() {
-                        _selectedSem = value!;
-                      });
-                    },
-                    decoration: InputDecoration(
-                      filled: true,
-                      hintText: "Sélectionnez le semestre",
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide.none, gapPadding: 1,
-                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                      ),
-                    ),
-                  ),
-
-                  SizedBox(height: 10),
-                  ElevatedButton(
-                    onPressed: (){
-                      Navigator.of(context).pop();
-                      fetchGroup();
-                      _name.text = _selectedGN.toString();
-
-                      // Pass the selected types to addCoursToProfesseur method
-                      AddGroup(_name.text, _selectedSem);
-                      // AddGroup(int.parse(_numero.text),date, selectedFil!.id!);
-
-                      // Addfilliere(_name.text, _desc.text);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Le filliere a été ajouter avec succès.')),
-                      );
-                      setState(() {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) =>Groups()));
-                      });
-                    },
-                    child: Text("Ajouter"),
-
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xff0fb2ea),
-                      foregroundColor: Colors.white,
-                      elevation: 10,
-                      minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
-                      // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
-                      //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                    ),
-                  )
-                ],
+        builder: (context) {
+          return AlertDialog(
+            insetPadding: EdgeInsets.only(top: 190,),
+            surfaceTintColor: Color(0xB0AFAFA3),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                topRight: Radius.circular(20),
+                topLeft: Radius.circular(20),
               ),
             ),
+            title:
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              // mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Text("Modifier un Filliere", style: TextStyle(fontSize: 25),),
+                Spacer(),
+                InkWell(
+                  child: Icon(Icons.close),
+                  onTap: (){
+                    Navigator.pop(context);
+                  },
+                )
+              ],
+            ),
+
+            content: Container(
+              height: 450,
+              width: MediaQuery.of(context).size.width,
+              // padding: const EdgeInsets.all(25.0),
+              child: SingleChildScrollView(
+                child: Column(
+                  // mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(height: 40),
+                    DropdownButtonFormField<String>(
+                      value: _selectedGT,
+                      items: [
+                        DropdownMenuItem<String>(
+                          child: Text('CM'),
+                          value: "CM",
+                        ),
+                        DropdownMenuItem<String>(
+                          child: Text('TD/TP'),
+                          value: "TD/TP",
+                        ),
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedGT = value!;
+                        });
+                      },
+                      decoration: InputDecoration(
+                        filled: true,labelText: 'GNom?',labelStyle: TextStyle(fontSize: 20,color: Colors.black),
+                        // fillColor: Color(0xA3B0AF1),
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide.none,gapPadding: 1,
+                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: 30,),
+                    TextFormField(
+                      controller: _numero,
+                      decoration: InputDecoration(
+                          filled: true,
+                          // fillColor: Color(0xA3B0AF1),
+                          fillColor: Colors.white,
+                          hintText: "Numero",
+                          border: OutlineInputBorder(
+                              borderSide: BorderSide.none,gapPadding: 1,
+                              borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                      // readOnly: true,
+                    ),
+
+                    SizedBox(height: 30),
+                    DropdownButtonFormField<String>(
+                      value: _selectedSem,
+                      items: data.map((fil) {
+                        String displayText = 'S${fil['numero']}';
+
+                        return DropdownMenuItem<String>(
+                          value: fil['_id'],
+                          child: Text(displayText ?? ''),
+                        );
+                      }).toList(),
+                      onChanged: (value) async {
+                        setState(() {
+                          _selectedSem = value!;
+                        });
+                      },
+                      decoration: InputDecoration(
+                        filled: true,
+                        // fillColor: Color(0xA3B0AF1),
+                        fillColor: Colors.white,
+                        hintText: "Sélectionnez le semestre",
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide.none, gapPadding: 1,
+                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: 30),
+                    ElevatedButton(
+                      onPressed: (){
+                        Navigator.of(context).pop();
+                        fetchGroup();
+                        _name.text = _selectedGT.toString();
+
+                        // Pass the selected types to addCoursToProfesseur method
+                        AddGroup(int.parse(_numero.text),_selectedGT, _selectedSem);
+                        // AddGroup(int.parse(_numero.text),date, selectedFil!.id!);
+
+                        // Addfilliere(_name.text, _desc.text);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Le filliere a été ajouter avec succès.')),
+                        );
+                        setState(() {
+                          Navigator.push(context, MaterialPageRoute(builder: (context) =>Groups()));
+                        });
+                      },
+                      child: Text("Ajouter"),
+
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xff0fb2ea),
+                        foregroundColor: Colors.white,
+                        elevation: 10,
+                        minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
+                        // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
+                        //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                      ),
+                    )
+                  ],
+                ),
+
+              ),
+            ),
+
           );
-
-        }
-
-
-    );
+        });
   }
-  
+
+  Future<String?> pickExcelFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['xlsx'],
+    );
+
+    if (result != null) {
+      return result.files.single.path;
+    } else {
+      return null;
+    }
+  }
+
+  Future<void> uploadFileToBackend(String? filePath, id) async {
+    if (filePath != null) {
+      try {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        String token = prefs.getString("token")!;
+        Uri url = Uri.parse('http://192.168.43.73:5000/element/upload/${id}');
+        var request = http.MultipartRequest('POST', url,);
+        request.headers['Authorization'] = 'Bearer $token';
+        request.files.add(await http.MultipartFile.fromPath('file', filePath));
+
+        var response = await request.send();
+        if (response.statusCode == 200) {
+          var jsonResponse = await response.stream.bytesToString();
+          print('Réponse du serveur: $jsonResponse');
+        } else {
+          print('Échec de la requête: ${response.statusCode}');
+        }
+      } catch (e) {
+        print('Erreur lors de la requête: $e');
+      }
+    } else {
+      print('Aucun fichier sélectionné');
+    }
+  }
+
+
   void showFetchedDataModal(BuildContext context, Map<String, dynamic> data,String filId ) {
     showModalBottomSheet(
-      context: context,
+        context: context,backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
           topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
       isScrollControlled: true, // Rendre le contenu déroulable
@@ -759,6 +861,25 @@ class _FilliereState extends State<Filliere> {
                 Row(
                   children: [
                     Text(
+                      'Elements:',
+                      style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(width: 160,),
+                    IconButton(
+                        onPressed: () async {
+                          String? filePath = await pickExcelFile();
+                          if (filePath != null) {
+                            uploadFileToBackend(filePath, filId);
+                          }
+                        },
+                        icon: Icon(Icons.group_add_sharp))
+
+
+                  ],
+                ),
+                Row(
+                  children: [
+                    Text(
                       'Semestres:',
                       style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
                     ),
@@ -778,7 +899,7 @@ class _FilliereState extends State<Filliere> {
                     children: [
                       // Text('ID: ${semestre['_id']}',style: TextStyle(fontSize: 18)),
                       // '${getMatIdFromNames(grp.semestre!.elements!.join(", ")) }',
-                      Text('Matieres: [${getMatIdFromNames(getMatSemIdFromName(semestre['_id']).join(", "))}]',style: TextStyle(fontSize: 18)),
+                      // Text('Matieres: [${getMatIdFromNames(getMatSemIdFromName(semestre['_id']).join(", "))}]',style: TextStyle(fontSize: 18)),
                       Text('Numéro: S${semestre['numero']}',style: TextStyle(fontSize: 18)),
                       Text( 'Deb Semestre: ${DateFormat('dd/MM/yyyy ').format(
                         DateTime.parse(getSemeInfos(semestre['_id']).start.toString()).toLocal(),
@@ -816,8 +937,8 @@ class _FilliereState extends State<Filliere> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       // Text('ID: ${group['_id']}',style: TextStyle(fontSize: 18)),
-                      Text('Nom du groupe: ${group['name']}',style: TextStyle(fontSize: 18)),
-                      SizedBox(width: 100,),
+                      Text('Type et Num: ${group['type']}-${group['numero']}',style: TextStyle(fontSize: 18)),
+                      SizedBox(width: group['type'] == "CM"? 90:70,),
                       Text('S${group['semestre_numero']}',style: TextStyle(fontSize: 18)),
                       SizedBox(width: 10,),
                       IconButton(icon:Icon( Icons.date_range),
@@ -849,7 +970,7 @@ class _FilliereState extends State<Filliere> {
                         _desc.text = data['description'];
                         _selectedNiveau = data['niveau'];
                         showModalBottomSheet(
-                            context: context,
+                            context: context,backgroundColor: Colors.white,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
                                 topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
                             isScrollControlled: true, // Rendre le contenu déroulable
@@ -883,6 +1004,7 @@ class _FilliereState extends State<Filliere> {
                                         keyboardType: TextInputType.text,
                                         decoration: InputDecoration(
                                             filled: true,
+                                            fillColor: Color(0xA3B0AF1),
                                             // fillColor: Colors.white,
                                             border: OutlineInputBorder(
                                                 borderSide: BorderSide.none,gapPadding: 1,
@@ -915,6 +1037,7 @@ class _FilliereState extends State<Filliere> {
                                         },
                                         decoration: InputDecoration(
                                           filled: true,
+                                          fillColor: Color(0xA3B0AF1),
                                           // fillColor: Colors.white,
                                           border: OutlineInputBorder(
                                             borderSide: BorderSide.none,gapPadding: 1,
@@ -931,6 +1054,7 @@ class _FilliereState extends State<Filliere> {
                                         decoration: InputDecoration(
                                             filled: true,
 
+                                            fillColor: Color(0xA3B0AF1),
                                             // fillColor: Colors.white,
                                             hintText: "description",
                                             border: OutlineInputBorder(
@@ -1001,7 +1125,8 @@ class _FilliereState extends State<Filliere> {
                           context: context,
                           builder: (BuildContext context) {
                             return AlertDialog(
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
+                                      surfaceTintColor: Color(0xB0AFAFA3),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
                               title: Text("Confirmer la suppression"),
                               content: Text(
                                   "Êtes-vous sûr de vouloir supprimer cet élément ?"),
@@ -1059,6 +1184,204 @@ class _FilliereState extends State<Filliere> {
     );
   }
 
+  Future<void> _showFilDetails(BuildContext context, filliere fil) {
+    return showModalBottomSheet(
+        context: context,backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
+            topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
+        isScrollControlled: true, // Rendre le contenu déroulable
+
+        builder: (BuildContext context){
+          return Container(
+            height: 450,
+            padding: const EdgeInsets.all(25.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              // mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Filiere Infos',style: TextStyle(fontSize: 30),),
+                SizedBox(height: 50),
+                Row(
+                  children: [
+                    Text('Nom:',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+                    SizedBox(width: 10,),
+                    Container(
+                      width: 200,
+                      child: Text(fil.name.toUpperCase(),
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                          // color: Colors.lightBlue
+                        ),),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 25),
+                Row(
+                  children: [
+                    Text('Niveau:',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+
+                    SizedBox(width: 10,),
+                    Text('${fil.niveau}',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+
+                  ],
+                ),
+                SizedBox(height: 25),
+                SingleChildScrollView(scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      Text('Nom Complet:',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                          // color: Colors.lightBlue
+                        ),),
+                  
+                      SizedBox(width: 10,),
+                      Container(
+                        // width: 200,
+                        child: Text('${fil.description}',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w400,
+                            fontStyle: FontStyle.italic,
+                            // color: Colors.lightBlue
+                          ),),
+                      ),
+                  
+                    ],
+                  ),
+                ),
+
+                SizedBox(height: 20),
+                Row(
+                  children: [
+                    Text(
+                      'Elements:',
+                      style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(width: 160,),
+                    IconButton(
+                        onPressed: () async {
+                          String? filePath = await pickExcelFile();
+                          if (filePath != null) {
+                            uploadFileToBackend(filePath, fil.id);
+                          }
+                        },
+                        icon: Icon(Icons.group_add_sharp))
+
+
+                  ],
+                ),
+                SizedBox(height: 25,),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+
+                      onPressed: (){},
+
+                      child: Text('Modifier'),
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.only(left: 20,right: 20),
+                        foregroundColor: Colors.lightGreen,
+                        backgroundColor: Colors.white,
+                        // side: BorderSide(color: Colors.black,),
+                        elevation: 3,
+                        // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                      ),
+
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                              surfaceTintColor: Color(0xB0AFAFA3),
+                              title: Text("Confirmer la suppression"),
+                              content: Text(
+                                  "Êtes-vous sûr de vouloir supprimer cet élément ?"),
+                              actions: <Widget>[
+                                TextButton(
+                                  child: Text("ANNULER"),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                                TextButton(
+                                  child: Text(
+                                    "SUPPRIMER",
+                                    // style: TextStyle(color: Colors.red),
+                                  ),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+
+                                    // fetchMatiere();
+                                    // DeleteMatiere(mat!.id);
+                                    // print(mat.id!);
+
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Le Category a été Supprimer avec succès.')),
+                                    );
+
+                                    setState(() {
+                                      Navigator.of(context).pop();
+                                      fetchMatiere();
+                                    });
+
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }, // Disable button functionality
+
+                      child: Text('Supprimer'),
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.only(left: 20,right: 20),
+                        foregroundColor: Colors.redAccent,
+                        backgroundColor: Colors.white,
+                        // side: BorderSide(color: Colors.black,),
+                        elevation: 3,
+                        // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                      ),
+
+                    ),
+                  ],
+                ),
+
+              ],
+            ),
+          );
+        }
+
+
+    );
+  }
 
   void Addfilliere (String name,String niveau,String description) async {
 
@@ -1150,14 +1473,14 @@ class filliere {
   final String name;
   final String niveau;
   final String? description;
-  final int? periode;
+  // final int? periode;
 
   filliere({
     required this.id,
     required this.name,
     required this.niveau,
      this.description,
-     this.periode,
+     // this.periode,
   });
 
   factory filliere.fromJson(Map<String, dynamic> json) {
@@ -1166,7 +1489,7 @@ class filliere {
       name: json['name'],
       niveau: json['niveau'],
       description: json['description'],
-      periode: json['periode'],
+      // periode: json['periode'],
     );
   }
 
@@ -1176,7 +1499,7 @@ class filliere {
       'name': name,
       'niveau': niveau,
       'description': description,
-      'periode': periode,
+      // 'periode': periode,
     };
   }
 }
@@ -1198,7 +1521,7 @@ Future<List<filliere>> fetchfilliere() async {
     // If the server did return a 200 OK response,
     // then parse the JSON.
     Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-    List<dynamic> filData = jsonResponse['fillieres'];
+    List<dynamic> filData = jsonResponse['filieres'];
 
     print(filData);
     List<filliere> categories = filData.map((item) {
@@ -1231,7 +1554,8 @@ class _GroupEmploiPageState extends State<GroupEmploiPage> {
   late String annee = '';
   late int semestre =0;
   late String niveau = '';
-  late String group = '';
+  late int GNum = 0;
+  late String GType = '';
 
   @override
   void initState() {
@@ -1261,7 +1585,8 @@ class _GroupEmploiPageState extends State<GroupEmploiPage> {
         annee = data['annee'];
         semestre = data['semestre'];
         niveau = data['niveau'];
-        group = data['group'];
+        GNum = data['group'];
+        GType = data['group_type'];
         emplois = data['emplois'];
       });
     } else {
@@ -1273,7 +1598,7 @@ class _GroupEmploiPageState extends State<GroupEmploiPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Emploi du Groupe $group'),
+        title: Text('Emploi du Groupe $GType$GNum'),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1290,6 +1615,7 @@ class _GroupEmploiPageState extends State<GroupEmploiPage> {
                 showCheckboxColumn: true,
                 showBottomBorder: true,
                 headingRowHeight: 50,
+                headingRowColor: MaterialStateColor.resolveWith((states) => Colors.lightBlueAccent.shade100), // Couleur de la ligne d'en-tête
                 columnSpacing: 8,
                 dataRowHeight: 50,
                 columns: [

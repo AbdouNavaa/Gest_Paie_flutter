@@ -191,6 +191,7 @@ class _PaieState extends State<Paie> {
                     child: DataTable(
                       showCheckboxColumn: true,
                       showBottomBorder: true,
+                      headingRowColor: MaterialStateColor.resolveWith((states) => Colors.lightBlueAccent.shade100), // Couleur de la ligne d'en-tête
                       headingRowHeight: 50,
                       columnSpacing: 8,
                       dataRowHeight: 50,

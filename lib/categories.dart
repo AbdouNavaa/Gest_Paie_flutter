@@ -217,130 +217,140 @@ class _CategoriesState extends State<Categories> {
                                             // _code.text = categ.code!;
                                             _desc.text = filteredItems![index].description!;
                                             _selectedTaux = filteredItems![index].prix!;
-                                            showModalBottomSheet(
+                                             showDialog(
                                                 context: context,
-                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
-                                                    topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
-                                                isScrollControlled: true, // Rendre le contenu déroulable
-
-                                                builder: (BuildContext context){
-                                                  return SingleChildScrollView(
-                                                    child: Container(
-                                                      height: 600,
-                                                      padding: const EdgeInsets.all(25.0),
-                                                      child: Column(
-                                                        // mainAxisSize: MainAxisSize.min,
-                                                        children: [
-                                                          Row(
-                                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                                            // mainAxisAlignment: MainAxisAlignment.start,
-                                                            children: [
-                                                              Text("Modifier une categorie", style: TextStyle(fontSize: 25),),
-                                                              Spacer(),
-                                                              InkWell(
-                                                                child: Icon(Icons.close),
-                                                                onTap: (){
-                                                                  Navigator.pop(context);
-                                                                },
-                                                              )
-                                                            ],
-                                                          ),
-                                                          //hmmm
-                                                          SizedBox(height: 40),
-                                                          TextField(
-                                                            controller: _name,
-                                                            keyboardType: TextInputType.text,
-                                                            decoration: InputDecoration(
-                                                                filled: true,
-                                                                // fillColor: Colors.white,
-                                                                border: OutlineInputBorder(
-                                                                    borderSide: BorderSide.none,gapPadding: 1,
-                                                                    borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                                                          ),
-
-                                                          SizedBox(height: 10),
-                                                          TextFormField(
-                                                            controller: _desc,
-                                                            keyboardType: TextInputType.text,
-                                                            maxLines: 3,
-                                                            decoration: InputDecoration(
-                                                                filled: true,
-
-                                                                // fillColor: Colors.white,
-                                                                hintText: "description",
-                                                                border: OutlineInputBorder(
-                                                                    borderSide: BorderSide.none,gapPadding: 1,
-                                                                    borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                                                          ),
-
-                                                          SizedBox(height: 10),
-                                                          DropdownButtonFormField<num>(
-                                                            value: _selectedTaux,
-                                                            items: [
-                                                              DropdownMenuItem<num>(
-                                                                child: Text('500'),
-                                                                value: 500,
-                                                              ),
-                                                              DropdownMenuItem<num>(
-                                                                child: Text('900'),
-                                                                value: 900,
-                                                              ),
-                                                            ],
-                                                            onChanged: (value) {
-                                                              setState(() {
-                                                                _selectedTaux = value!;
-                                                              });
-                                                            },
-                                                            decoration: InputDecoration(
-                                                              filled: true,
-                                                              // fillColor: Colors.white,
-                                                              border: OutlineInputBorder(
-                                                                borderSide: BorderSide.none,gapPadding: 1,
-                                                                borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                          SizedBox(height: 10),
-
-
-
-
-                                                          ElevatedButton(
-                                                            onPressed: () {
-                                                              Navigator.of(context).pop();
-                                                              _taux.text = _selectedTaux.toString();
-
-                                                              fetchCategory();
-                                                              // AddCategory(_name.text, _desc.text);
-                                                              print(filteredItems?[index].id!);
-                                                              UpdateCateg(filteredItems?[index].id!, _name.text,_desc.text, _selectedTaux,);
-                                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                                SnackBar(content: Text('Le Type est mis à jour avec succès.')),
-                                                              );
-
-                                                              setState(() {
-                                                                fetchCategory();
-                                                              });
-                                                            },
-                                                            child: Text("Modifier"),
-
-                                                            style: ElevatedButton.styleFrom(
-                                                              backgroundColor: Color(0xff0fb2ea),
-                                                              foregroundColor: Colors.white,
-                                                              elevation: 10,
-                                                              minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
-                                                              // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
-                                                              //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
-                                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                                                            ),
-                                                          )
-                                                        ],
+                                                builder: (context) {
+                                                  return AlertDialog(
+                                                    insetPadding: EdgeInsets.only(top: 190,),
+                                                    surfaceTintColor: Color(0xB0AFAFA3),
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.only(
+                                                        topRight: Radius.circular(20),
+                                                        topLeft: Radius.circular(20),
                                                       ),
                                                     ),
-                                                  );
+                                                    title:
+                                                    Row(
+                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                      // mainAxisAlignment: MainAxisAlignment.start,
+                                                      children: [
+                                                        Text("Modifier une categorie", style: TextStyle(fontSize: 25),),
+                                                        Spacer(),
+                                                        InkWell(
+                                                          child: Icon(Icons.close),
+                                                          onTap: (){
+                                                            Navigator.pop(context);
+                                                          },
+                                                        )
+                                                      ],
+                                                    ),
 
-                                                }
-                                            );
+                                                    content: Container(
+                                                      height: 450,
+                                                      width: MediaQuery.of(context).size.width,
+                                                      // padding: const EdgeInsets.all(25.0),
+                                                      child: SingleChildScrollView(
+                                                        child: Column(
+                                                          // mainAxisSize: MainAxisSize.min,
+                                                          children: [
+                                                            //hmmm
+                                                            SizedBox(height: 40),
+                                                            TextField(
+                                                              controller: _name,
+                                                              keyboardType: TextInputType.text,
+                                                              decoration: InputDecoration(
+                                                                  filled: true,
+                                                                  // fillColor: Color(0xA3B0AF1),
+                                                                  fillColor: Colors.white,
+                                                                  border: OutlineInputBorder(
+                                                                      borderSide: BorderSide.none,gapPadding: 1,
+                                                                      borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                                                            ),
+
+                                                            SizedBox(height: 30),
+                                                            TextFormField(
+                                                              controller: _desc,
+                                                              keyboardType: TextInputType.text,
+                                                              maxLines: 3,
+                                                              decoration: InputDecoration(
+                                                                  filled: true,
+
+                                                                  // fillColor: Color(0xA3B0AF1),
+                                                                  fillColor: Colors.white,
+                                                                  hintText: "description",
+                                                                  border: OutlineInputBorder(
+                                                                      borderSide: BorderSide.none,gapPadding: 1,
+                                                                      borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                                                            ),
+
+                                                            SizedBox(height: 30),
+                                                            DropdownButtonFormField<num>(
+                                                              value: _selectedTaux,
+                                                              items: [
+                                                                DropdownMenuItem<num>(
+                                                                  child: Text('500'),
+                                                                  value: 500,
+                                                                ),
+                                                                DropdownMenuItem<num>(
+                                                                  child: Text('900'),
+                                                                  value: 900,
+                                                                ),
+                                                              ],
+                                                              onChanged: (value) {
+                                                                setState(() {
+                                                                  _selectedTaux = value!;
+                                                                });
+                                                              },
+                                                              decoration: InputDecoration(
+                                                                filled: true,
+                                                                // fillColor: Color(0xA3B0AF1),
+                                                                fillColor: Colors.white,
+                                                                border: OutlineInputBorder(
+                                                                  borderSide: BorderSide.none,gapPadding: 1,
+                                                                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                                                                ),
+                                                              ),
+                                                            ),
+
+                                                            SizedBox(height: 30),
+                                                            ElevatedButton(
+                                                              onPressed: () {
+                                                                Navigator.of(context).pop();
+                                                                _taux.text = _selectedTaux.toString();
+
+                                                                fetchCategory();
+                                                                // AddCategory(_name.text, _desc.text);
+                                                                print(filteredItems?[index].id!);
+                                                                UpdateCateg(filteredItems?[index].id!, _name.text,_desc.text, _selectedTaux,);
+                                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                                  SnackBar(content: Text('Le Type est mis à jour avec succès.')),
+                                                                );
+
+                                                                setState(() {
+                                                                  fetchCategory();
+                                                                });
+                                                              },
+                                                              child: Text("Modifier"),
+
+                                                              style: ElevatedButton.styleFrom(
+                                                                backgroundColor: Color(0xff0fb2ea),
+                                                                foregroundColor: Colors.white,
+                                                                elevation: 10,
+                                                                minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
+                                                                // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
+                                                                //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
+                                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                                              ),
+                                                            )
+                                                          ],
+                                                        ),
+
+
+                                                      ),
+                                                    ),
+
+                                                  );
+                                                });
                                           }, // Disable button functionality
                                           child: Icon(Icons.mode_edit_outline_outlined, color: Colors.black,),
 
@@ -354,7 +364,8 @@ class _CategoriesState extends State<Categories> {
                                               context: context,
                                               builder: (BuildContext context) {
                                                 return AlertDialog(
-                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
+                                                          surfaceTintColor: Color(0xB0AFAFA3),
+                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
                                                   title: Text("Confirmer la suppression"),
                                                   content: Text(
                                                       "Êtes-vous sûr de vouloir supprimer cet élément ?"),
@@ -438,7 +449,7 @@ class _CategoriesState extends State<Categories> {
 
 
     return showModalBottomSheet(
-        context: context,
+        context: context,backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
           topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
       isScrollControlled: true, // Rendre le contenu déroulable
@@ -472,6 +483,7 @@ class _CategoriesState extends State<Categories> {
                     keyboardType: TextInputType.text,
                     decoration: InputDecoration(
                         filled: true,
+                        fillColor: Color(0xA3B0AF1),
                         // fillColor: Colors.white,
                         hintText: "Nom",
                         border: OutlineInputBorder(
@@ -487,7 +499,7 @@ class _CategoriesState extends State<Categories> {
                     decoration: InputDecoration(
                         filled: true,
 
-                        // fillColor: Colors.white,
+                        fillColor: Color(0xA3B0AF1),
                         hintText: "description",
                         border: OutlineInputBorder(
                             borderSide: BorderSide.none,gapPadding: 1,
@@ -514,7 +526,7 @@ class _CategoriesState extends State<Categories> {
                     },
                     decoration: InputDecoration(
                       filled: true,
-                      // fillColor: Colors.white,
+                      fillColor: Color(0xA3B0AF1),
                       hintText: "taux",
                       border: OutlineInputBorder(
                         borderSide: BorderSide.none,gapPadding: 1,

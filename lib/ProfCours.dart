@@ -353,6 +353,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                           showCheckboxColumn: true,
                           showBottomBorder: true,
                           horizontalMargin: 1,
+                          headingRowColor: MaterialStateColor.resolveWith((states) => Colors.lightBlueAccent.shade100), // Couleur de la ligne d'en-tête
                           headingRowHeight: 50,
                           columnSpacing: 18,
                           dataRowHeight: 60,
@@ -543,7 +544,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
 
   Future<void> _showCourseDetails(BuildContext context, Map<String, dynamic> course) {
     return showModalBottomSheet(
-        context: context,
+        context: context,backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
             topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
         isScrollControlled: true, // Rendre le contenu déroulable

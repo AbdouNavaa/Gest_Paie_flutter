@@ -89,7 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   }
 
-  Color _primaryColor =Color(0xFF676363);
+  Color _primaryColor =Colors.lightBlueAccent;
 
   Color _accentColor =Colors.white;
   late int index;
@@ -111,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
       //     : null,
 
       drawer: Drawer(width: 250,
-        child: Container(
+        child: Container(color: Colors.white,
           child: ListView(
             children: [
               DrawerHeader(
@@ -122,7 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     stops: [0.0, 1.0],
-                    colors: [ _primaryColor,_accentColor,],
+                    colors: [ _accentColor,Colors.blueAccent],
 
                   ),
                 ),
@@ -136,40 +136,40 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [
                           InkWell(
                             onTap:() async {
-                             if (widget.role == "professeur") {
-                            SharedPreferences prefs = await SharedPreferences.getInstance();
-                            String token = prefs.getString("token")!;
-                            String role = prefs.getString("role")!;
-                            String email = prefs.getString("email")!;
-                            String name = prefs.getString("nom")!;
-                            String id = prefs.getString("id")!;
-                            print(id);
-                            Navigator.push(context, MaterialPageRoute(
-                            builder: (context) =>
-                            // ProfesseurInfoPage(id: id, email: email, role: role),
-                            ProfesseurDetailsScreen(
-                            profId: widget.profId!,
-                            nom: name,
-                            mail: email,
-                            ),
-                            // builder: (context) => LandingScreen(role: role,name: nom,), // Passer le rôle ici
-                            ),);
+                              if (widget.role == "professeur") {
+                                SharedPreferences prefs = await SharedPreferences.getInstance();
+                                String token = prefs.getString("token")!;
+                                String role = prefs.getString("role")!;
+                                String email = prefs.getString("email")!;
+                                String name = prefs.getString("nom")!;
+                                String id = prefs.getString("id")!;
+                                print(id);
+                                Navigator.push(context, MaterialPageRoute(
+                                  builder: (context) =>
+                                  // ProfesseurInfoPage(id: id, email: email, role: role),
+                                  ProfesseurDetailsScreen(
+                                    profId: widget.profId!,
+                                    nom: name,
+                                    mail: email,
+                                  ),
+                                  // builder: (context) => LandingScreen(role: role,name: nom,), // Passer le rôle ici
+                                ),);
 
-                            }
+                              }
 
                               else{
                                 Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage(  username: widget.name,
-                                role: widget.role,
-                                email: widget.email,)));
-                                }
+                                  role: widget.role,
+                                  email: widget.email,)));
+                              }
 
-                                },
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(100),
+                            },
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(100),
 
-                            child: Image.asset("assets/user1.png",width: 90),
+                              child: Image.asset("assets/user1.png",width: 90),
+                            ),
                           ),
-                                ),
                           widget.role == "professeur"?
                           Row(
                             mainAxisAlignment: MainAxisAlignment.start,
@@ -305,50 +305,50 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
 
-                    ),
+                ),
               ),
               if (widget.role == "professeur")
                 Column(
                   children: [
                     ListTile(
-                      leading: Icon(Icons.book_outlined, size: _drawerIconSize, color: Colors.black,),
-                      title: Text('Mes Cours', style: TextStyle(fontSize: 17, color: Colors.black),),
-                      onTap: ()async{
-                        SharedPreferences prefs = await SharedPreferences.getInstance();
-                        String token = prefs.getString("token")!;
-                        String id = prefs.getString("id")!;
-                        String nom = prefs.getString("nom")!;
+                        leading: Icon(Icons.book_outlined, size: _drawerIconSize, color: Colors.black,),
+                        title: Text('Mes Cours', style: TextStyle(fontSize: 17, color: Colors.black),),
+                        onTap: ()async{
+                          SharedPreferences prefs = await SharedPreferences.getInstance();
+                          String token = prefs.getString("token")!;
+                          String id = prefs.getString("id")!;
+                          String nom = prefs.getString("nom")!;
 
-                        var url = Uri.parse('http://192.168.43.73:5000/professeur/${widget.profId}/cours-oui');
+                          var url = Uri.parse('http://192.168.43.73:5000/professeur/${widget.profId}/cours-oui');
 
-                        var responseInitialise = await http.get(
-                          url,
-                          headers: {
-                            'Authorization': 'Bearer $token',
-                            'Content-Type': 'application/json', // Ajoutez le type de contenu
-                          },
-                          // body: jsonEncode({"notification": ""}), // Encodez votre corps en JSON
-                        );
-
-
-                        if (responseInitialise.statusCode == 200) {
-                          Map<String, dynamic> jsonResponse = jsonDecode(responseInitialise.body);
-                          courses = jsonResponse['cours'];
-                          // print('Paiements avec status "initialisé": ${courses.length}');
-                          setState(() {
-                            coursCN = courses.length;
-                          });
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) =>
-                                ProfCoursesPage(courses: courses,
-                                  ProfId: widget.profId!,)),
+                          var responseInitialise = await http.get(
+                            url,
+                            headers: {
+                              'Authorization': 'Bearer $token',
+                              'Content-Type': 'application/json', // Ajoutez le type de contenu
+                            },
+                            // body: jsonEncode({"notification": ""}), // Encodez votre corps en JSON
                           );
 
-                        } else {
-                          print('Request for "initialisé" failed with status: ${responseInitialise.statusCode}');
+
+                          if (responseInitialise.statusCode == 200) {
+                            Map<String, dynamic> jsonResponse = jsonDecode(responseInitialise.body);
+                            courses = jsonResponse['cours'];
+                            // print('Paiements avec status "initialisé": ${courses.length}');
+                            setState(() {
+                              coursCN = courses.length;
+                            });
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) =>
+                                  ProfCoursesPage(courses: courses,
+                                    ProfId: widget.profId!,)),
+                            );
+
+                          } else {
+                            print('Request for "initialisé" failed with status: ${responseInitialise.statusCode}');
+                          }
                         }
-                      }
                     ),
                     ListTile(
                       leading: Icon(Icons.payment_outlined,size: _drawerIconSize,color: Colors.black),
@@ -417,81 +417,37 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               // if (widget.role == "responsable")
-                if (widget.role == "admin")
+              if (widget.role == "admin")
                 Column(
                   children: [
-                  ListTile(
-                    leading: Icon(Icons.supervised_user_circle_outlined, size: _drawerIconSize, color: Colors.black,),
-                    title: Text('Users', style: TextStyle(fontSize: 17, color: Colors.black),),
-                    onTap: (){
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => Users()));
-                    },
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.groups,size: _drawerIconSize,color: Colors.black),
-                    title: Text('Professeures', style: TextStyle(fontSize: _drawerFontSize, color: Colors.black),
+                    ListTile(
+                      leading: Icon(Icons.supervised_user_circle_outlined, size: _drawerIconSize, color: Colors.black,),
+                      title: Text('Users', style: TextStyle(fontSize: 17, color: Colors.black),),
+                      onTap: (){
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => Users()));
+                      },
                     ),
-                    onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => Professeures()),);
-                    },
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.featured_play_list_outlined,size: _drawerIconSize,color: Colors.black),
-                    title: Text('Elements', style: TextStyle(fontSize: _drawerFontSize, color: Colors.black),
+                    ListTile(
+                      leading: Icon(Icons.groups,size: _drawerIconSize,color: Colors.black),
+                      title: Text('Professeures', style: TextStyle(fontSize: _drawerFontSize, color: Colors.black),
+                      ),
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => Professeures()),);
+                      },
                     ),
-                    onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => Elements()),);
-                    },
-                  ),
-                  //Divider(color: Theme.of(context).primaryColor, height: 1,),
-                  //Divider(color: Theme.of(context).primaryColor, height: 1,),
-                  ListTile(
-                    leading: Icon(Icons.play_lesson_outlined, size: _drawerIconSize,color: Colors.black,),
-                    title: Text('Cours',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
-                    onTap: ()async{
-                      SharedPreferences prefs = await SharedPreferences.getInstance();
-                      String token = prefs.getString("token")!;
-                      String role = prefs.getString("role")!;
-                      var response = await http.get(
-                        Uri.parse('http://192.168.43.73:5000/cours'),
-                        headers: {
-                          'Content-Type': 'application/json',
-                          'Authorization': 'Bearer $token'
-                        },
-                      );
-                      // print(response.body);
-
-                      if (response.statusCode == 200) {
-                        List<dynamic> courses = json.decode(
-                            response.body)['cours'];
-                        // this.coursNum = json.decode(response.body)['data']['countLL'];
-                        // num heuresTV = json.decode(response.body)['data']['heuresTV'];
-                        // num sommeTV = json.decode(response.body)['data']['sommeTV'];
-                        // setState(() {
-                        this.coursNum = json.decode(response.body)['cours'].length;
-                        //
-                        // });
-                        print('Mes Cours :${json.decode(response.body)['cours']}');
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) =>
-                              CoursesPage(courses: courses,
-                                coursNum: coursNum,
-                                // heuresTV: heuresTV,
-                                // sommeTV: sommeTV,
-                                role: role,)),
-                        );
-                      } else {
-                        // Handle error
-                        print('Failed to fetch prof courses. Status Code: ${response
-                            .statusCode}');
-                      }
-                    },
-                  ),
-                  //Divider(color: Theme.of(context).primaryColor, height: 1,),
-                  ListTile(
-                      leading: Icon(Icons.payment_outlined, size: _drawerIconSize,color: Colors.black,),
-                      title: Text('Paiements',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
+                    ListTile(
+                      leading: Icon(Icons.featured_play_list_outlined,size: _drawerIconSize,color: Colors.black),
+                      title: Text('Elements', style: TextStyle(fontSize: _drawerFontSize, color: Colors.black),
+                      ),
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => Elements()),);
+                      },
+                    ),
+                    //Divider(color: Theme.of(context).primaryColor, height: 1,),
+                    //Divider(color: Theme.of(context).primaryColor, height: 1,),
+                    ListTile(
+                      leading: Icon(Icons.play_lesson_outlined, size: _drawerIconSize,color: Colors.black,),
+                      title: Text('Cours',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
                       onTap: ()async{
                         SharedPreferences prefs = await SharedPreferences.getInstance();
                         String token = prefs.getString("token")!;
@@ -508,54 +464,98 @@ class _HomeScreenState extends State<HomeScreen> {
                         if (response.statusCode == 200) {
                           List<dynamic> courses = json.decode(
                               response.body)['cours'];
+                          // this.coursNum = json.decode(response.body)['data']['countLL'];
+                          // num heuresTV = json.decode(response.body)['data']['heuresTV'];
+                          // num sommeTV = json.decode(response.body)['data']['sommeTV'];
+                          // setState(() {
                           this.coursNum = json.decode(response.body)['cours'].length;
-                          // print('Mes cours: ${json.decode(response.body)['cours']}');
+                          //
+                          // });
+                          print('Mes Cours :${json.decode(response.body)['cours']}');
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => Paiements(courses: courses,)),
+                            MaterialPageRoute(builder: (context) =>
+                                CoursesPage(courses: courses,
+                                  coursNum: coursNum,
+                                  // heuresTV: heuresTV,
+                                  // sommeTV: sommeTV,
+                                  role: role,)),
                           );
                         } else {
                           // Handle error
                           print('Failed to fetch prof courses. Status Code: ${response
                               .statusCode}');
                         }
-                      }
-                  ),
+                      },
+                    ),
+                    // Divider(color: Colors.black38, height: 1,),
+                    ListTile(
+                        leading: Icon(Icons.payment_outlined, size: _drawerIconSize,color: Colors.black,),
+                        title: Text('Paiements',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
+                        onTap: ()async{
+                          SharedPreferences prefs = await SharedPreferences.getInstance();
+                          String token = prefs.getString("token")!;
+                          String role = prefs.getString("role")!;
+                          var response = await http.get(
+                            Uri.parse('http://192.168.43.73:5000/cours'),
+                            headers: {
+                              'Content-Type': 'application/json',
+                              'Authorization': 'Bearer $token'
+                            },
+                          );
+                          // print(response.body);
 
-                  ListTile(
-                    leading: Icon(Icons.calendar_month, size: _drawerIconSize,color: Colors.black,),
-                    title: Text('Emplois',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
-                    onTap: () {
-                      Navigator.push( context, MaterialPageRoute(builder: (context) => Emploi()), );
-                    },
-                  ),
-                  //Divider(color: Theme.of(context).primaryColor, height: 1,),
-                  ListTile(
-                    leading: Icon(Icons.folder_special_outlined, size: _drawerIconSize,color: Colors.black),
-                    title: Text('Fillieres',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
-                    onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => Filliere()),);
-                    },
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.read_more, size: _drawerIconSize,color: Colors.black),
-                    title: Text('Autres',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
-                    onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => MoreOptionsPage(username: widget.name!,
-                          userRole: widget.role!, userEmail: widget.email!)));
-                    },
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.logout_rounded, size: _drawerIconSize,color: Colors.black,),
-                    title: Text('Logout',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
-                    onTap: () async{
-                      SharedPreferences prefs = await SharedPreferences.getInstance();
-                      await prefs.setString('token', '');
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => LoginSection()));
+                          if (response.statusCode == 200) {
+                            List<dynamic> courses = json.decode(
+                                response.body)['cours'];
+                            this.coursNum = json.decode(response.body)['cours'].length;
+                            // print('Mes cours: ${json.decode(response.body)['cours']}');
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => Paiements(courses: courses,)),
+                            );
+                          } else {
+                            // Handle error
+                            print('Failed to fetch prof courses. Status Code: ${response
+                                .statusCode}');
+                          }
+                        }
+                    ),
 
-                    },
-                  ),
-                ],)
+                    ListTile(
+                      leading: Icon(Icons.calendar_month, size: _drawerIconSize,color: Colors.black,),
+                      title: Text('Emplois',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
+                      onTap: () {
+                        Navigator.push( context, MaterialPageRoute(builder: (context) => Emploi()), );
+                      },
+                    ),
+                    //Divider(color: Theme.of(context).primaryColor, height: 1,),
+                    ListTile(
+                      leading: Icon(Icons.folder_special_outlined, size: _drawerIconSize,color: Colors.black),
+                      title: Text('Fillieres',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => Filliere()),);
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.read_more, size: _drawerIconSize,color: Colors.black),
+                      title: Text('Autres',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => MoreOptionsPage(username: widget.name!,
+                            userRole: widget.role!, userEmail: widget.email!)));
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.logout_rounded, size: _drawerIconSize,color: Colors.black,),
+                      title: Text('Logout',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
+                      onTap: () async{
+                        SharedPreferences prefs = await SharedPreferences.getInstance();
+                        await prefs.setString('token', '');
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => LoginSection()));
+
+                      },
+                    ),
+                  ],)
             ],
           ),
         ),
@@ -573,7 +573,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Colors.blueGrey, Colors.black12],
+                  colors: [Colors.lightBlueAccent, Colors.white],
                 ),
               ),
             ),
@@ -867,8 +867,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                     imageUrl: "users1.jpg",
                                     item: "Utilisateures",
                                     duration: "${useres?.length!} Users",
-                                    height: 160,
-                                    width: 160,
+                                    height: 150,
+                                    width: 150,
                                     onPessed: (){
                                       Navigator.push(
                                           context, MaterialPageRoute(builder: (context) => Users()));
@@ -876,12 +876,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
                                     },
                                   ),
+
+                                  SizedBox(width: 15,),
                                   _customCard(
                                     imageUrl: "profs2.png",
                                     item: "Professeures",
                                     duration: "${profs?.length!} Profs",
-                                    height: 160,
-                                    width: 160,
+                                    height: 150,
+                                    width: 150,
                                     onPessed: (){
                                       Navigator.push(
                                           context, MaterialPageRoute(builder: (context) => Professeures()));
@@ -891,14 +893,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
                                 ],
                               ),
+
+                              SizedBox(height: 5,),
                               Row(
                                 children: [
                                   _customCard(
                                     imageUrl: "cours3.png",
                                     item: "Cours",
                                     duration: "${coursNum} Cours",
-                                    height: 160,
-                                    width: 160,
+                                    height: 150,
+                                    width: 150,
                                     onPessed: ()async{
                                       SharedPreferences prefs = await SharedPreferences.getInstance();
                                       String token = prefs.getString("token")!;
@@ -918,11 +922,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                         // this.coursNum = json.decode(response.body)['data']['countLL'];
                                         // num heuresTV = json.decode(response.body)['data']['heuresTV'];
                                         // num sommeTV = json.decode(response.body)['data']['sommeTV'];
-                                        // setState(() {
+                                        setState(() {
                                         this.coursNum = json.decode(response.body)['cours'].length;
                                         //
-                                        // });
+                                        });
                                         print('Mes Cours :${json.decode(response.body)['cours']}');
+                                        print("Mes CN${coursNum}");
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(builder: (context) =>
@@ -939,13 +944,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                       }
                                     },
                                   ),
+
+                                  SizedBox(width: 15,),
                                   _customCard(
                                     imageUrl: "paie2.jpg",
                                     // imageUrl: "paie3.jpg",
                                     item: "Paiements",
                                     duration: "",
-                                    height: 160,
-                                    width: 160,
+                                    height: 150,
+                                    width: 150,
                                     onPessed: ()async{
                                       SharedPreferences prefs = await SharedPreferences.getInstance();
                                       String token = prefs.getString("token")!;
@@ -979,26 +986,31 @@ class _HomeScreenState extends State<HomeScreen> {
 
                                 ],
                               ),
+
+                              SizedBox(height: 5,),
                               Row(
                                 children: [
                                   _customCard(
                                     imageUrl: "emp4.png",
                                     item: "Emploi",
                                     duration: "${emplois?.length!} Emploi",
-                                    height: 160,
-                                    width: 160,
+                                    height: 150,
+                                    width: 150,
                                     onPessed: (){
                                       Navigator.push(
                                           context, MaterialPageRoute(builder: (context) => Emploi()));
 
                                     },
                                   ),
+
+
+                                  SizedBox(width: 15,),
                                   _customCard(
                                     imageUrl: "grps4.jpg",
                                     item: "Fillieres",
                                     duration: "${fillieres?.length} Filliere",
-                                    height: 160,
-                                    width: 160,
+                                    height: 150,
+                                    width: 150,
                                     onPessed: (){
                                       Navigator.push(
                                           context, MaterialPageRoute(builder: (context) => Filliere()));
@@ -1011,6 +1023,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ],
                               ),
 
+                              SizedBox(height: 5,),
                               Row(
                                 children: [
                                   _customCard(
@@ -1018,24 +1031,25 @@ class _HomeScreenState extends State<HomeScreen> {
                                     // imageUrl: "more1.png",
                                     item: "Autres",
                                     duration: "",
-                                    height: 160,
-                                    width: 160,
+                                    height: 150,
+                                    width: 150,
                                     onPessed:  () async {
                                       Navigator.push(context, MaterialPageRoute(builder: (context) =>
                                           MoreOptionsPage(username: widget.name!, userRole: widget.role!, userEmail: widget.email!)));
                                     },
                                   ),
+
+
+                                  SizedBox(width: 15,),
                                   _customCard(
-                                    imageUrl: "logout1.png",
+                                    imageUrl: "coding1.jpg",
                                     // imageUrl: "user1.png",
-                                    item: "Se Déconnecter",
+                                    item: "Elements",
                                     duration: "",
-                                    height: 160,
-                                    width: 160,
-                                    onPessed:  () async {
-                                      SharedPreferences prefs = await SharedPreferences.getInstance();
-                                      await prefs.setString('token', '');
-                                      Navigator.push(context, MaterialPageRoute(builder: (context) => LoginSection()));
+                                    height: 150,
+                                    width: 150,
+                                    onPessed:   () {
+                                      Navigator.push(context, MaterialPageRoute(builder: (context) => Elements()),);
                                     },
                                   ),
 
@@ -1067,14 +1081,14 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Card(
           color: Colors.white,
           shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20)
+              borderRadius: BorderRadius.circular(10)
           ),
           elevation: 10,
           child: Container(
             decoration: BoxDecoration(
               // shape: BoxShape.circle,
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(20)
+                borderRadius: BorderRadius.circular(10)
             ),
 
             child: Padding(

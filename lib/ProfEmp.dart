@@ -36,10 +36,14 @@ class _EmploiPageState extends State<EmploiPage> {
 
     if (response.statusCode == 200) {
       Map<String, dynamic> data = jsonDecode(response.body);
+
+      // Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+      List<dynamic> filData = data['emplois'];
+
       setState(() {
         emplois = List<ProfEmploi>.from(data['emplois'].map((emp) => ProfEmploi.fromJson(emp)));
       });
-      print("My Data${data}");
+      print("My Data${filData}");
     } else {
       throw Exception('Failed to load emplois');
     }
@@ -80,6 +84,7 @@ class _EmploiPageState extends State<EmploiPage> {
                     child: DataTable(
                       showCheckboxColumn: true,
                       showBottomBorder: true,
+                      headingRowColor: MaterialStateColor.resolveWith((states) => Colors.lightBlueAccent.shade100), // Couleur de la ligne d'en-tête
                       headingRowHeight: 70,
                       columnSpacing: 10,
                       dataRowHeight: 70,

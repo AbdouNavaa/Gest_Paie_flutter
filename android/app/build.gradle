@@ -31,13 +31,13 @@ android {
     compileSdkVersion 33
     defaultConfig {
         applicationId "com.example.gestion_payements"
-        minSdkVersion flutter.minSdkVersion
+        minSdkVersion 21
 //        targetSdkVersion 30
 //        targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         // Ajoutez ces lignes
-//        minSdkVersion 16
+        minSdkVersion 21
         targetSdkVersion 33
         // ...
     }
