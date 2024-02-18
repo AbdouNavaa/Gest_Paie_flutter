@@ -43,7 +43,7 @@ class _PaiementsState extends State<Paiements> {
         return (course['isSigned'] != "pas encore" && course['isPaid'] != "oui" && course['isPaid'] != "préparée") && // Filter courses with signs
             (courseDate.isAtSameMomentAs(widget.dateDeb!) || (courseDate.isAfter(widget.dateDeb!.toLocal()) &&
                 courseDate.isBefore(widget.dateFin!.toLocal().add(Duration(days: 1)))));
-      }).map((course) => double.parse(course['TH'].toString())).fold(0, (prev, amount) => prev + amount);
+      }).map((course) => double.parse(course['th'].toString())).fold(0, (prev, amount) => prev + amount);
 
       somme = widget.courses.where((course) {
         DateTime courseDate = DateTime.parse(course['date'].toString());
@@ -62,7 +62,7 @@ class _PaiementsState extends State<Paiements> {
       int startIndex = (currentPage - 1) * coursesPerPage;
       int endIndex = startIndex + coursesPerPage - 1;
       totalType = widget.courses.skip(startIndex).take(coursesPerPage).where((course) =>
-      (course['isSigned'] != null && course['isSigned'] != '')).map((course) => double.parse(course['TH'].toString())).fold(0, (prev, amount) => prev + amount);
+      (course['isSigned'] != null && course['isSigned'] != '')).map((course) => double.parse(course['th'].toString())).fold(0, (prev, amount) => prev + amount);
       somme = widget.courses.skip(startIndex).take(coursesPerPage).where((course) =>
       (course['isSigned'] != null && course['isSigned'] != '')).map((course) => double.parse(course['somme'].toString())).fold(0, (prev, amount) => prev + amount);
     }
@@ -70,7 +70,7 @@ class _PaiementsState extends State<Paiements> {
 
 
   DateTime defaultDateDeb = DateTime(2024, 1, 1);
-  DateTime defaultDateFin = DateTime(2024, 2, 1);
+  DateTime defaultDateFin = DateTime(2024, 4, 1);
   @override
   void initState() {
     // TODO: implement initState
@@ -99,9 +99,9 @@ class _PaiementsState extends State<Paiements> {
     widget.dateFin = defaultDateFin;
 
     // Groupe les cours en utilisant les dates par défaut
-    // ( _selectedDateDeb != null ||_selectedDateFin != null) ? groupCoursesByProfesseur(_selectedDateDeb!, _selectedDateFin!)
-    //     :
-    groupCoursesByProfesseur(widget.dateDeb, widget.dateFin);
+    ( _selectedDateDeb != null ||_selectedDateFin != null) ? groupCoursesByProfesseur(_selectedDateDeb!, _selectedDateFin!)
+        :
+    groupCoursesByProfesseur(_selectedDateDeb, _selectedDateFin);
   }
 
   List<Paies>? filteredItems;
@@ -142,7 +142,7 @@ class _PaiementsState extends State<Paiements> {
     // Assuming you have a list of professeurs named 'professeursList'
     final professeur = professeurList.firstWhere((prof) => '${prof.id}' == id, orElse: () =>
         Professeur(id: '',   user: '', matieres: [], ));
-    print(professeurList);
+    print(professeur.banque);
     return professeur; // Return the ID if found, otherwise an empty string
 
   }
@@ -153,7 +153,7 @@ class _PaiementsState extends State<Paiements> {
     totalType = 0;
     somme = 0;
     for (var course in widget.courses) {
-      String profId = course['professeur_id'];
+      String profId = course['professeur'];
       DateTime courseDate = DateTime.parse(course['date'].toString());
 
 
@@ -163,25 +163,25 @@ class _PaiementsState extends State<Paiements> {
           if (!professeurData.containsKey(profId)) {
             // Initialiser les données du professeur
             professeurData[profId] = {
-              'professeur': course['professeur'],
+              'professeur': course['enseignant'],
               'email': course['email'],
-              'TH_total': 0.0,
+              'th_total': 0.0,
               'somme_total': 0.0,
             };
           }
 
-          // Mettre à jour les valeurs pour 'TH_total' et 'somme_total'
-          professeurData[profId]!['TH_total'] += double.parse(course['TH'].toString());
-          totalType += double.parse(course['TH'].toString());
+          // Mettre à jour les valeurs pour 'th_total' et 'somme_total'
+          professeurData[profId]!['th_total'] += double.parse(course['th'].toString());
+          totalType += double.parse(course['th'].toString());
           professeurData[profId]!['somme_total'] += double.parse(course['somme'].toString());
           somme += double.parse(course['somme'].toString());
         }
       // }
     }
 
-    // Filtrer les professeurs avec 'TH_total' égal à 0
+    // Filtrer les professeurs avec 'th_total' égal à 0
     if (Deb != null || Fin != null) {
-      professeurData.removeWhere((key, value) => value['TH_total'] == 0.0);
+      professeurData.removeWhere((key, value) => value['th_total'] == 0.0);
 
     }
   }
@@ -306,7 +306,7 @@ class _PaiementsState extends State<Paiements> {
                 padding: const pw.EdgeInsets.all(5),
                 alignment: pw.Alignment.center,
                 child: pw.Text(
-                  entry.value['TH_total'].toString(),
+                  entry.value['th_total'].toString(),
                   style: pw.TextStyle(
                     color: PdfColors.black,
                     fontSize: 10,
@@ -483,7 +483,7 @@ class _PaiementsState extends State<Paiements> {
         entry.value['professeur'].toString(),
         getProfesseurIdFromName(entry.key).banque.toString(),
         getProfesseurIdFromName(entry.key).compte.toString(),
-        entry.value['TH_total'].toString(),
+        entry.value['th_total'].toString(),
         entry.value['somme_total'].toString(),
       ]);
     }
@@ -583,7 +583,7 @@ class _PaiementsState extends State<Paiements> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              ElevatedButton(
+              TextButton(
                 onPressed: () async {
                   DateTime? selectedDateDeb = await showDatePicker(
                     context: context,
@@ -599,15 +599,26 @@ class _PaiementsState extends State<Paiements> {
                       groupCoursesByProfesseur(_selectedDateDeb, null);
                   }
                 },
-                child: Text(_selectedDateDeb == null ? 'Date Deb' : DateFormat('yyyy/MM/dd').format(_selectedDateDeb!)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white, textStyle: TextStyle(fontWeight: FontWeight.bold),
-                  padding:widget.dateDeb != null ? EdgeInsets.only(left: 40,right: 40): EdgeInsets.only(left: 50,right: 50),
+                child:_selectedDateDeb == null ?
+                Row(
+                  children: [
+                    Text( 'Date Deb' ),
+                 SizedBox(width: 20,),
+                  Icon(Icons.date_range)
+                  ],
+                )
+                    : Text(DateFormat('yyyy/MM/dd').format(_selectedDateDeb!)),
+                style: TextButton.styleFrom(
+                  // backgroundColor: Colors.blue,
+                  // surfaceTintColor: Color(0xB0AFAFA3),
+
+                  side: BorderSide(color: Colors.black26),
+                  foregroundColor: Colors.black, textStyle: TextStyle(fontWeight: FontWeight.bold),
+                  padding:widget.dateDeb != null ? EdgeInsets.only(left: 20,right: 20): EdgeInsets.only(left: 20,right: 20),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
               ),
-              ElevatedButton(
+              TextButton(
                 onPressed: () async {
                   DateTime? selectedDateFin = await showDatePicker(
                     context: context,
@@ -623,12 +634,21 @@ class _PaiementsState extends State<Paiements> {
                       groupCoursesByProfesseur(_selectedDateDeb!, _selectedDateFin);
                   }
                 },
-                child: Text(_selectedDateFin == null ? 'Date Fin' : DateFormat('yyyy/MM/dd').format(_selectedDateFin!) ),
+                child:_selectedDateFin == null ?
+                  Row(
+                  children: [
+                    Text(  'Date Fin' ),
+                  SizedBox(width: 20,),
+                  Icon(Icons.date_range)
+                  ],
+                )
+        : Text(DateFormat('yyyy/MM/dd').format(_selectedDateFin!)),
                 // child: Text(_selectedDateFin == null ? DateFormat('yyyy/MM/dd').format(widget.dateFin!) :DateFormat('yyyy/MM/dd').format(_selectedDateFin!) ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white, textStyle: TextStyle(fontWeight: FontWeight.bold),
-                   padding:widget.dateFin != null ? EdgeInsets.only(left: 40,right: 40): EdgeInsets.only(left: 50,right: 50),
+                style: TextButton.styleFrom(
+                  // backgroundColor: Colors.blue,
+                  side: BorderSide(color: Colors.black26),
+                  foregroundColor: Colors.black, textStyle: TextStyle(fontWeight: FontWeight.bold),
+                  padding:widget.dateFin != null ? EdgeInsets.only(left: 20,right: 20): EdgeInsets.only(left: 20,right: 20),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
               ),
@@ -695,14 +715,47 @@ class _PaiementsState extends State<Paiements> {
                                             child: Text(profData['professeur'].toString()))),
                                     DataCell(Text(getProfesseurIdFromName(profId).banque.toString())),
                                     DataCell(Text(getProfesseurIdFromName(profId).compte.toString())),
-                                    DataCell(Text(profData['TH_total'].toString())),
+                                    DataCell(Text(profData['th_total'].toString())),
                                     DataCell(Text(profData['somme_total'].toString())),
                                     DataCell(
                                       Container(
                                         width: 35,
                                         child: TextButton(
                                           onPressed: () {
-                                            AddPaie(profId, widget.dateDeb, widget.dateFin);
+                                            _selectedDateDeb == null || _selectedDateFin == null ?
+                                            AddPaie(profId, widget.dateDeb, widget.dateFin)
+                                            :AddPaie(profId, _selectedDateDeb, _selectedDateFin);
+                                            print(profId);
+                                            setState(() {
+                                              Navigator.of(context).pop();
+                                              showDialog(
+                                                  context: context,
+                                                  builder: (BuildContext context) {
+                                                    return AlertDialog(
+                                                      surfaceTintColor: Color(0xB0AFAFA3),
+                                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                                                      title: Row(
+                                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                        children: [
+                                                          Text("Alert de Succes"),
+                                                          Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
+                                                        ],
+                                                      ),
+                                                      content: Text(
+                                                          "Le paiement est en Cours il faut que son Profeseur va Confirmer"),
+
+                                                      actions: [
+                                                        TextButton(
+                                                          child: Text("Ok"),
+                                                          onPressed: () {
+                                                            Navigator.of(context).pop();
+                                                          },
+                                                        ),
+
+                                                      ],
+
+                                                    );});
+                                            });
                                             print('Id: ${profId} De: ${widget.dateDeb} Vers: ${widget.dateFin}');
                                           },// Disable button functionality
 
@@ -761,26 +814,28 @@ class _PaiementsState extends State<Paiements> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ElevatedButton(
+              TextButton(
                 onPressed: () async {
                   await savePdf();
                 },
                 child: Text('Télécharger PDF'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white, textStyle: TextStyle(fontWeight: FontWeight.bold),
+                style: TextButton.styleFrom(
+                  side: BorderSide(color: Colors.black26),
+                  padding: EdgeInsets.only(left: 20,right: 20),
+                  foregroundColor: Colors.black, textStyle: TextStyle(fontWeight: FontWeight.bold),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
               ),
               SizedBox(width: 20,),
-              ElevatedButton(
+              TextButton(
                 onPressed: () async {
                   await saveExcel();
                 },
                 child: Text('Télécharger Excel'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white, textStyle: TextStyle(fontWeight: FontWeight.bold),
+                style: TextButton.styleFrom(
+                  side: BorderSide(color: Colors.black26),
+                  padding: EdgeInsets.only(left: 20,right: 20),
+                  foregroundColor: Colors.black, textStyle: TextStyle(fontWeight: FontWeight.bold),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
               ),
@@ -789,45 +844,20 @@ class _PaiementsState extends State<Paiements> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ElevatedButton(
+              TextButton(
                 onPressed: ()  {
                   Navigator.push(context, MaterialPageRoute(builder: (context) => EtatPaiemens(courses: widget.courses)));
 
                 },
                 child: Text('Etats'),
-                style: ElevatedButton.styleFrom(padding: EdgeInsets.only(left: 60,right: 60),
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white, textStyle: TextStyle(fontWeight: FontWeight.bold),
+                style: TextButton.styleFrom(
+                  side: BorderSide(color: Colors.black26),
+                  padding: EdgeInsets.only(left: 50,right: 50),
+                  foregroundColor: Colors.black, textStyle: TextStyle(fontWeight: FontWeight.bold),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
               ),
-              ElevatedButton(
-                onPressed: () async {
-                  // Ouvrez une boîte de dialogue pour permettre à l'utilisateur de sélectionner un fichier
-                  FilePickerResult? result = await FilePicker.platform.pickFiles(
-                    type: FileType.custom,
-                    allowedExtensions: ['xlsx', 'xls'],
-                  );
-
-                  if (result != null && result.files.isNotEmpty) {
-                    // Récupérez le chemin du fichier sélectionné
-                    String path = result.files.first.path!;
-
-                    // Lisez les données du fichier Excel.
-                    final List<List<String>> data = await readExcelData(path);
-
-                    // Afficher les données dans la console
-                    for (List<String> rowData in data) {
-                      for (String data in rowData) {
-                        print(data);
-                      }
-                      print('---------------------');
-                    }
-                  }
-
-                },
-                child: Text('Lire le fichier Excel'),
-              ),],
+            ],
           ),
           Padding(padding: EdgeInsets.all(60)),
         ],
@@ -928,7 +958,7 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
     // Assuming you have a list of professeurs named 'professeursList'
     final professeur = professeurList.firstWhere((prof) => '${prof.id}' == id, orElse: () =>
         Professeur(id: '',   user: '', matieres: [], ));
-    print(professeurList);
+    print("Profs${professeurList}");
     return professeur; // Return the ID if found, otherwise an empty string
 
   }
@@ -939,7 +969,7 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
     totalType = 0;
     somme = 0;
     for (var course in widget.courses) {
-      String profId = course['professeur_id'];
+      String profId = course['professeur'];
       DateTime courseDate = DateTime.parse(course['date'].toString());
 
 
@@ -951,23 +981,23 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
             professeurData[profId] = {
               'professeur': course['professeur'],
               'email': course['email'],
-              'TH_total': 0.0,
+              'th_total': 0.0,
               'somme_total': 0.0,
             };
           }
 
-          // Mettre à jour les valeurs pour 'TH_total' et 'somme_total'
-          professeurData[profId]!['TH_total'] += double.parse(course['TH'].toString());
-          totalType += double.parse(course['TH'].toString());
+          // Mettre à jour les valeurs pour 'th_total' et 'somme_total'
+          professeurData[profId]!['th_total'] += double.parse(course['th'].toString());
+          totalType += double.parse(course['th'].toString());
           professeurData[profId]!['somme_total'] += double.parse(course['somme'].toString());
           somme += double.parse(course['somme'].toString());
         }
       // }
     }
 
-    // Filtrer les professeurs avec 'TH_total' égal à 0
+    // Filtrer les professeurs avec 'th_total' égal à 0
     if (Deb != null || Fin != null) {
-      professeurData.removeWhere((key, value) => value['TH_total'] == 0.0);
+      professeurData.removeWhere((key, value) => value['th_total'] == 0.0);
 
     }
   }
@@ -1021,7 +1051,7 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                 children: [
                   Row(
                     children: [
-                      ElevatedButton(
+                      TextButton(
                         onPressed: () {
                           setState(() {
                             showPaid = !showPaid;
@@ -1029,11 +1059,13 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                             showConf =false;
                           });
                         },
-                        style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)),
-                            padding: EdgeInsets.only(left: 15, right: 15),
-                            backgroundColor:  Colors.white,foregroundColor: Colors.black54,side: BorderSide(color: Colors.black12,width: 1)),
+                        style: TextButton.styleFrom(
+                          side: BorderSide(color: Colors.black26),
+                          padding: EdgeInsets.only(left: 15,right: 15),
+                          foregroundColor: Colors.black, textStyle: TextStyle(fontWeight: FontWeight.bold),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+
                         child: Row(
                           children: [
                             Text('En Cours'),
@@ -1043,8 +1075,8 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                         ),
 
                       ),
-                      SizedBox(width: 10),
-                      ElevatedButton(
+                      SizedBox(width: 5),
+                      TextButton(
                         onPressed: () {
                           setState(() {
                             showPaid = false;
@@ -1054,11 +1086,12 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
 
                           });
                         },
-                        style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)),
-                            padding: EdgeInsets.only(left: 15, right: 15),
-                            backgroundColor: showRef? Colors.white70:Colors.white,foregroundColor: Colors.black54,side: BorderSide(color: Colors.black12,width: 1)),
+                        style: TextButton.styleFrom(
+                          side: BorderSide(color: Colors.black26),
+                          padding: EdgeInsets.only(left: 15,right: 15),
+                          foregroundColor: Colors.black, textStyle: TextStyle(fontWeight: FontWeight.bold),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
                         child: Row(
                           children: [
                             Text('Refuser'),
@@ -1067,8 +1100,8 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                           ],
                         ),
                       ),
-                      SizedBox(width: 10),
-                      ElevatedButton(
+                      SizedBox(width: 5),
+                      TextButton(
                         onPressed: () {
                           setState(() {
                             showPaid = false;
@@ -1078,11 +1111,12 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
 
                           });
                         },
-                        style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)),
-                            padding: EdgeInsets.only(left: 15, right: 15),
-                            backgroundColor: showConf? Colors.white70:Colors.white,foregroundColor: Colors.black54,side: BorderSide(color: Colors.black12,width: 1)),
+                        style: TextButton.styleFrom(
+                          side: BorderSide(color: Colors.black26),
+                          padding: EdgeInsets.only(left: 15,right: 15),
+                          foregroundColor: Colors.black, textStyle: TextStyle(fontWeight: FontWeight.bold),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
                         child: Row(
                           children: [
                             Text('Accepté'),
@@ -1151,14 +1185,14 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                                    color: Colors.black,
                                  ),)),
                                  DataCell(Container(width: 60,
-                                   child: Text('${filteredItems?[index].nomComp}',style: TextStyle(
+                                   child: Text('${getProfesseurIdFromName(filteredItems![index].prof!).nom}',style: TextStyle(
                                      color: Colors.black,
                                    ),),
                                  )),
-                                 DataCell(Text('${filteredItems?[index].banq}',style: TextStyle(
+                                 DataCell(Text('${getProfesseurIdFromName(filteredItems![index].prof!).banque}',style: TextStyle(
                                    color: Colors.black,
                                  ),)),
-                                 DataCell(Text('${filteredItems?[index].comp}',style: TextStyle(
+                                 DataCell(Text('${getProfesseurIdFromName(filteredItems![index].prof!).compte}',style: TextStyle(
                                    color: Colors.black,
                                  ),)),
                                  DataCell(Icon( filteredItems?[index].conf =="vide"? Icons.indeterminate_check_box_outlined : filteredItems?[index].conf =="accepté"?Icons.payments_outlined:Icons.refresh_outlined,),
@@ -1293,14 +1327,14 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                                      color: Colors.black,
                                    ),)),
                                    DataCell(Container(width: 60,
-                                     child: Text('${filteredItems?[index].nomComp}',style: TextStyle(
+                                     child: Text('${getProfesseurIdFromName(filteredItems![index].prof!).nom}',style: TextStyle(
                                        color: Colors.black,
                                      ),),
                                    )),
-                                   DataCell(Text('${filteredItems?[index].banq}',style: TextStyle(
+                                   DataCell(Text('${getProfesseurIdFromName(filteredItems![index].prof!).banque}',style: TextStyle(
                                      color: Colors.black,
                                    ),)),
-                                   DataCell(Text('${filteredItems?[index].comp}',style: TextStyle(
+                                   DataCell(Text('${getProfesseurIdFromName(filteredItems![index].prof!).compte}',style: TextStyle(
                                      color: Colors.black,
                                    ),)),
                                    DataCell(Icon( filteredItems?[index].conf =="vide"? Icons.indeterminate_check_box_outlined : filteredItems?[index].conf =="accepté"?Icons.payments_outlined:Icons.refresh_outlined,),
@@ -1436,14 +1470,14 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                                      color: Colors.black,
                                    ),)),
                                    DataCell(Container(width: 60,
-                                     child: Text('${filteredItems?[index].nomComp}',style: TextStyle(
+                                     child: Text('${getProfesseurIdFromName(filteredItems![index].prof!).nom}',style: TextStyle(
                                        color: Colors.black,
                                      ),),
                                    )),
-                                   DataCell(Text('${filteredItems?[index].banq}',style: TextStyle(
+                                   DataCell(Text('${getProfesseurIdFromName(filteredItems![index].prof!).banque}',style: TextStyle(
                                      color: Colors.black,
                                    ),)),
-                                   DataCell(Text('${filteredItems?[index].comp}',style: TextStyle(
+                                   DataCell(Text('${getProfesseurIdFromName(filteredItems![index].prof!).compte}',style: TextStyle(
                                      color: Colors.black,
                                    ),)),
                                    DataCell(Icon( filteredItems?[index].conf =="vide"? Icons.indeterminate_check_box_outlined : filteredItems?[index].conf =="accepté"?Icons.payments_outlined:Icons.refresh_outlined,),
@@ -1726,26 +1760,9 @@ class _PaieListState extends State<PaieList> {
               height: 50,
               child: Row(
                 children: [
-                  Container(
-                    height: 45,
-                    width: 45,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.all(Radius.circular(50)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 5,
-                        ),
-                      ],
-                    ),
-                    child: InkWell(
-                      onTap: (){
-                        Navigator.pop(context);
-                      }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,color: Colors.black,),
-
-                    ),
-                  ),
+                     TextButton(onPressed: (){
+                    Navigator.pop(context);
+                  }, child: Icon(Icons.arrow_back_ios,color: Colors.black,)),
                   SizedBox(width: 50,),
                   Text("Liste de Paiemets",style: TextStyle(fontSize: 25),)
                 ],

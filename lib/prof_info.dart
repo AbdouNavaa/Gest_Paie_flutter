@@ -8,8 +8,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
    
 import 'Cours.dart';
-import 'Dashboard.dart';
-import 'ProfCours.dart';
 import 'categories.dart';
 
 class ProfesseurDetailsScreen extends StatefulWidget {
@@ -33,7 +31,6 @@ class _ProfesseurDetailsScreenState extends State<ProfesseurDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    fetchProfesseurDetail(widget.profId);
     print(widget.profId);
     fetchMatiere().then((data) {
       setState(() {
@@ -42,7 +39,13 @@ class _ProfesseurDetailsScreenState extends State<ProfesseurDetailsScreen> {
     }).catchError((error) {
       print('Erreur: $error');
     });
+    fetchProfesseurDetail(widget.profId);
+
   }
+
+  TextEditingController _mobile = TextEditingController();
+  TextEditingController _compte = TextEditingController();
+  String _banque = 'BMCI';
 
   Map<String, dynamic>? professeurData;
   List<dynamic> matieres = [];
@@ -71,8 +74,11 @@ class _ProfesseurDetailsScreenState extends State<ProfesseurDetailsScreen> {
     print(response.statusCode);
     if (response.statusCode == 200) {
       Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-      professeurData = jsonResponse['professeur'];
-      matieres = jsonResponse['matieres'];
+
+      setState(() {
+        professeurData = jsonResponse['professeur'];
+        matieres = jsonResponse['matieres'];
+      });
 
       print(professeurData);
     } else {
@@ -101,9 +107,163 @@ class _ProfesseurDetailsScreenState extends State<ProfesseurDetailsScreen> {
                   //       'https://th.bing.com/th/id/R.8b167af653c2399dd93b952a48740620?rik=%2fIwzk0n3LnH7dA&pid=ImgRaw&r=0'),
                   // ),
                   SizedBox(child: Container(
-                    child: Center(
-                      child: Text("Mes Iformations", style: TextStyle(fontStyle: FontStyle.italic, fontWeight: FontWeight.bold ,color: Colors.black,
-                        fontSize: 20,),),
+                    child: Row(
+                     mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("Mes Iformations", style: TextStyle(fontStyle: FontStyle.italic, fontWeight: FontWeight.bold ,color: Colors.black,
+                          fontSize: 20,),),
+                        IconButton(
+                            onPressed: (){
+                              showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      insetPadding: EdgeInsets.only(top: 190,),
+                                      surfaceTintColor: Color(0xB0AFAFA3),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.only(
+                                          topRight: Radius.circular(20),
+                                          topLeft: Radius.circular(20),
+                                        ),
+                                      ),
+                                      title:
+                                      Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        // mainAxisAlignment: MainAxisAlignment.start,
+                                        children: [
+                                          Text("Modifier Profile", style: TextStyle(fontSize: 25),),
+                                          Spacer(),
+                                          InkWell(
+                                            child: Icon(Icons.close),
+                                            onTap: (){
+                                              Navigator.pop(context);
+                                            },
+                                          )
+                                        ],
+                                      ),
+
+                                      content: Container(
+                                        height: 450,
+                                        width: MediaQuery.of(context).size.width,
+                                        // padding: const EdgeInsets.all(25.0),
+                                        child: SingleChildScrollView(
+                                          child: Column(
+                                            // mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              //hmmm
+                                              SizedBox(height: 40),
+                                              TextFormField(
+                                                controller: _mobile,
+                                                // initialValue: professeurData!['info']['mobile'].toString()!,
+                                                keyboardType: TextInputType.text,
+                                                // maxLines: 3,
+                                                decoration: InputDecoration(
+                                                    filled: true,
+
+                                                    // fillColor: Color(0xA3B0AF1),
+                                                    fillColor: Colors.white,
+                                                    hintText: "Mobile",
+                                                    border: OutlineInputBorder(
+                                                        borderSide: BorderSide.none,gapPadding: 1,
+                                                        borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                                              ),
+
+                                              SizedBox(height: 30),
+                                              TextFormField(
+                                                controller: _compte,
+                                                decoration: InputDecoration(
+                                                    filled: true,
+
+                                                    // fillColor: Color(0xA3B0AF1),
+                                                    fillColor: Colors.white,
+                                                    hintText: "Compte",
+                                                    border: OutlineInputBorder(
+                                                        borderSide: BorderSide.none,gapPadding: 1,
+                                                        borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                                              ),
+
+                                              SizedBox(height: 30),
+                                               DropdownButtonFormField<String>(
+                                                value: _banque,
+
+                                                items: [
+                                                  DropdownMenuItem<String>(
+                                                    child: Text('BMCI'),
+                                                    value: 'BMCI',
+                                                  ),
+                                                  DropdownMenuItem<String>(
+                                                    child: Text('BNM'),
+                                                    value: 'BNM',
+                                                  ),
+                                                  DropdownMenuItem<String>(
+                                                    child: Text('ORABANK'),
+                                                    value: 'ORABANK',
+                                                  ),
+                                                ],
+                                                onChanged: (value) {
+                                                  setState(() {
+                                                    _banque = value!;
+                                                  });
+                                                },
+                                                decoration: InputDecoration(
+                                                  filled: true,
+                                                  fillColor: Colors.white,
+                                                  border: OutlineInputBorder(
+                                                    borderSide: BorderSide.none,gapPadding: 1,
+                                                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                                                  ),
+                                                ),
+                                              ),
+
+                                              SizedBox(height: 30),
+                                              ElevatedButton(
+                                                onPressed: () async{
+                                                  Navigator.of(context).pop();
+
+
+                                                  String professeurId = widget.profId; // Remplacez par l'ID de votre professeur
+                                                  Map<String, dynamic> updatedData = {
+                                                    'info': {
+                                                      'mobile': _mobile.text, // Remplacez par la nouvelle valeur
+                                                      'accountNumero': _compte.text, // Remplacez par la nouvelle valeur
+                                                      'banque': _banque, // Remplacez par la nouvelle valeur
+                                                    },
+                                                  };
+
+                                                  await updateProfesseurInfo(professeurId, updatedData);
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    SnackBar(content: Text('Le Type est mis à jour avec succès.')),
+                                                  );
+
+                                                  setState(() {
+                                                    Navigator.pop(context);
+                                                  });
+                                                },
+                                                child: Text("Modifier"),
+
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: Color(0xff0fb2ea),
+                                                  foregroundColor: Colors.white,
+                                                  elevation: 10,
+                                                  minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
+                                                  // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
+                                                  //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
+                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                                ),
+                                              )
+                                            ],
+                                          ),
+
+
+                                        ),
+                                      ),
+
+                                    );
+                                  });
+                            }, // Disable button functionality
+
+                            icon: Icon(Icons.mode_edit_outline_outlined))
+                      ],
                     ),
                     // color: Colors.blue,
                     decoration: BoxDecoration(
@@ -129,8 +289,8 @@ class _ProfesseurDetailsScreenState extends State<ProfesseurDetailsScreen> {
                         Radius.circular(20.0),
                       ),
                     ),
-                    margin: EdgeInsets.only(left: 5, right: 10),
-                    padding: EdgeInsets.only(left: 40, right: 38),
+                    // margin: EdgeInsets.only(left: 5, right: 10),
+                    // padding: EdgeInsets.only(left: 40, right: 38),
                     child: DataTable(
                       showCheckboxColumn: true,
                       showBottomBorder: true,
@@ -153,12 +313,16 @@ class _ProfesseurDetailsScreenState extends State<ProfesseurDetailsScreen> {
                               DataCell(Text('${widget.mail} ')),
                             ]),
                         DataRow(cells: [
+                          DataCell(Text('Mobile')),
+                          DataCell(Text('${professeurData?['info']['mobile']}')),
+                        ]),
+                        DataRow(cells: [
                           DataCell(Text('Compte')),
-                          DataCell(Text('${professeurData?['compte']}')),
+                          DataCell(Text('${professeurData?['info']['accountNumero']}')),
                         ]),
                         DataRow(cells: [
                           DataCell(Text('Banque')),
-                          DataCell(Text('${professeurData?['banque']}')),
+                          DataCell(Text('${professeurData?['info']['banque']}')),
                         ]),
                       ],
                     ),
@@ -167,6 +331,7 @@ class _ProfesseurDetailsScreenState extends State<ProfesseurDetailsScreen> {
                 ],
               ),
             ),
+
             Divider(), // Add a divider between professor info and matieres
 
             // Matieres Table
@@ -239,7 +404,9 @@ class _ProfesseurDetailsScreenState extends State<ProfesseurDetailsScreen> {
                                     context: context,
                                     builder: (context) {
                                       return AlertDialog(
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
+                                        surfaceTintColor: Color(0xB0AFAFA3),
+                                        backgroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
                                         title: Text('Supprimer Matiere'),
                                         content: Text('Voulez vous supprimer: ${matiere['name']}?'),
                                         actions: [
@@ -287,21 +454,21 @@ class _ProfesseurDetailsScreenState extends State<ProfesseurDetailsScreen> {
               ],
             ),
 
-            SizedBox(height: 20), // Add a divider between professor info and matieres
-            Container(margin:EdgeInsets.only(left: 80,right: 80,bottom: 20 ,top: 10),height: 45,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),backgroundColor: Colors.white,elevation: 10),
-                onPressed: () => _displayTextInputDialog(context,widget.profId!),
-                child: Row(mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.add,size: 28,color: Colors.black,),
-                    Text(' Matiere', style: TextStyle(fontSize: 17,fontStyle: FontStyle.italic,color: Colors.black),)
-                  ],
-                ),
-                // tooltip: 'Add Category',
-              ),
-            ),
+            // SizedBox(height: 20), // Add a divider between professor info and matieres
+            // Container(margin:EdgeInsets.only(left: 80,right: 80,bottom: 20 ,top: 10),height: 45,
+            //   child: ElevatedButton(
+            //     style: ElevatedButton.styleFrom(
+            //         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),backgroundColor: Colors.white,elevation: 10),
+            //     onPressed: () => _displayTextInputDialog(context,widget.profId!),
+            //     child: Row(mainAxisAlignment: MainAxisAlignment.center,
+            //       children: [
+            //         Icon(Icons.add,size: 28,color: Colors.black,),
+            //         Text(' Matiere', style: TextStyle(fontSize: 17,fontStyle: FontStyle.italic,color: Colors.black),)
+            //       ],
+            //     ),
+            //     // tooltip: 'Add Category',
+            //   ),
+            // ),
 
           ],
         ),
@@ -316,6 +483,34 @@ class _ProfesseurDetailsScreenState extends State<ProfesseurDetailsScreen> {
         return AddMat(id:id);
       },
     );
+  }
+
+
+}
+
+Future<void> updateProfesseurInfo(String id, Map<String, dynamic> data) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String token = prefs.getString("token")!;
+
+  final String apiUrl = "http://192.168.43.73:5000/professeur" + "/$id"; // Mettez à jour l'URL de votre API
+
+  final http.Response response = await http.patch(
+    Uri.parse(apiUrl),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+      'Authorization': 'Bearer $token',
+      // Ajoutez d'autres en-têtes au besoin, par exemple, le jeton d'authentification.
+    },
+    body: jsonEncode(data),
+  );
+
+  if (response.statusCode == 201) {
+    print('Mise à jour réussie');
+    // Gérez la réponse réussie ici, si nécessaire.
+
+  } else {
+    print('Échec de la mise à jour - StatusCode: ${response.statusCode}');
+    // Gérez l'échec de la mise à jour ici, si nécessaire.
   }
 }
 
@@ -418,7 +613,9 @@ class _AddMatState extends State<AddMat> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Ajouter une Matiere'),
+        surfaceTintColor: Color(0xB0AFAFA3),
+        backgroundColor: Colors.white,
+        title: Text('Ajouter une Matiere'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

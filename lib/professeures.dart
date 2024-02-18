@@ -212,7 +212,7 @@ class _ProfesseuresState extends State<Professeures> {
   TextEditingController _searchController = TextEditingController();
 
   TextEditingController _name = TextEditingController();
-  TextEditingController _Banque = TextEditingController();
+  String _Banque = 'BMCI';
   TextEditingController _account = TextEditingController();
   TextEditingController _email = TextEditingController();
   TextEditingController _mobile = TextEditingController();
@@ -228,26 +228,9 @@ class _ProfesseuresState extends State<Professeures> {
             height: 50,
             child: Row(
               children: [
-                Container(
-                  height: 45,
-                  width: 45,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.all(Radius.circular(50)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 5,
-                      ),
-                    ],
-                  ),
-                  child: InkWell(
-                    onTap: (){
-                      Navigator.pop(context);
-                    }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,color: Colors.black,),
-
-                  ),
-                ),
+                   TextButton(onPressed: (){
+                    Navigator.pop(context);
+                  }, child: Icon(Icons.arrow_back_ios,color: Colors.black,)),
                 SizedBox(width: 50,),
                 Text("Liste de Profes",style: TextStyle(fontSize: 25),)
               ],
@@ -513,42 +496,48 @@ class _ProfesseuresState extends State<Professeures> {
                         ],
                       ),
                       SizedBox(height: 25),
+                      SingleChildScrollView(scrollDirection: Axis.horizontal,
+                        child: Container(width: MediaQuery.of(context).size.width,
+                          child: Row(
+                            children: [
+                              Text('Email:',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w400,
+                                  fontStyle: FontStyle.italic,
+                                ),),
+                              SizedBox(width: 10,),
+                              Text('${prof['email']}',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w400,
+                                  fontStyle: FontStyle.italic,
+                                ),),
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 25),
                       Row(
                         children: [
-                          Text('Email:',
+                          Text('Mobile:',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w400,
                               fontStyle: FontStyle.italic,
                             ),),
                           SizedBox(width: 10,),
-                          Text('${prof['email']}',
+                          Text('${prof['info']['mobile']}',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w400,
                               fontStyle: FontStyle.italic,
                             ),),
+
                         ],
                       ),
+
                       SizedBox(height: 25),
-                      // Row(
-                      //   children: [
-                      //     Text('mobile:',
-                      //       style: TextStyle(
-                      //         fontSize: 20,
-                      //         fontWeight: FontWeight.w400,
-                      //         fontStyle: FontStyle.italic,
-                      //       ),),
-                      //     SizedBox(width: 10,),
-                      //     Text('${getUserMob(prof['nom'])}',
-                      //       style: TextStyle(
-                      //         fontSize: 20,
-                      //         fontWeight: FontWeight.w400,
-                      //         fontStyle: FontStyle.italic,
-                      //       ),),
-                      //   ],
-                      // ),
-                      // SizedBox(height: 25),
                       Row(
                         children: [
                           Text('Banque:',
@@ -558,7 +547,7 @@ class _ProfesseuresState extends State<Professeures> {
                               fontStyle: FontStyle.italic,
                             ),),
                           SizedBox(width: 10,),
-                          Text('${getProfBanq(prof['nom'])}',
+                          Text('${prof['info']['banque']}',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w400,
@@ -567,100 +556,252 @@ class _ProfesseuresState extends State<Professeures> {
 
                         ],
                       ),
+
                       SizedBox(height: 25),
-                      SingleChildScrollView(scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            Text('Matieres:',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w400,
-                                fontStyle: FontStyle.italic,
-                              ),),
-                            SizedBox(width: 10,),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                for (var matiere in mat) // Assuming items![index].matieres is a list of matieres for the professor
-                                  Row(
-                                    children: [
-                                      // Text('Matieres: [${getMatIdFromNames(getMatSemIdFromName(semestre['_id']).join(", "))}]',style: TextStyle(fontSize: 18)),
-                                      Text(matiere['name'] ?? '',//abdou
-                                          style: TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.w400,
-                                            fontStyle: FontStyle.italic,
-                                          )),
-                                      TextButton(
-                                      onPressed: (){
-                                            showDialog(
-                                              context: context,
-                                              builder: (context) {
-                                                return AlertDialog(
-                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
-                                                  title: Text('Supprimer Matiere'),
-                                                  content: Text('Voulez vous supprimer: ${matiere['name']}?'),
-                                                  actions: [
-                                                    TextButton(
-                                                      onPressed: () {
-                                                        Navigator.of(context).pop(); // Close the dialog
-                                                      },
-                                                      child: Text('Cancel'),
-                                                    ),
-                                                    TextButton(
-                                                      onPressed: () {
-                                                        Navigator.of(context).pop(); // Close the dialog
-                                                        String profId = prof['_id']!;
-                                                        String matiereId = matiere['_id']; // Replace 'matiere' with the actual matiere data
-                                                        deleteMatiereFromProfesseur(profId, matiereId);
-                                                        setState(() {
-                                                          Navigator.pop(context);
-                                                        });ScaffoldMessenger.of(context).showSnackBar(
-                                                          SnackBar(
-                                                              content: Text('La matiere est Supprimer avec succès.',)),);
+                      Row(
+                        children: [
+                          Text('Compte:',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.italic,
+                            ),),
+                          SizedBox(width: 10,),
+                          Text('${prof['info']['accountNumero']}',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.italic,
+                            ),),
 
-                                                      },
-                                                      child: Text('Supprimer'),
-                                                    ),
-                                                  ],
-                                                );
-                                              },
-                                            );
-                                          },
-                                          child: Icon(Icons.delete, color: Colors.red,))
-                                    ],
-                                  ),
-                              ],
-                            ),
+                        ],
+                      ),
 
-                          ],
+                      SizedBox(height: 25),
+                      Container(width: MediaQuery.of(context).size.width,
+                        child: SingleChildScrollView(scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: [
+                              Text('Matieres:',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w400,
+                                  fontStyle: FontStyle.italic,
+                                ),),
+                              SizedBox(width: 10,),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  for (var matiere in mat) // Assuming items![index].matieres is a list of matieres for the professor
+                                    Row(
+                                      children: [
+                                        // Text('Matieres: [${getMatIdFromNames(getMatSemIdFromName(semestre['_id']).join(", "))}]',style: TextStyle(fontSize: 18)),
+                                        Text(matiere['name'] ?? '',//abdou
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.w400,
+                                              fontStyle: FontStyle.italic,
+                                            )),
+                                        TextButton(
+                                        onPressed: (){
+                                              showDialog(
+                                                context: context,
+                                                builder: (context) {
+                                                  return AlertDialog(
+                                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
+                                                    title: Text('Supprimer Matiere'),
+                                                    content: Text('Voulez vous supprimer: ${matiere['name']}?'),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed: () {
+                                                          Navigator.of(context).pop(); // Close the dialog
+                                                        },
+                                                        child: Text('Cancel'),
+                                                      ),
+                                                      TextButton(
+                                                        onPressed: () {
+                                                          Navigator.of(context).pop(); // Close the dialog
+                                                          String profId = prof['_id']!;
+                                                          String matiereId = matiere['_id']; // Replace 'matiere' with the actual matiere data
+                                                          deleteMatiereFromProfesseur(profId, matiereId);
+                                                          setState(() {
+                                                            Navigator.pop(context);
+                                                          });ScaffoldMessenger.of(context).showSnackBar(
+                                                            SnackBar(
+                                                                content: Text('La matiere est Supprimer avec succès.',)),);
+
+                                                        },
+                                                        child: Text('Supprimer'),
+                                                      ),
+                                                    ],
+                                                  );
+                                                },
+                                              );
+                                            },
+                                            child: Icon(Icons.delete, color: Colors.red,))
+                                      ],
+                                    ),
+                                ],
+                              ),
+
+                            ],
+                          ),
                         ),
                       ),
-                      // SizedBox(height: 40,),
-                      // ElevatedButton(
-                      //   onPressed:() =>_AddProfMatriere(context,prof['professeur']['_id']!),
-                      //   child:Text('Ajouter une Matiere au Prof',style: TextStyle(fontSize: 18)),
-                      //
-                      //   style: ElevatedButton.styleFrom(
-                      //     backgroundColor: Color(0xff0fb2ea),
-                      //     foregroundColor: Colors.white,
-                      //     elevation: 10,
-                      //     minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
-                      //     // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
-                      //     //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
-                      //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                      //   ),
-                      //
-                      // ),
                       SizedBox(height: 20,),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           ElevatedButton(
-                            onPressed: () {
-                              // Modifier les informations du professeur
-                            },
+                            onPressed: (){
+                              showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      insetPadding: EdgeInsets.only(top: 190,),
+                                      surfaceTintColor: Color(0xB0AFAFA3),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.only(
+                                          topRight: Radius.circular(20),
+                                          topLeft: Radius.circular(20),
+                                        ),
+                                      ),
+                                      title:
+                                      Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        // mainAxisAlignment: MainAxisAlignment.start,
+                                        children: [
+                                          Text("Modifier Profile", style: TextStyle(fontSize: 25),),
+                                          Spacer(),
+                                          InkWell(
+                                            child: Icon(Icons.close),
+                                            onTap: (){
+                                              Navigator.pop(context);
+                                            },
+                                          )
+                                        ],
+                                      ),
+
+                                      content: Container(
+                                        height: 450,
+                                        width: MediaQuery.of(context).size.width,
+                                        // padding: const EdgeInsets.all(25.0),
+                                        child: SingleChildScrollView(
+                                          child: Column(
+                                            // mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              //hmmm
+                                              SizedBox(height: 40),
+                                              TextFormField(
+                                                controller: _mobile,
+                                                keyboardType: TextInputType.text,
+                                                // maxLines: 3,
+                                                decoration: InputDecoration(
+                                                    filled: true,
+
+                                                    // fillColor: Color(0xA3B0AF1),
+                                                    fillColor: Colors.white,
+                                                    hintText: "Mobile",
+                                                    border: OutlineInputBorder(
+                                                        borderSide: BorderSide.none,gapPadding: 1,
+                                                        borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                                              ),
+
+                                              SizedBox(height: 30),
+                                              TextFormField(
+                                                controller: _account,
+                                                decoration: InputDecoration(
+                                                    filled: true,
+
+                                                    // fillColor: Color(0xA3B0AF1),
+                                                    fillColor: Colors.white,
+                                                    hintText: "Compte",
+                                                    border: OutlineInputBorder(
+                                                        borderSide: BorderSide.none,gapPadding: 1,
+                                                        borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                                              ),
+
+                                              SizedBox(height: 30),
+                                              DropdownButtonFormField<String>(
+                                                value: _Banque,
+
+
+                                                items: [
+                                                  DropdownMenuItem<String>(
+                                                    child: Text('BMCI'),
+                                                    value: 'BMCI',
+                                                  ),
+                                                  DropdownMenuItem<String>(
+                                                    child: Text('BNM'),
+                                                    value: 'BNM',
+                                                  ),
+                                                  DropdownMenuItem<String>(
+                                                    child: Text('ORABANK'),
+                                                    value: 'ORABANK',
+                                                  ),
+                                                ],
+                                                onChanged: (value) {
+                                                  setState(() {
+                                                    _Banque = value!;
+                                                  });
+                                                },
+                                                decoration: InputDecoration(
+                                                  filled: true,
+                                                  fillColor: Colors.white,
+                                                  border: OutlineInputBorder(
+                                                    borderSide: BorderSide.none,gapPadding: 1,
+                                                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                                                  ),
+                                                ),
+                                              ),
+
+                                              SizedBox(height: 30),
+                                              ElevatedButton(
+                                                onPressed: () async{
+                                                  Navigator.of(context).pop();
+
+                                                  fetchProfs();
+
+                                                  String professeurId = prof['_id']; // Remplacez par l'ID de votre professeur
+                                                  Map<String, dynamic> updatedData = {
+                                                    'info': {
+                                                      'mobile': _mobile.text, // Remplacez par la nouvelle valeur
+                                                      'accountNumero': _account.text, // Remplacez par la nouvelle valeur
+                                                      'banque': _Banque, // Remplacez par la nouvelle valeur
+                                                    },
+                                                  };
+
+                                                  await updateProfesseurInfo(professeurId, updatedData);
+
+                                                  setState(() {
+                                                    Navigator.pop(context);
+                                                  //  fetchProfs();
+                                                       });
+                                                },
+                                                child: Text("Modifier"),
+
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: Color(0xff0fb2ea),
+                                                  foregroundColor: Colors.white,
+                                                  elevation: 10,
+                                                  minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
+                                                  // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
+                                                  //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
+                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                                ),
+                                              )
+                                            ],
+                                          ),
+
+
+                                        ),
+                                      ),
+
+                                    );
+                                  });
+                            }, // Disable button functionality
+
                             child: Text('Modifier'),
                             style: ElevatedButton.styleFrom(
                               padding: EdgeInsets.only(left: 20,right: 20),
@@ -1363,6 +1504,7 @@ class Professeur {
   num? nbc;
   num? th;
   num? somme;
+  List<Info>? infos; // Change this field to be of type List<String>
   List? matieres; // Change this field to be of type List<String>
 
   Professeur({
@@ -1373,10 +1515,12 @@ class Professeur {
     this.compte,
     this.user,
     this.email,
+    this.mobile,
     this.nbh,
     this.nbc,
     this.th,
     this.somme,
+    this.infos, // Update the constructor parameter
     this.matieres, // Update the constructor parameter
   });
 
@@ -1386,15 +1530,37 @@ class Professeur {
       id: json['_id'],
       nom: json['nom'],
       prenom: json['prenom'],
-      banque: json['info']['banque'],
+      mobile: json['info']['mobile'] ,
+      banque: json['info']['banque'] ,
       user: json['user']?? '',
-      compte: json['accountNumero'],
+      compte: json['info']['accountNumero'],
       email: json['email'],
       nbh: json['nbh'],
       nbc: json['nbc'],
       th: json['th'],
       somme: json['somme'],
       matieres: List.from(json['matieres']?? []), // Convert the 'matieres' list to List<String>
+      // infos: List.from(json['info']?? []), // Convert the 'matieres' list to List<String>
+    );
+  }
+}
+
+class Info {
+  int? mobile;
+  int? compte;
+  String? banque;
+
+  Info({
+    this.mobile,
+    this.compte,
+    this.banque,
+  });
+
+  factory Info.fromJson(Map<String, dynamic> json) {
+    return Info(
+      mobile: json['mobile'],
+      compte: json['accountNumero'],
+      banque: json['banque'],
     );
   }
 }

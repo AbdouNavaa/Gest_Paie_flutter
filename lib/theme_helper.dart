@@ -8,7 +8,7 @@ class ThemeHelper{
     return InputDecoration(
       labelText: lableText,
       hintText: hintText,
-      fillColor: Colors.white,
+      fillColor: Color(0xA3E7E3E3),
       filled: true,
       contentPadding: EdgeInsets.fromLTRB(20, 10, 20, 10),
       // focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0), borderSide: BorderSide(color: Colors.grey)),

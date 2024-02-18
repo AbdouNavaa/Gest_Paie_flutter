@@ -55,7 +55,7 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
 
       // Calcul d'autres valeurs en fonction de la liste filtrée des cours
       totalType = coursesInDateRange
-          .map((course) => double.parse(course['TH'].toString()))
+          .map((course) => double.parse(course['th'].toString()))
           .fold(0, (prev, amount) => prev + amount);
 
       somme = coursesInDateRange
@@ -75,7 +75,7 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
       totalType = widget.courses
           .skip(startIndex)
           .take(coursesPerPage)
-          .map((course) => double.parse(course['TH'].toString()))
+          .map((course) => double.parse(course['th'].toString()))
           .fold(0, (prev, amount) => prev + amount);
 
       somme = widget.courses
@@ -104,7 +104,10 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
     );
     print(response.statusCode);
     if (response.statusCode == 201) {
-      // Fetch the updated list of Matieres and update the UI
+
+      setState(() {
+        Navigator.pop(context);
+      });
     } else {
       return Future.error('Server Error');
     }
@@ -178,26 +181,9 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
             height: 50,
             child: Row(
               children: [
-                Container(
-                  height: 45,
-                  width: 45,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.all(Radius.circular(50)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 5,
-                      ),
-                    ],
-                  ),
-                  child: InkWell(
-                    onTap: (){
-                      Navigator.pop(context);
-                    }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,color: Colors.black,),
-
-                  ),
-                ),
+                   TextButton(onPressed: (){
+                    Navigator.pop(context);
+                  }, child: Icon(Icons.arrow_back_ios,color: Colors.black,)),
                 SizedBox(width: 50,),
                 Text("Cours Non Signé",style: TextStyle(fontSize: 25),)
               ],
@@ -242,7 +228,7 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
 
               children: [
-                ElevatedButton(
+                TextButton(
                   onPressed: () async {
                     DateTime? selectedDateDeb = await showDatePicker(
                       context: context,
@@ -258,16 +244,29 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
                       });
                     }
                   },
-                  child: Text(widget.dateDeb != null ? DateFormat('yyyy/MM/dd').format(widget.dateDeb!) : 'Date Deb'),
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xff0fb2ea),foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                  // child: Text(widget.dateDeb != null ? DateFormat('yyyy/MM/dd').format(widget.dateDeb!) : 'Date Deb'),
+                  child:widget.dateDeb == null ?
+                  Row(
+                    children: [
+                      Text( 'Date Deb' ),
+                      SizedBox(width: 20,),
+                      Icon(Icons.date_range)
+                    ],
+                  )
+                      : Text(DateFormat('yyyy/MM/dd').format(widget.dateDeb!)),
+                  style: TextButton.styleFrom(
+                    // backgroundColor: Colors.blue,
+                    // surfaceTintColor: Color(0xB0AFAFA3),
+
+                    side: BorderSide(color: Colors.black26),
+                    foregroundColor: Colors.black, textStyle: TextStyle(fontWeight: FontWeight.bold),
+                    padding:EdgeInsets.only(left: 20,right: 20),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
 
                 ),
-                Container(width: 50,
-                  child:Center(child: Text('total: ${totalType.toStringAsFixed(2)}')),
-                ),
-                ElevatedButton(
+
+                TextButton(
                   onPressed: () async {
                     DateTime? selectedDateFin = await showDatePicker(
                       context: context,
@@ -283,39 +282,60 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
                       });
                     }
                   },
-                  child: Text(widget.dateFin != null ? DateFormat('yyyy/MM/dd').format(widget.dateFin!) : 'Date Fin'),
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xff0fb2ea),foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-                ),
-                Container(width: MediaQuery.of(context).size.width /8,height: 45,
-                  child: Card(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    color: Color(0xff0fb2ea),
-                    child: TextButton(
-                      onPressed: () {
-                        setState(() {
-                          totalType =0;
-                          sortByDateAscending = !sortByDateAscending;
-                          // Reverse the sorting order when the button is tapped
-                          widget.courses.sort((a, b) {
-                            DateTime dateA = DateTime.parse(a['date'].toString());
-                            DateTime dateB = DateTime.parse(b['date'].toString());
+                  child:widget.dateFin == null ?
+                  Row(
+                    children: [
+                      Text( 'Date Fin' ),
+                      SizedBox(width: 20,),
+                      Icon(Icons.date_range)
+                    ],
+                  )
+                      : Text(DateFormat('yyyy/MM/dd').format(widget.dateFin!)),
+                  style: TextButton.styleFrom(
+                    // backgroundColor: Colors.blue,
+                    // surfaceTintColor: Color(0xB0AFAFA3),
 
-                            // Sort in ascending order if sortByDateAscending is true,
-                            // otherwise sort in descending order
-                            return sortByDateAscending ? dateA.compareTo(dateB) : dateB.compareTo(dateA);
-                          });
-                        });
-                      },
-                      child: Icon(sortByDateAscending ? Icons.arrow_upward : Icons.arrow_downward,color: Colors.white,),
-                    ),
+                    side: BorderSide(color: Colors.black26),
+                    foregroundColor: Colors.black, textStyle: TextStyle(fontWeight: FontWeight.bold),
+                    padding:EdgeInsets.only(left: 20,right: 20),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                ),
+
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      totalType =0;
+                      sortByDateAscending = !sortByDateAscending;
+                      // Reverse the sorting order when the button is tapped
+                      widget.courses.sort((a, b) {
+                        DateTime dateA = DateTime.parse(a['date'].toString());
+                        DateTime dateB = DateTime.parse(b['date'].toString());
+
+                        // Sort in ascending order if sortByDateAscending is true,
+                        // otherwise sort in descending order
+                        return sortByDateAscending ? dateA.compareTo(dateB) : dateB.compareTo(dateA);
+                      });
+                    });
+                  },
+                  child: Icon(sortByDateAscending ? Icons.arrow_upward : Icons.arrow_downward,),
+                  style: TextButton.styleFrom(
+                    // backgroundColor: Colors.blue,
+                    // surfaceTintColor: Color(0xB0AFAFA3),
+
+                    side: BorderSide(color: Colors.black26),
+                    foregroundColor: Colors.black, textStyle: TextStyle(fontWeight: FontWeight.bold),
+                    padding: EdgeInsets.only(left: 5,right: 5),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
                 ),
 
 
+
               ],          ),
           ),
+
+          Divider(color: Colors.black26,),
 
           // Display the calculated sums
 
@@ -392,14 +412,46 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
 
                                             Navigator.of(context).pop();
 
-                                            final updatedDate = DateFormat('yyyy-MM-ddTHH:mm').parse(widget.courses[index]['date']).toUtc();
+                                            // final updatedDate = DateFormat('yyyy-MM-ddthH:mm').parse(widget.courses[index]['date']).toUtc();
 
-                                            final matiereName = widget.courses[index]['somme'];
+                                            // final matiereName = widget.courses[index]['somme'];
                                             // final matiereId = getMatiereIdFromName(matiereName);
                                             singeCours(
                                                 widget.courses[index]['_id'],
                                                 value
                                             );
+
+                                            setState(() {
+                                              Navigator.of(context).pop();
+                                              showDialog(
+                                                  context: context,
+                                                  builder: (BuildContext context) {
+                                                    return AlertDialog(
+                                                      surfaceTintColor: Color(0xB0AFAFA3),
+                                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                                                      title: Row(
+                                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                        children: [
+                                                          Text("Alert de Succes"),
+                                                          Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
+                                                        ],
+                                                      ),
+                                                      content: Text(
+                                                          "Le Cours est signe avec succes"),
+
+                                                      actions: [
+                                                        TextButton(
+                                                          child: Text("Ok"),
+                                                          onPressed: () {
+                                                            Navigator.of(context).pop();
+                                                          },
+                                                        ),
+
+                                                      ],
+
+                                                    );});
+                                            });
+
                                           },
                                         )
                                     ),
@@ -425,7 +477,7 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
                                       ),
                                     ),
                                     DataCell(
-                                      Text('${widget.courses[index]['TH']}',style: TextStyle(
+                                      Text('${widget.courses[index]['th']}',style: TextStyle(
                                         color: Colors.black,
                                       ),),
                                     ),
@@ -755,7 +807,7 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
                       ),),
 
                     SizedBox(width: 10,),
-                    Text('${course['TH']}',
+                    Text('${course['th']}',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,

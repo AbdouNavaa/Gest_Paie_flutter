@@ -91,16 +91,20 @@ class _EmploiState extends State<Emploi> {
   //   }
   // }
 
-  List<emploi> filterItemsBySemestre(Elem? ele, List<emploi> allItems) {
+  List<emploi> filterItemsBySemestre(int? ele,filliere? filiere, List<emploi> allItems) {
     if (ele == null) {
       return allItems;
     } else {
-      print("ElID:${ele.id}");
-      return allItems.where((emp) => emp.SemNum == ele.SemNum).toList();
+      // print("ElID:${ele.id}");
+      return allItems.where((emp) => emp.SemNum == ele && emp.fil == filiere!.id).toList();
     }
   }
 
-
+  List<int> extractUniqueSemesters(List<Elem> elems) {
+    // List<Elem> Els = filterItemsByFil()
+    Set<int> uniqueSemesters = elems.map((elem) => elem.SemNum!).toSet();
+    return uniqueSemesters.toList();
+  }
   List<Elem> filterItemsByFil(filliere? fil, List<Elem> allItems) {
     if (fil == null) {
       return allItems;
@@ -143,9 +147,10 @@ class _EmploiState extends State<Emploi> {
   Group? selectedGroup;
   filliere? selectedFil;
   Elem? selectedELem;
+  List<int> semestersList = [];
+int? selectedSem ;
 
-
-
+  bool showFloat  = false;
   void DeleteEmploi(id) async{
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token")!;
@@ -253,26 +258,6 @@ class _EmploiState extends State<Emploi> {
                 children: [
                   Text('Emploi Infos',style: TextStyle(fontSize: 30),),
                   SizedBox(height: 50),
-                  // Row(
-                  //   children: [
-                  //     Text('Prof:',
-                  //       style: TextStyle(
-                  //         fontSize: 20,
-                  //         fontWeight: FontWeight.w400,
-                  //         fontStyle: FontStyle.italic,
-                  //         // color: Colors.lightBlue
-                  //       ),),
-                  //     SizedBox(width: 10,),
-                  //     Text(emp.type == "CM" ? getEls(emp.element)!.ProfCM!.toUpperCase()
-                  //         :(emp.type == 'TP' ? getEls(emp.element)!.ProfTP!.toUpperCase():getEls(emp.element)!.ProfTD!.toUpperCase()),
-                  //       style: TextStyle(
-                  //         fontSize: 20,
-                  //         fontWeight: FontWeight.w400,
-                  //         fontStyle: FontStyle.italic,
-                  //         // color: Colors.lightBlue
-                  //       ),),
-                  //   ],
-                  // ),
                   Row(
                     children: [
                       Text('Professeur:',
@@ -340,48 +325,28 @@ class _EmploiState extends State<Emploi> {
                     ],
                   ),
                   SizedBox(height: 25),
-                  // Row(
-                  //   children: [
-                  //     Text('Professeur:',
-                  //       style: TextStyle(
-                  //         fontSize: 20,
-                  //         fontWeight: FontWeight.w400,
-                  //         fontStyle: FontStyle.italic,
-                  //         // color: Colors.lightBlue
-                  //       ),),
-                  //
-                  //     SizedBox(width: 10,),
-                  //     Text(getProfesseurIdFromName(emp.professor!),
-                  //       style: TextStyle(
-                  //         fontSize: 20,
-                  //         fontWeight: FontWeight.w400,
-                  //         fontStyle: FontStyle.italic,
-                  //         // color: Colors.lightBlue
-                  //       ),),
-                  //
-                  //   ],
-                  // ),
-                  // Row(
-                  //   children: [
-                  //     Text('Jour:',
-                  //       style: TextStyle(
-                  //         fontSize: 20,
-                  //         fontWeight: FontWeight.w400,
-                  //         fontStyle: FontStyle.italic,
-                  //         // color: Colors.lightBlue
-                  //       ),),
-                  //
-                  //     SizedBox(width: 10,),
-                  //     Text(days[emp.dayNumero],
-                  //       style: TextStyle(
-                  //         fontSize: 20,
-                  //         fontWeight: FontWeight.w400,
-                  //         fontStyle: FontStyle.italic,
-                  //         // color: Colors.lightBlue
-                  //       ),),
-                  //
-                  //   ],
-                  // ),
+                  Row(
+                    children: [
+                      Text('Filiere:',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                          // color: Colors.lightBlue
+                        ),),
+
+                      SizedBox(width: 10,),
+                      Text(getFilIdFromName(emp.fil!).toUpperCase(),
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                          // color: Colors.lightBlue
+                        ),),
+
+                    ],
+                  ),
+                  SizedBox(height: 25),
                   Row(
                     children: [
                       Text('Jour:',
@@ -511,8 +476,10 @@ class _EmploiState extends State<Emploi> {
                               context,
                               MaterialPageRoute(builder: (context) => UpdateEmploiScreen(empId: emp.id, day: _selectedNum, start: _date.text,
                                 GN: '',
-                                EM: getEls( emp.element)!.nameMat!,
-                                // EP:emp.type == "CM" ?
+                                EM: emp.mat,
+                                Prof:emp.enseignat!,
+                                Fil:getFilIdFromName(emp.fil!),
+                                SemN:emp.SemNum!,
                                 // getEls( emp.element)!.ProfCM!
                                 //     :(emp.type == "TP" ? getEls( emp.element)!.ProfCM!:getEls( emp.element)!.ProfCM!),
                                 TN: emp.type!, TH: emp.nbh!, GId: '',EId: emp.element,)),
@@ -625,26 +592,10 @@ class _EmploiState extends State<Emploi> {
               height: 50,
               child: Row(
                 children: [
-                  Container(
-                    height: 45,
-                    width: 45,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.all(Radius.circular(50)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 5,
-                        ),
-                      ],
-                    ),
-                    child: InkWell(
-                      onTap: (){
-                        Navigator.pop(context);
-                      }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,color: Colors.black,),
-
-                    ),
-                  ),
+               
+                     TextButton(onPressed: (){
+                    Navigator.pop(context);
+                  }, child: Icon(Icons.arrow_back_ios,color: Colors.black,)),
                   SizedBox(width: 50,),
                   Text("Liste d\'Emplois",style: TextStyle(fontSize: 25),)
                 ],
@@ -675,7 +626,7 @@ class _EmploiState extends State<Emploi> {
                     // Implémentez la logique de filtrage ici
                     // Par exemple, filtrez les emploiesseurs dont le name ou le préname contient la valeur saisie
                     filteredItems = Emplois.where((emploi) =>
-                    // getEls(emploi.element)!.ProfCM!.toLowerCase().contains(value.toLowerCase()) ||
+                    getProfesseurIdFromName(emploi.professor).toLowerCase().contains(value.toLowerCase()) ||
                     // getEls(emploi.element)!.ProfTP!.toLowerCase().contains(value.toLowerCase()) ||
                     // getEls(emploi.element)!.ProfTP!.toLowerCase().contains(value.toLowerCase()) ||
                     getEls(emploi.element)!.nameMat!.toLowerCase().contains(value.toLowerCase()) ||
@@ -765,12 +716,15 @@ class _EmploiState extends State<Emploi> {
 
                                         updateSelectedFil(value);
                                         setState(() {
-                                          elList1 = filterItemsByFil(selectedFil, elLis!);
-                                          selectedELem = null;
+                                          selectedFil = value;
+                                          // elList1 = filterItemsByFil(selectedFil, elLis!);
+                                           semestersList = extractUniqueSemesters(elLis);
+                                          // selectedELem = null;
                                           // selectedGroup = null;
                                         });
 
 
+                                        print("SemListe${semestersList}");
                                       },
                                       decoration: InputDecoration(
                                         filled: true,
@@ -787,29 +741,25 @@ class _EmploiState extends State<Emploi> {
                                   Container(
                                     height: 80,
                                     width: MediaQuery.of(context).size.width / 3,
-                                    child: DropdownButtonFormField<Elem>(
-                                      value: selectedELem,hint: Text('Elements'),
-                                      items: elList1.map((ele) {
-                                        return DropdownMenuItem<Elem>(
-                                          value: ele,
-                                          child: Text("S${ele.SemNum}" ),
+                                    child: DropdownButtonFormField<int>(
+                                      value: selectedSem,
+                                      hint: Text('Semestre'),
+                                      items: semestersList.map((sem) {
+                                        return DropdownMenuItem<int>(
+                                          value: sem,
+                                          child: Text("S$sem"),
                                         );
                                       }).toList(),
-                                      onChanged: (value) async{
+                                      onChanged: (value) async {
                                         setState(() {
-                                          selectedELem = value;
-                                          // selectedGroup = null;
-                                          // updateElemList(selectedFil!.id, selectedSem!.numero!); // Mettre à jour la liste des éléments en fonction du semestre du groupe sélectionné
-                                          // filteredItems = filterElsbySem(selectedFil!.id!,selectedSem!.numero!, elList!);
-                                                  filteredItems = filterItemsBySemestre(selectedELem, items!);
-                                          // grpList1 = filterItemsBySem(selectedSem, grpList!);
-
+                                          selectedSem = value;
+                                          filteredItems = filterItemsBySemestre(selectedSem,selectedFil, items!);
                                         });
                                       },
                                       decoration: InputDecoration(
                                         filled: true,
                                         fillColor: Colors.white,
-                                        hintText: "Sélecte Group",
+                                        hintText: "Sélecte Semestre",
                                         border: OutlineInputBorder(
                                           borderSide: BorderSide.none,
                                           gapPadding: 1,
@@ -819,39 +769,6 @@ class _EmploiState extends State<Emploi> {
                                     ),
                                   ),
 
-                                  // Container(
-                                  //   width: MediaQuery.of(context).size.width /3,
-                                  //   height: 80,
-                                  //   child: DropdownButtonFormField<Group>(
-                                  //     dropdownColor: Colors.white,
-                                  //     value: selectedGroup,hint: Text('Groups'),
-                                  //     items: grpList1.map((grp) {
-                                  //       return DropdownMenuItem<Group>(
-                                  //         value: grp,
-                                  //         child: Text('${getFilIdFromName(grp.filliereId!).toUpperCase()}-${grp.type}${grp.numero}'),
-                                  //       );
-                                  //     }).toList(),
-                                  //     onChanged: (value)  {
-                                  //       updateSelectedGroup(value);
-                                  //
-                                  //       setState(() {
-                                  //         // filteredItems = filterItemsByGroup(selectedGroup, items!);
-                                  //       });
-                                  //
-                                  //
-                                  //     },
-                                  //     decoration: InputDecoration(
-                                  //       filled: true,
-                                  //       fillColor: Colors.white,
-                                  //       hintText: "Sélecte Group",
-                                  //       border: OutlineInputBorder(
-                                  //         borderSide: BorderSide.none,
-                                  //         gapPadding: 1,
-                                  //         borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                                  //       ),
-                                  //     ),
-                                  //   ),
-                                  // ),
                                 ],
                               ),
                                       SizedBox(height: 10,),
@@ -893,8 +810,9 @@ class _EmploiState extends State<Emploi> {
         //   onPressed: () => _displayTextInputDialog(context),
         //
         // ),
-        floatingActionButton: Container(
-          width: 400,
+        floatingActionButton: showFloat ?
+        Container(
+          width: 260,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.all(Radius.circular(50)),
@@ -907,7 +825,7 @@ class _EmploiState extends State<Emploi> {
           ),
 
           // margin: EdgeInsets.only(left: 25,right: 5),
-          margin: EdgeInsets.only(left: 60,right: 55),
+          margin: EdgeInsets.only(left: 30,right: 25),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -992,9 +910,45 @@ class _EmploiState extends State<Emploi> {
                 },
 
               ),
+              TextButton(
+                child: Icon(Icons.close_outlined, color: Colors.black,),
+                onPressed: () {
+                  setState(() {
+                    showFloat = false;
+                  });
+                },
+
+              ),
             ],
           ),
+        )
+            :Container(
+          width: 60,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(50)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 5,
+              ),
+            ],
+          ),
+
+          // margin: EdgeInsets.only(left: 90,right: 60),
+          child:
+          TextButton(
+            child: Icon(Icons.add, color: Colors.black,),
+            onPressed: () {
+              setState(() {
+                showFloat = true;
+              });
+            },
+
+          ),
+
         ),
+
 
 
       ),
@@ -1005,7 +959,7 @@ class _EmploiState extends State<Emploi> {
 
 
 
-  DataTable buildDayDataTable(String day ,List<emploi> items) {
+  Container buildDayDataTable(String day ,List<emploi> items) {
     List<DataRow> dayRows = [];
 
     if (!items.any((emp) => days[emp.dayNumero] == day)) {
@@ -1016,6 +970,7 @@ class _EmploiState extends State<Emploi> {
             DataCell(Container(width: 50,child: Text('N/A', style: TextStyle(color: Colors.black)))),
             DataCell(Container(width: 50,child: Text('N/A', style: TextStyle(color: Colors.black)))),
             DataCell(Container(width: 50,child: Text('N/A', style: TextStyle(color: Colors.black)))),
+            DataCell(Container(width: 35,child: Text('N/A', style: TextStyle(color: Colors.black)))),
             DataCell(Container(width: 35,child: Text('N/A', style: TextStyle(color: Colors.black)))),
           ],
         ),
@@ -1028,18 +983,12 @@ class _EmploiState extends State<Emploi> {
         dayRows.add(
           DataRow(
             cells: [
-              DataCell(Text(emp.startTime!, style: TextStyle(color: Colors.black))),
+              DataCell(Container(width: 35,child: Text(emp.startTime!, style: TextStyle(color: Colors.black)))),
               DataCell(Text(getProfesseurIdFromName(emp.professor!), style: TextStyle(color: Colors.black))),
-              // DataCell(Container(
-              //   child: Text(
-              //     '${emp.type == 'CM' ? getEls(emp.element)!.ProfCM ?? ''
-              //         :(emp.type == 'TP' ? getEls(emp.element)!.ProfTP ?? '':getEls(emp.element)!.ProfTD ?? '')}',
-              //   ),
-              // )),
-              DataCell(Container(width: 50, child: Text('${emp.mat}'))),
-              // DataCell(Container(width: 50, child: Text('${getFilIdFromName(getGroupIdFromName(emp.group).filliereId!).toUpperCase()}${getGroupIdFromName(emp.group).SemNum!}'
-              //     '-${getGroupIdFromName(emp.group).type!.toUpperCase()}'))),
-              DataCell(Container(width: 50, child: Text('S${emp.SemNum!}'))),
+
+              DataCell(Text('${emp.mat}')),
+              DataCell(Container(width: 30, child: Text(getFilIdFromName(emp.fil!).toUpperCase()))),
+              DataCell(Container(width: 25, child: Text('S${emp.SemNum!}'))),
               DataCell(
                 Container(
                   width: 35,
@@ -1060,31 +1009,35 @@ class _EmploiState extends State<Emploi> {
     }
 
     // Construisez le DataTable pour le jour donné
-    return DataTable(
-      showCheckboxColumn: true,
-      showBottomBorder: true,
-      headingRowHeight: 50,
-      columnSpacing: 15,
-      dataRowHeight: 60,
-      headingRowColor: MaterialStateColor.resolveWith((states) => Colors.lightBlueAccent.shade100), // Couleur de la ligne d'en-tête
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      child: DataTable(
+        // showCheckboxColumn: true,
+        // showBottomBorder: true,
+        headingRowHeight: 50,
+        columnSpacing: 15,
+        dataRowHeight: 60,
+        headingRowColor: MaterialStateColor.resolveWith((states) => Colors.lightBlueAccent.shade100), // Couleur de la ligne d'en-tête
+        horizontalMargin: 10,
 
-      headingTextStyle: TextStyle(
-        fontWeight: FontWeight.bold,
-        color: Colors.black,
+        headingTextStyle: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: Colors.black,
+        ),
+        columns: [
+          DataColumn(label: Text(day,style: TextStyle(color: Colors.black,fontSize: 20,fontWeight: FontWeight.w500),),),
+          DataColumn(label: Text('')),
+          DataColumn(label: Text('')),
+          DataColumn(label: Text('')),
+          DataColumn(label: Text('')),
+          DataColumn(label: Text('')),
+        ],
+        rows: dayRows,
       ),
-      columns: [
-        DataColumn(label: Text(day),),
-        DataColumn(label: Text('')),
-        DataColumn(label: Text('')),
-        DataColumn(label: Text('')),
-        DataColumn(label: Text('')),
-      ],
-      rows: dayRows,
     );
   }
 
   Future<void> _displayTextInputDialog(BuildContext context) async {
-    setState(() {
       fetchemploi().then((data) {
         setState(() {
           filteredItems = data; // Assigner la liste renvoyée par Professeur à items
@@ -1093,7 +1046,7 @@ class _EmploiState extends State<Emploi> {
       }).catchError((error) {
         print('Erreur: $error');
       });
-    });return showDialog(
+return showDialog(
       context: context,
       builder: (context) {
         return AddEmploiScreen();
@@ -1162,7 +1115,7 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
 
   Group? selectedGroup;
   filliere? selectedFil;
-  Semestre? selectedSem;
+  int? selectedSem;
   Elem? selectedElem;
   Matiere? selectedMat;
   Professeur? selectedProfesseur;
@@ -1171,25 +1124,7 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
 
   bool isChanged =false;
 
-  // Future<void> updateProfesseurList() async {
-  //   if (selectedMat != null) {
-  //     List<Professeur> fetchedProfesseurs = await fetchProfesseursByMatiere(selectedMat!.id);
-  //     setState(() {
-  //       professeurs = fetchedProfesseurs;
-  //       selectedProfesseurCM = null;
-  //       selectedProfesseurTP = null;
-  //       selectedProfesseurTD = null;
-  //     });
-  //   } else {
-  //     List<Professeur> fetchedProfesseurs = await fetchProfs();
-  //     setState(() {
-  //       professeurs = fetchedProfesseurs;
-  //       selectedProfesseurCM = null;
-  //       selectedProfesseurTP = null;
-  //       selectedProfesseurTD = null;
-  //     });
-  //   }
-  // }
+
 
 
   Elem getEls(String id) {
@@ -1220,11 +1155,15 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
   List<Group> grpList = [];
   List<Group> grpList1 = [];
   List<Elem> elList = [];
+  List<Elem> elList2 = [];
   List<Elem> elList1 = [];
   List<Matiere> matiereList = [];
   List<filliere> filList = [];
   List<Semestre> SemList = [];
   List<Semestre> SemList1 = [];
+  List<int> semestersList = [];
+
+
   String getFilIdFromName(String id) {
     // Assuming you have a list of professeurs named 'professeursList'
     final fil = filList.firstWhere((f) => '${f.id}' == id, orElse: () =>filliere(id: '', name: '', description: '', niveau: ''));
@@ -1308,6 +1247,21 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
 
   }
 
+  Future<void> updateElemList() async {
+    if (selectedProfesseur != null) {
+      List<Elem>? fetchedProfesseurs = await fetchElsByProf(selectedProfesseur!.id);
+      setState(() {
+        elList = fetchedProfesseurs!;
+        selectedElem = null;
+      });
+    } else {
+      List<Elem> fetchedProfesseurs = await fetchElems();
+      setState(() {
+        elList = fetchedProfesseurs;
+        selectedElem = null;
+      });
+    }
+  }
 
   Future<void> updateElementList(String semestreId) async {
     // try {
@@ -1323,29 +1277,27 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
     // }
   }
 
-  List<Semestre> filterItemsByFil(filliere? fil, List<Semestre> allItems) {
+  List<Elem> filterItemsBySemestre(int? ele, List<Elem> allItems) {
+    if (ele == 0) {
+      return allItems;
+    } else {
+      // print("ElID:${ele.id}");
+      return allItems.where((elem) => elem.SemNum == ele).toList();
+    }
+  }
+
+  List<int> extractUniqueSemesters(List<Elem> elems) {
+    // List<Elem> Els = filterItemsByFil(fil,elems);
+    Set<int> uniqueSemesters = elems.map((elem) => elem.SemNum!).toSet();
+    return uniqueSemesters.toList();
+  }
+  List<Elem> filterItemsByFil(filliere? fil, List<Elem> allItems) {
     if (fil == null) {
       return allItems;
     } else {
-      return allItems.where((emp) => emp!.filliereId == fil.id).toList();
+      return allItems.where((ele) => ele!.filId == fil.id).toList();
     }
   }
-  List<Group> filterItemsBySem(Semestre? sem, List<Group> allItems) {
-    if (sem == null) {
-      return allItems;
-    } else {
-      return allItems.where((emp) => emp.semestre!.id == sem!.id).toList();
-    }
-  }
-  List<Elem> filterElsbySem(String FilId, int sem,List<Elem> allItems) {
-    if (FilId == null) {
-      return [];
-    } else {
-      return allItems.where((emp) => emp.filId == FilId && emp.SemNum == sem).toList();
-    }
-  }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -1384,27 +1336,55 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
               children: [
                 // _buildTypesInput(),
                 SizedBox(height: 30),
+                DropdownButtonFormField<Professeur>(
+                  value: selectedProfesseur,
+                  items: professeurList.map((prof) {
+                    return DropdownMenuItem<Professeur>(
+                      value: prof,
+                      child: Text(prof.nom! ),
+                    );
+                  }).toList(),
+                  onChanged: (value) async{
+                    setState(() {
+                      selectedProfesseur = value;
+                      selectedElem = null;
+                      updateElemList();
+                    });
+                  },
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    hintText: "selection d'une Professeur",
+
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,gapPadding: 1,
+                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 10),
                 Row(
                   children: [
                     Container(
-                      width: MediaQuery.of(context).size.width / 1.8,
+                      width: MediaQuery.of(context).size.width / 2.2,
                       child: DropdownButtonFormField<filliere>(
                         value: selectedFil,
                         items: filList.map((fil) {
                           return DropdownMenuItem<filliere>(
                             value: fil,
-                            child: Text(fil.name ),
+                            child: Text(fil.name.toUpperCase() ),
                           );
                         }).toList(),
                         onChanged: (value) async{
                           setState(() {
                             selectedFil = value;
                             selectedSem = null; // Reset the selected matière
-                            selectedGroup = null; // Reset the selected matière
+                            // selectedGroup = null; // Reset the selected matière
                             selectedElem = null; // Reset the selected matière
-                            SemList1 = filterItemsByFil(selectedFil, SemList!);
+                            elList2 = filterItemsByFil(selectedFil, elList!);
+                            semestersList = extractUniqueSemesters(elList2);
 
-                            print("Sems1${SemList1}");
+                            print("Sems1${elList2}");
 
                           });
                         },
@@ -1423,34 +1403,33 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
                     ),
                     SizedBox(width: 10),
                     Container(
-                      width: MediaQuery.of(context).size.width / 3.6,
-                      child: DropdownButtonFormField<Semestre>(
+                      width: MediaQuery.of(context).size.width /2.7,
+                      child: DropdownButtonFormField<int>(
                         value: selectedSem,
-                        items: SemList1.map((sem) {
-                          return DropdownMenuItem<Semestre>(
+                        hint: Text('Semestre'),
+                        items: semestersList.map((sem) {
+                          return DropdownMenuItem<int>(
                             value: sem,
-                            child: Text("S${sem.numero}" ),
+                            child: Text("S$sem"),
                           );
                         }).toList(),
-                        onChanged: (value) async{
+                        onChanged: (value) async {
                           setState(() {
                             selectedSem = value;
-                            selectedGroup = null;
-                            selectedElem = null;
-                            // updateElemList(selectedFil!.id, selectedSem!.numero!); // Mettre à jour la liste des éléments en fonction du semestre du groupe sélectionné
-                            elList1 = filterElsbySem(selectedFil!.id!,selectedSem!.numero!, elList!);
-                            grpList1 = filterItemsBySem(selectedSem, grpList!);
-
+                            // filteredItems = filterItemsBySemestre(selectedSem, items!);
+                            // semestersList = extractUniqueSemesters(elList1);
+                            // elList1 = filterItemsByFil(selectedFil, elList!);
+                            elList1 = filterItemsBySemestre(selectedSem, elList2!);
+                            // print("EL1${elList1} et ${elList}");
                           });
                         },
                         decoration: InputDecoration(
                           filled: true,
-                          // fillColor: Color(0xA3B0AF1),
                           fillColor: Colors.white,
-                          hintText: "...",
-
+                          hintText: "Sélecte Semestre",
                           border: OutlineInputBorder(
-                            borderSide: BorderSide.none,gapPadding: 1,
+                            borderSide: BorderSide.none,
+                            gapPadding: 1,
                             borderRadius: BorderRadius.all(Radius.circular(10.0)),
                           ),
                         ),
@@ -1459,48 +1438,20 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
 
                   ],
                 ),
-                  SizedBox(height: 10),
-                DropdownButtonFormField<Group>(
-                  value: selectedGroup,
-                  items: grpList1.map((grp) {
-                    return DropdownMenuItem<Group>(
-                      value: grp,
-                      child: Text('${getFilIdFromName(grp.filliereId!).toUpperCase()}${grp.numero}-${grp.type}' ),
-                    );
-                  }).toList(),
-                  onChanged: (value) async{
-                    setState(() {
-                      selectedGroup = value;
-                      // selectedElem = null;
-
-                    });
-                  },
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    hintText: "selection d'une Group",
-
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,gapPadding: 1,
-                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    ),
-                  ),
-                ),
-
                 SizedBox(height: 10),
                 DropdownButtonFormField<Elem>(
                   value: selectedElem,
                   items: elList1.map((ele) {
                     return DropdownMenuItem<Elem>(
                         value: ele,
-                        child: Text('${getEls(ele.id).nameMat}' )
+                        child: Text(ele.nameM ?? '')
                     );
                   }).toList(),
                   onChanged: (value) async{
                     setState(() {
                       selectedElem = value;
-                      selectedProfesseur = null; // Reset the selected matière
-                      updateProfesseurList();
+                      // selectedProfesseur = null; // Reset the selected matière
+                      // updateProfesseurList();
 
                       // print("PL${professeurs}");
                     });
@@ -1517,35 +1468,9 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
                   ),
                 ),
 
-                // SizedBox(height: 10),
-                // DropdownButtonFormField<Professeur>(
-                //   value: selectedProfesseur,
-                //   items: professeurs.map((ele) {
-                //     return DropdownMenuItem<Professeur>(
-                //       value: ele,
-                //       child: Text(ele?.nom ?? ''));
-                //   }).toList(),
-                //   onChanged: (value) async{
-                //     setState(() {
-                //       selectedProfesseur = value;
-                //       // selectedMat = null; // Reset the selected matière
-                //
-                //     });
-                //   },
-                //   decoration: InputDecoration(
-                //     filled: true,
-                //     fillColor: Colors.white,
-                //     hintText: "selection d'un Element",
-                //
-                //     border: OutlineInputBorder(
-                //       borderSide: BorderSide.none,gapPadding: 1,
-                //       borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                //     ),
-                //   ),
-                // ),
+
 
                 SizedBox(height: 10),
-
                 Row(
                   children: [
                     Container(
@@ -1684,15 +1609,13 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
                 ElevatedButton(
                   onPressed: (){
 
-                    addEmp(_selectedType,_selectedNbh,_date.text,_selectedNum,selectedGroup!.id,selectedElem!.id,);
+                    Navigator.pop(context);
+                    addEmp(_selectedType,_selectedNbh,_date.text,_selectedNum,selectedFil!.id,selectedElem!.id,selectedProfesseur!.id);
                     // Addemploi(_name.text, _desc.text);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('L\'emploi a été ajouter avec succès.')),
-                    );
 
-                    setState(() {
-                      Navigator.of(context).pop();
-                    });
+
+
+
 
                   },
                   child: Text("Ajouter"),
@@ -1715,7 +1638,8 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
 
   }
 
-  Future<void> addEmp(String type, num nbh,String date, int days, String GpId, String ElemId) async {
+
+  Future<void> addEmp(String type, num nbh,String date, int days, String filId, String ElemId,String ProfId) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token")!;
     print(token);
@@ -1728,12 +1652,12 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
       "nbh": nbh,
       "startTime": date,
       "dayNumero": days,
-      "group": GpId,
-      // "professeur": ProfId,
+      "filiere": filId,
+      "professeur": ProfId,
       "element": ElemId
     };
 
-    try {
+    // try {
       final response = await http.post(
         uri,
         body: jsonEncode(emploiData),
@@ -1743,30 +1667,126 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
         },
       );
 
-      if (response.statusCode == 200) {
+      print(response.statusCode);
+      if (response.statusCode == 201) {
 
-
-        print('Emploi ajouter avec succes');
         setState(() {
-          Navigator.pop(context);
+          Navigator.of(context).pop();
+          showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  surfaceTintColor: Color(0xB0AFAFA3),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Text("Alert de Succes"),
+                      Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
+                    ],
+                  ),
+                  content: Text(
+                      "L\'emploi est ajouter avec succes"),
+
+                  actions: [
+                    TextButton(
+                      child: Text("Ok"),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+
+                  ],
+
+                );});
         });
 
 
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Échec de l\'ajout de l\'emploi.')),
-        );
+       setState(() {
+         showDialog(
+             context: context,
+             builder: (BuildContext context) {
+               return AlertDialog(
+                 surfaceTintColor: Color(0xB0AFAFA3),
+                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                 title: Row(
+                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                   children: [
+                     Text("Alert d\'erreur"),
+                     Icon(Icons.wrong_location_outlined,color: Colors.redAccent,)
+                   ],
+                 ),
+                 content: Text(
+                     "L\'emploi n\'est pas ajouter"),
+               );});
+
+       });
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(content: Text('Échec de l\'ajout de l\'emploi.')),
+        // );
       }
 
-    }
-    catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur: $error')),
-      );
-    }
+    // }
+    // catch (error) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(content: Text('Erreur: $error')),
+    //   );
+    // }
   }
 
 }
+
+Future<List<Elem>?> fetchElsByProf(String ProfId,) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String token = prefs.getString("token")!;
+  print(token);
+
+
+
+
+  final response = await http.get(
+    Uri.parse('http://192.168.43.73:5000/professeur/$ProfId'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+  );
+  // try {
+
+  print(response.statusCode);
+  if (response.statusCode == 200) {
+    Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+    List<dynamic> empData = jsonResponse['elements'];
+
+    print(empData);
+    List<Elem> els = empData.map((item) {
+      return Elem.fromJson(item);
+    }).toList();
+
+    print(els);
+
+    // await sendEmailNotification(profEmail, type, date, time); // Send email
+    // setState(() {
+    //   Navigator.pop(context);
+    // });
+
+    return els;
+
+  } else {
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(content: Text('Échec de l\'ajout de l\'emploi.')),
+    // );
+  }
+
+  // }
+  // catch (error) {
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //     SnackBar(content: Text('Erreur: $error')),
+  //   );
+  // }
+}
+
 
 class UpdateEmploiScreen extends StatefulWidget {
   final String empId;
@@ -1775,12 +1795,15 @@ class UpdateEmploiScreen extends StatefulWidget {
   final String GN;
   final String GId;
   final String EM;
-  // final String EP;
+  final String Prof;
+  final String Fil;
   final String EId;
   final String TN;
   final num TH;
+  final num SemN;
 
-  UpdateEmploiScreen({Key? key, required this.empId, required this.day, required this.start, required this.GN, required this.EM,  required this.TN, required this.TH, required this.GId, required this.EId}) : super(key: key);
+  UpdateEmploiScreen({Key? key, required this.empId, required this.day, required this.start, required this.GN, required this.Prof,
+    required this.Fil,required this.EM,  required this.TN, required this.TH, required this.GId, required this.EId, required this.SemN}) : super(key: key);
   @override
   State<UpdateEmploiScreen> createState() => _UpdateEmploiScreenState();
 
@@ -1815,8 +1838,9 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
 
 
   List<Professeur> professeurList = [];
-  List<Group> grpList = [];
   List<Elem> elList = [];
+  List<Elem> elList1 = [];
+  List<Elem> elList2 = [];
   List<Matiere> matiereList = [];
   List<filliere> filList = [];
   String getFilIdFromName(String id) {
@@ -1849,27 +1873,16 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
     return element!; // Return the ID if found, otherwise an empty string
 
   }
-  Future<void> updateElementList(String semestreId) async {
-    // try {
-    // Utilisez l'ID du semestre pour récupérer les éléments correspondants
-    List<Elem> elements = await fetchElementsBySemestre(semestreId);
-
-    setState(() {
-      elList = elements;
-      selectedElem = null; // Réinitialiser la sélection de l'élément
-    });
-    // } catch (error) {
-    //   print('Erreur lors de la récupération des éléments: $error');
-    // }
-  }
 
 
   @override
   void initState() {
     super.initState();
-    fetchGroup().then((data) {
+
+    fetchProfs().then((data) {
       setState(() {
-        grpList = data; // Assigner la liste renvoyée par emploiesseur à items
+        professeurList = data; // Assigner la liste renvoyée par emploiesseur à items
+        print('Hello');
       });
 
       fetchMatiere().then((data) {
@@ -1878,15 +1891,6 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
         });
       }).catchError((error) {
         print('Erreur: $error');
-      });
-
-    }).catchError((error) {
-      print('Erreur: $error');
-    });
-    fetchProfs().then((data) {
-      setState(() {
-        professeurList = data; // Assigner la liste renvoyée par emploiesseur à items
-        print('Hello');
       });
     }).catchError((error) {
       print('Erreur: $error');
@@ -1901,6 +1905,61 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
 
     selectedNbhValue = widget.TH;
     selectedTypeName = widget.TN;
+  }
+
+  List<int> semestersList = [];
+  filliere? selectedFil;
+  int? selectedSem;
+  Future<void> updateElemList() async {
+    if (selectedProfesseur != null) {
+      List<Elem>? fetchedProfesseurs = await fetchElsByProf(selectedProfesseur!.id);
+      setState(() {
+        elList = fetchedProfesseurs!;
+        selectedElem = null;
+      });
+    } else {
+      List<Elem> fetchedProfesseurs = await fetchElems();
+      setState(() {
+        elList = fetchedProfesseurs;
+        selectedElem = null;
+      });
+    }
+  }
+
+  Future<void> updateElementList(String semestreId) async {
+    // try {
+    // Utilisez l'ID du semestre pour récupérer les éléments correspondants
+    List<Elem> elements = await fetchElementsBySemestre(semestreId);
+
+    setState(() {
+      elList = elements;
+      selectedElem = null; // Réinitialiser la sélection de l'élément
+    });
+    // } catch (error) {
+    //   print('Erreur lors de la récupération des éléments: $error');
+    // }
+  }
+
+  List<Elem> filterItemsBySemestre(int? ele, List<Elem> allItems) {
+    if (ele == 0) {
+      return allItems;
+    } else {
+      // print("ElID:${ele.id}");
+      return allItems.where((elem) => elem.SemNum == ele).toList();
+    }
+  }
+
+  List<int> extractUniqueSemesters(List<Elem> elems) {
+    // List<Elem> Els = filterItemsByFil(fil,elems);
+    Set<int> uniqueSemesters = elems.map((elem) => elem.SemNum!).toSet();
+    return uniqueSemesters.toList();
+  }
+  List<Elem> filterItemsByFil(filliere? fil, List<Elem> allItems) {
+    if (fil == null) {
+      return allItems;
+    } else {
+      return allItems.where((ele) => ele!.filId == fil.id).toList();
+    }
   }
 
   @override
@@ -1939,7 +1998,142 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
               children: [
                 //hmmm
                 SizedBox(height: 30),
-                // _buildTypesInput(),
+                DropdownButtonFormField<Professeur>(
+                  value: selectedProfesseur,
+                  hint: Text('${widget.Prof}'),
+                  items: professeurList.map((prof) {
+                    return DropdownMenuItem<Professeur>(
+                      value: prof,
+                      child: Text(prof.nom! ),
+                    );
+                  }).toList(),
+                  onChanged: (value) async{
+                    setState(() {
+                      selectedProfesseur = value;
+                      selectedElem = null;
+                      updateElemList();
+                    });
+                  },
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    hintText: "selection d'une Professeur",
+
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,gapPadding: 1,
+                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 10),
+                Row(
+                  children: [
+                    Container(
+                      width: MediaQuery.of(context).size.width / 2.2,
+                      child: DropdownButtonFormField<filliere>(
+                        value: selectedFil,
+                        hint: Text('${widget.Fil}'),
+                        items: filList.map((fil) {
+                          return DropdownMenuItem<filliere>(
+                            value: fil,
+                            child: Text(fil.name.toUpperCase() ),
+                          );
+                        }).toList(),
+                        onChanged: (value) async{
+                          setState(() {
+                            selectedFil = value;
+                            selectedSem = null; // Reset the selected matière
+                            // selectedGroup = null; // Reset the selected matière
+                            selectedElem = null; // Reset the selected matière
+                            elList2 = filterItemsByFil(selectedFil, elList!);
+                            semestersList = extractUniqueSemesters(elList2);
+
+                            print("Sems1${elList2}");
+
+                          });
+                        },
+                        decoration: InputDecoration(
+                          filled: true,
+                          // fillColor: Color(0xA3B0AF1),
+                          fillColor: Colors.white,
+                          hintText: "selection d'un flliere",
+
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide.none,gapPadding: 1,
+                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Container(
+                      width: MediaQuery.of(context).size.width /2.7,
+                      child: DropdownButtonFormField<int>(
+                        value: selectedSem,
+                        hint: Text('${widget.SemN}'),
+                        items: semestersList.map((sem) {
+                          return DropdownMenuItem<int>(
+                            value: sem,
+                            child: Text("S$sem"),
+                          );
+                        }).toList(),
+                        onChanged: (value) async {
+                          setState(() {
+                            selectedSem = value;
+                            // filteredItems = filterItemsBySemestre(selectedSem, items!);
+                            // semestersList = extractUniqueSemesters(elList1);
+                            // elList1 = filterItemsByFil(selectedFil, elList!);
+                            elList1 = filterItemsBySemestre(selectedSem, elList2!);
+                            // print("EL1${elList1} et ${elList}");
+                          });
+                        },
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          hintText: "Sélecte Semestre",
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                            gapPadding: 1,
+                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  ],
+                ),
+                SizedBox(height: 10),
+                DropdownButtonFormField<Elem>(
+                  value: selectedElem,
+                  hint: Text('${widget.EM}'),
+                  items: elList1.map((ele) {
+                    return DropdownMenuItem<Elem>(
+                        value: ele,
+                        child: Text(ele.nameM ?? '')
+                    );
+                  }).toList(),
+                  onChanged: (value) async{
+                    setState(() {
+                      selectedElem = value;
+                      // selectedProfesseur = null; // Reset the selected matière
+                      // updateProfesseurList();
+
+                      // print("PL${professeurs}");
+                    });
+                  },
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    hintText: "selection d'un Element",
+
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,gapPadding: 1,
+                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    ),
+                  ),
+                ),
+
+                SizedBox(height: 10),
                 Row(
                   children: [
                     Container(
@@ -2073,97 +2267,7 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
                 ),
 
 
-                SizedBox(height: 10),
-                DropdownButtonFormField<Group>(
-                  value: selectedGroup,
-                  hint: Text(widget.GN),
-                  items: grpList.map((grp) {
-                    return DropdownMenuItem<Group>(
-                      value: grp,
-                      child: Text('${getFilIdFromName(grp.filliereId!).toUpperCase()}${grp.semestre!.numero}-${grp.type}' ),
-                    );
-                  }).toList(),
-                  onChanged: (value) async{
-                    setState(() {
-                      selectedGroup = value;
-                      selectedElem = null; // Reset the selected matière
-                      updateElementList(selectedGroup!.semestre!.id); // Mettre à jour la liste des éléments en fonction du semestre du groupe sélectionné
-                      showgroup = true;
 
-                    });
-                  },
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    hintText: "selection d'une Group",
-
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,gapPadding: 1,
-                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    ),
-                  ),
-                ),
-
-                SizedBox(height: 10),
-                DropdownButtonFormField<Elem>(
-                  value: selectedElem,
-                  hint: Text('${widget.EM}'),
-                  items: elList.map((ele) {
-                    return DropdownMenuItem<Elem>(
-                        value: ele,
-                        child: Text('${getEls(ele.id).nameMat}' )
-                    );
-                  }).toList(),
-                  onChanged: (value) async{
-                    setState(() {
-                      selectedElem = value;
-                      // selectedMat = null; // Reset the selected matière
-                      showElem = true;
-
-                    });
-                  },
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    hintText: "selection d'un Element",
-
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,gapPadding: 1,
-                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    ),
-                  ),
-                ),
-
-                SizedBox(height: 10),
-                // DropdownButtonFormField<Elem>(
-                //   value: selectedElem,
-                //   hint: Text('${widget.EP}'),
-                //   items: elList.map((ele) {
-                //     return DropdownMenuItem<Elem>(
-                //       value: ele,
-                //       child: selectedTypeName == "CM" ? Text('${getEls(ele.id).ProfCM}' )
-                //           :(selectedTypeName == "TP" ? Text('${getEls(ele.id).ProfTP}' ):Text('${getEls(ele.id).ProfTD}' )),
-                //     );
-                //   }).toList(),
-                //   onChanged: (value) async{
-                //     setState(() {
-                //       selectedElem = value;
-                //       // selectedMat = null; // Reset the selected matière
-                //       showElem = true;
-                //
-                //     });
-                //   },
-                //   decoration: InputDecoration(
-                //     filled: true,
-                //     fillColor: Colors.white,
-                //     hintText: "selection d'un Element",
-                //
-                //     border: OutlineInputBorder(
-                //       borderSide: BorderSide.none,gapPadding: 1,
-                //       borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                //     ),
-                //   ),
-                // ),
 
                 SizedBox(height:20),
                 ElevatedButton(
@@ -2268,6 +2372,55 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
       print("Error: $error");
     }
   }
+  Future<List<Elem>?> fetchElsByProf(String ProfId,) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString("token")!;
+    print(token);
+
+
+
+
+    final response = await http.get(
+      Uri.parse('http://192.168.43.73:5000/professeur/$ProfId'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    // try {
+
+    print(response.statusCode);
+    if (response.statusCode == 200) {
+      Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+      List<dynamic> empData = jsonResponse['elements'];
+
+      print(empData);
+      List<Elem> els = empData.map((item) {
+        return Elem.fromJson(item);
+      }).toList();
+
+      print(els);
+
+      // await sendEmailNotification(profEmail, type, date, time); // Send email
+      // setState(() {
+      //   Navigator.pop(context);
+      // });
+
+      return els;
+
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Échec de l\'ajout de l\'emploi.')),
+      );
+    }
+
+    // }
+    // catch (error) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(content: Text('Erreur: $error')),
+    //   );
+    // }
+  }
 
 }
 
@@ -2278,7 +2431,7 @@ class emploi {
   final num? SemNum;
   final String? startTime;
   final int dayNumero;
-  // final String group;
+  final String? classe;
   final String professor;
   final String element;
   final String? jour;
@@ -2299,6 +2452,7 @@ class emploi {
     this.jour,
     this.fil,
     this.SemNum,
+    this.classe,
     this.enseignat,
     required this.finishTime,
   });
@@ -2318,6 +2472,7 @@ class emploi {
       finishTime: json['finishTime'],
       SemNum: json['semestre'],
       enseignat: json['enseignat'],
+      classe: json['classe'],
     );
   }
 

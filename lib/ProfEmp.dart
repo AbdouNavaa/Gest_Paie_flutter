@@ -53,6 +53,7 @@ class _EmploiPageState extends State<EmploiPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        surfaceTintColor: Color(0xB0AFAFA3),
         title: Text('Mon Emploi'),
       ),
       body:
@@ -73,7 +74,7 @@ class _EmploiPageState extends State<EmploiPage> {
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Container(
-                    // width: MediaQuery.of(context).size.width ,
+                    width: MediaQuery.of(context).size.width ,
                     decoration: BoxDecoration(
                       color: Colors.white12,
                       borderRadius: BorderRadius.all(
@@ -84,14 +85,14 @@ class _EmploiPageState extends State<EmploiPage> {
                     child: DataTable(
                       showCheckboxColumn: true,
                       showBottomBorder: true,
-                      headingRowColor: MaterialStateColor.resolveWith((states) => Colors.lightBlueAccent.shade100), // Couleur de la ligne d'en-tête
-                      headingRowHeight: 70,
+                      // headingRowColor: MaterialStateColor.resolveWith((states) => Colors.lightBlueAccent.shade100), // Couleur de la ligne d'en-tête
+                      headingRowHeight: 50,horizontalMargin: 10,
                       columnSpacing: 10,
                       dataRowHeight: 70,
                       columns: [
                         DataColumn(label: Text('Jours')),
-                        DataColumn(label: Text('Filliere')),
                         DataColumn(label: Text('Matiere')),
+                        DataColumn(label: Text('Filiere')),
                         DataColumn(label: Text('Type')),
                         DataColumn(label: Text('Deb')),
                         // DataColumn(label: Text('Fin')),
@@ -107,12 +108,18 @@ class _EmploiPageState extends State<EmploiPage> {
                                     color: Colors.black,
                                   ),),
                                 )),
-                                DataCell(Text('${emplois?[index].filliere.toUpperCase()}${emplois[index].semestre}',style: TextStyle(
-                                  color: Colors.black,
-                                ),)),
+                                // DataCell(Text('${emplois?[index].filliere.toUpperCase()}${emplois[index].semestre}',style: TextStyle(
+                                //   color: Colors.black,
+                                // ),)),
                                 DataCell(Container(
-                                  width: 90,
+                                  width: 80,
                                   child: Text('${emplois?[index].matiere}',style: TextStyle(
+                                    color: Colors.black,
+                                  ),),
+                                )),
+                                DataCell(Container(
+                                  width: 70,
+                                  child: Text('${emplois?[index].classe.toUpperCase()}',style: TextStyle(
                                     color: Colors.black,
                                   ),),
                                 )),
@@ -147,52 +154,72 @@ class _EmploiPageState extends State<EmploiPage> {
 
 class ProfEmploi {
   final String id;
-  final String group;
   final String day;
   final String startTime;
   final String finishTime;
   final int dayNumero;
   final String type;
   final double nbh;
-  final int semestre;
-  final String filliere;
-  final String niveau;
-  final String anne;
+  final String classe;
   final String matiere;
+  // final Mats matiere;
 
   ProfEmploi({
     required this.id,
-    required this.group,
     required this.day,
     required this.startTime,
     required this.finishTime,
     required this.dayNumero,
     required this.type,
     required this.nbh,
-    required this.semestre,
-    required this.filliere,
-    required this.niveau,
-    required this.anne,
+    required this.classe,
     required this.matiere,
   });
 
   factory ProfEmploi.fromJson(Map<String, dynamic> json) {
     return ProfEmploi(
-      id: json['id'],
-      group: json['group'],
-      day: json['day'],
+      id: json['_id'],
+      day: json['jour'],
       startTime: json['startTime'],
       finishTime: json['finishTime'],
       dayNumero: json['dayNumero'],
       type: json['type'],
       nbh: json['nbh'],
-      semestre: json['semestre'],
-      filliere: json['filliere'],
-      niveau: json['niveau'],
-      anne: json['anne'],
       matiere: json['matiere'],
+      classe: json['classe'],
+      // matiere: Mats.fromJson(json['matiere']),
     );
   }
 }
+
+class Mats {
+  final String id;
+  final String name;
+  final String categorie;
+  final int numero;
+  final int prix;
+  final String code;
+
+  Mats({
+    required this.id,
+    required this.name,
+    required this.categorie,
+    required this.numero,
+    required this.prix,
+    required this.code,
+  });
+
+  factory Mats.fromJson(Map<String, dynamic> json) {
+    return Mats(
+      id: json['_id'],
+      name: json['name'],
+      categorie: json['categorie'],
+      numero: json['numero'],
+      prix: json['prix'],
+      code: json['code'],
+    );
+  }
+}
+
 
 

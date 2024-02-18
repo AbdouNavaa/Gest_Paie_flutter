@@ -1,15 +1,18 @@
+import 'dart:convert';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:otp_text_field/otp_field.dart';
-import 'package:otp_text_field/style.dart';
+import 'package:gestion_payements/auth/login.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../theme_helper.dart';
 import 'header_widget.dart';
 
-// import 'profile_page.dart';
 
 class ForgotPasswordVerificationPage extends StatefulWidget {
-  const ForgotPasswordVerificationPage({Key? key}) : super(key: key);
+  String token;
+   ForgotPasswordVerificationPage({Key? key, required this.token}) : super(key: key);
 
   @override
   _ForgotPasswordVerificationPageState createState() => _ForgotPasswordVerificationPageState();
@@ -18,6 +21,9 @@ class ForgotPasswordVerificationPage extends StatefulWidget {
 class _ForgotPasswordVerificationPageState extends State<ForgotPasswordVerificationPage> {
   final _formKey = GlobalKey<FormState>();
   bool _pinSuccess = false;
+  TextEditingController _token = TextEditingController();
+  TextEditingController _pass = TextEditingController();
+  TextEditingController _conf = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -72,21 +78,35 @@ class _ForgotPasswordVerificationPageState extends State<ForgotPasswordVerificat
                         key: _formKey,
                         child: Column(
                           children: <Widget>[
-                            OTPTextField(
-                              length: 4,
-                              width: 300,
-                              fieldWidth: 50,
-                              style: TextStyle(
-                                  fontSize: 30
+                            // OTPTextField(
+                            //   length: 4,
+                            //   width: 300,
+                            //   fieldWidth: 50,
+                            //   style: TextStyle(
+                            //       fontSize: 30
+                            //   ),
+                            //   textFieldAlignment: MainAxisAlignment.spaceAround,
+                            //   fieldStyle: FieldStyle.underline,
+                            //   onCompleted: (pin) {
+                            //     setState(() {
+                            //       _pinSuccess = true;
+                            //     });
+                            //   },
+                            // ),
+                            SizedBox(height: 10.0),
+                          TextFormField(
+                            controller: _pass,
+                            decoration: ThemeHelper().textInputDecoration("Mot de Passe", ""),
+                          ),
+                            SizedBox(height: 10.0),
+                            Container(
+                              child: TextFormField(
+                                controller: _conf,
+                                decoration: ThemeHelper().textInputDecoration("Confirmation de mot de passe", ""),
                               ),
-                              textFieldAlignment: MainAxisAlignment.spaceAround,
-                              fieldStyle: FieldStyle.underline,
-                              onCompleted: (pin) {
-                                setState(() {
-                                  _pinSuccess = true;
-                                });
-                              },
+                              decoration: ThemeHelper().inputBoxDecorationShaddow(),
                             ),
+
                             SizedBox(height: 50.0),
                             Text.rich(
                               TextSpan(
@@ -135,14 +155,19 @@ class _ForgotPasswordVerificationPageState extends State<ForgotPasswordVerificat
                                     ),
                                   ),
                                 ),
-                                onPressed: _pinSuccess ? () {
-                                  // Navigator.of(context).pushAndRemoveUntil(
-                                  //     MaterialPageRoute(
-                                  //         builder: (context) => ProfilePage()
-                                  //     ),
-                                  //         (Route<dynamic> route) => false
-                                  // );
-                                } : null,
+                                onPressed: () async {
+                                  await resetPassword(widget.token,_pass.text, _conf.text);
+
+                                _pinSuccess?  Navigator.of(context).pushAndRemoveUntil(
+                                      MaterialPageRoute(
+                                          builder: (context) => LoginSection()
+                                      ),
+                                          (Route<dynamic> route) => false
+                                  )
+                                    : ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(' l\'operation a un erreur')),
+                                );;
+                                }
                               ),
                             ),
                           ],
@@ -157,4 +182,31 @@ class _ForgotPasswordVerificationPageState extends State<ForgotPasswordVerificat
         )
     );
   }
+
+  resetPassword( token,password,conf,) async {
+    var url = "http://192.168.43.73:5000/auth/resetPassword/$token"; // iOS
+    final response = await http.patch(
+      Uri.parse(url),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'password': password,
+        'passwordConfirm': conf,
+      }),
+    );
+    print(response.body);
+    if (response.statusCode == 200) {
+
+      setState(() {
+        _pinSuccess = true;
+      });
+    }
+    else {
+      setState(() {
+        _pinSuccess = false;
+      });
+    }
+  }
+
 }

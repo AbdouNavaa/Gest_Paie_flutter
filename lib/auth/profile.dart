@@ -34,26 +34,9 @@ class _ProfilePageState extends State<ProfilePage> {
             height: 50,
             child: Row(
               children: [
-                Container(
-                  height: 45,
-                  width: 45,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.all(Radius.circular(50)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 5,
-                      ),
-                    ],
-                  ),
-                  child: InkWell(
-                    onTap: (){
-                      Navigator.pop(context);
-                    }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,color: Colors.black,),
-
-                  ),
-                ),
+                   TextButton(onPressed: (){
+                    Navigator.pop(context);
+                  }, child: Icon(Icons.arrow_back_ios,color: Colors.black,)),
                 SizedBox(width: 90,),
                 Text("Profile",style: TextStyle(fontSize: 25),)
               ],

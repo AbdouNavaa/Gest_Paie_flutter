@@ -8,6 +8,7 @@ import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server/gmail.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
+import 'auth/emploi.dart';
 import 'categories.dart';
 import 'constants.dart';
 import 'element.dart';
@@ -92,7 +93,7 @@ class _CoursesPageState extends State<CoursesPage> {
 
       // Calcul d'autres valeurs en fonction de la liste filtrée des cours
       totalType = coursesInDateRange
-          .map((course) => double.parse(course['TH'].toString()))
+          .map((course) => double.parse(course['th'].toString()))
           .fold(0, (prev, amount) => prev + amount);
 
       somme = coursesInDateRange
@@ -112,7 +113,7 @@ class _CoursesPageState extends State<CoursesPage> {
       totalType = widget.courses
           .skip(startIndex)
           .take(coursesPerPage)
-          .map((course) => double.parse(course['TH'].toString()))
+          .map((course) => double.parse(course['th'].toString()))
           .fold(0, (prev, amount) => prev + amount);
 
       somme = widget.courses
@@ -227,36 +228,19 @@ bool showFloat = false;
             height: 50,
             child: Row(
               children: [
-                Container(
-                  height: 45,
-                  width: 45,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.all(Radius.circular(50)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 5,
-                      ),
-                    ],
-                  ),
-                  child: InkWell(
-                    onTap: (){
-                      Navigator.pop(context);
-                    }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,color: Colors.black,),
-
-                  ),
-                ),
+                   TextButton(onPressed: (){
+                    Navigator.pop(context);
+                  }, child: Icon(Icons.arrow_back_ios,color: Colors.black,)),
                 SizedBox(width: 50,),
                 Text("Liste de Cours",style: TextStyle(fontSize: 25),),
 
-                SizedBox(width: 60,),
-                // Container(
-                //   width: 50,
-                //   height: 50,
+                SizedBox(width: 40,),
+                Container(
+                  width: 50,
+                  height: 50,
                 // color: Colors.black26,
-                // child: IconButton(icon:Icon(Icons.cached, size: 40,color: Colors.black38), onPressed: () => auto(),),
-                // )
+                child: IconButton(icon:Icon(Icons.cached, size: 35,color: Colors.black), onPressed: () => auto(),),
+                )
 
               ],
             ),
@@ -458,7 +442,7 @@ bool showFloat = false;
                                               ),
                                             ),
                                           ),
-                                          DataCell(Container(width: 50,child: Text('${widget.courses[index]['professeur']}',style: TextStyle(
+                                          DataCell(Container(width: 50,child: Text('${widget.courses[index]['enseignant']}',style: TextStyle(
                                             color: Colors.black,
                                           ),)),
                                               onTap: () => _showCourseDetails(context, widget.courses[index])
@@ -469,7 +453,7 @@ bool showFloat = false;
                                             onTap: () => _showCourseDetails(context, widget.courses[index])
                                           ),
                                           DataCell(
-                                            Center(child: Container(width: 20, child: Text('${widget.courses[index]['TH']}',style: TextStyle(
+                                            Center(child: Container(width: 20, child: Text('${widget.courses[index]['th']}',style: TextStyle(
                                               color: Colors.black,
                                             ),))),
                                           ),
@@ -818,7 +802,7 @@ bool showFloat = false;
                         // color: Colors.lightBlue
                       ),),
                     SizedBox(width: 10,),
-                    Text(course['professeur'].toUpperCase(),
+                    Text(course['enseignant'].toUpperCase(),
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,
@@ -980,7 +964,7 @@ bool showFloat = false;
                       ),),
 
                     SizedBox(width: 10,),
-                    Text('${course['TH']} heures',
+                    Text('${course['th']} heures',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,
@@ -1084,8 +1068,9 @@ bool showFloat = false;
                         setState(() {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => UpdateCoursScreen(empId: course['_id'], start: course['startTime'],date: course['date'],
-                              EM:course['matiere'], EP:course['professeur'], TN: course['type'], TH: course['nbh'], GN: '', MId: course['matiere_id'], PId: course['professeur_id'],)),
+                            MaterialPageRoute(builder: (context) => UpdateCoursScreen(empId: course['_id'], start: course['startTime'], date: DateFormat('dd/MM/yyyy ').format(
+                              DateTime.parse(course['date'].toString()).toLocal(),),Prof: course['enseignant'],
+                              EM:course['matiere'], EP:course['enseignant'], TN: course['type'], th: course['nbh'], GN: '', MId: course['element'], PId: course['professeur'],)),
                           );
                         });
                       },// Disable button functionality
@@ -1166,9 +1151,9 @@ bool showFloat = false;
   }
 
   Future<void> _displayTextInputDialog(BuildContext context) async {
-    // setState(() {
-    //   Navigator.pop(context);
-    // });
+    setState(() {
+      Navigator.pop(context);
+    });
     return showDialog(
       context: context,
       builder: (context) {
@@ -1439,6 +1424,58 @@ bool showFloat = false;
   }
 
 
+  Future<void> auto() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString("token")!;
+    print(token);
+
+    final response = await http.get(
+      Uri.parse('http://192.168.43.73:5000/cours/auto-create/'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    // print("Categ:${response.statusCode}");
+    if (response.statusCode == 200) {
+      setState(() {
+        Navigator.of(context).pop();
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                surfaceTintColor: Color(0xB0AFAFA3),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Text("Alert de Succes"),
+                    Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
+                  ],
+                ),
+                content: Text(
+                    "tous les cous dans l\'emploi aujourduis sont crees"),
+                actions: [
+                  TextButton(
+                    child: Text("Ok"),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+
+                ],
+              );});
+      });
+
+
+    } else {
+      // If the server did not return a 200 OK response,
+      // then throw an exception.
+      throw Exception('Failed to load Category');
+    }
+  }
+
+
 
 
 
@@ -1458,64 +1495,63 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
   // List<emploi>? filteredItems;
 
   TextEditingController _date = TextEditingController();
+  TextEditingController _start = TextEditingController();
   int _selectedNum = 1;
 
   Group? selectedGroup;
-  Elem? selectedElem;
   filliere? selectedFil;
-  Semestre? selectedSem;
+  int? selectedSem;
+  Elem? selectedElem;
   Matiere? selectedMat;
   Professeur? selectedProfesseur;
   List<Professeur> professeurs = [];
   DateTime? selectedDateTime;
 
-  Future<void> updateProfesseurList() async {
-    if (selectedElem != null) {
-      List<Professeur> fetchedProfesseurs = await fetchProfesseursByMatiere(selectedElem!.MatId);
+  // Future<void> updateProfesseurList() async {
+  //   if (selectedElem != null) {
+  //     List<Professeur> fetchedProfesseurs = await fetchProfesseursByMatiere(selectedElem!.MatId);
+  //     setState(() {
+  //       professeurs = fetchedProfesseurs;
+  //       selectedElem = null;
+  //     });
+  //   } else {
+  //     List<Professeur> fetchedProfesseurs = await fetchProfs();
+  //     setState(() {
+  //       professeurs = fetchedProfesseurs;
+  //       selectedElem = null;
+  //     });
+  //   }
+  // }
+  Future<void> updateElemList() async {
+    if (selectedProfesseur != null) {
+      List<Elem>? fetchedProfesseurs = await fetchElsByProf(selectedProfesseur!.id);
       setState(() {
-        professeurs = fetchedProfesseurs;
-        selectedProfesseur = null;
+        elList = fetchedProfesseurs!;
+        selectedElem = null;
       });
     } else {
-      List<Professeur> fetchedProfesseurs = await fetchProfs();
+      List<Elem> fetchedProfesseurs = await fetchElems();
       setState(() {
-        professeurs = fetchedProfesseurs;
-        selectedProfesseur = null;
+        elList = fetchedProfesseurs;
+        selectedElem = null;
       });
     }
   }
 
   List<Professeur> professeurList = [];
+
   List<Group> grpList = [];
   List<Group> grpList1 = [];
   List<Elem> elList = [];
+  List<Elem> elList2 = [];
   List<Elem> elList1 = [];
   List<Matiere> matiereList = [];
   List<filliere> filList = [];
   List<Semestre> SemList = [];
   List<Semestre> SemList1 = [];
+  List<int> semestersList = [];
 
-  Future<void> updateElementList(String semestreId) async {
-    // try {
-    // Utilisez l'ID du semestre pour récupérer les éléments correspondants
-    List<Elem> elements = await fetchElementsBySemestre(semestreId);
 
-    setState(() {
-      elList = elements;
-      selectedElem = null; // Réinitialiser la sélection de l'élément
-    });
-    // } catch (error) {
-    //   print('Erreur lors de la récupération des éléments: $error');
-    // }
-  }
-
-  List<Semestre> filterItemsByFil(filliere? fil, List<Semestre> allItems) {
-    if (fil == null) {
-      return allItems;
-    } else {
-      return allItems.where((emp) => emp!.filliereId == fil.id).toList();
-    }
-  }
   List<Group> filterItemsBySem(Semestre? sem, List<Group> allItems) {
     if (sem == null) {
       return allItems;
@@ -1602,9 +1638,11 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
     }).catchError((error) {
       print('Erreur: $error');
     });
-    fetchGroup().then((data) {
+
+
+    fetchfilliere().then((data) {
       setState(() {
-        grpList = data; // Assigner la liste renvoyée par emploiesseur à items
+        filList = data; // Assigner la liste renvoyée par emploiesseur à items
       });
 
       fetchProfs().then((data) {
@@ -1624,26 +1662,6 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
         print('Erreur: $error');
       });
 
-    }).catchError((error) {
-      print('Erreur: $error');
-    });
-
-    fetchfilliere().then((data) {
-      setState(() {
-        filList = data; // Assigner la liste renvoyée par emploiesseur à items
-      });
-
-
-
-    }).catchError((error) {
-      print('Erreur: $error');
-    });
-    fetchSemestre().then((data) {
-      setState(() {
-        SemList = data; // Assigner la liste renvoyée par emploiesseur à items
-      });
-
-
 
     }).catchError((error) {
       print('Erreur: $error');
@@ -1659,27 +1677,48 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
 
   }
 
-  Future<void> updateElemList() async {
-    if (selectedGroup != null) {
-      Elem fetchedmatieres = getElem(selectedGroup!.id);
-      setState(() {
-        selectedElem = fetchedmatieres;
-      });
+  Future<void> updateElementList(String semestreId) async {
+    // try {
+    // Utilisez l'ID du semestre pour récupérer les éléments correspondants
+    List<Elem> elements = await fetchElementsBySemestre(semestreId);
+
+    setState(() {
+      elList = elements;
+      selectedElem = null; // Réinitialiser la sélection de l'élément
+    });
+    // } catch (error) {
+    //   print('Erreur lors de la récupération des éléments: $error');
+    // }
+  }
+
+  List<Elem> filterItemsBySemestre(int? ele, List<Elem> allItems) {
+    if (ele == 0) {
+      return allItems;
     } else {
-      List<Elem> fetchedmatieres = await fetchElems();
-      setState(() {
-        elList = fetchedmatieres;
-      });
+      // print("ElID:${ele.id}");
+      return allItems.where((elem) => elem.SemNum == ele).toList();
     }
   }
 
+  List<int> extractUniqueSemesters(List<Elem> elems) {
+    Set<int> uniqueSemesters = elems.map((elem) => elem.SemNum!).toSet();
+    return uniqueSemesters.toList();
+  }
+  List<Elem> filterItemsByFil(filliere? fil, List<Elem> allItems) {
+    if (fil == null) {
+      return allItems;
+    } else {
+      return allItems.where((ele) => ele!.filId == fil.id).toList();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-        insetPadding: EdgeInsets.only(top: 80,),
-
         surfaceTintColor: Color(0xB0AFAFA3),
+        backgroundColor: Colors.white,
+        insetPadding: EdgeInsets.only(top: 60,),
+// backgroundColor: Color(0xB0AFAFA3),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
             topRight: Radius.circular(20),
@@ -1690,7 +1729,7 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           // mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Text("Ajouter une Cours", style: TextStyle(fontSize: 25),),
+            Text("Ajouter un Cours", style: TextStyle(fontSize: 25),),
             Spacer(),
             InkWell(
               child: Icon(Icons.close),
@@ -1702,7 +1741,7 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
         ),
         content: Container(
           width: MediaQuery.of(context).size.width,
-          // height: 600,
+          height: 700,
           // color: Color(0xA3B0AF1),
           child: SingleChildScrollView(
             child: Column(
@@ -1710,7 +1749,140 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
               children: [
                 // _buildTypesInput(),
                 SizedBox(height: 30),
-            
+                 DropdownButtonFormField<Professeur>(
+                  value: selectedProfesseur,
+                  items: professeurList.map((prof) {
+                    return DropdownMenuItem<Professeur>(
+                      value: prof,
+                      child: Text(prof.nom! ),
+                    );
+                  }).toList(),
+                  onChanged: (value) async{
+                    setState(() {
+                      selectedProfesseur = value;
+                      selectedElem = null;
+                      updateElemList();
+                    });
+                  },
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    hintText: "selection d'une Professeur",
+
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,gapPadding: 1,
+                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 10),
+                Row(
+                  children: [
+                    Container(
+                      width: MediaQuery.of(context).size.width / 2.2,
+                      child: DropdownButtonFormField<filliere>(
+                        value: selectedFil,
+                        items: filList.map((fil) {
+                          return DropdownMenuItem<filliere>(
+                            value: fil,
+                            child: Text(fil.name.toUpperCase() ),
+                          );
+                        }).toList(),
+                        onChanged: (value) async{
+                          setState(() {
+                            selectedFil = value;
+                            selectedSem = null; // Reset the selected matière
+                            // selectedGroup = null; // Reset the selected matière
+                            selectedElem = null; // Reset the selected matière
+                            elList2 = filterItemsByFil(selectedFil, elList!);
+                            semestersList = extractUniqueSemesters(elList2);
+
+                            print("Sems1${elList2}");
+
+                          });
+                        },
+                        decoration: InputDecoration(
+                          filled: true,
+                          // fillColor: Color(0xA3B0AF1),
+                          fillColor: Colors.white,
+                          hintText: "selection d'un flliere",
+
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide.none,gapPadding: 1,
+                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Container(
+                      width: MediaQuery.of(context).size.width /2.7,
+                      child: DropdownButtonFormField<int>(
+                        value: selectedSem,
+                        hint: Text('Semestre'),
+                        items: semestersList.map((sem) {
+                          return DropdownMenuItem<int>(
+                            value: sem,
+                            child: Text("S$sem"),
+                          );
+                        }).toList(),
+                        onChanged: (value) async {
+                          setState(() {
+                            selectedSem = value;
+                            // filteredItems = filterItemsBySemestre(selectedSem, items!);
+                            // semestersList = extractUniqueSemesters(elList1);
+                            // elList1 = filterItemsByFil(selectedFil, elList!);
+                            elList1 = filterItemsBySemestre(selectedSem, elList2!);
+                            // print("EL1${elList1} et ${elList}");
+                          });
+                        },
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          hintText: "Sélecte Semestre",
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                            gapPadding: 1,
+                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  ],
+                ),
+                SizedBox(height: 10),
+                DropdownButtonFormField<Elem>(
+                  value: selectedElem,
+                  items: elList1.map((ele) {
+                    return DropdownMenuItem<Elem>(
+                        value: ele,
+                        child: Text(ele.nameM ?? '')
+                    );
+                  }).toList(),
+                  onChanged: (value) async{
+                    setState(() {
+                      selectedElem = value;
+                      // selectedProfesseur = null; // Reset the selected matière
+                      // updateProfesseurList();
+
+                      // print("PL${professeurs}");
+                    });
+                  },
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    hintText: "selection d'un Element",
+
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,gapPadding: 1,
+                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    ),
+                  ),
+                ),
+
+
+                SizedBox(height: 10),
                 Row(
                   children: [
                     Container(
@@ -1738,7 +1910,6 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
                         },
                         decoration: InputDecoration(
                           filled: true,
-                          // fillColor: Colors.white,
                           fillColor: Colors.white,
                           border: OutlineInputBorder(
                             borderSide: BorderSide.none,gapPadding: 1,
@@ -1746,7 +1917,7 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
                           ),
                         ),
                       ),
-            
+
                     ),
                     SizedBox(width: 10),
                     Container(
@@ -1770,7 +1941,6 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
                         },
                         decoration: InputDecoration(
                           filled: true,
-                          // fillColor: Colors.white,
                           fillColor: Colors.white,
                           hintText: "taux",
                           border: OutlineInputBorder(
@@ -1779,16 +1949,29 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
                           ),
                         ),
                       ),
-            
+
                     ),
                   ],
                 ),
                 SizedBox(height: 10),
                 TextFormField(
+                  controller: _start,
+                  decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      hintText: "Heure",
+                      border: OutlineInputBorder(
+                          borderSide: BorderSide.none,gapPadding: 1,
+                          borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                  // readOnly: true,
+                  onTap: () => selectTime(_start),
+                ),
+
+                SizedBox(height: 10),
+                TextFormField(
                   controller: _date,
                   decoration: InputDecoration(
                       filled: true,
-                      // fillColor: Colors.white,
                       fillColor: Colors.white,
                       hintText: "Date",
                       border: OutlineInputBorder(
@@ -1797,214 +1980,52 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
                   // readOnly: true,
                   onTap: () => selectDate(_date),
                 ),
-            
-            
-                SizedBox(height: 10),
-                TextFormField(
-                  controller: _time,
-                  decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.white,
-                      hintText: "Deb",
-                      border: OutlineInputBorder(
-                          borderSide: BorderSide.none,gapPadding: 1,
-                          borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                  // readOnly: true,
-                  onTap: () => selectTime(_time),
-                ),
-            
-            
-                SizedBox(height: 10),
-                Row(
-                  children: [
-                    Container(
-                      width: MediaQuery.of(context).size.width / 1.8,
-                      child: DropdownButtonFormField<filliere>(
-                        value: selectedFil,
-                        items: filList.map((fil) {
-                          return DropdownMenuItem<filliere>(
-                            value: fil,
-                            child: Text(fil.name ),
-                          );
-                        }).toList(),
-                        onChanged: (value) async{
-                          setState(() {
-                            selectedFil = value;
-                            selectedSem = null; // Reset the selected matière
-                            selectedGroup = null; // Reset the selected matière
-                            selectedElem = null; // Reset the selected matière
-                            SemList1 = filterItemsByFil(selectedFil, SemList!);
-
-                            print("Sems1${SemList1}");
-
-                          });
-                        },
-                        decoration: InputDecoration(
-                          filled: true,
-                          // fillColor: Color(0xA3B0AF1),
-                          fillColor: Colors.white,
-                          hintText: "selection d'un flliere",
-
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide.none,gapPadding: 1,
-                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 10),
-                    Container(
-                      width: MediaQuery.of(context).size.width / 3.6,
-                      child: DropdownButtonFormField<Semestre>(
-                        value: selectedSem,
-                        items: SemList1.map((sem) {
-                          return DropdownMenuItem<Semestre>(
-                            value: sem,
-                            child: Text("S${sem.numero}" ),
-                          );
-                        }).toList(),
-                        onChanged: (value) async{
-                          setState(() {
-                            selectedSem = value;
-                            selectedGroup = null;
-                            selectedElem = null;
-                            // updateElemList(selectedFil!.id, selectedSem!.numero!); // Mettre à jour la liste des éléments en fonction du semestre du groupe sélectionné
-                            elList1 = filterElsbySem(selectedFil!.id!,selectedSem!.numero!, elList!);
-                            grpList1 = filterItemsBySem(selectedSem, grpList!);
-
-                          });
-                        },
-                        decoration: InputDecoration(
-                          filled: true,
-                          // fillColor: Color(0xA3B0AF1),
-                          fillColor: Colors.white,
-                          hintText: "...",
-
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide.none,gapPadding: 1,
-                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                          ),
-                        ),
-                      ),
-                    ),
-
-                  ],
-                ),
-                SizedBox(height: 10),
-                DropdownButtonFormField<Group>(
-                  value: selectedGroup,
-                  items: grpList1.map((grp) {
-                    return DropdownMenuItem<Group>(
-                      value: grp,
-                      child: Text('${getFilIdFromName(grp.filliereId!).toUpperCase()}${grp.numero}-${grp.type}' ),
-                    );
-                  }).toList(),
-                  onChanged: (value) async{
-                    setState(() {
-                      selectedGroup = value;
-                      // selectedElem = null;
-
-                    });
-                  },
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    hintText: "selection d'une Group",
-
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,gapPadding: 1,
-                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    ),
-                  ),
-                ),
-
-                SizedBox(height: 10),
-                DropdownButtonFormField<Elem>(
-                  value: selectedElem,
-                  items: elList1.map((ele) {
-                    return DropdownMenuItem<Elem>(
-                        value: ele,
-                        child: Text('${getEls(ele.id).nameMat}' )
-                    );
-                  }).toList(),
-                  onChanged: (value) async{
-                    setState(() {
-                      selectedElem = value;
-                      selectedProfesseur = null; // Reset the selected matière
-                      updateProfesseurList();
-
-                      // print("PL${professeurs}");
-                    });
-                  },
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    hintText: "selection d'un Element",
-
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,gapPadding: 1,
-                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    ),
-                  ),
-                ),
 
 
-                SizedBox(height: 10),
-                // DropdownButtonFormField<Elem>(
-                //   value: selectedElem,
-                //   // hint: Text('${widget.EP}'),
-                //   items: elList.map((ele) {
-                //     return DropdownMenuItem<Elem>(
-                //       value: ele,
-                //       child: _selectedType == "CM" ? Text('${getEls(ele.id).ProfCM}' )
-                //           :(_selectedType == "TP" ? Text('${getEls(ele.id).ProfTP}' ):Text('${getEls(ele.id).ProfTD}' )),
-                //     );
-                //   }).toList(),
-                //   onChanged: (value) async{
-                //     setState(() {
-                //       selectedElem = value;
-                //       // selectedMat = null; // Reset the selected matière
-                //
-                //     });
-                //   },
-                //   decoration: InputDecoration(
-                //     filled: true,
-                //     fillColor: Colors.white,
-                //     hintText: "selection d'un Prof",
-                //
-                //     border: OutlineInputBorder(
-                //       borderSide: BorderSide.none,gapPadding: 1,
-                //       borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                //     ),
-                //   ),
-                // ),
-            
+
                 SizedBox(height:20),
                 ElevatedButton(
                   onPressed: (){
-            
-                    DateTime date = DateFormat('yyyy/MM/dd').parse(_date.text).toUtc();
-            
-                    // String email =  getProfEmailFromName(selectedElem!.ProCMId);
-                        // _selectedType == "TP" ? getProfEmailFromName(selectedElem!.ProTPId):getProfEmailFromName(selectedElem!.ProTDId));
-                    // print("MatId${selectedElem!.MatId}");
-                    // String Prof = _selectedType == "CM" ? selectedElem!.ProCMId:( _selectedType == "TP" ? selectedElem!.ProTPId: selectedElem!.ProTDId);
-                    // print("ProfId${Prof}");
-                    addCours(_selectedType,_selectedNbh,date,_time.text,selectedElem!.id,selectedGroup!.id);
+
+                    DateTime date =DateFormat('yyyy/MM/dd').parse(_date.text).toUtc();
+                    addCours(_selectedType,_selectedNbh,date,_start.text,selectedElem!.id,selectedProfesseur!.id);
                     // Addemploi(_name.text, _desc.text);
-            
-                    // addCours(_selectedType,_selectedNbh,date,_time.text,selectedProfesseur!.id,selectedMat!.id);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Le Cours a été ajouter avec succès.')),
-                    );
-            
+
+
+
+
                     setState(() {
                       Navigator.of(context).pop();
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              surfaceTintColor: Color(0xB0AFAFA3),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                              title: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Text("Alert de Succes"),
+                                  Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
+                                ],
+                              ),
+                              content: Text(
+                                  "L\'Emploi est ajouter avec succes"),
+                              actions: [
+                                TextButton(
+                                  child: Text("Ok"),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+
+                              ],
+                            );});
                     });
-            
+
                   },
                   child: Text("Ajouter"),
-            
+
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xff0fb2ea),
                     foregroundColor: Colors.white,
@@ -2023,7 +2044,7 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
 
   }
 
-  Future<void> addCours(String type, num nbh,DateTime date,String time, String ElemId,String GrpId,) async {
+  Future<void> addCours(String type, num nbh,DateTime date,String time, String ElemId,String ProfId,) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token")!;
     print(token);
@@ -2038,7 +2059,7 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
       "startTime": time,
       // "dayNumero": days,
       "element": ElemId,
-      "group": GrpId
+      "professeur": ProfId
     };
 
     // try {
@@ -2061,6 +2082,55 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
           Navigator.pop(context);
         });
 
+
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Échec de l\'ajout de l\'emploi.')),
+        );
+      }
+
+    // }
+    // catch (error) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     SnackBar(content: Text('Erreur: $error')),
+    //   );
+    // }
+  }
+  Future<List<Elem>?> fetchElsByProf(String ProfId,) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString("token")!;
+    print(token);
+
+
+
+
+    final response = await http.get(
+      Uri.parse('http://192.168.43.73:5000/professeur/$ProfId'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    // try {
+
+      print(response.statusCode);
+      if (response.statusCode == 200) {
+        Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+        List<dynamic> empData = jsonResponse['elements'];
+
+        print(empData);
+        List<Elem> els = empData.map((item) {
+          return Elem.fromJson(item);
+        }).toList();
+
+        print(els);
+
+        // await sendEmailNotification(profEmail, type, date, time); // Send email
+        // setState(() {
+        //   Navigator.pop(context);
+        // });
+
+        return els;
 
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -2273,58 +2343,6 @@ class _FiltrerState extends State<Filtrer> {
 
   }
 
-  Future<void> addCours(String type, num nbh,DateTime date,String time, String ElemId,String GrpId,String profEmail) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString("token")!;
-    print(token);
-
-    final Uri uri = Uri.parse('http://192.168.43.73:5000/cours');
-
-
-    final Map<String, dynamic> emploiData = {
-      "type": type,
-      "nbh": nbh,
-      "date": date!.toIso8601String(),
-      "startTime": time,
-      // "dayNumero": days,
-      "element": ElemId,
-      "group": GrpId
-    };
-
-    // try {
-      final response = await http.post(
-        uri,
-        body: jsonEncode(emploiData),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-
-      print(response.statusCode);
-      if (response.statusCode == 200) {
-
-
-        print('Cour ajouter avec succes');
-        await sendEmailNotification(profEmail, type, date, time); // Send email
-        setState(() {
-          Navigator.pop(context);
-        });
-
-
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Échec de l\'ajout de l\'emploi.')),
-        );
-      }
-
-    // }
-    // catch (error) {
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     SnackBar(content: Text('Erreur: $error')),
-    //   );
-    // }
-  }
 
   Future<void> sendEmailNotification(
       String recipientEmail,
@@ -2334,7 +2352,7 @@ class _FiltrerState extends State<Filtrer> {
       ) async {
     try {
       String username = 'i17201.etu@iscae.mr';
-      String password = '26986690';
+      String password = '111';
 
       final smtpServer = gmail(username, password);
       final message = Message()
@@ -2361,16 +2379,18 @@ class UpdateCoursScreen extends StatefulWidget {
   final String start;
   final String date;
   final String GN;
-  // final String GId;
+  final String Prof;
   final String EM;
   final String MId;
   final String EP;
   final String PId;
-  // final String EId;
+  // final String Fil;
   final String TN;
-  final num TH;
+  final num th;
+  // final num SemN;
 
-  UpdateCoursScreen({Key? key, required this.empId,  required this.start,  required this.EM, required this.EP, required this.TN, required this.TH, required this.GN, required this.MId, required this.PId, required this.date}) : super(key: key);
+  UpdateCoursScreen({Key? key, required this.empId,  required this.start,  required this.EM, required this.EP, required this.TN, required this.th,
+    required this.GN, required this.MId, required this.PId, required this.date, required this.Prof, }) : super(key: key);
   @override
   State<UpdateCoursScreen> createState() => _UpdateCoursScreenState();
 
@@ -2409,7 +2429,7 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
   bool showNum = false;
   bool showTime = false;
   bool showDate = false;
-  bool showgroup = false;
+  bool showProf = false;
   bool showElem = false;
 
   Elem? selectedElem;
@@ -2420,13 +2440,14 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
   List<Matiere> matieres = [];
   DateTime? selectedDateTime;
 
+  List<Elem> elList = [];
+  List<Elem> elList2 = [];
+  List<Elem> elList1 = [];
   bool isChanged =false;
 
 
 
   List<Professeur> professeurList = [];
-  List<Group> grpList = [];
-  List<Elem> elList = [];
   List<Matiere> matiereList = [];
   List<filliere> filList = [];
   String getFilIdFromName(String id) {
@@ -2452,13 +2473,24 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
     }
   }
 
-  Elem getEls(String id) {
-    // Assuming you have a list of professeurs named 'professeursList'
-    final element = elList.firstWhere((g) => '${g.id}' == id, orElse: () => Elem(id: '', filId: '', MatId: '', ));
-    print( "Els:${element}");
-    return element!; // Return the ID if found, otherwise an empty string
 
+
+  Future<void> updateElemList() async {
+    if (selectedProfesseur != null) {
+      List<Elem>? fetchedProfesseurs = await fetchElsByProf(selectedProfesseur!.id);
+      setState(() {
+        elList = fetchedProfesseurs!;
+        selectedElem = null;
+      });
+    } else {
+      List<Elem> fetchedProfesseurs = await fetchElems();
+      setState(() {
+        elList = fetchedProfesseurs;
+        selectedElem = null;
+      });
+    }
   }
+
   Future<void> updateElementList(String semestreId) async {
     // try {
     // Utilisez l'ID du semestre pour récupérer les éléments correspondants
@@ -2473,13 +2505,48 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
     // }
   }
 
+  List<Elem> filterItemsBySemestre(int? ele, List<Elem> allItems) {
+    if (ele == 0) {
+      return allItems;
+    } else {
+      // print("ElID:${ele.id}");
+      return allItems.where((elem) => elem.SemNum == ele).toList();
+    }
+  }
+
+  List<int> extractUniqueSemesters(List<Elem> elems) {
+    // List<Elem> Els = filterItemsByFil(fil,elems);
+    Set<int> uniqueSemesters = elems.map((elem) => elem.SemNum!).toSet();
+    return uniqueSemesters.toList();
+  }
+  List<Elem> filterItemsByFil(filliere? fil, List<Elem> allItems) {
+    if (fil == null) {
+      return allItems;
+    } else {
+      return allItems.where((ele) => ele!.filId == fil.id).toList();
+    }
+  }
+
+  Elem getEls(String id) {
+    // Assuming you have a list of professeurs named 'professeursList'
+    final element = elList.firstWhere((g) => '${g.id}' == id, orElse: () => Elem(id: '', filId: '', MatId: '', ));
+    print( "Els:${element}");
+    return element!; // Return the ID if found, otherwise an empty string
+
+  }
+
+  filliere? selectedFil;
+  int? selectedSem;
+  List<int> semestersList = [];
 
   @override
   void initState() {
     super.initState();
-    fetchGroup().then((data) {
+
+    fetchProfs().then((data) {
       setState(() {
-        grpList = data; // Assigner la liste renvoyée par emploiesseur à items
+        professeurList = data; // Assigner la liste renvoyée par emploiesseur à items
+        print('Hello');
       });
 
       fetchMatiere().then((data) {
@@ -2488,15 +2555,6 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
         });
       }).catchError((error) {
         print('Erreur: $error');
-      });
-
-    }).catchError((error) {
-      print('Erreur: $error');
-    });
-    fetchProfs().then((data) {
-      setState(() {
-        professeurList = data; // Assigner la liste renvoyée par emploiesseur à items
-        print('Hello');
       });
     }).catchError((error) {
       print('Erreur: $error');
@@ -2508,9 +2566,15 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
     }).catchError((error) {
       print('Erreur: $error');
     });
-
-    _date.text = DateFormat('dd/MM/yyyy').format(DateTime.parse(widget.date.toString()));
-    selectedNbhValue = widget.TH;
+    fetchElems().then((data) {
+      setState(() {
+        elList = data; // Assigner la liste renvoyée par emploiesseur à items
+      });
+    }).catchError((error) {
+      print('Erreur: $error');
+    });
+    _date.text = widget.date.toString();
+    selectedNbhValue = widget.th;
     selectedTypeName = widget.TN;
   }
 
@@ -2549,6 +2613,141 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
               // mainAxisSize: MainAxisSize.min,
               children: [
                 //hmmm
+                SizedBox(height: 30),
+                DropdownButtonFormField<Professeur>(
+                  value: selectedProfesseur,
+                  hint: Text('${widget.Prof}'),
+                  items: professeurList.map((prof) {
+                    return DropdownMenuItem<Professeur>(
+                      value: prof,
+                      child: Text(prof.nom! ),
+                    );
+                  }).toList(),
+                  onChanged: (value) async{
+                    setState(() {
+                      selectedProfesseur = value;
+                      selectedElem = null;
+                      updateElemList();
+                    });
+                  },
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    hintText: "selection d'une Professeur",
+
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,gapPadding: 1,
+                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 10),
+                Row(
+                  children: [
+                    Container(
+                      width: MediaQuery.of(context).size.width / 2.2,
+                      child: DropdownButtonFormField<filliere>(
+                        value: selectedFil,
+                        // hint: Text('${widget.Fil}'),
+                        items: filList.map((fil) {
+                          return DropdownMenuItem<filliere>(
+                            value: fil,
+                            child: Text(fil.name.toUpperCase() ),
+                          );
+                        }).toList(),
+                        onChanged: (value) async{
+                          setState(() {
+                            selectedFil = value;
+                            selectedSem = null; // Reset the selected matière
+                            // selectedGroup = null; // Reset the selected matière
+                            selectedElem = null; // Reset the selected matière
+                            elList2 = filterItemsByFil(selectedFil, elList!);
+                            semestersList = extractUniqueSemesters(elList2);
+
+                            print("Sems1${elList2}");
+
+                          });
+                        },
+                        decoration: InputDecoration(
+                          filled: true,
+                          // fillColor: Color(0xA3B0AF1),
+                          fillColor: Colors.white,
+                          hintText: "selection d'un flliere",
+
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide.none,gapPadding: 1,
+                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Container(
+                      width: MediaQuery.of(context).size.width /2.7,
+                      child: DropdownButtonFormField<int>(
+                        value: selectedSem,
+                        // hint: Text('${widget.SemN}'),
+                        items: semestersList.map((sem) {
+                          return DropdownMenuItem<int>(
+                            value: sem,
+                            child: Text("S$sem"),
+                          );
+                        }).toList(),
+                        onChanged: (value) async {
+                          setState(() {
+                            selectedSem = value;
+                            // filteredItems = filterItemsBySemestre(selectedSem, items!);
+                            // semestersList = extractUniqueSemesters(elList1);
+                            // elList1 = filterItemsByFil(selectedFil, elList!);
+                            elList1 = filterItemsBySemestre(selectedSem, elList2!);
+                            // print("EL1${elList1} et ${elList}");
+                          });
+                        },
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          hintText: "Sélecte Semestre",
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                            gapPadding: 1,
+                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  ],
+                ),
+                SizedBox(height: 10),
+                DropdownButtonFormField<Elem>(
+                  value: selectedElem,
+                  hint: Text('${widget.EM}'),
+                  items: elList1.map((ele) {
+                    return DropdownMenuItem<Elem>(
+                        value: ele,
+                        child: Text(ele.nameM ?? '')
+                    );
+                  }).toList(),
+                  onChanged: (value) async{
+                    setState(() {
+                      selectedElem = value;
+                      // selectedProfesseur = null; // Reset the selected matière
+                      // updateProfesseurList();
+
+                      // print("PL${professeurs}");
+                    });
+                  },
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    hintText: "selection d'un Element",
+
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,gapPadding: 1,
+                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    ),
+                  ),
+                ),
                 SizedBox(height: 10),
                 // _buildTypesInput(),
                 Row(
@@ -2617,6 +2816,7 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
                   controller: _date,
                   onChanged: (value) {
                     setState(() {
+                      _date.text = value;
                       showDate = true;
                     });
                   },
@@ -2624,12 +2824,18 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
                   decoration: InputDecoration(
                       filled: true,
                       fillColor: Colors.white,
-                      hintText: widget.date,
+                      hintText: 'Entrer la Date',
                       border: OutlineInputBorder(
                           borderSide: BorderSide.none,gapPadding: 1,
                           borderRadius: BorderRadius.all(Radius.circular(10.0)))),
                   // readOnly: true,
-                  onTap: () => selectDate(_date),
+                  onTap: () {
+                    setState(() {
+                      selectDate(_date);
+                      showDate = true;
+
+                    });
+                  },
                 ),
 
 
@@ -2653,98 +2859,6 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
                 ),
 
 
-
-                SizedBox(height: 10),
-                DropdownButtonFormField<Group>(
-                  value: selectedGroup,
-                  hint: Text(widget.GN),
-                  items: grpList.map((grp) {
-                    return DropdownMenuItem<Group>(
-                      value: grp,
-                      child: Text('${getFilIdFromName(grp.filliereId!).toUpperCase()}${grp.semestre!.numero}-${grp.type}' ),
-                    );
-                  }).toList(),
-                  onChanged: (value) async{
-                    setState(() {
-                      selectedGroup = value;
-                      selectedElem = null; // Reset the selected matière
-                      updateElementList(selectedGroup!.semestre!.id); // Mettre à jour la liste des éléments en fonction du semestre du groupe sélectionné
-                      showgroup = true;
-
-                    });
-                  },
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    hintText: "selection d'une Group",
-
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,gapPadding: 1,
-                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    ),
-                  ),
-                ),
-
-                SizedBox(height: 10),
-                DropdownButtonFormField<String>(
-                  value: selectedMat,
-                  hint: showElem ? Text(''):Text('${widget.EM}'),
-                  items: elList.map((ele) {
-                    return DropdownMenuItem<String>(
-                      value: ele.id,
-                      child: Text('${getEls(ele.id).nameMat}' )
-                    );
-                  }).toList(),
-                  onChanged: (value) async{
-                    setState(() {
-                      selectedMat = value;
-                      // selectedMat = null; // Reset the selected matière
-                      showElem = true;
-
-                    });
-                  },
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    hintText: "selection d'un Element",
-
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,gapPadding: 1,
-                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    ),
-                  ),
-                ),
-
-                SizedBox(height: 10),
-                // DropdownButtonFormField<Elem>(
-                //   value: selectedElem,
-                //   hint: Text('${widget.EP}'),
-                //   items: elList.map((ele) {
-                //     return DropdownMenuItem<Elem>(
-                //       value: ele,
-                //       child: selectedTypeName == "CM" ? Text('${getEls(ele.id).ProfCM}' )
-                //           :(selectedTypeName == "TP" ? Text('${getEls(ele.id).ProfTP}' ):Text('${getEls(ele.id).ProfTD}' )),
-                //     );
-                //   }).toList(),
-                //   onChanged: (value) async{
-                //     setState(() {
-                //       selectedElem = value;
-                //       // selectedMat = null; // Reset the selected matière
-                //       showElem = true;
-                //
-                //     });
-                //   },
-                //   decoration: InputDecoration(
-                //     filled: true,
-                //     fillColor: Colors.white,
-                //     hintText: "selection d'un Element",
-                //
-                //     border: OutlineInputBorder(
-                //       borderSide: BorderSide.none,gapPadding: 1,
-                //       borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                //     ),
-                //   ),
-                // ),
 
                 SizedBox(height: 10),
 
@@ -2781,10 +2895,14 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
                 SizedBox(height:20),
                 ElevatedButton(
                   onPressed: () {
-                    // Navigator.of(context).pop();
+                    Navigator.of(context).pop();
 
                     // DateTime date = showDate ? DateFormat('yyyy/MM/dd').parse(_date.text).toUtc():DateFormat('yyyy/MM/dd').parse(widget.date).toUtc();
-                    DateTime date =DateFormat('yyyy/MM/dd').parse(_date.text).toUtc();
+                    DateTime date =
+                    showDate ?
+                    DateFormat('yyyy/MM/dd').parse(_date.text).toUtc()
+                    :DateFormat('dd/MM/yyyy').parse(widget.date).toUtc();
+                    // _date.text = DateFormat('dd/MM/yyyy').format(DateTime.parse(widget.date.toString()));
                     String time = showTime ? _time.text:widget.start;
 
                     print("MatId${showElem? selectedElem!.MatId: widget.MId}");
@@ -2793,20 +2911,47 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
                     // print("ProfId${Prof}");
 
                     String type = showType ? selectedTypeName : widget.TN;
-                    num nbh = showNum ? selectedNbhValue : widget.TH;
-                    String mat = showElem ? selectedElem!.MatId : widget.MId;
+                    num nbh = showNum ? selectedNbhValue : widget.th;
+                    String elem = showElem ? selectedElem!.id : widget.MId;
+                    String prof = showProf ? selectedProfesseur!.id : widget.PId;
                     UpdatCours(
                         widget.empId,
                         type,
                         nbh,date,
                         time
-                        ,selectedElem!.id,selectedGroup!.id,
+                        ,elem,prof,
                       signe
                     );
 
                     setState(() {
-                      Navigator.pop(context);
+                      Navigator.of(context).pop();
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              surfaceTintColor: Color(0xB0AFAFA3),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                              title: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Text("Alert de Succes"),
+                                  Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
+                                ],
+                              ),
+                              content: Text(
+                                  "Le Cours est modifier avec succes"),
+                              actions: [
+                                TextButton(
+                                  child: Text("Ok"),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+
+                              ],
+                            );});
                     });
+
 
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Le Type est mis à jour avec succès.')),
@@ -2835,7 +2980,7 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
   }
 
 
-  Future<void> UpdatCours (id,String TN,num TH,DateTime date,String time, String ElemId,String GrpId,String isSigned) async {
+  Future<void> UpdatCours (id,String TN,num th,DateTime date,String time, String ElemId,String ProfId,String isSigned) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token")!;
     final url = 'http://192.168.43.73:5000/cours/'  + '/$id';
@@ -2846,11 +2991,11 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
     };
     final Map<String, dynamic> body = {
       "type": TN,
-      "nbh": TH,
+      "nbh": th,
       'date': date.toIso8601String(),
       "startTime": time,
       "element": ElemId,
-      "group": GrpId,
+      "professeur": ProfId,
       "isSigned": isSigned,
     };
 

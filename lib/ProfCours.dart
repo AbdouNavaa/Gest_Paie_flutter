@@ -55,7 +55,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
 
       // Calcul d'autres valeurs en fonction de la liste filtrée des cours
       totalType = coursesInDateRange
-          .map((course) => double.parse(course['TH'].toString()))
+          .map((course) => double.parse(course['th'].toString()))
           .fold(0, (prev, amount) => prev + amount);
 
       somme = coursesInDateRange
@@ -75,7 +75,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
       totalType = widget.courses
           .skip(startIndex)
           .take(coursesPerPage)
-          .map((course) => double.parse(course['TH'].toString()))
+          .map((course) => double.parse(course['th'].toString()))
           .fold(0, (prev, amount) => prev + amount);
 
       somme = widget.courses
@@ -179,26 +179,9 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
             height: 50,
             child: Row(
               children: [
-                Container(
-                  height: 45,
-                  width: 45,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.all(Radius.circular(50)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 5,
-                      ),
-                    ],
-                  ),
-                  child: InkWell(
-                    onTap: (){
-                      Navigator.pop(context);
-                    }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,color: Colors.black,),
-
-                  ),
-                ),
+                   TextButton(onPressed: (){
+                    Navigator.pop(context);
+                  }, child: Icon(Icons.arrow_back_ios,color: Colors.black,)),
                 SizedBox(width: 50,),
                 Text("Mes Cours Signé",style: TextStyle(fontSize: 25),)
               ],
@@ -243,7 +226,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
 
               children: [
-                ElevatedButton(
+                TextButton(
                   onPressed: () async {
                     DateTime? selectedDateDeb = await showDatePicker(
                       context: context,
@@ -259,16 +242,29 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                       });
                     }
                   },
-                  child: Text(widget.dateDeb != null ? DateFormat('yyyy/MM/dd').format(widget.dateDeb!) : 'Date Deb'),
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xff0fb2ea),foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                  // child: Text(widget.dateDeb != null ? DateFormat('yyyy/MM/dd').format(widget.dateDeb!) : 'Date Deb'),
+                  child:widget.dateDeb == null ?
+                  Row(
+                    children: [
+                      Text( 'Date Deb' ),
+                      SizedBox(width: 20,),
+                      Icon(Icons.date_range)
+                    ],
+                  )
+                      : Text(DateFormat('yyyy/MM/dd').format(widget.dateDeb!)),
+                  style: TextButton.styleFrom(
+                    // backgroundColor: Colors.blue,
+                    // surfaceTintColor: Color(0xB0AFAFA3),
+
+                    side: BorderSide(color: Colors.black26),
+                    foregroundColor: Colors.black, textStyle: TextStyle(fontWeight: FontWeight.bold),
+                    padding:EdgeInsets.only(left: 20,right: 20),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
 
                 ),
-                Container(width: 50,
-                  child:Center(child: Text('total: ${totalType.toStringAsFixed(2)}')),
-                ),
-                ElevatedButton(
+
+                TextButton(
                   onPressed: () async {
                     DateTime? selectedDateFin = await showDatePicker(
                       context: context,
@@ -284,40 +280,60 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                       });
                     }
                   },
-                  child: Text(widget.dateFin != null ? DateFormat('yyyy/MM/dd').format(widget.dateFin!) : 'Date Fin'),
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xff0fb2ea),foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-                ),
-                Container(width: MediaQuery.of(context).size.width /8,height: 45,
-                  child: Card(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    color: Color(0xff0fb2ea),
-                    child: TextButton(
-                      onPressed: () {
-                        setState(() {
-                          totalType =0;
-                          sortByDateAscending = !sortByDateAscending;
-                          // Reverse the sorting order when the button is tapped
-                          widget.courses.sort((a, b) {
-                            DateTime dateA = DateTime.parse(a['date'].toString());
-                            DateTime dateB = DateTime.parse(b['date'].toString());
+                  child:widget.dateFin == null ?
+                  Row(
+                    children: [
+                      Text( 'Date Fin' ),
+                      SizedBox(width: 20,),
+                      Icon(Icons.date_range)
+                    ],
+                  )
+                      : Text(DateFormat('yyyy/MM/dd').format(widget.dateFin!)),
+                  style: TextButton.styleFrom(
+                    // backgroundColor: Colors.blue,
+                    // surfaceTintColor: Color(0xB0AFAFA3),
 
-                            // Sort in ascending order if sortByDateAscending is true,
-                            // otherwise sort in descending order
-                            return sortByDateAscending ? dateA.compareTo(dateB) : dateB.compareTo(dateA);
-                          });
-                        });
-                      },
-                      child: Icon(sortByDateAscending ? Icons.arrow_upward : Icons.arrow_downward,color: Colors.white,),
-                    ),
+                    side: BorderSide(color: Colors.black26),
+                    foregroundColor: Colors.black, textStyle: TextStyle(fontWeight: FontWeight.bold),
+                    padding:EdgeInsets.only(left: 20,right: 20),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
                 ),
+
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      totalType =0;
+                      sortByDateAscending = !sortByDateAscending;
+                      // Reverse the sorting order when the button is tapped
+                      widget.courses.sort((a, b) {
+                        DateTime dateA = DateTime.parse(a['date'].toString());
+                        DateTime dateB = DateTime.parse(b['date'].toString());
+
+                        // Sort in ascending order if sortByDateAscending is true,
+                        // otherwise sort in descending order
+                        return sortByDateAscending ? dateA.compareTo(dateB) : dateB.compareTo(dateA);
+                      });
+                    });
+                  },
+                  child: Icon(sortByDateAscending ? Icons.arrow_upward : Icons.arrow_downward,),
+                  style: TextButton.styleFrom(
+                    // backgroundColor: Colors.blue,
+                    // surfaceTintColor: Color(0xB0AFAFA3),
+
+                    side: BorderSide(color: Colors.black26),
+                    foregroundColor: Colors.black, textStyle: TextStyle(fontWeight: FontWeight.bold),
+                    padding: EdgeInsets.only(left: 5,right: 5),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                ),
+
 
 
               ],          ),
           ),
           // Display the calculated sums
+          Divider(color: Colors.black26,),
 
 
 
@@ -327,7 +343,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
 
           Expanded(
             child: Container(
-              margin: EdgeInsets.only(top: 30),
+              // margin: EdgeInsets.only(top: 30),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.only(
@@ -353,7 +369,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                           showCheckboxColumn: true,
                           showBottomBorder: true,
                           horizontalMargin: 1,
-                          headingRowColor: MaterialStateColor.resolveWith((states) => Colors.lightBlueAccent.shade100), // Couleur de la ligne d'en-tête
+                          // headingRowColor: MaterialStateColor.resolveWith((states) => Colors.lightBlueAccent.shade100), // Couleur de la ligne d'en-tête
                           headingRowHeight: 50,
                           columnSpacing: 18,
                           dataRowHeight: 60,
@@ -382,11 +398,11 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                                   cells: [
 
                                     DataCell(
-                                        Icon(Icons.check_box_outlined,size: 27)
+                                        Icon(Icons.check_circle_outline,size: 27)
                                     ),
                                     DataCell(
-                                        widget.courses[index]['isPaid'] == "oui"||widget.courses[index]['isPaid'] == "préparée"? Container(child: Icon(Icons.check_box_outlined,size: 27))
-                                            :Container(child: Icon(Icons.check_box_outline_blank,size: 27))
+                                        widget.courses[index]['isPaid'] == "oui"||widget.courses[index]['isPaid'] == "préparée"? Container(child: Icon(Icons.check_circle_outline,size: 27))
+                                            :Container(child: Icon(Icons.do_not_disturb_off_outlined,size: 27))
                                     ),
                                     DataCell(Container(
                                       width: 60,
@@ -406,7 +422,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                                       ),
                                     ),
                                     DataCell(
-                                      Text('${widget.courses[index]['TH']}',style: TextStyle(
+                                      Text('${widget.courses[index]['th']}',style: TextStyle(
                                         color: Colors.black,
                                       ),),
                                     ),
@@ -733,7 +749,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                       ),),
 
                     SizedBox(width: 10,),
-                    Text('${course['TH']}',
+                    Text('${course['th']}',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,

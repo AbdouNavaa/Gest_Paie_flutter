@@ -31,13 +31,13 @@ import 'filliere.dart';
 
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key, this.role, this.name, this.email, this.profId, this.notif, this.CNS}) : super(key: key);
+   HomeScreen({Key? key, this.role, this.name, this.email, this.profId, this.notif, this.CNS}) : super(key: key);
   final String? role;
   final String? name;
   final String? email;
   final String? profId;
-  final int? notif;
-  final int? CNS;
+  late int? notif;
+  late int? CNS;
   static String routeName = 'HomeScreen';
 
   @override
@@ -122,7 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     stops: [0.0, 1.0],
-                    colors: [ _accentColor,Colors.blueAccent],
+                    colors: [ Colors.lightBlueAccent,Colors.white],
 
                   ),
                 ),
@@ -200,6 +200,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                         Map<String, dynamic> jsonResponse = jsonDecode(responseInitialise.body);
                                         courses = jsonResponse['cours'];
                                         // print('Paiements avec status "initialisé": ${paies.length}');
+                                        setState(() {
+                                          widget.CNS = courses.length;
+                                        });
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(builder: (context) =>
@@ -248,6 +251,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                         Map<String, dynamic> jsonResponse = jsonDecode(responseInitialise.body);
                                         paies = jsonResponse['paiements'];
                                         // print('Paiements avec status "initialisé": ${paies.length}');
+                                        setState(() {
+                                          widget.notif = paies.length;
+                                        });
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(builder: (context) =>
@@ -574,6 +580,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [Colors.lightBlueAccent, Colors.white],
+                  // colors: [Color(0xB0AFAFA3), Colors.white],
                 ),
               ),
             ),

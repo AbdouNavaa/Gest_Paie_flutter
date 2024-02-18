@@ -44,7 +44,7 @@ class _FilliereState extends State<Filliere> {
     String token = prefs.getString("token")!;
     print(token);
 
-    var response = await http.delete(Uri.parse('http://192.168.43.73:5000/filliere' +"/$id"),
+    var response = await http.delete(Uri.parse('http://192.168.43.73:5000/filiere' +"/$id"),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -73,7 +73,7 @@ class _FilliereState extends State<Filliere> {
     print(token);
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.43.73:5000/filliere/$filliereId'),
+        Uri.parse('http://192.168.43.73:5000/filiere/$filliereId'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -217,26 +217,9 @@ class _FilliereState extends State<Filliere> {
               height: 50,
               child: Row(
                 children: [
-                  Container(
-                    height: 45,
-                    width: 45,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.all(Radius.circular(50)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 5,
-                        ),
-                      ],
-                    ),
-                    child: InkWell(
-                      onTap: (){
-                        Navigator.pop(context);
-                      }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,color: Colors.black,),
-
-                    ),
-                  ),
+                     TextButton(onPressed: (){
+                    Navigator.pop(context);
+                  }, child: Icon(Icons.arrow_back_ios,color: Colors.black,)),
                   SizedBox(width: 50,),
                   Text("Liste de Filliere",style: TextStyle(fontSize: 25),)
                 ],
@@ -1390,7 +1373,7 @@ class _FilliereState extends State<Filliere> {
     String token = prefs.getString("token")!;
     print(token);
     final response = await http.post(
-      Uri.parse('http://192.168.43.73:5000/filliere/'),
+      Uri.parse('http://192.168.43.73:5000/filiere/'),
       headers: <String, String>{
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -1420,7 +1403,7 @@ class _FilliereState extends State<Filliere> {
   Future<void> UpdateFilliere( id,String name,String niveau,String desc) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token")!;
-    final url = 'http://192.168.43.73:5000/filliere/'  + '/$id';
+    final url = 'http://192.168.43.73:5000/filiere/'  + '/$id';
     final headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',
@@ -1510,7 +1493,7 @@ Future<List<filliere>> fetchfilliere() async {
   print(token);
 
   final response = await http.get(
-    Uri.parse('http://192.168.43.73:5000/filliere/'),
+    Uri.parse('http://192.168.43.73:5000/filiere/'),
     headers: {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',

@@ -234,26 +234,9 @@ class _ElementsState extends State<Elements> {
               height: 50,
               child: Row(
                 children: [
-                  Container(
-                    height: 45,
-                    width: 45,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.all(Radius.circular(50)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 5,
-                        ),
-                      ],
-                    ),
-                    child: InkWell(
-                      onTap: (){
-                        Navigator.pop(context);
-                      }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,color: Colors.black,),
-
-                    ),
-                  ),
+                     TextButton(onPressed: (){
+                    Navigator.pop(context);
+                  }, child: Icon(Icons.arrow_back_ios,color: Colors.black,)),
                   SizedBox(width: 50,),
                   Text("Liste de Elements",style: TextStyle(fontSize: 25),)
                 ],
@@ -984,6 +967,7 @@ class Elem {
   int? HTD;
   String? code;
   String? nameMat;
+  String? nameM;
   int? taux;
   // String? mat;
   String? fil;
@@ -1004,6 +988,7 @@ class Elem {
     this.SemNum,
     this.code,
     this.nameMat,
+    this.nameM,
     // this.mat,
     this.fil,
     this.taux,
@@ -1027,6 +1012,7 @@ class Elem {
       code: json['code'],
       taux: json['taux'],
       nameMat: json['matiere_mane'],
+      nameM: json['name'],
       fil: json['filiere_name'],
       // mat: json['matiere'],
       ProCMId: json['professeurCM'] ?? [],

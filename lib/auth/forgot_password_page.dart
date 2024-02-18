@@ -1,12 +1,16 @@
 
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:gestion_payements/auth/login.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../theme_helper.dart';
 import 'forgot_password_verification_page.dart';
 import 'header_widget.dart';
+import 'package:http/http.dart' as http;
 
 
 class ForgotPasswordPage extends StatefulWidget {
@@ -19,6 +23,7 @@ class ForgotPasswordPage extends StatefulWidget {
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _emailController;
+   TextEditingController _token = TextEditingController();
 
 
   @override
@@ -112,7 +117,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                   padding: const EdgeInsets.fromLTRB(
                                       40, 10, 40, 10),
                                   child: Text(
-                                    "Send".toUpperCase(),
+                                    "Envoyer".toUpperCase(),
                                     style: TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
@@ -120,12 +125,14 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                     ),
                                   ),
                                 ),
-                                onPressed: () {
+                                onPressed: () async {
                                   if(_formKey.currentState!.validate()) {
+                                    await forgotPassword(_emailController.text);
+
                                     Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => ForgotPasswordVerificationPage()),
+                                          builder: (context) => ForgotPasswordVerificationPage(token: _token.text,)),
                                     );
                                   }
                                 },
@@ -155,6 +162,30 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                 ],
                               ),
                             ),
+                            Text.rich(
+                              TextSpan(
+                                children: [
+                                  TextSpan(text: "Remember your password? "),
+                                  TextSpan(
+                                    text: 'Login',
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        Navigator.push(
+                                          context,
+                                          // MaterialPageRoute(builder: (context) => LoginSection()),
+                                            MaterialPageRoute(builder: (context) => ForgotPasswordVerificationPage(token: '',)),
+
+                                        );
+                                      },
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold, color: Colors.lightBlue
+
+
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ],
                         ),
                       )
@@ -167,4 +198,33 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         )
     );
   }
+
+  forgotPassword(email) async {
+    var url = "http://192.168.43.73:5000/auth/forgotPassword"; // iOS
+    final response = await http.post(
+      Uri.parse(url),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'email': email,
+      }),
+    );
+    print(response.body);
+    if (response.statusCode == 200) {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      var parse = jsonDecode(response.body);
+
+       _token.text = parse["resetToken"];
+      print('Welcom $_token');
+    }
+    else {
+      // Authentification échouée
+      // isLoginFailed = true;
+      // errorMessage = 'Email ou mot de passe incorrect.';
+      // Mettez à jour l'état de l'interface utilisateur
+      setState(() {});
+    }
+  }
+
 }

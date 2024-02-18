@@ -74,8 +74,8 @@ class _UsersState extends State<Users> {
   TextEditingController _pass = TextEditingController();
   TextEditingController _confpass = TextEditingController();
   TextEditingController _email = TextEditingController();
-  TextEditingController _banque = TextEditingController();
-  TextEditingController _role = TextEditingController();
+  String _role ="professeur";
+  String _banque  ="BMCI";
   TextEditingController _compte = TextEditingController();
 
 
@@ -93,26 +93,9 @@ class _UsersState extends State<Users> {
               height: 50,
               child: Row(
                 children: [
-                  Container(
-                    height: 45,
-                    width: 45,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.all(Radius.circular(50)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 5,
-                        ),
-                      ],
-                    ),
-                    child: InkWell(
-                      onTap: (){
-                        Navigator.pop(context);
-                      }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,color: Colors.black,),
-
-                    ),
-                  ),
+                     TextButton(onPressed: (){
+                    Navigator.pop(context);
+                  }, child: Icon(Icons.arrow_back_ios,color: Colors.black,)),
                   SizedBox(width: 50,),
                   Text("Liste de Utlisateurs",style: TextStyle(fontSize: 25),)
                 ],
@@ -476,29 +459,64 @@ class _UsersState extends State<Users> {
                                 borderRadius: BorderRadius.all(Radius.circular(10.0)))),
                       ),
                       SizedBox(height: 10),
-                      TextField(
-                        controller: _banque,
-                        keyboardType: TextInputType.text,
+                      DropdownButtonFormField<String>(
+                        value: _banque,
+
+                        items: [
+                          DropdownMenuItem<String>(
+                            child: Text('BMCI'),
+                            value: 'BMCI',
+                          ),
+                          DropdownMenuItem<String>(
+                            child: Text('BNM'),
+                            value: 'BNM',
+                          ),
+                          DropdownMenuItem<String>(
+                            child: Text('ORABANK'),
+                            value: 'ORABANK',
+                          ),
+                        ],
+                        onChanged: (value) {
+                          setState(() {
+                            _banque = value!;
+                          });
+                        },
                         decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.white,
-                            hintText: "Banque",
-                            border: OutlineInputBorder(
-                                borderSide: BorderSide.none,gapPadding: 1,
-                                borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide.none,gapPadding: 1,
+                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                          ),
+                        ),
                       ),
 
                       SizedBox(height: 10),
-                      TextField(
-                        controller: _role,
-                        keyboardType: TextInputType.text,
+                      DropdownButtonFormField<String>(
+                        value: _role,
+                        items: [
+                          DropdownMenuItem<String>(
+                            child: Text('Professeur'),
+                            value: 'professeur',
+                          ),
+                          DropdownMenuItem<String>(
+                            child: Text('Responsable'),
+                            value: 'responsable',
+                          ),
+                        ],
+                        onChanged: (value) {
+                          setState(() {
+                            _role = value!;
+                          });
+                        },
                         decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.white,
-                            hintText: "Role",
-                            border: OutlineInputBorder(
-                                borderSide: BorderSide.none,gapPadding: 1,
-                                borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide.none,gapPadding: 1,
+                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                          ),
+                        ),
                       ),
                       SizedBox(height: 10),
                       TextField(
@@ -518,14 +536,15 @@ class _UsersState extends State<Users> {
                       ElevatedButton(onPressed: (){
                         Navigator.of(context).pop();
                         fetchUser();
-                        AddUser(_name.text,_prenom.text,int.parse(_mobile.text),_email.text,_pass.text,_confpass.text,_banque.text,_role.text,int.parse(_compte.text));
+                       print("${_role} ${_banque} et ${int.parse(_compte.text)}");
+                        AddUser(_name.text,_prenom.text,int.parse(_mobile.text),_email.text,_pass.text,_confpass.text,_banque,_role,int.parse(_compte.text));
                         // AddUser(_name.text, _desc.text);
                         ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Le User a été ajouter avec succès.')),
                         );
-                        // setState(() {
-                        //   fetchUser();
-                        // });
+                        setState(() {
+                          fetchUser();
+                        });
                       }, child: Text("Ajouter"),
 
                         style: ElevatedButton.styleFrom(
@@ -550,13 +569,13 @@ class _UsersState extends State<Users> {
   void AddUser (String name,String prenom,int mobile,String email,String pass,String confPass,String banque,String role,int compte) async {
     final Map<String, dynamic> data = {
       "nom":name,
-      "prenom":prenom ,
-      "mobile": mobile ,
+      "prenom":prenom,
+      "mobile": mobile,
       "email":email,
-      "password":pass ,
-      "passwordConfirm": confPass ,
-      "banque":banque ,
-      "role": role ,
+      "password":pass,
+      "passwordConfirm": confPass,
+      "banque":banque,
+      "role": role,
       "accountNumero":compte,
     };
 
@@ -572,7 +591,7 @@ class _UsersState extends State<Users> {
       },
       body: jsonEncode(data),
     );
-    print(response.statusCode);
+    print("Status${response.statusCode}");
     if (response.statusCode == 200) {
       print('User ajouter avec succes');
       setState(() {

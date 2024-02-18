@@ -132,33 +132,16 @@ class _PaieState extends State<Paie> {
     return Scaffold(
       body: Column(
         children: [
-          SizedBox(height: 30,),
+          SizedBox(height: 40,),
           Container(
             height: 50,
             child: Row(
               children: [
-                Container(
-                  height: 45,
-                  width: 45,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.all(Radius.circular(50)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 5,
-                      ),
-                    ],
-                  ),
-                  child: InkWell(
-                    onTap: (){
-                      Navigator.pop(context);
-                    }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,color: Colors.black,),
-
-                  ),
-                ),
-                SizedBox(width: 50,),
-                Text("Etat de Paiement",style: TextStyle(fontSize: 25),)
+                   TextButton(onPressed: (){
+                    Navigator.pop(context);
+                  }, child: Icon(Icons.arrow_back_ios,color: Colors.black,)),
+                SizedBox(width: 5,),
+                Text("Paiements pour Confirmer",style: TextStyle(fontSize: 25),)
               ],
             ),
           ),
@@ -191,7 +174,7 @@ class _PaieState extends State<Paie> {
                     child: DataTable(
                       showCheckboxColumn: true,
                       showBottomBorder: true,
-                      headingRowColor: MaterialStateColor.resolveWith((states) => Colors.lightBlueAccent.shade100), // Couleur de la ligne d'en-tête
+                      // headingRowColor: MaterialStateColor.resolveWith((states) => Colors.lightBlueAccent.shade100), // Couleur de la ligne d'en-tête
                       headingRowHeight: 50,
                       columnSpacing: 8,
                       dataRowHeight: 50,
@@ -232,8 +215,15 @@ class _PaieState extends State<Paie> {
                                               context: context,
                                               builder: (BuildContext context) {
                                                 return AlertDialog(
-                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
-                                                  title: Text("Confirmer la Refusion"),
+                                                  surfaceTintColor: Color(0xB0AFAFA3),
+                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                                                  title: Row(
+                                                    children: [
+                                                      Text("Refusion"),
+                                                      SizedBox(width: 90,),
+                                                      Icon(Icons.dangerous_outlined, color: Colors.redAccent.shade200,)
+                                                    ],
+                                                  ),
                                                   content: Text(
                                                       "Êtes-vous sûr de vouloir refuser cet paiement ?"),
                                                   actions: <Widget>[
@@ -253,14 +243,37 @@ class _PaieState extends State<Paie> {
 
                                                         // fetchCategory();
                                                         Refuse(widget.paies![index]["_id"]);
-                                                        // print(filteredItems?[index].id!);
-                                                        // Navigator.of(context).pop();
-                                                        ScaffoldMessenger.of(context).showSnackBar(
-                                                          SnackBar(content: Text('Le Paiement a été Rfuser avec succès.')),
-                                                        );
                                                         setState(() {
-                                                          // Navigator.pop(context);
+                                                          Navigator.of(context).pop();
+                                                          showDialog(
+                                                              context: context,
+                                                              builder: (BuildContext context) {
+                                                                return AlertDialog(
+                                                                  surfaceTintColor: Color(0xB0AFAFA3),
+                                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                                                                  title: Row(
+                                                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                                    children: [
+                                                                      Text("Alert de Succes"),
+                                                                      Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
+                                                                    ],
+                                                                  ),
+                                                                  content: Text(
+                                                                      "Le paiement est Refuser"),
+
+                                                                  actions: [
+                                                                    TextButton(
+                                                                      child: Text("Ok"),
+                                                                      onPressed: () {
+                                                                        Navigator.of(context).pop();
+                                                                      },
+                                                                    ),
+
+                                                                  ],
+
+                                                                );});
                                                         });
+
                                                       },
                                                     ),
                                                   ],
@@ -268,7 +281,7 @@ class _PaieState extends State<Paie> {
                                               },
                                             );
                                           }, // Disable button functionality
-                                          child: Icon(Icons.refresh_outlined, color: Colors.black,),
+                                          child: Icon(Icons.unpublished_outlined, color: Colors.black,),
 
                                         ),
                                       ),
@@ -280,8 +293,15 @@ class _PaieState extends State<Paie> {
                                               context: context,
                                               builder: (BuildContext context) {
                                                 return AlertDialog(
-                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
-                                                  title: Text("Confimation"),
+                                                  surfaceTintColor: Color(0xB0AFAFA3),
+                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                                                  title: Row(
+                                                    children: [
+                                                      Text("Confimation"),
+                                                     SizedBox(width: 80,),
+                                                      Icon(Icons.done_all_sharp, color: Colors.lightGreen,)
+                                                    ],
+                                                  ),
                                                   content: Text(
                                                       "Êtes-vous sûr de vouloir confirmer cet paiement ?"),
                                                   actions: <Widget>[
@@ -303,12 +323,37 @@ class _PaieState extends State<Paie> {
                                                         Confirm(widget.paies![index]["_id"]);
                                                         // print(filteredItems?[index].id!);
                                                         // Navigator.of(context).pop();
-                                                        ScaffoldMessenger.of(context).showSnackBar(
-                                                          SnackBar(content: Text('Le Paiement a été Confirmer avec succès.')),
-                                                        );
                                                         setState(() {
-                                                          // Navigator.pop(context);
+                                                          Navigator.of(context).pop();
+                                                          showDialog(
+                                                              context: context,
+                                                              builder: (BuildContext context) {
+                                                                return AlertDialog(
+                                                                  surfaceTintColor: Color(0xB0AFAFA3),
+                                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                                                                  title: Row(
+                                                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                                    children: [
+                                                                      Text("Alert de Succes"),
+                                                                      Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
+                                                                    ],
+                                                                  ),
+                                                                  content: Text(
+                                                                      "Le paiement est Confirme"),
+
+                                                                  actions: [
+                                                                    TextButton(
+                                                                      child: Text("Ok"),
+                                                                      onPressed: () {
+                                                                        Navigator.of(context).pop();
+                                                                      },
+                                                                    ),
+
+                                                                  ],
+
+                                                                );});
                                                         });
+
                                                       },
                                                     ),
                                                   ],
@@ -316,7 +361,7 @@ class _PaieState extends State<Paie> {
                                               },
                                             );
                                           }, // Disable button functionality
-                                          child: Icon(Icons.check_box_outlined, color: Colors.black,),
+                                          child: Icon(Icons.done_all_sharp, color: Colors.black,),
 
                                         ),
                                       ),

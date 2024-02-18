@@ -183,32 +183,16 @@ class _PaieState extends State<ProfPaies> {
       //   style: TextStyle(fontStyle: FontStyle.italic,fontWeight: FontWeight.bold,color: Colors.white),),)),
       body: Column(
         children: [
-          SizedBox(height: 30,),
+          SizedBox(height: 40,),
           Container(
             height: 50,
+            // color: Color(0xB0AFAFA3),
             child: Row(
               children: [
-                Container(
-                  height: 45,
-                  width: 45,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.all(Radius.circular(50)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 5,
-                      ),
-                    ],
-                  ),
-                  child: InkWell(
-                    onTap: (){
-                      Navigator.pop(context);
-                    }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,color: Colors.black,),
-
-                  ),
-                ),
-                SizedBox(width: 50,),
+                   TextButton(onPressed: (){
+                    Navigator.pop(context);
+                  }, child: Icon(Icons.arrow_back_ios,color: Colors.black,)),
+                SizedBox(width: 40,),
                 Text("Etat de Paiement",style: TextStyle(fontSize: 25),)
               ],
             ),
@@ -216,115 +200,8 @@ class _PaieState extends State<ProfPaies> {
 
 
 
-          Padding(padding: EdgeInsets.all(10)),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ElevatedButton(
-                onPressed: () async {
-                  DateTime? selectedDateDeb = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2030),
-                  );
-
-                  if (selectedDateDeb != null) {
-                    setState(() {
-                      widget.dateDeb = selectedDateDeb.toUtc();
-                      // totalType = 0; // Reset the totalId
-                    });
-                  }
-                },
-                child: Text(widget.dateDeb != null ? DateFormat('yyyy/MM/dd').format(widget.dateDeb!) : 'Date Deb'),
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xff0fb2ea),foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  DateTime? selectedDateFin = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2030),
-                  );
-
-                  if (selectedDateFin != null) {
-                    setState(() {
-                      widget.dateFin = selectedDateFin.toUtc();
-                      // totalType = 0; // Reset the totalId
-                    });
-                  }
-                },
-                child: Text(widget.dateFin != null ? DateFormat('yyyy/MM/dd').format(widget.dateFin!) : 'Date Fin'),
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xff0fb2ea),foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-              ),
-            ],          ),
-
           Padding(padding: EdgeInsets.all(20)),
 
-          // Padding(
-          //   padding: const EdgeInsets.all(8.0),
-          //   child: SizedBox(
-          //     child: Row(
-          //       mainAxisAlignment: MainAxisAlignment.center,
-          //       children: [
-          //         Row(
-          //           children: [
-          //             ElevatedButton(
-          //               onPressed: () {
-          //                 setState(() {
-          //                   showPaid = false;
-          //                   // showSigned = !showSigned;
-          //                 });
-          //               },
-          //               style: ElevatedButton.styleFrom(
-          //                   shape: RoundedRectangleBorder(
-          //                       borderRadius: BorderRadius.circular(10)),
-          //                   padding: EdgeInsets.only(left: 40, right: 40),
-          //                   backgroundColor: showPaid? Colors.white:Colors.white70,foregroundColor: Colors.black54,side: BorderSide(color: Colors.black12,width: 1)),
-          //               child: Row(
-          //                 children: [
-          //                   Text('Facture'),
-          //                   Icon(Icons.fact_check_outlined)
-          //                 ],
-          //               ),
-          //
-          //             ),
-          //             SizedBox(width: 10),
-          //             ElevatedButton(
-          //               onPressed: () {
-          //                 setState(() {
-          //                   showPaid = true;
-          //                   // Navigator.push(context, MaterialPageRoute(builder: (context) => PaieList()));
-          //
-          //                 });
-          //               },
-          //               style: ElevatedButton.styleFrom(
-          //                   shape: RoundedRectangleBorder(
-          //                       borderRadius: BorderRadius.circular(10)),
-          //                   padding: EdgeInsets.only(left: 30, right: 30),
-          //                   backgroundColor: showPaid? Colors.white70:Colors.white,foregroundColor: Colors.black54,side: BorderSide(color: Colors.black12,width: 1)),
-          //               child: Row(
-          //                 children: [
-          //                   Text('Notifications'),
-          //                   Icon(Icons.message_outlined)
-          //                 ],
-          //               ),
-          //             ),
-          //           ],
-          //         ),
-          //
-          //       ],
-          //     ),
-          //   ),
-          // ),
-
-          // showPaid?
           Expanded(
             child: Container(
               width: MediaQuery.of(context).size.width,
