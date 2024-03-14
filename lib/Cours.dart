@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:gestion_payements/professeures.dart';
-import 'package:gestion_payements/semestre.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -9,11 +9,8 @@ import 'package:mailer/smtp_server/gmail.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'auth/emploi.dart';
-import 'categories.dart';
-import 'constants.dart';
 import 'element.dart';
 import 'filliere.dart';
-import 'group.dart';
 import 'matieres.dart';
 
 
@@ -184,7 +181,7 @@ class _CoursesPageState extends State<CoursesPage> {
 
 
   int currentPage = 1;
-  int coursesPerPage = 10;
+  int coursesPerPage = 7;
   String searchQuery = '';
   bool sortByDateAscending = true;
   bool showSigned = false;
@@ -230,16 +227,16 @@ bool showFloat = false;
               children: [
                    TextButton(onPressed: (){
                     Navigator.pop(context);
-                  }, child: Icon(Icons.arrow_back_ios,color: Colors.black,)),
-                SizedBox(width: 50,),
-                Text("Liste de Cours",style: TextStyle(fontSize: 25),),
+                  }, child: Icon(Icons.arrow_back_ios,color: Colors.black,size: 20,)),
+                // SizedBox(width: 40,),
+                Text("Liste des Cours",style: TextStyle(fontSize: 20),),
 
-                SizedBox(width: 40,),
+                SizedBox(width: 100,),
                 Container(
                   width: 50,
                   height: 50,
                 // color: Colors.black26,
-                child: IconButton(icon:Icon(Icons.cached, size: 35,color: Colors.black), onPressed: () => auto(),),
+                child: IconButton(icon:Icon(Icons.cached, size: 30,color: Colors.black), onPressed: () => auto(),),
                 )
 
               ],
@@ -287,14 +284,14 @@ bool showFloat = false;
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
 
-                Icon(Icons.not_interested,),
-                Text('Pas encore'),
+                Icon(Icons.panorama_fish_eye,),
+                Text('en attente'),
                 SizedBox(width: 8,),
-                Icon(Icons.indeterminate_check_box_outlined,),
+                Icon(Icons.remove_circle_outline,),
                 Text('En Cours'),
                 SizedBox(width: 8,),
-                Icon(Icons.check_circle_outline,),
-                Text('Oui')
+                Icon(Icons.task_alt,),
+                Text('Effectué')
               ],
             ),
           ),
@@ -397,8 +394,8 @@ bool showFloat = false;
                                 index < widget.courses.length && index < currentPage * coursesPerPage;
                                 index++)
                                   if (courseFitsCriteria(widget.courses[index]))
-                                    if ((!showSigned || widget.courses[index]['isSigned'] == 'oui') &&
-                                        (!showPaid || widget.courses[index]['isPaid'] == 'oui' || widget.courses[index]['isPaid'] == 'préparée'))
+                                    if ((!showSigned || widget.courses[index]['isSigned'] == "effectué") &&
+                                        (!showPaid || widget.courses[index]['isPaid'] == "effectué" || widget.courses[index]['isPaid'] == 'préparé'))
                                       DataRow(
                                         onLongPress: () =>
                                             _showCourseDetails(context, widget.courses[index]),
@@ -411,7 +408,9 @@ bool showFloat = false;
                                               Container(
                                                 margin: EdgeInsets.only(left: 5),
                                                 width: 20,color: Colors.white,
-                                                child: Icon( widget.courses[index]['isSigned'] =="oui"?  Icons.check_circle_outline:Icons.not_interested,
+                                                child: Icon( widget.courses[index]['isSigned'] =="effectué"?  Icons.task_alt:Icons.panorama_fish_eye,
+                                                  color: widget.courses[index]['isSigned'] =="effectué" ? Colors.green: Colors.black54,
+
                                                   size: 25,),
                                               ),
                                             ),
@@ -423,10 +422,11 @@ bool showFloat = false;
                                                   margin: EdgeInsets.only(right: 5),
                                                   width: 20,
                                                   color: Colors.white,
-                                                  child: Icon( widget.courses[index]['isPaid'] =="oui" ?
-                                                  Icons.check_circle_outline:widget.courses[index]['isPaid'] =="préparée"  ?
-                                                  Icons.indeterminate_check_box_outlined:
-                                                  Icons.not_interested,
+                                                  child: Icon( widget.courses[index]['isPaid'] =="effectué" ?
+                                                  Icons.task_alt:widget.courses[index]['isPaid'] =="préparé"  ?
+                                                  Icons.remove_circle_outline:
+                                                  Icons.panorama_fish_eye,
+                                                    color: widget.courses[index]['isPaid'] =="effectué" ? Colors.green:widget.courses[index]['isPaid'] =="préparé"  ? Colors.lightBlue: Colors.black54,
                                                     size: 25,),
                                                 ),
                                               ),
@@ -442,12 +442,12 @@ bool showFloat = false;
                                               ),
                                             ),
                                           ),
-                                          DataCell(Container(width: 50,child: Text('${widget.courses[index]['enseignant']}',style: TextStyle(
+                                          DataCell(Container(width: 50,child: Text('${widget.courses[index]['enseignant'].toString().capitalize}',style: TextStyle(
                                             color: Colors.black,
                                           ),)),
                                               onTap: () => _showCourseDetails(context, widget.courses[index])
                                           ),
-                                          DataCell(Container(width: 55,child: Text('${widget.courses[index]['matiere']}',style: TextStyle(
+                                          DataCell(Container(width: 55,child: Text('${widget.courses[index]['matiere'].toString().capitalize}',style: TextStyle(
                                             color: Colors.black,
                                           ),)),
                                             onTap: () => _showCourseDetails(context, widget.courses[index])
@@ -620,7 +620,7 @@ bool showFloat = false;
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ElevatedButton(
+                TextButton(
                   onPressed: () {
                     setState(() {
                       if (currentPage > 1) {
@@ -628,30 +628,73 @@ bool showFloat = false;
                       }
                     });
                   },
-                  child: Text('Precedant'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black,
-                  ),
+                  child: Icon(Icons.skip_previous_rounded),
+                  // style: ElevatedButton.styleFrom(
+                  //   backgroundColor: Colors.white,
+                  //   foregroundColor: Colors.black,
+                  // ),
                 ),
                 Container(
                   width: 115,
-                  child: Column(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
+                      Row(
+                        children: [
+                          // Text('(${coursesPerPage} Cours par page)'),
+                          Container(
+                            width: 70,
+                            child: DropdownButtonFormField<int>(
+                              value: coursesPerPage,
+                              hint: Text(coursesPerPage.toString()),
+                              items: [
+                                DropdownMenuItem<int>(
+                                  child: Text('5'),
+                                  value: 5,
+                                ),
+                                DropdownMenuItem<int>(
+                                  child: Text('7'),
+                                  value: 7,
+                                ),
+                                DropdownMenuItem<int>(
+                                  child: Text('10'),
+                                  value: 10,
+                                ),
+                              ],
+                              onChanged: (value) {
+                                setState(() {
+                                  coursesPerPage = value!;
+                                });
+                              },
+                              decoration: InputDecoration(
+                                filled: true,
+                                fillColor: Colors.white,
+                                hintText: "Sélecte Semestre",
+                                border: OutlineInputBorder(
+                                  borderSide: BorderSide.none,
+                                  gapPadding: 1,
+                                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          Text(currentPage.toString()),
-                          Text('/'),
-                          Text((widget.courses.length / coursesPerPage).ceil().toString()),
+                          Text(currentPage.toString(),style: TextStyle(fontSize: 18),),
+                          SizedBox(width: 5,),
+                          Text('/',style: TextStyle(fontSize: 18)),
+                          SizedBox(width: 5,),
+                          Text((widget.courses.length / coursesPerPage).ceil().toString(),style: TextStyle(fontSize: 18)),
                         ],
                       ),
-                      Text('(${coursesPerPage} Cours par page)')
                     ],
                   ),
                 ),
 
-                ElevatedButton(
+                TextButton(
                   onPressed: () {
                     int totalPage = (widget.courses.length / coursesPerPage).ceil();
                     setState(() {
@@ -660,14 +703,11 @@ bool showFloat = false;
                       }
                     });
                   },
-                  child: Container(
-                    padding: EdgeInsets.only(left: 12, right: 12),
-                    child: Text('Suivant'),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black,
-                  ),
+                  child: Icon(Icons.skip_next),
+                  // style: ElevatedButton.styleFrom(
+                  //   backgroundColor: Colors.white,
+                  //   foregroundColor: Colors.black,
+                  // ),
                 ),
               ],
             ),
@@ -790,8 +830,19 @@ bool showFloat = false;
               crossAxisAlignment: CrossAxisAlignment.center,
               // mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Cours Infos',style: TextStyle(fontSize: 30),),
-                SizedBox(height: 50),
+                Row(
+                  children: [
+                    Text('Cours Infos',style: TextStyle(fontSize: 25),),
+                    Spacer(),
+                    InkWell(
+                      child: Icon(Icons.close),
+                      onTap: (){
+                        Navigator.pop(context);
+                      },
+                    )
+                  ],
+                ),
+                SizedBox(height: 30),
                 Row(
                   children: [
                     Text('Prof:',
@@ -802,7 +853,7 @@ bool showFloat = false;
                         // color: Colors.lightBlue
                       ),),
                     SizedBox(width: 10,),
-                    Text(course['enseignant'].toUpperCase(),
+                    Text(course['enseignant'].toString().capitalize!,
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,
@@ -812,26 +863,31 @@ bool showFloat = false;
                   ],
                 ),
                 SizedBox(height: 25),
-                Row(
-                  children: [
-                    Text('Matiere:',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
+                Container(
+                  width: MediaQuery.of(context).size.width,
+                  child: SingleChildScrollView(scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        Text('Matiere:',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w400,
+                            fontStyle: FontStyle.italic,
+                            // color: Colors.lightBlue
+                          ),),
 
-                    SizedBox(width: 10,),
-                    Text('${course['matiere']}',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
+                        SizedBox(width: 10,),
+                        Text('${course['matiere'].toString().capitalize}',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w400,
+                            fontStyle: FontStyle.italic,
+                            // color: Colors.lightBlue
+                          ),),
 
-                  ],
+                      ],
+                    ),
+                  ),
                 ),
                 SizedBox(height: 25),
                 Row(
@@ -1009,8 +1065,8 @@ bool showFloat = false;
 
                     SizedBox(width: 10,),
                     Text(
-                      course['isSigned'] == "oui"?
-                      'Oui':'Pas encore',
+                      course['isSigned'] == "effectué"?
+                      'Oui':'En attente',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,
@@ -1036,8 +1092,8 @@ bool showFloat = false;
 
                           SizedBox(width: 10,),
                           Text(
-                            course['isPaid'] =="oui"?
-                            'Oui':course['isPaid'] =="préparée"?'Préparée' :'Pas encore',
+                            course['isPaid'] =="effectué"?
+                            'Effectué':course['isPaid'] =="préparé"?'Préparé' :'En attente',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w400,
@@ -1053,7 +1109,7 @@ bool showFloat = false;
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    ElevatedButton(
+                    TextButton(
                       onPressed: () {
 
                         setState(() {
@@ -1076,18 +1132,19 @@ bool showFloat = false;
                       },// Disable button functionality
 
                       child: Text('Modifier'),
-                      style: ElevatedButton.styleFrom(
+                      style: TextButton.styleFrom(
                         padding: EdgeInsets.only(left: 20,right: 20),
                         foregroundColor: Colors.lightGreen,
-                        backgroundColor: Colors.white,
-                        // side: BorderSide(color: Colors.black,),
-                        elevation: 3,
-                        // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                          backgroundColor: Color(0xfffff1),
+                          side: BorderSide(color: Colors.black12,),
+                          // side: BorderSide(color: Colors.black,),
+                          elevation: 3,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))
                       ),
 
                     ),
 
-                    ElevatedButton(
+                    TextButton(
                       onPressed: () {
                         showDialog(
                           context: context,
@@ -1097,7 +1154,7 @@ bool showFloat = false;
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
                               title: Text("Confirmer la suppression"),
                               content: Text(
-                                  "Êtes-vous sûr de vouloir supprimer cet élément ?"),
+                                  "Êtiez-vous sûr de vouloir supprimer cet élément ?"),
                               actions: <Widget>[
                                 TextButton(
                                   child: Text("ANNULER"),
@@ -1128,13 +1185,14 @@ bool showFloat = false;
                       }, // Disable button functionality
 
                       child: Text('Supprimer'),
-                      style: ElevatedButton.styleFrom(
+                      style: TextButton.styleFrom(
                         padding: EdgeInsets.only(left: 20,right: 20),
                         foregroundColor: Colors.redAccent,
-                        backgroundColor: Colors.white,
-                        // side: BorderSide(color: Colors.black,),
-                        elevation: 3,
-                        // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                          backgroundColor: Color(0xfffff1),
+                          side: BorderSide(color: Colors.black12,),
+                          // side: BorderSide(color: Colors.black,),
+                          elevation: 3,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))
                       ),
 
                     ),
@@ -1313,8 +1371,8 @@ bool showFloat = false;
                             }
                             , child: Row(
                               children: [
-                                Icon(Icons.check_circle_outline),
-                                Text("Paié"),
+                                Icon(Icons.task_alt),
+                                Text("Payé"),
                               ],
                             ),
                               style: ElevatedButton.styleFrom(
@@ -1449,12 +1507,12 @@ bool showFloat = false;
                 title: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    Text("Alert de Succes"),
+                    Text("Alerte de succès"),
                     Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
                   ],
                 ),
                 content: Text(
-                    "tous les cous dans l\'emploi aujourduis sont crees"),
+                    "Tous les cours en emploi aujourduis sont créés"),
                 actions: [
                   TextButton(
                     child: Text("Ok"),
@@ -1498,7 +1556,6 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
   TextEditingController _start = TextEditingController();
   int _selectedNum = 1;
 
-  Group? selectedGroup;
   filliere? selectedFil;
   int? selectedSem;
   Elem? selectedElem;
@@ -1540,25 +1597,14 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
 
   List<Professeur> professeurList = [];
 
-  List<Group> grpList = [];
-  List<Group> grpList1 = [];
   List<Elem> elList = [];
   List<Elem> elList2 = [];
   List<Elem> elList1 = [];
   List<Matiere> matiereList = [];
   List<filliere> filList = [];
-  List<Semestre> SemList = [];
-  List<Semestre> SemList1 = [];
   List<int> semestersList = [];
 
 
-  List<Group> filterItemsBySem(Semestre? sem, List<Group> allItems) {
-    if (sem == null) {
-      return allItems;
-    } else {
-      return allItems.where((emp) => emp.semestre!.id == sem!.id).toList();
-    }
-  }
   List<Elem> filterElsbySem(String FilId, int sem,List<Elem> allItems) {
     if (FilId == null) {
       return [];
@@ -1677,19 +1723,6 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
 
   }
 
-  Future<void> updateElementList(String semestreId) async {
-    // try {
-    // Utilisez l'ID du semestre pour récupérer les éléments correspondants
-    List<Elem> elements = await fetchElementsBySemestre(semestreId);
-
-    setState(() {
-      elList = elements;
-      selectedElem = null; // Réinitialiser la sélection de l'élément
-    });
-    // } catch (error) {
-    //   print('Erreur lors de la récupération des éléments: $error');
-    // }
-  }
 
   List<Elem> filterItemsBySemestre(int? ele, List<Elem> allItems) {
     if (ele == 0) {
@@ -1749,7 +1782,34 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
               children: [
                 // _buildTypesInput(),
                 SizedBox(height: 30),
-                 DropdownButtonFormField<Professeur>(
+                TextFormField(
+                  controller: _start,
+                  decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      hintText: "Heure",
+                      border: OutlineInputBorder(
+                          borderSide: BorderSide.none,gapPadding: 1,
+                          borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                  // readOnly: true,
+                  onTap: () => selectTime(_start),
+                ),
+
+                SizedBox(height: 10),
+                TextFormField(
+                  controller: _date,
+                  decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      hintText: "Date",
+                      border: OutlineInputBorder(
+                          borderSide: BorderSide.none,gapPadding: 1,
+                          borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                  // readOnly: true,
+                  onTap: () => selectDate(_date),
+                ),
+                SizedBox(height: 10),
+                DropdownButtonFormField<Professeur>(
                   value: selectedProfesseur,
                   items: professeurList.map((prof) {
                     return DropdownMenuItem<Professeur>(
@@ -1953,33 +2013,6 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
                     ),
                   ],
                 ),
-                SizedBox(height: 10),
-                TextFormField(
-                  controller: _start,
-                  decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.white,
-                      hintText: "Heure",
-                      border: OutlineInputBorder(
-                          borderSide: BorderSide.none,gapPadding: 1,
-                          borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                  // readOnly: true,
-                  onTap: () => selectTime(_start),
-                ),
-
-                SizedBox(height: 10),
-                TextFormField(
-                  controller: _date,
-                  decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.white,
-                      hintText: "Date",
-                      border: OutlineInputBorder(
-                          borderSide: BorderSide.none,gapPadding: 1,
-                          borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                  // readOnly: true,
-                  onTap: () => selectDate(_date),
-                ),
 
 
 
@@ -1994,34 +2027,6 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
 
 
 
-                    setState(() {
-                      Navigator.of(context).pop();
-                      showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              surfaceTintColor: Color(0xB0AFAFA3),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
-                              title: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  Text("Alert de Succes"),
-                                  Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
-                                ],
-                              ),
-                              content: Text(
-                                  "L\'Emploi est ajouter avec succes"),
-                              actions: [
-                                TextButton(
-                                  child: Text("Ok"),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                ),
-
-                              ],
-                            );});
-                    });
 
                   },
                   child: Text("Ajouter"),
@@ -2072,21 +2077,74 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
         },
       );
 
-      print(response.statusCode);
-      if (response.statusCode == 200) {
+      print("Cours Code${response.statusCode}");
+      if (response.statusCode == 201) {
 
 
-        print('Cour ajouter avec succes');
+        print('Cours ajouter avec succes');
         // await sendEmailNotification(profEmail, type, date, time); // Send email
         setState(() {
-          Navigator.pop(context);
+          Navigator.of(context).pop();
+          showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  surfaceTintColor: Color(0xB0AFAFA3),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Text("Alerte de succès"),
+                      Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
+                    ],
+                  ),
+                  content: Text(
+                      "Le cours a été ajouté avec succès"),
+                  actions: [
+                    TextButton(
+                      child: Text("Ok"),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+
+                  ],
+                );});
         });
 
 
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Échec de l\'ajout de l\'emploi.')),
-        );
+
+      }
+      else {
+
+        setState(() {
+          showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  surfaceTintColor: Color(0xB0AFAFA3),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Text("Alerte d\'erreur"),
+                      Icon(Icons.wrong_location_outlined,color: Colors.redAccent,)
+                    ],
+                  ),
+                  content: Text(jsonDecode(response.body)["message"]),
+                  actions: [
+                    TextButton(
+                      child: Text("Réessayez?"),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+
+                  ],
+                );});
+
+        });
+
       }
 
     // }
@@ -2205,7 +2263,7 @@ class _FiltrerState extends State<Filtrer> {
           crossAxisAlignment: CrossAxisAlignment.start,
           // mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Text("Ajouter une Filtre", style: TextStyle(fontSize: 25),),
+            Text("Ajouter un Filtre", style: TextStyle(fontSize: 25),),
             Spacer(),
             InkWell(
               child: Icon(Icons.close),
@@ -2321,8 +2379,8 @@ class _FiltrerState extends State<Filtrer> {
                   }
                     , child: Row(
                       children: [
-                        Icon(Icons.check_circle_outline),
-                        Text("Paié"),
+                        Icon(Icons.task_alt),
+                        Text("Payé"),
                       ],
                     ),
                     style: ElevatedButton.styleFrom(
@@ -2419,7 +2477,7 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
   }
 
   int _selectedNum = 1;
-  String signe = "pas encore";
+  String signe = "en attente";
   String selectedTypeName = 'CM'; // Nom de type sélectionné par défaut
   num selectedNbhValue = 1.5;
   List<String> typeNames = ['CM', 'TP', 'TD']; // Liste des noms uniques de types
@@ -2433,7 +2491,6 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
   bool showElem = false;
 
   Elem? selectedElem;
-  Group? selectedGroup;
   String? selectedMat;
   Professeur? selectedProfesseur;
   List<Professeur> professeurs = [];
@@ -2491,19 +2548,6 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
     }
   }
 
-  Future<void> updateElementList(String semestreId) async {
-    // try {
-    // Utilisez l'ID du semestre pour récupérer les éléments correspondants
-    List<Elem> elements = await fetchElementsBySemestre(semestreId);
-
-    setState(() {
-      elList = elements;
-      selectedElem = null; // Réinitialiser la sélection de l'élément
-    });
-    // } catch (error) {
-    //   print('Erreur lors de la récupération des éléments: $error');
-    // }
-  }
 
   List<Elem> filterItemsBySemestre(int? ele, List<Elem> allItems) {
     if (ele == 0) {
@@ -2594,7 +2638,7 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           // mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Text("Modifier un Cours", style: TextStyle(fontSize: 25),),
+            Text("Modifier un cours", style: TextStyle(fontSize: 25),),
             Spacer(),
             InkWell(
               child: Icon(Icons.close),
@@ -2867,11 +2911,11 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
                   items: [
                     DropdownMenuItem<String>(
                       child: Text('True'),
-                      value: "oui",
+                      value: "effectué",
                     ),
                     DropdownMenuItem<String>(
                       child: Text('False'),
-                      value: "pas encore",
+                      value: "en attente",
                     ),
                   ],
                   onChanged: (value) {
@@ -2934,12 +2978,12 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
                               title: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                 children: [
-                                  Text("Alert de Succes"),
+                                  Text("Alerte de succès"),
                                   Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
                                 ],
                               ),
                               content: Text(
-                                  "Le Cours est modifier avec succes"),
+                                  "Le cours a été modifier avec succès"),
                               actions: [
                                 TextButton(
                                   child: Text("Ok"),

@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
@@ -78,6 +79,8 @@ class _UsersState extends State<Users> {
   String _banque  ="BMCI";
   TextEditingController _compte = TextEditingController();
 
+  List<User> selectedUsers = [];
+  
 
   @override
   Widget build(BuildContext context) {
@@ -95,9 +98,9 @@ class _UsersState extends State<Users> {
                 children: [
                      TextButton(onPressed: (){
                     Navigator.pop(context);
-                  }, child: Icon(Icons.arrow_back_ios,color: Colors.black,)),
-                  SizedBox(width: 50,),
-                  Text("Liste de Utlisateurs",style: TextStyle(fontSize: 25),)
+                  }, child: Icon(Icons.arrow_back_ios,color: Colors.black,size: 20,)),
+                  // SizedBox(width: 50,),
+                  Text("Liste des utilisateurs",style: TextStyle(fontSize: 20),)
                 ],
               ),
             ),
@@ -139,6 +142,25 @@ class _UsersState extends State<Users> {
               ,
             ),
 
+            Container(
+              margin: EdgeInsets.only(left: 230),
+              child: TextButton(
+                onPressed: () {
+                  setState(() {
+                    // Sélectionnez tous les cours
+                    selectedUsers = filteredItems!;
+                  });
+                },
+                child: Text('Sélectionner tous'),
+                style: TextButton.styleFrom(
+                  // side: BorderSide(color: Colors.black26),
+                  // padding: EdgeInsets.only(left: 20,right: 20),
+                  foregroundColor: Colors.lightBlueAccent, textStyle: TextStyle(fontWeight: FontWeight.bold),
+                  // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+
+              ),
+            ),
 
             Expanded(
               child: Container(
@@ -156,7 +178,7 @@ class _UsersState extends State<Users> {
                         return Center(child: CircularProgressIndicator());
                       } else {
                         if (snapshot.hasError) {
-                          return Text('Error: ${snapshot.error}');
+                          return Text('Erreur: ${snapshot.error}');
                         } else {
 
                           List<User>? items = snapshot.data;
@@ -173,7 +195,7 @@ class _UsersState extends State<Users> {
                                     // Modifiez les couleurs de DataTable ici
                                     dataTableTheme: DataTableThemeData(
                                       dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white), // Couleur des lignes de données
-                                      // headingRowColor: MaterialStateColor.resolveWith((states) => Colors.black), // Couleur de la ligne d'en-tête
+                                      headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white70), // Couleur de la ligne d'en-tête
 
                                     ),
                                   ),
@@ -188,14 +210,20 @@ class _UsersState extends State<Users> {
                                       });
                                     },
                                     columns: [
-                                      DataColumn(label: Text('Active')),
+                                      // DataColumn(label: Text('Active')),
+                                      DataColumn(
+                                        label: Text('Active'),
+                                        onSort: (columnIndex, ascending) {
+                                          // Code pour gérer la sélection ici
+                                        },
+                                      ),
                                       DataColumn(label: Text('Nom')),
-                                      DataColumn(label: Text('Email')),
+                                      DataColumn(label: Text('E-mail')),
                                       DataColumn(label: Text('Role')),
                                       DataColumn(label: Text('Banque')),
                                       // DataColumn(label: Text('Action')),
                                     ],
-                                    source: YourDataSource(filteredItems ?? items!,),
+                                    source: YourDataSource(filteredItems ?? items!,updateState,selectedUsers),
                                   ),
                                 ),
 
@@ -208,6 +236,53 @@ class _UsersState extends State<Users> {
                     },
                   ),
                 ),
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.only(left: 200),
+              child: TextButton(
+                onPressed: () {
+                  // Confirmer et traiter les cours sélectionnés
+                  activerOuDesactiverUser(selectedUsers);
+                  // Remettre la liste de sélection à zéro
+                  setState(() {
+                    selectedUsers = [];
+                    Navigator.of(context).pop();
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            surfaceTintColor: Color(0xB0AFAFA3),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                            title: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Text("Alerte de succès"),
+                                Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
+                              ],
+                            ),
+                            content: Text(
+                                "l\'operation est effectuée avec succès"),
+                            actions: [
+                              TextButton(
+                                child: Text("Ok"),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+
+                            ],
+                          );});
+                  });
+                },
+                child: Text('Confirmer la sélection'),
+                style: TextButton.styleFrom(
+                  // side: BorderSide(color: Colors.black26),
+                  // padding: EdgeInsets.only(left: 20,right: 20),
+                  foregroundColor: Colors.lightBlueAccent, textStyle: TextStyle(fontWeight: FontWeight.bold),
+                  // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+
               ),
             ),
 
@@ -272,7 +347,7 @@ class _UsersState extends State<Users> {
         :Container(
           width: 60,
           decoration: BoxDecoration(
-            color: Colors.lightGreen,
+            color: Colors.white,
             borderRadius: BorderRadius.all(Radius.circular(50)),
             boxShadow: [
               BoxShadow(
@@ -285,7 +360,7 @@ class _UsersState extends State<Users> {
           // margin: EdgeInsets.only(left: 90,right: 60),
           child:
           TextButton(
-            child: Icon(Icons.add, color: Colors.white,),
+            child: Icon(Icons.add, color: Colors.black,),
             onPressed: () {
               setState(() {
                 showFloat = true;
@@ -376,7 +451,7 @@ class _UsersState extends State<Users> {
                   topLeft: Radius.circular(20),
                 ),
               ),
-              title: Text('Ajouter un Utilisateur'),
+              title: Text('Ajouter un utilisateur'),
               content: Container(
                 width: MediaQuery.of(context).size.width,
                 child: SingleChildScrollView(
@@ -540,7 +615,7 @@ class _UsersState extends State<Users> {
                         AddUser(_name.text,_prenom.text,int.parse(_mobile.text),_email.text,_pass.text,_confpass.text,_banque,_role,int.parse(_compte.text));
                         // AddUser(_name.text, _desc.text);
                         ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Le User a été ajouter avec succès.')),
+                        SnackBar(content: Text('L\'utilisateur a été ajouté avec succès.')),
                         );
                         setState(() {
                           fetchUser();
@@ -635,54 +710,98 @@ class _UsersState extends State<Users> {
           '4e 5asser sa77bi mad5al======================================');
     }
   }
+
+  void activerOuDesactiverUser(List<User> selectedUsers) {
+    for (User user in selectedUsers) {
+      ActiveUser(
+        user.id,
+      );
+    }
+  }
+  void updateState(void Function() callback) {
+    setState(() {
+      callback();
+    });
+  }
+
+
 }
 
 class YourDataSource extends DataTableSource {
   List<User> _items;
+  List<User> selectedUsers;
   // Function(int) onTapCallback; // La fonction prendra un index comme paramètre
+  final Function(void Function()) updateStateCallback;
 
-  YourDataSource(this._items,);
+  YourDataSource(this._items, this.updateStateCallback,this.selectedUsers);
 
   @override
   DataRow? getRow(int index) {
 
     final item = _items[index];
     return DataRow(cells: [
+      // DataCell(
+      //     CupertinoSwitch(
+      //       activeColor: Colors.black26,
+      //       // thumbColor: Colors.blueAccent,
+      //       value: item.isActive!,
+      //       onChanged: (value) async {
+      //         // Continue with the rest of your onChanged logic if the types string is in the expected format
+      //         // setState(() {
+      //           // filteredItems![index].isActive = value;
+      //           // fetchUser();
+      //         // });
+      //
+      //         // Navigator.of(context).pop();
+      //
+      //         // fetchUser().then((data) {
+      //         //   setState(() {
+      //         //     filteredItems = data; // Assigner la liste renvoyée par Useresseur à items
+      //         //   });});
+      //
+      //         ActiveUser(
+      //           item.id,
+      //         );
+      //       },
+      //     )
+      //
+      // ),
       DataCell(
-          CupertinoSwitch(
-            activeColor: Colors.black26,
-            // thumbColor: Colors.blueAccent,
-            value: item.isActive!,
-            onChanged: (value) async {
-              // Continue with the rest of your onChanged logic if the types string is in the expected format
-              // setState(() {
-                // filteredItems![index].isActive = value;
-                // fetchUser();
-              // });
-
-              // Navigator.of(context).pop();
-
-              // fetchUser().then((data) {
-              //   setState(() {
-              //     filteredItems = data; // Assigner la liste renvoyée par Useresseur à items
-              //   });});
-
-              ActiveUser(
-                item.id,
-              );
-            },
-          )
-
+        Row(
+          children: [
+            Checkbox(
+              value: selectedUsers.contains(item),
+              activeColor: Colors.green,
+              onChanged: (value) async {
+                updateStateCallback(() {
+                  if (value != null && value) {
+                    selectedUsers.add(item);
+                  } else {
+                    selectedUsers.remove(item);
+                  }
+                });
+              },
+            ),
+            Text(
+              item.isActive! ? 'Actif' : 'Inactif',
+              style: TextStyle(
+                color: item.isActive! ? Colors.green : Colors.red,
+              ),
+            ),
+          ],
+        ),
       ),
+
+
       DataCell(Container(width: 70,
-          child: Text('${item.name } ${item.prenom}',style: TextStyle(
+          child: Text('${item.name.capitalize } ${item.prenom.capitalize}',style: TextStyle(
             color: Colors.black,
           ),))),
       DataCell(Container(width: 150,
           child: Text('${item.email}',style: TextStyle(
             color: Colors.black,
           ),)),),
-      DataCell(Container(width: 80, child: Text('${item.role}',style: TextStyle(
+      DataCell(Container(width: 80, child: Text('${item.role.capitalizeFirst}',style: TextStyle(
             color: Colors.black,
           ),)),),
       DataCell(Container(width: 68,

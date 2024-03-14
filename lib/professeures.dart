@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:gestion_payements/auth/users.dart';
 import 'package:gestion_payements/matieres.dart';
 import 'package:gestion_payements/prof_info.dart';
+import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/cupertino.dart';
@@ -230,9 +231,9 @@ class _ProfesseuresState extends State<Professeures> {
               children: [
                    TextButton(onPressed: (){
                     Navigator.pop(context);
-                  }, child: Icon(Icons.arrow_back_ios,color: Colors.black,)),
-                SizedBox(width: 50,),
-                Text("Liste de Profes",style: TextStyle(fontSize: 25),)
+                  }, child: Icon(Icons.arrow_back_ios,color: Colors.black,size: 20,)),
+                // SizedBox(width: 50,),
+                Text("Liste des Professeurs",style: TextStyle(fontSize: 20),)
               ],
             ),
           ),
@@ -332,7 +333,7 @@ class _ProfesseuresState extends State<Professeures> {
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Text('${filteredItems?[index].nom ?? items?[index].nom!} ',style: TextStyle(
+                                          Text('${filteredItems?[index].nom.toString().capitalizeFirst ?? items?[index].nom!.capitalizeFirst} ',style: TextStyle(
                                             color: Colors.black,
                                           ),),
                                           SizedBox(height: 10),
@@ -467,7 +468,7 @@ class _ProfesseuresState extends State<Professeures> {
                         // mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           // Spacer(),
-                          Text("Prof Infos", style: TextStyle(fontSize: 30),),
+                          Text("Prof Infos", style: TextStyle(fontSize: 25),),
                           Spacer(),
                           InkWell(
                             child: Icon(Icons.close,size: 25),
@@ -487,7 +488,7 @@ class _ProfesseuresState extends State<Professeures> {
                               fontStyle: FontStyle.italic,
                             ),),
                           SizedBox(width: 10,),
-                          Text('${prof['nom']} ${prof['prenom']} ',
+                          Text('${prof['nom'].toString().capitalize} ${prof['prenom'].toString().capitalize} ',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w400,
@@ -597,7 +598,7 @@ class _ProfesseuresState extends State<Professeures> {
                                     Row(
                                       children: [
                                         // Text('Matieres: [${getMatIdFromNames(getMatSemIdFromName(semestre['_id']).join(", "))}]',style: TextStyle(fontSize: 18)),
-                                        Text(matiere['name'] ?? '',//abdou
+                                        Text(matiere['name'].toString().capitalize ?? '',//abdou
                                             style: TextStyle(
                                               fontSize: 20,
                                               fontWeight: FontWeight.w400,
@@ -653,7 +654,7 @@ class _ProfesseuresState extends State<Professeures> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          ElevatedButton(
+                          TextButton(
                             onPressed: (){
                               showDialog(
                                   context: context,
@@ -803,17 +804,18 @@ class _ProfesseuresState extends State<Professeures> {
                             }, // Disable button functionality
 
                             child: Text('Modifier'),
-                            style: ElevatedButton.styleFrom(
+                            style: TextButton.styleFrom(
                               padding: EdgeInsets.only(left: 20,right: 20),
                               foregroundColor: Colors.lightGreen,
-                              // backgroundColor: Colors.lightGreen,
-                              // side: BorderSide(color: Colors.black,),
-                              elevation: 3,
-                              // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                                backgroundColor: Color(0xfffff1),
+                                side: BorderSide(color: Colors.black12,),
+                                // side: BorderSide(color: Colors.black,),
+                                elevation: 3,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))
                             ),
 
                           ),
-                          ElevatedButton(
+                          TextButton(
                             onPressed:() {
                             Navigator.pop(context);
                               _AddProfMatriere(context,prof['_id']!);
@@ -824,17 +826,19 @@ class _ProfesseuresState extends State<Professeures> {
                               },
 
                             child: Text('Ajout Mat'),
-                            style: ElevatedButton.styleFrom(
+                            style: TextButton.styleFrom(
                               padding: EdgeInsets.only(left: 20,right: 20),
                               // foregroundColor: Colors.black,
                               foregroundColor: Color(0xff0fb2ea),
+                              backgroundColor: Color(0xfffff1),
+                              side: BorderSide(color: Colors.black12,),
                               // side: BorderSide(color: Colors.black,),
                               elevation: 3,
-                              // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))
                             ),
 
                           ),
-                          ElevatedButton(
+                          TextButton(
                             onPressed: () {
                               showDialog(
                                 context: context,
@@ -874,10 +878,11 @@ class _ProfesseuresState extends State<Professeures> {
                             style: ElevatedButton.styleFrom(
                               padding: EdgeInsets.only(left: 20,right: 20),
                               foregroundColor: Colors.redAccent,
-                              // backgroundColor: Colors.redAccent,
-                              // side: BorderSide(color: Colors.black,),
-                              elevation: 3,
-                              // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                                backgroundColor: Color(0xfffff1),
+                                side: BorderSide(color: Colors.black12,),
+                                // side: BorderSide(color: Colors.black,),
+                                elevation: 3,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))
                             ),
                           ),
                         ],

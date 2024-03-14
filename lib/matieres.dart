@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/cupertino.dart';
@@ -31,6 +32,7 @@ class _MatieresState extends State<Matieres> {
 
   bool sort = false;
   List<Matiere>? filteredItems;
+  bool showFloat = false;
   String generateMatiereCode(String? semestre, String categoryCode, int newCodeNumber) {
     final semesterCode = semestre?.substring(1); // Get the second character of the semestre (e.g., "1" from "S1")
     // final autre = 1; // Get the second character of the semestre (e.g., "1" from "S1")
@@ -268,28 +270,11 @@ class _MatieresState extends State<Matieres> {
                 height: 50,
                 child: Row(
                   children: [
-                    Container(
-                      height: 45,
-                      width: 45,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.all(Radius.circular(50)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 5,
-                          ),
-                        ],
-                      ),
-                      child: InkWell(
-                        onTap: (){
-                          Navigator.pop(context);
-                        }, child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,color: Colors.black,),
-          
-                      ),
-                    ),
-                    SizedBox(width: 50,),
-                    Text("Liste de Matieres",style: TextStyle(fontSize: 25),)
+                    TextButton(onPressed: (){
+                      Navigator.pop(context);
+                    }, child: Icon(Icons.arrow_back_ios,color: Colors.black,size: 20,)),
+                    // SizedBox(width: 50,),
+                    Text("Liste des Matieres",style: TextStyle(fontSize: 20),)
                   ],
                 ),
               ),
@@ -342,6 +327,7 @@ class _MatieresState extends State<Matieres> {
                       // Modifiez les couleurs de DataTable ici
                       dataTableTheme: DataTableThemeData(
                         dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white), // Couleur des lignes de données
+                        headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white70), // Couleur de la ligne d'en-tête
                         // headingRowColor: MaterialStateColor.resolveWith((states) => Colors.lightBlueAccent.shade100), // Couleur de la ligne d'en-tête
 
                       ),
@@ -358,12 +344,13 @@ class _MatieresState extends State<Matieres> {
                       columns: [
                         DataColumn(label: Text('Code EM')),
                         DataColumn(label: Text('Element de Module')),
-                        DataColumn(label: Text('Action')),
+                        // DataColumn(label: Text('Action')),
                       ],
                       source: YourDataSource(filteredItems ?? [],
-                        onTapCallback: (index) {
-                        _showMatDetails(context, filteredItems![index],); // Appel de showMatDetails avec l'objet Matiere correspondant
-                      },),
+                      //   onTapCallback: (index) {
+                      //   _showMatDetails(context, filteredItems![index],); // Appel de showMatDetails avec l'objet Matiere correspondant
+                      // },
+                      ),
                     ),
                   ),
           
@@ -375,7 +362,9 @@ class _MatieresState extends State<Matieres> {
           ),
         ),
 
-        floatingActionButton: Container(
+        floatingActionButton:
+        showFloat?
+        Container(
           width: 400,
           decoration: BoxDecoration(
             color: Colors.white,
@@ -388,8 +377,7 @@ class _MatieresState extends State<Matieres> {
             ],
           ),
 
-          // margin: EdgeInsets.only(left: 25,right: 5),
-          margin: EdgeInsets.only(left: 60,right: 55),
+          margin: EdgeInsets.only(left: 80,right: 25),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -474,8 +462,45 @@ class _MatieresState extends State<Matieres> {
                 },
 
               ),
+              TextButton(
+                child: Icon(Icons.close_outlined, color: Colors.black,),
+                onPressed: () {
+                  setState(() {
+                    showFloat = false;
+                  });
+                },
+
+              ),
+
+
             ],
           ),
+        )
+            :Container(
+          width: 60,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(50)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 5,
+              ),
+            ],
+          ),
+
+          // margin: EdgeInsets.only(left: 90,right: 60),
+          child:
+          TextButton(
+            child: Icon(Icons.add, color: Colors.black,),
+            onPressed: () {
+              setState(() {
+                showFloat = true;
+              });
+            },
+
+          ),
+
         ),
 
       ),
@@ -755,27 +780,29 @@ class _MatieresState extends State<Matieres> {
               children: [
                 Text('Matiere Infos',style: TextStyle(fontSize: 30),),
                 SizedBox(height: 50),
-                Row(
-                  children: [
-                    Text('Nom:',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-                    SizedBox(width: 10,),
-                    Container(
-                      width: 200,
-                      child: Text(mat.name.toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
+                Container(width: MediaQuery.of(context).size.width,
+                  child: SingleChildScrollView(scrollDirection: Axis.horizontal,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Nom:',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w400,
+                            fontStyle: FontStyle.italic,
+                            // color: Colors.lightBlue
+                          ),),
+                        SizedBox(width: 10,),
+                        Text(mat.name,
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w400,
+                            fontStyle: FontStyle.italic,
+                            // color: Colors.lightBlue
+                          ),),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
                 SizedBox(height: 25),
                 Row(
@@ -822,33 +849,33 @@ class _MatieresState extends State<Matieres> {
                   ],
                 ),
                 SizedBox(height: 25),
-                Row(
-                  children: [
-                    Text('Numero:',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                    SizedBox(width: 10,),
-                    Text('${mat.numero}',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                  ],
-                ),
+                // Row(
+                //   children: [
+                //     Text('Numero:',
+                //       style: TextStyle(
+                //         fontSize: 20,
+                //         fontWeight: FontWeight.w400,
+                //         fontStyle: FontStyle.italic,
+                //         // color: Colors.lightBlue
+                //       ),),
+                //
+                //     SizedBox(width: 10,),
+                //     Text('${mat.numero}',
+                //       style: TextStyle(
+                //         fontSize: 20,
+                //         fontWeight: FontWeight.w400,
+                //         fontStyle: FontStyle.italic,
+                //         // color: Colors.lightBlue
+                //       ),),
+                //
+                //   ],
+                // ),
 
                 SizedBox(height: 25,),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    ElevatedButton(
+                    TextButton(
                       onPressed: () async {
                         List<Category> types = await fetchCategory();
                         List<Matiere> matieres = await fetchMatiere();
@@ -988,17 +1015,18 @@ class _MatieresState extends State<Matieres> {
 
 
                       child: Text('Modifier'),
-                      style: ElevatedButton.styleFrom(
+                      style: TextButton.styleFrom(
                         padding: EdgeInsets.only(left: 20,right: 20),
                         foregroundColor: Colors.lightGreen,
-                        backgroundColor: Colors.white,
-                        // side: BorderSide(color: Colors.black,),
+                        backgroundColor: Color(0xfffff1),
+                        side: BorderSide(color: Colors.black12,),
                         elevation: 3,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))
                         // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
                       ),
 
                     ),
-                    ElevatedButton(
+                    TextButton(
                       onPressed: () {
                         showDialog(
                           context: context,
@@ -1046,13 +1074,13 @@ class _MatieresState extends State<Matieres> {
                       }, // Disable button functionality
 
                       child: Text('Supprimer'),
-                      style: ElevatedButton.styleFrom(
+                      style: TextButton.styleFrom(
                         padding: EdgeInsets.only(left: 20,right: 20),
                         foregroundColor: Colors.redAccent,
-                        backgroundColor: Colors.white,
-                        // side: BorderSide(color: Colors.black,),
+                        backgroundColor: Color(0xfffff1),
+                        side: BorderSide(color: Colors.black12,),
                         elevation: 3,
-                        // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))
                       ),
 
                     ),
@@ -1074,9 +1102,10 @@ class _MatieresState extends State<Matieres> {
 
 class YourDataSource extends DataTableSource {
   List<Matiere> _items;
-  Function(int) onTapCallback; // La fonction prendra un index comme paramètre
+  // Function(int) onTapCallback; // La fonction prendra un index comme paramètre
 
-  YourDataSource(this._items, {required this.onTapCallback});
+  YourDataSource(this._items, );
+  // YourDataSource(this._items, {required this.onTapCallback});
 
   @override
   DataRow? getRow(int index) {
@@ -1085,15 +1114,15 @@ class YourDataSource extends DataTableSource {
     return DataRow(cells: [
       DataCell(Container(width: 40,
           child: Text(item.code!))),
-      DataCell(Container(width: 150,
-          child: Text(item.name!))),DataCell(
-        IconButton(
-          icon: Icon(Icons.more_horiz),
-          onPressed: () {
-            onTapCallback(index); // Appel de la fonction de callback avec l'index
-          },
-        ),
-      ),
+      DataCell(Text(item.name!.capitalize!)),
+      // DataCell(
+      //   IconButton(
+      //     icon: Icon(Icons.more_horiz),
+      //     onPressed: () {
+      //       onTapCallback(index); // Appel de la fonction de callback avec l'index
+      //     },
+      //   ),
+      // ),
     ]);
   }
 

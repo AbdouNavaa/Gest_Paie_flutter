@@ -11,8 +11,8 @@ import 'header_widget.dart';
 
 
 class ForgotPasswordVerificationPage extends StatefulWidget {
-  String token;
-   ForgotPasswordVerificationPage({Key? key, required this.token}) : super(key: key);
+  // String token;
+   ForgotPasswordVerificationPage({Key? key}) : super(key: key);
 
   @override
   _ForgotPasswordVerificationPageState createState() => _ForgotPasswordVerificationPageState();
@@ -27,7 +27,7 @@ class _ForgotPasswordVerificationPageState extends State<ForgotPasswordVerificat
 
   @override
   Widget build(BuildContext context) {
-    double _headerHeight = 300;
+    double _headerHeight = 200;
 
     return Scaffold(
         backgroundColor: Colors.white,
@@ -41,7 +41,7 @@ class _ForgotPasswordVerificationPageState extends State<ForgotPasswordVerificat
               ),
               SafeArea(
                 child: Container(
-                  margin: EdgeInsets.fromLTRB(25, 10, 25, 10),
+                  margin: EdgeInsets.fromLTRB(10, 5, 25, 10),
                   padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                   child: Column(
                     children: [
@@ -56,13 +56,14 @@ class _ForgotPasswordVerificationPageState extends State<ForgotPasswordVerificat
                               style: TextStyle(
                                   fontSize: 35,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.black54
+                                  // color: Colors.black54
+                                  color: Colors.indigoAccent
                               ),
                               // textAlign: TextAlign.center,
                             ),
                             SizedBox(height: 10,),
                             Text(
-                              'Entrer le code de verification que nous venonsde vous envoyer sur votre addresse e-mail.',
+                              'Entrer le token que nous venons de vous envoyer sur votre addresse e-mail.',
                               style: TextStyle(
                                 // fontSize: 20,
                                   fontWeight: FontWeight.bold,
@@ -93,6 +94,11 @@ class _ForgotPasswordVerificationPageState extends State<ForgotPasswordVerificat
                             //     });
                             //   },
                             // ),
+                            SizedBox(height: 10.0),
+                          TextFormField(
+                            controller: _token,
+                            decoration: ThemeHelper().textInputDecoration("Token", ""),
+                          ),
                             SizedBox(height: 10.0),
                           TextFormField(
                             controller: _pass,
@@ -156,7 +162,7 @@ class _ForgotPasswordVerificationPageState extends State<ForgotPasswordVerificat
                                   ),
                                 ),
                                 onPressed: () async {
-                                  await resetPassword(widget.token,_pass.text, _conf.text);
+                                  await resetPassword(_token.text,_pass.text, _conf.text);
 
                                 _pinSuccess?  Navigator.of(context).pushAndRemoveUntil(
                                       MaterialPageRoute(

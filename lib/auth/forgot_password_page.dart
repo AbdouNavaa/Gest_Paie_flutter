@@ -63,6 +63,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                               style: TextStyle(
                                   fontSize: 23,
                                   fontWeight: FontWeight.bold,
+                                  // color: Colors.black54
                                   color: Colors.indigoAccent
                               ),
                               // textAlign: TextAlign.center,
@@ -132,7 +133,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                     Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => ForgotPasswordVerificationPage(token: _token.text,)),
+                                          builder: (context) => ForgotPasswordVerificationPage()),
                                     );
                                   }
                                 },
@@ -173,7 +174,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                         Navigator.push(
                                           context,
                                           // MaterialPageRoute(builder: (context) => LoginSection()),
-                                            MaterialPageRoute(builder: (context) => ForgotPasswordVerificationPage(token: '',)),
+                                            MaterialPageRoute(builder: (context) => ForgotPasswordVerificationPage()),
 
                                         );
                                       },
@@ -215,8 +216,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       var parse = jsonDecode(response.body);
 
-       _token.text = parse["resetToken"];
-      print('Welcom $_token');
+       // _token.text = parse["resetToken"];
+      // print('Welcom $_token');
     }
     else {
       // Authentification échouée

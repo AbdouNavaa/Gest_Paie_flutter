@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:gestion_payements/professeures.dart';
+import 'package:get/get.dart';
 
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
@@ -39,6 +40,9 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
   double totalType = 0;
   double somme = 0;
   int coursesNum = 0;
+  // List<dynamic> selectedCourses = [];
+  List<dynamic> selectedCourses = [];
+
   void calculateTotalType() {
     if (widget.dateDeb != null && widget.dateFin != null) {
       // If date filters are applied
@@ -99,7 +103,7 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
         'Authorization': 'Bearer $token',
       },
       body: jsonEncode(<String, dynamic>{
-        'isSigned':isSigned? "oui": "pas encore"
+        'isSigned':isSigned? "effectué": "en attente"
       }),
     );
     print(response.statusCode);
@@ -183,9 +187,9 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
               children: [
                    TextButton(onPressed: (){
                     Navigator.pop(context);
-                  }, child: Icon(Icons.arrow_back_ios,color: Colors.black,)),
-                SizedBox(width: 50,),
-                Text("Cours Non Signé",style: TextStyle(fontSize: 25),)
+                  }, child: Icon(Icons.arrow_back_ios,color: Colors.black,size: 20,)),
+                // SizedBox(width: 50,),
+                Text("Cours à Signé",style: TextStyle(fontSize: 20),)
               ],
             ),
           ),
@@ -343,6 +347,27 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
 // Define the pagination variables
 
 // Determine the total number of pages
+          Padding(padding: EdgeInsets.all(10)),
+
+          Container(
+            margin: EdgeInsets.only(left: 230),
+            child: TextButton(
+              onPressed: () {
+                setState(() {
+                  // Sélectionnez tous les cours
+                  selectedCourses = widget.courses.map((course) => course['_id']).toList();
+                });
+              },
+              child: Text('Sélectionner tous'),
+              style: TextButton.styleFrom(
+                // side: BorderSide(color: Colors.black26),
+                // padding: EdgeInsets.only(left: 20,right: 20),
+                foregroundColor: Colors.lightBlueAccent, textStyle: TextStyle(fontWeight: FontWeight.bold),
+                // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+
+            ),
+          ),
 
           Expanded(
             child: Container(
@@ -398,70 +423,81 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
                                       _showCourseDetails(context, widget.courses[index]),
                                   cells: [
 
-                                    DataCell(
-                                        widget.courses[index]['isSigned'] == "oui"? Icon(Icons.check_box_outlined,size: 27):CupertinoSwitch(
-                                          activeColor: Colors.black26,
-                                          value:  widget.courses[index]['isSigned'] == "oui"? true: false,
-                                          onChanged: (value) async {
-
-
-
-                                            setState(() {
-                                              widget.courses[index]['isSigned'] = value;
-                                            });
-
-                                            Navigator.of(context).pop();
-
-                                            // final updatedDate = DateFormat('yyyy-MM-ddthH:mm').parse(widget.courses[index]['date']).toUtc();
-
-                                            // final matiereName = widget.courses[index]['somme'];
-                                            // final matiereId = getMatiereIdFromName(matiereName);
-                                            singeCours(
-                                                widget.courses[index]['_id'],
-                                                value
-                                            );
-
-                                            setState(() {
-                                              Navigator.of(context).pop();
-                                              showDialog(
-                                                  context: context,
-                                                  builder: (BuildContext context) {
-                                                    return AlertDialog(
-                                                      surfaceTintColor: Color(0xB0AFAFA3),
-                                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
-                                                      title: Row(
-                                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                                        children: [
-                                                          Text("Alert de Succes"),
-                                                          Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
-                                                        ],
-                                                      ),
-                                                      content: Text(
-                                                          "Le Cours est signe avec succes"),
-
-                                                      actions: [
-                                                        TextButton(
-                                                          child: Text("Ok"),
-                                                          onPressed: () {
-                                                            Navigator.of(context).pop();
-                                                          },
-                                                        ),
-
-                                                      ],
-
-                                                    );});
-                                            });
-
-                                          },
-                                        )
-                                    ),
                                     // DataCell(
-                                    //     widget.courses[index]['isPaid'] == "oui"||widget.courses[index]['isPaid'] == "préparée"? Icon(Icons.check_box_outlined,size: 27)
-                                    //         :Icon(Icons.check_box_outline_blank,size: 27)
+                                    //     widget.courses[index]['isSigned'] == "effectué"? Icon(Icons.check_box_outlined,size: 27):CupertinoSwitch(
+                                    //       activeColor: Colors.black26,
+                                    //       value:  widget.courses[index]['isSigned'] == "effectué"? true: false,
+                                    //       onChanged: (value) async {
+                                    //
+                                    //
+                                    //
+                                    //         setState(() {
+                                    //           widget.courses[index]['isSigned'] = value;
+                                    //         });
+                                    //
+                                    //         Navigator.of(context).pop();
+                                    //
+                                    //         // final updatedDate = DateFormat('yyyy-MM-ddthH:mm').parse(widget.courses[index]['date']).toUtc();
+                                    //
+                                    //         // final matiereName = widget.courses[index]['somme'];
+                                    //         // final matiereId = getMatiereIdFromName(matiereName);
+                                    //         singeCours(
+                                    //             widget.courses[index]['_id'],
+                                    //             value
+                                    //         );
+                                    //
+                                    //         setState(() {
+                                    //           Navigator.of(context).pop();
+                                    //           showDialog(
+                                    //               context: context,
+                                    //               builder: (BuildContext context) {
+                                    //                 return AlertDialog(
+                                    //                   surfaceTintColor: Color(0xB0AFAFA3),
+                                    //                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                                    //                   title: Row(
+                                    //                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    //                     children: [
+                                    //                       Text("Alerte de succès"),
+                                    //                       Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
+                                    //                     ],
+                                    //                   ),
+                                    //                   content: Text(
+                                    //                       "Le Cours est signe avec succes"),
+                                    //
+                                    //                   actions: [
+                                    //                     TextButton(
+                                    //                       child: Text("Ok"),
+                                    //                       onPressed: () {
+                                    //                         Navigator.of(context).pop();
+                                    //                       },
+                                    //                     ),
+                                    //
+                                    //                   ],
+                                    //
+                                    //                 );});
+                                    //         });
+                                    //
+                                    //       },
+                                    //     )
                                     // ),
+                                    DataCell(
+                                      Checkbox(
+                                        value: selectedCourses.contains(widget.courses[index]['_id']),
+                                        onChanged: (value) {
+                                          setState(() {
+                                            if (value != null && value) {
+                                              selectedCourses.add(widget.courses[index]['_id']);
+                                            } else {
+                                              selectedCourses.remove(widget.courses[index]['_id']);
+                                            }
+                                          });
+                                        },
+                                      ),
+                                    ),
+
                                     DataCell(Container(
                                       width: 60,
-                                      child: Text('${widget.courses[index]['matiere']}',style: TextStyle(
+                                      child: Text('${widget.courses[index]['matiere'].toString().capitalize}',style: TextStyle(
                                         color: Colors.black,
                                       ),),
                                     ),
@@ -541,6 +577,30 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
               ),
             ),
           ),
+
+          Container(
+            margin: EdgeInsets.only(left: 200),
+            child: TextButton(
+              onPressed: () {
+                // Confirmer et traiter les cours sélectionnés
+                singeCoursMultiple(selectedCourses);
+                // Remettre la liste de sélection à zéro
+                setState(() {
+                  selectedCourses = [];
+                  Navigator.of(context).pop();
+                });
+              },
+              child: Text('Confirmer la sélection'),
+              style: TextButton.styleFrom(
+                // side: BorderSide(color: Colors.black26),
+                // padding: EdgeInsets.only(left: 20,right: 20),
+                foregroundColor: Colors.lightBlueAccent, textStyle: TextStyle(fontWeight: FontWeight.bold),
+                // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+
+            ),
+          ),
+          Padding(padding: EdgeInsets.all(105)),
 
 
           Visibility(
@@ -625,63 +685,30 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
 
         builder: (BuildContext context){
           return Container(
-            height: 620,
+            height: 640,
             padding: const EdgeInsets.all(25.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              // mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Cours Infos',style: TextStyle(fontSize: 30),),
-                SizedBox(height: 50),
-                Row(
-                  children: [
-                    Text('Matiere:',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                    SizedBox(width: 10,),
-                    Text('${course['matiere']}',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                  ],
-                ),
-                SizedBox(height: 25),
-                Row(
-                  children: [
-                    Text('Date:',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                    SizedBox(width: 10,),
-                    Text('${DateFormat('dd/M/yyyy ').format(DateTime.parse(course['date'].toString()).toLocal())}',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                  ],
-                ),
-                SizedBox(height: 25),
-                Row(children: [
+            child: SingleChildScrollView(scrollDirection: Axis.vertical,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                // mainAxisAlignment: MainAxisAlignment.center,
+                children: [
                   Row(
                     children: [
-                      Text('Deb:',
+                      Text('Cours Infos',style: TextStyle(fontSize: 25),),
+                      Spacer(),
+                      InkWell(
+                        child: Icon(Icons.close),
+                        onTap: (){
+                          Navigator.pop(context);
+                        },
+                      )
+                    ],
+                  ),
+                  SizedBox(height: 30),
+                  Row(
+                    children: [
+                      Text('Matiere:',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w400,
@@ -690,7 +717,7 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
                         ),),
 
                       SizedBox(width: 10,),
-                      Text(course['startTime'],
+                      Text('${course['matiere'].toString().capitalize}',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w400,
@@ -700,10 +727,10 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
 
                     ],
                   ),
-                  SizedBox(width: 15),
+                  SizedBox(height: 25),
                   Row(
                     children: [
-                      Text('Fin:',
+                      Text('Date:',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w400,
@@ -712,7 +739,7 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
                         ),),
 
                       SizedBox(width: 10,),
-                      Text(course['finishTime'],
+                      Text('${DateFormat('dd/M/yyyy ').format(DateTime.parse(course['date'].toString()).toLocal())}',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w400,
@@ -722,14 +749,11 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
 
                     ],
                   ),
-                ],),
-                SizedBox(height: 25),
-
-                Row(
-                  children: [
+                  SizedBox(height: 25),
+                  Row(children: [
                     Row(
                       children: [
-                        Text('Type:',
+                        Text('Deb:',
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w400,
@@ -738,7 +762,7 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
                           ),),
 
                         SizedBox(width: 10,),
-                        Text('${course['type']}',
+                        Text(course['startTime'],
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w400,
@@ -748,10 +772,10 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
 
                       ],
                     ),
-                    SizedBox(width: 20),
+                    SizedBox(width: 15),
                     Row(
                       children: [
-                        Text('NbH:',
+                        Text('Fin:',
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w400,
@@ -760,7 +784,7 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
                           ),),
 
                         SizedBox(width: 10,),
-                        Text('${course['nbh']}',
+                        Text(course['finishTime'],
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w400,
@@ -770,147 +794,196 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
 
                       ],
                     ),
-                    SizedBox(width: 20),
-                  ],
-                ),
-                SizedBox(height: 25),
-                Row(
-                  children: [
-                    Text('Taux:',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
+                  ],),
+                  SizedBox(height: 25),
 
-                    SizedBox(width: 10,),
-                    Text('${course['prix']}',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
+                  Row(
+                    children: [
+                      Row(
+                        children: [
+                          Text('Type:',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.italic,
+                              // color: Colors.lightBlue
+                            ),),
 
-                  ],
-                ),
-                SizedBox(height: 25),
-                Row(
-                  children: [
-                    Text('Eq.CM:',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
+                          SizedBox(width: 10,),
+                          Text('${course['type']}',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.italic,
+                              // color: Colors.lightBlue
+                            ),),
 
-                    SizedBox(width: 10,),
-                    Text('${course['th']}',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
+                        ],
+                      ),
+                      SizedBox(width: 20),
+                      Row(
+                        children: [
+                          Text('NbH:',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.italic,
+                              // color: Colors.lightBlue
+                            ),),
 
-                  ],
-                ),
-                SizedBox(height: 25),
-                Row(
-                  children: [
-                    Text('Montant Total:',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
+                          SizedBox(width: 10,),
+                          Text('${course['nbh']}',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.italic,
+                              // color: Colors.lightBlue
+                            ),),
 
-                    SizedBox(width: 10,),
-                    Text('${course['somme']}',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                  ],
-                ),
-                SizedBox(height: 25),
-                Row(
-                  children: [
-                    Text('Signed:',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                    SizedBox(width: 10,),
-                    Text(
-                      '${course['isSigned'] == "oui"? 'Oui': 'Non'}',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                  ],
-                ),
-                SizedBox(height: 25),
-                Row(
-                  children: [
-                    Text('Payé:',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                    SizedBox(width: 10,),
-                    Text(
-                      '${course['isPaid'] == "oui"||course['isPaid'] == "préparée"? 'Oui': 'Non'}',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                  ],
-                ),
-                SizedBox(height: 25,),
-                ElevatedButton(
-                  onPressed: () async{
-                    setState(() {
-                      Navigator.pop(context);
-                    });
-                    return showDialog(
-                      context: context,
-                      builder: (context) {
-                        return UpdateProfCoursDialog(courses: course, ProfId: course['professeur_id'],);
-                      },
-                    );
-                  },// Disable button functionality
-
-                  child: Text('Modifier'),
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.only(left: 20,right: 20),
-                    foregroundColor: Colors.lightGreen,
-                    backgroundColor: Colors.white,
-                    // side: BorderSide(color: Colors.black,),
-                    elevation: 3,
-                    // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                        ],
+                      ),
+                      SizedBox(width: 20),
+                    ],
                   ),
+                  SizedBox(height: 25),
+                  Row(
+                    children: [
+                      Text('Taux:',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                          // color: Colors.lightBlue
+                        ),),
 
-                ),
-              ],
+                      SizedBox(width: 10,),
+                      Text('${course['prix']}',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                          // color: Colors.lightBlue
+                        ),),
+
+                    ],
+                  ),
+                  SizedBox(height: 25),
+                  Row(
+                    children: [
+                      Text('Eq.CM:',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                          // color: Colors.lightBlue
+                        ),),
+
+                      SizedBox(width: 10,),
+                      Text('${course['th']}',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                          // color: Colors.lightBlue
+                        ),),
+
+                    ],
+                  ),
+                  SizedBox(height: 25),
+                  Row(
+                    children: [
+                      Text('Montant Total:',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                          // color: Colors.lightBlue
+                        ),),
+
+                      SizedBox(width: 10,),
+                      Text('${course['somme']}',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                          // color: Colors.lightBlue
+                        ),),
+
+                    ],
+                  ),
+                  SizedBox(height: 25),
+                  Row(
+                    children: [
+                      Text('Signed:',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                          // color: Colors.lightBlue
+                        ),),
+
+                      SizedBox(width: 10,),
+                      Text(
+                        '${course['isSigned'] == "effectué"? 'Effectué': 'Non'}',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                          // color: Colors.lightBlue
+                        ),),
+
+                    ],
+                  ),
+                  SizedBox(height: 25),
+                  Row(
+                    children: [
+                      Text('Payé:',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                          // color: Colors.lightBlue
+                        ),),
+
+                      SizedBox(width: 10,),
+                      Text(
+                        '${course['isPaid'] == "effectué"||course['isPaid'] == "préparé"? 'Effectué': 'En attente'}',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                          // color: Colors.lightBlue
+                        ),),
+
+                    ],
+                  ),
+                  SizedBox(height: 25,),
+                  TextButton(
+                    onPressed: () async{
+                      setState(() {
+                        Navigator.pop(context);
+                      });
+                      return showDialog(
+                        context: context,
+                        builder: (context) {
+                          return UpdateProfCoursDialog(courses: course, ProfId: course['professeur'],);
+                        },
+                      );
+                    },// Disable button functionality
+
+                    child: Text('Modifier'),
+                    style: TextButton.styleFrom(
+                        padding: EdgeInsets.only(left: 20,right: 20),
+                        foregroundColor: Colors.lightGreen,
+                        backgroundColor: Color(0xfffff1),
+                        side: BorderSide(color: Colors.black12,),
+                        elevation: 3,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))
+                      // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         }
@@ -1158,6 +1231,16 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
   }
 
 
+  void singeCoursMultiple(List<dynamic> selectedCourses) {
+    for (String courseId in selectedCourses) {
+      singeCours(courseId,true);
+      // Ajoutez votre logique pour traiter chaque cours sélectionné ici
+      // Utilisez courseId comme nécessaire
+    }
+  }
+
+
+
 }
 
 
@@ -1239,6 +1322,8 @@ class _UpdateProfCoursDialogState extends State<UpdateProfCoursDialog> {
   bool _selectedSigne = false;
   TextEditingController _date = TextEditingController();
   TextEditingController _isSigned = TextEditingController();
+  String type = '';
+  num Nbh = 0;
 
   bool showMatDropdown = false;
   late String mat;
@@ -1250,6 +1335,8 @@ class _UpdateProfCoursDialogState extends State<UpdateProfCoursDialog> {
     _date.text = DateFormat('yyyy/MM/dd HH:mm').format(DateTime.parse(widget.courses['date'])).toString();
     // _selectedSigne = widget.courses['isSigned'];
     mat = widget.courses['matiere'];
+    type = widget.courses['type'];
+    Nbh = widget.courses['th'];
   }
 
   Future<void> selectTime(TextEditingController controller) async {
@@ -1304,38 +1391,106 @@ class _UpdateProfCoursDialogState extends State<UpdateProfCoursDialog> {
   }
 
 
-
+  String _selectedType = 'CM';
+  num _selectedNbh = 2;
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      child: AlertDialog(
+      child:
+      AlertDialog(
+        surfaceTintColor: Colors.white,
+        backgroundColor: Colors.white,
+        insetPadding: EdgeInsets.only(top: 210,),
+
+
+        // surfaceTintColor: Color(0xB0AFAFA3),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            topRight: Radius.circular(20),
+            topLeft: Radius.circular(20),
+            // bottomRight: Radius.circular(20),
+            // bottomLeft: Radius.circular(20),
+          ),
+        ),
         title: Text("Mise à jour de la tâche"),
         content: Form(
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(height: 110,
-                  child: SingleChildScrollView(scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: availableTypes.map((type) {
-                        return CheckboxMenuButton(
-                          value: selectedTypes.contains(type),
-                          onChanged: (value) {
-                            setState(() {
-                              if (selectedTypes.contains(type)) {
-                                selectedTypes.remove(type);
-                              } else {
-                                selectedTypes.add(type);
-                              }
-                            });
-                          },child: Text(type['name'] + ' - ' + type['nbh'].toString()),
-                        );
-                      }).toList(),
+                Row(
+                  children: [
+                    Container(
+                      width: 147.5,
+                      child: DropdownButtonFormField<String>(
+                        value: _selectedType,
+                        hint: Text(type),
+                        items: [
+                          DropdownMenuItem<String>(
+                            child: Text('CM'),
+                            value: 'CM',
+                          ),
+                          DropdownMenuItem<String>(
+                            child: Text('TP'),
+                            value: 'TP',
+                          ),
+                          DropdownMenuItem<String>(
+                            child: Text('TD'),
+                            value: 'TD',
+                          ),
+                        ],
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedType = value!;
+                          });
+                        },
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide.none,gapPadding: 1,
+                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                          ),
+                        ),
+                      ),
+
                     ),
-                  ),
+                    SizedBox(width: 10),
+                    Container(
+                      width: 147.5,
+                      child: DropdownButtonFormField<num>(
+                        value: _selectedNbh,
+                        hint: Text(Nbh.toString()),
+                        items: [
+                          DropdownMenuItem<num>(
+                            child: Text('1.5'),
+                            value: 1.5,
+                          ),
+                          DropdownMenuItem<num>(
+                            child: Text('2'),
+                            value: 2,
+                          ),
+                        ],
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedNbh = value!;
+                          });
+                        },
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          hintText: "${Nbh.toString()}",
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide.none,gapPadding: 1,
+                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                          ),
+                        ),
+                      ),
+
+                    ),
+                  ],
                 ),
-                SizedBox(height: 16),
+                SizedBox(height: 20),
                 Text(
                   "selection d'une Matiere",
                   style: TextStyle(fontWeight: FontWeight.bold),
@@ -1375,7 +1530,7 @@ class _UpdateProfCoursDialogState extends State<UpdateProfCoursDialog> {
                     });
                   },
                 ),
-                SizedBox(height: 16),
+                SizedBox(height: 20),
                 TextFormField(
                   controller: _date,
                   decoration: InputDecoration(
@@ -1386,7 +1541,7 @@ class _UpdateProfCoursDialogState extends State<UpdateProfCoursDialog> {
                   onTap: () => selectTime(_date),
                 ),
 
-                SizedBox(height: 16,),
+                SizedBox(height: 20,),
                 DropdownButtonFormField<bool>(
                   value: _selectedSigne,
                   items: [
@@ -1413,6 +1568,7 @@ class _UpdateProfCoursDialogState extends State<UpdateProfCoursDialog> {
                     ),
                   ),
                 ),
+                SizedBox(height: 20,),
 
               ],
             ),
@@ -1488,7 +1644,7 @@ Future<void> updateProfCours( id,String professeurId,String matiereId, double CM
     'types': types,
     "startTime": CM,
     'date': date?.toIso8601String(),
-    'isSigned':isSigned? "oui": "pas encore"
+    'isSigned':isSigned? "effectué": "en attente"
   });
 
   if (date != null) {

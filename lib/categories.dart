@@ -92,9 +92,9 @@ class _CategoriesState extends State<Categories> {
                 children: [
                      TextButton(onPressed: (){
                     Navigator.pop(context);
-                  }, child: Icon(Icons.arrow_back_ios,color: Colors.black,)),
-                  SizedBox(width: 50,),
-                  Text("Liste de Categories",style: TextStyle(fontSize: 25),)
+                  }, child: Icon(Icons.arrow_back_ios,color: Colors.black,size: 20,)),
+                  // SizedBox(width: 50,),
+                  Text("Liste des Categories",style: TextStyle(fontSize: 20),)
                 ],
               ),
             ),

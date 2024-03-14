@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:gestion_payements/professeures.dart';
+import 'package:get/get.dart';
   
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
@@ -100,7 +101,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
         'Authorization': 'Bearer $token',
       },
       body: jsonEncode(<String, dynamic>{
-      'isSigned':isSigned? "oui": "pas encore"
+      'isSigned':isSigned? "effectué": "en attente"
       }),
     );
     print(response.statusCode);
@@ -181,9 +182,9 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
               children: [
                    TextButton(onPressed: (){
                     Navigator.pop(context);
-                  }, child: Icon(Icons.arrow_back_ios,color: Colors.black,)),
-                SizedBox(width: 50,),
-                Text("Mes Cours Signé",style: TextStyle(fontSize: 25),)
+                  }, child: Icon(Icons.arrow_back_ios,color: Colors.black,size: 20,)),
+                // SizedBox(width: 50,),
+                Text("Mes Cours",style: TextStyle(fontSize: 20),)
               ],
             ),
           ),
@@ -379,9 +380,9 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                           ),
                           // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
                           columns: [
-                            DataColumn(label: Text('Signe')),
+                            DataColumn(label: Text('Signé')),
                             DataColumn(label: Text('Payé')),
-                            DataColumn(label: Text('Matiere')),
+                            DataColumn(label: Text('Matière')),
                             DataColumn(label: Text('Date')),
                             DataColumn(label: Text('Eq.CM')),
                             DataColumn(label: Text('MT')),
@@ -398,15 +399,17 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                                   cells: [
 
                                     DataCell(
-                                        Icon(Icons.check_circle_outline,size: 27)
+                                        Icon(Icons.task_alt,size: 27,color: Colors.green,)
                                     ),
                                     DataCell(
-                                        widget.courses[index]['isPaid'] == "oui"||widget.courses[index]['isPaid'] == "préparée"? Container(child: Icon(Icons.check_circle_outline,size: 27))
-                                            :Container(child: Icon(Icons.do_not_disturb_off_outlined,size: 27))
+                                        widget.courses[index]['isPaid'] == "effectué" ? Container(child: Icon(Icons.task_alt,size: 27,color: Colors.green,))
+                                            :widget.courses[index]['isPaid'] == "préparé"?
+                                        Container(child: Icon(Icons.remove_circle_outline,size: 27,color: Colors.blueGrey,))
+                                            :Container(child: Icon(Icons.panorama_fish_eye,size: 27))
                                     ),
                                     DataCell(Container(
                                       width: 60,
-                                      child: Text('${widget.courses[index]['matiere']}',style: TextStyle(
+                                      child: Text('${widget.courses[index]['matiere'].toString().capitalize}',style: TextStyle(
                                         color: Colors.black,
                                       ),),
                                     ),
@@ -455,7 +458,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                                   ],
                                 ),
                             DataRow(cells: [
-                              DataCell(Text('totals')),
+                              DataCell(Text('Total')),
                               DataCell(Text('')),
                               DataCell((widget.dateDeb != null && widget.dateFin != null)?
                               Center(child: Text('${coursesNum} Cours',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400)))
@@ -567,14 +570,25 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
 
         builder: (BuildContext context){
           return Container(
-            height: 650,
+            height: 630,
             padding: const EdgeInsets.all(25.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.center,
               // mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Cours Infos',style: TextStyle(fontSize: 30),),
+                Row(
+                  children: [
+                    Text('Cours Infos',style: TextStyle(fontSize: 25),),
+                    Spacer(),
+                    InkWell(
+                      child: Icon(Icons.close),
+                      onTap: (){
+                        Navigator.pop(context);
+                      },
+                    )
+                  ],
+                ),
                 SizedBox(height: 50),
                 Row(
                   children: [
@@ -587,7 +601,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                       ),),
 
                     SizedBox(width: 10,),
-                    Text('${course['matiere']}',
+                    Text('${course['matiere'].toString().capitalize}',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,
@@ -784,7 +798,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                 SizedBox(height: 25),
                 Row(
                   children: [
-                    Text('Signed:',
+                    Text('Signé ?:',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,
@@ -794,7 +808,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
 
                     SizedBox(width: 10,),
                     Text(
-                      '${course['isSigned'] == "oui"? 'Oui': 'Non'}',
+                      '${course['isSigned'] == "effectué"? 'Oui': 'Non'}',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,
@@ -807,7 +821,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                 SizedBox(height: 25),
                 Row(
                   children: [
-                    Text('Payé:',
+                    Text('Payé ?:',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,
@@ -817,7 +831,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
 
                     SizedBox(width: 10,),
                     Text(
-                      '${course['isPaid'] == "oui"||course['isPaid'] == "préparée"? 'Oui': 'Non'}',
+                      '${course['isPaid'] == "effectué"||course['isPaid'] == "préparé"? 'Oui': 'En attente'}',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,
@@ -828,30 +842,30 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                   ],
                 ),
                 SizedBox(height: 25,),
-                ElevatedButton(
-                  onPressed: () async{
-                    setState(() {
-                      Navigator.pop(context);
-                    });
-                    return showDialog(
-                      context: context,
-                      builder: (context) {
-                        return UpdateProfCoursDialog(courses: course, ProfId: course['professeur_id'],);
-                      },
-                    );
-                  },// Disable button functionality
-
-                  child: Text('Modifier'),
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.only(left: 20,right: 20),
-                    foregroundColor: Colors.lightGreen,
-                    backgroundColor: Colors.white,
-                    // side: BorderSide(color: Colors.black,),
-                    elevation: 3,
-                    // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
-                  ),
-
-                ),
+                // ElevatedButton(
+                //   onPressed: () async{
+                //     setState(() {
+                //       Navigator.pop(context);
+                //     });
+                //     return showDialog(
+                //       context: context,
+                //       builder: (context) {
+                //         return UpdateProfCoursDialog(courses: course, ProfId: course['professeur'],);
+                //       },
+                //     );
+                //   },// Disable button functionality
+                //
+                //   child: Text('Modifier'),
+                //   style: ElevatedButton.styleFrom(
+                //     padding: EdgeInsets.only(left: 20,right: 20),
+                //     foregroundColor: Colors.lightGreen,
+                //     backgroundColor: Colors.white,
+                //     // side: BorderSide(color: Colors.black,),
+                //     elevation: 3,
+                //     // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                //   ),
+                //
+                // ),
               ],
             ),
           );
@@ -861,295 +875,8 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
     );
   }
 
-
-  // Future<void> _displayTextInputDialog(BuildContext context) async {
-  //   List<Map<String, dynamic>> selectedTypes = [];
-  //
-  //   List<Map<String, dynamic>> availableTypes = [
-  //     {"name": "CM", "nbh": 1.5},
-  //     {"name": "CM", "nbh": 2},
-  //     {"name": "TP", "nbh": 1.5},
-  //     {"name": "TP", "nbh": 1},
-  //     {"name": "TD", "nbh": 1.5},
-  //     {"name": "TD", "nbh": 1},
-  //     // Add more available types here as needed
-  //   ];
-  //
-  //   final professorData = await fetchProfessorInfo();
-  //   String professorId = professorData['professeur']['_id'];
-  //   List<dynamic> professorMatieres = professorData['professeur']['matieres'];
-  //
-  //
-  //   Matiere? selectedMat;
-  //
-  //   DateTime? selectedDateTime; // Initialize the selected date and time to null
-  //   Future<void> selectTime(TextEditingController controller) async {
-  //     DateTime? selectedDateTime = await showDatePicker(
-  //       context: context,
-  //       initialDate: DateTime.now(),
-  //       firstDate: DateTime(2000),
-  //       lastDate: DateTime(2030),
-  //     );
-  //
-  //     if (selectedDateTime != null) {
-  //       TimeOfDay? selectedTime = await showTimePicker(
-  //         context: context,
-  //         initialTime: TimeOfDay.now(),
-  //       );
-  //
-  //       if (selectedTime != null) {
-  //         DateTime selectedDateTimeWithTime = DateTime(
-  //           selectedDateTime.year,
-  //           selectedDateTime.month,
-  //           selectedDateTime.day,
-  //           selectedTime.hour,
-  //           selectedTime.minute,
-  //         );
-  //
-  //         String formattedDateTime = DateFormat('yyyy/MM/dd HH:mm').format(selectedDateTimeWithTime);
-  //         setState(() {
-  //           controller.text = formattedDateTime;
-  //         });
-  //       }
-  //     }
-  //   }
-  //
-  //   return showDialog(
-  //     context: context,
-  //     builder: (context) {
-  //       return SingleChildScrollView(
-  //         child: AlertDialog(
-  //           title: Text('Ajouter Cours Au Prof'),
-  //           content: Column(
-  //             mainAxisSize: MainAxisSize.min,
-  //             children: [
-  //               Container(height: 110,
-  //                 child: SingleChildScrollView(scrollDirection: Axis.horizontal,
-  //                   child:  CourseTypeSelector(
-  //                     availableTypes: availableTypes,
-  //                     selectedTypes: selectedTypes,
-  //                     onChanged: (newSelectedTypes) {
-  //                       setState(() {
-  //                         selectedTypes = newSelectedTypes;
-  //                       });
-  //                     },
-  //                   ),
-  //                 ),
-  //               ),
-  //
-  //               SizedBox(height: 16),
-  //               Text(
-  //                "selection d'une Matiere",
-  //                 style: TextStyle(fontWeight: FontWeight.bold),
-  //               ),
-  //
-  //               DropdownButtonFormField<Matiere>(
-  //                 value: selectedMat,
-  //                 items: professorMatieres.map((matiere) {
-  //                   return DropdownMenuItem<Matiere>(
-  //                     value: Matiere(
-  //                       id: matiere['_id'],
-  //                       name: matiere['name'], semestre: matiere['semestre'],
-  //                       description: matiere['description'], categorieId: matiere['categorie']['_id'],
-  //                       // Add other properties if needed
-  //                     ),
-  //                     child: Text(matiere['name'] ?? ''),
-  //                   );
-  //                 }).toList(),
-  //                 onChanged: (value) {
-  //                   setState(() {
-  //                     selectedMat = value;
-  //                   });
-  //                 },
-  //                 decoration: InputDecoration(
-  //                   filled: true,
-  //                   fillColor: Colors.white,
-  //                   hintText: "....",hintStyle: TextStyle(fontSize: 20),
-  //                   border: OutlineInputBorder(
-  //                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
-  //                   ),
-  //                 ),
-  //               ),
-  //
-  //
-  //               SizedBox(height: 16),
-  //               TextFormField(
-  //                 controller: _date,
-  //                 decoration: InputDecoration(
-  //                   labelText: 'Date',
-  //                   border: OutlineInputBorder(),
-  //                 ),
-  //                 // readOnly: true,
-  //                 onTap: () => selectTime(_date),
-  //               ),
-  //
-  //
-  //               // ElevatedButton for adding the matiere to professor
-  //               ElevatedButton(
-  //                 onPressed: () async {
-  //                   if (selectedMat == null ) {
-  //
-  //                     // Check if both a matiere and at least one type is selected
-  //                     ScaffoldMessenger.of(context).showSnackBar(
-  //                       SnackBar(content: Text('Please select a matiere .')),
-  //                     );
-  //                   }
-  //                   else if (selectedTypes.isEmpty) {
-  //
-  //                     // Check if both a matiere and at least one type is selected
-  //                     ScaffoldMessenger.of(context).showSnackBar(
-  //                       SnackBar(content: Text('Please select  at least one type.')),
-  //                     );
-  //                   }
-  //                   else if (_date == null) {
-  //
-  //                     // Check if both a matiere and at least one type is selected
-  //                     ScaffoldMessenger.of(context).showSnackBar(
-  //                       SnackBar(content: Text('Please select a date.')),
-  //                     );
-  //                   }
-  //                   else {
-  //                     Navigator.of(context).pop();
-  //                     // SharedPreferences prefs = await SharedPreferences.getInstance();
-  //                     // String token = prefs.getString("token")!;
-  //
-  //                     print(professorId);
-  //                     print(selectedMat!.id!);
-  //                     print(selectedTypes); // Check the selected types here
-  //
-  //                     DateTime date = DateFormat('yyyy/MM/dd HH:mm').parse(_date.text).toUtc();
-  //                     // Pass the selected types to addCoursToProfesseur method
-  //                     addCoursToProfesseur( selectedMat!.id!, selectedTypes, date);
-  //
-  //                     ScaffoldMessenger.of(context).showSnackBar(
-  //                       SnackBar(content: Text('Matiere has been added to professor successfully.')),
-  //                     );
-  //
-  //                     // setState(() {
-  //                     //   fetchProfessorInfo();
-  //                     // });
-  //                   }
-  //                 },
-  //                 child: Text("Ajouter"),
-  //                 style: ElevatedButton.styleFrom(
-  //                   backgroundColor: Colors.black,
-  //                   foregroundColor: Colors.white,
-  //                   elevation: 10,
-  //                   padding: EdgeInsets.only(left: 90, right: 90),
-  //                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-  //                 ),
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
-
-
-  Future<void> addCoursToProfesseur( String matiereId, List<Map<String, dynamic>> types, DateTime date) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString("token")!;
-    String id = prefs.getString("_id")!;
-    // final professorData = await fetchProfesseurDetails(id);
-    // String id = professorData['professeur']['_id'];
-    final url = 'http://192.168.43.73:5000/professeur/$id/cours';
-    final headers = {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
-    };
-    final body = json.encode({
-      'matiere': matiereId,
-      'type': types,
-      'date': date.toIso8601String(),
-    });
-
-    final response = await http.post(Uri.parse(url), headers: headers, body: body);
-    print(response.statusCode);
-    if (response.statusCode == 201) {
-      final responseData = json.decode(response.body);
-      Navigator.of(context).pop(true);
-
-      // You can handle the response data here if needed
-      print(responseData);
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(content: Text('Course added successfully.')),
-      // );
-    } else {
-      // Handle errors
-      print('Failed to add course to professor. Status Code: ${response.statusCode}');
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(content: Text('Failed to add course to professor.')),
-      // );
-    }
-  }
-
-
-  Future<List<Matiere>> fetchMatiereCateg(String categoryId) async {
-    final url = 'http://192.168.43.73:5000/categorie/$categoryId/matieres';
-    final response = await http.get(Uri.parse(url));
-
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      List<Matiere> matieres = List<Matiere>.from(data['matieres'].map((m) => Matiere.fromJson(m)));
-      return matieres;
-    } else {
-      throw Exception('Failed to fetch matières');
-    }
-  }
-
-
 }
 
-
-class CourseTypeSelector extends StatefulWidget {
-  final List<Map<String, dynamic>> availableTypes;
-  final List<Map<String, dynamic>> selectedTypes;
-  final ValueChanged<List<Map<String, dynamic>>> onChanged;
-
-  CourseTypeSelector({
-    required this.availableTypes,
-    required this.selectedTypes,
-    required this.onChanged,
-  });
-
-  @override
-  _CourseTypeSelectorState createState() => _CourseTypeSelectorState();
-}
-
-class _CourseTypeSelectorState extends State<CourseTypeSelector> {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 110,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: widget.availableTypes.map((type) {
-            return CheckboxMenuButton(
-              value: widget.selectedTypes.contains(type),
-              onChanged: (value) {
-                setState(() {
-                  if (widget.selectedTypes.contains(type)) {
-                    widget.selectedTypes.remove(type);
-                  } else {
-                    widget.selectedTypes.add(type);
-                  }
-                  widget.onChanged(widget.selectedTypes);
-                });
-              },
-              child: Text(type['name'] + ' - ' + type['nbh'].toString()),
-            );
-          }).toList(),
-        ),
-      ),
-    );
-  }
-
-
-
-}
 
 
 class UpdateProfCoursDialog extends StatefulWidget {
@@ -1333,11 +1060,11 @@ class _UpdateProfCoursDialogState extends State<UpdateProfCoursDialog> {
                   value: _selectedSigne,
                   items: [
                     DropdownMenuItem<bool>(
-                      child: Text('True'),
+                      child: Text('Vrai'),
                       value: true,
                     ),
                     DropdownMenuItem<bool>(
-                      child: Text('False'),
+                      child: Text('Faux'),
                       value: false,
                     ),
                   ],
@@ -1392,7 +1119,7 @@ class _UpdateProfCoursDialogState extends State<UpdateProfCoursDialog> {
                 // updateProfCours(widget.courses['_id'], widget.ProfId, updatedMatId, widget.courses['CM'], date, bool.parse(_isSigned.text));
               }
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Le Type est  Update avec succès.')),
+                SnackBar(content: Text('Le Type est  modifier avec succès.')),
               );
 
               setState(() {
@@ -1430,7 +1157,7 @@ Future<void> updateProfCours( id,String professeurId,String matiereId, double CM
     'types': types,
     "startTime": CM,
     'date': date?.toIso8601String(),
-    'isSigned':isSigned? "oui": "pas encore"
+    'isSigned':isSigned? "effectué": "en attente"
   });
 
   if (date != null) {

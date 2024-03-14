@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -52,13 +53,22 @@ class _EmploiPageState extends State<EmploiPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        surfaceTintColor: Color(0xB0AFAFA3),
-        title: Text('Mon Emploi'),
-      ),
       body:
       Column(
         children: [
+          SizedBox(height: 40,),
+          Container(
+            height: 50,
+            child: Row(
+              children: [
+                TextButton(onPressed: (){
+                  Navigator.pop(context);
+                }, child: Icon(Icons.arrow_back_ios,color: Colors.black,size: 20,)),
+                // SizedBox(width: 3,),
+                Text('Mon emploi',style: TextStyle(fontSize: 20),),
+              ],
+            ),
+          ),
           Expanded(
             child: Container(
               width: MediaQuery.of(context).size.width,
@@ -87,12 +97,13 @@ class _EmploiPageState extends State<EmploiPage> {
                       showBottomBorder: true,
                       // headingRowColor: MaterialStateColor.resolveWith((states) => Colors.lightBlueAccent.shade100), // Couleur de la ligne d'en-tête
                       headingRowHeight: 50,horizontalMargin: 10,
+                      headingTextStyle: TextStyle(fontWeight: FontWeight.bold),
                       columnSpacing: 10,
                       dataRowHeight: 70,
                       columns: [
                         DataColumn(label: Text('Jours')),
-                        DataColumn(label: Text('Matiere')),
-                        DataColumn(label: Text('Filiere')),
+                        DataColumn(label: Text('Matière')),
+                        DataColumn(label: Text('Filière')),
                         DataColumn(label: Text('Type')),
                         DataColumn(label: Text('Deb')),
                         // DataColumn(label: Text('Fin')),
@@ -104,7 +115,7 @@ class _EmploiPageState extends State<EmploiPage> {
                           DataRow(
                               cells: [
                                 DataCell(Container(width: 60,
-                                  child: Text('${emplois?[index].day}',style: TextStyle(
+                                  child: Text('${emplois?[index].day.capitalizeFirst}',style: TextStyle(
                                     color: Colors.black,
                                   ),),
                                 )),
@@ -113,13 +124,13 @@ class _EmploiPageState extends State<EmploiPage> {
                                 // ),)),
                                 DataCell(Container(
                                   width: 80,
-                                  child: Text('${emplois?[index].matiere}',style: TextStyle(
+                                  child: Text('${emplois?[index].matiere.capitalize}',style: TextStyle(
                                     color: Colors.black,
                                   ),),
                                 )),
                                 DataCell(Container(
                                   width: 70,
-                                  child: Text('${emplois?[index].classe.toUpperCase()}',style: TextStyle(
+                                  child: Text('${emplois?[index].classe.capitalize}',style: TextStyle(
                                     color: Colors.black,
                                   ),),
                                 )),

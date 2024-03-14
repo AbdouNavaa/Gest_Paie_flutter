@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:gestion_payements/auth/emploi.dart';
 import 'package:gestion_payements/element.dart';
-import 'package:gestion_payements/group.dart';
 import 'package:gestion_payements/matieres.dart';
 import 'package:gestion_payements/more_page.dart';
 import 'package:gestion_payements/paie.dart';
@@ -122,7 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     stops: [0.0, 1.0],
-                    colors: [ Colors.lightBlueAccent,Colors.white],
+                    colors: [ Colors.lightBlueAccent,Colors.black],
 
                   ),
                 ),
@@ -254,6 +253,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                         setState(() {
                                           widget.notif = paies.length;
                                         });
+                                        print(paies);
+
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(builder: (context) =>
@@ -538,7 +539,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     //Divider(color: Theme.of(context).primaryColor, height: 1,),
                     ListTile(
                       leading: Icon(Icons.folder_special_outlined, size: _drawerIconSize,color: Colors.black),
-                      title: Text('Fillieres',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
+                      title: Text('Filières',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
                       onTap: () {
                         Navigator.push(context, MaterialPageRoute(builder: (context) => Filliere()),);
                       },
@@ -571,15 +572,16 @@ class _HomeScreenState extends State<HomeScreen> {
         fit: StackFit.expand,
         children: [
           ClipPath(
-            clipper: ClippingClass(),
+            // clipper: ClippingClass(),
             child: Container(
               width: double.infinity,
               height: MediaQuery.of(context).size.height*4/7,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  begin: Alignment.topCenter,
+                  begin: Alignment.center,
                   end: Alignment.bottomCenter,
-                  colors: [Colors.lightBlueAccent, Colors.white],
+                  // colors: [ Colors.white,Colors.white],
+                  colors: [Colors.blueAccent.shade200, Colors.white],
                   // colors: [Color(0xB0AFAFA3), Colors.white],
                 ),
               ),
@@ -588,7 +590,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           Positioned(
             left: 20,
-            top: 100,
+            top: widget.role == "professeur"? 40:100,
             right: 20,
             child: Column(
               children:[
@@ -600,8 +602,173 @@ class _HomeScreenState extends State<HomeScreen> {
                       if (widget.role == "professeur")
                         Column(
                           children: [
+                            // SizedBox(height: 40,),
 
-                            SizedBox(height: 80,),
+                            InkWell(
+                              onTap: () async {
+                                SharedPreferences prefs = await SharedPreferences.getInstance();
+                                String token = prefs.getString("token")!;
+                                String role = prefs.getString("role")!;
+                                String email = prefs.getString("email")!;
+                                String name = prefs.getString("nom")!;
+                                String id = prefs.getString("id")!;
+                                print(id);
+                                Navigator.push(context, MaterialPageRoute(
+                                  builder: (context) =>
+                                  // ProfesseurInfoPage(id: id, email: email, role: role),
+                                  ProfesseurDetailsScreen(
+                                    profId: widget.profId!,
+                                    nom: name,
+                                    mail: email,
+                                  ),
+                                  // builder: (context) => LandingScreen(role: role,name: nom,), // Passer le rôle ici
+                                ),);
+
+
+
+                              },
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(100),
+
+                                child: Image.asset("assets/user1.png",width: 100),
+                              ),
+                            ),
+
+                            SizedBox(height: 20,),
+                            Row(
+                              children: [
+                                Stack(
+                                  // alignment: Alignment.center, // Centrez les enfants dans la stack
+                                    children: [
+                                      _customCard(
+                                    imageUrl: "cours2.png",
+                                    item: "Cours Non Signé",
+                                    height: 180,
+                                    width: 160,
+                                    duration: "${widget.CNS} Cours",
+                                    onPessed: ()async{
+                                      SharedPreferences prefs = await SharedPreferences.getInstance();
+                                      String token = prefs.getString("token")!;
+                                      String id = prefs.getString("id")!;
+                                      String nom = prefs.getString("nom")!;
+
+                                      var url = Uri.parse('http://192.168.43.73:5000/professeur/${widget.profId}/cours-non');
+
+                                      var responseInitialise = await http.get(
+                                        url,
+                                        headers: {
+                                          'Authorization': 'Bearer $token',
+                                          'Content-Type': 'application/json', // Ajoutez le type de contenu
+                                        },
+                                        // body: jsonEncode({"notification": ""}), // Encodez votre corps en JSON
+                                      );
+
+
+                                      if (responseInitialise.statusCode == 200) {
+                                        Map<String, dynamic> jsonResponse = jsonDecode(responseInitialise.body);
+                                        courses = jsonResponse['cours'];
+                                        // print('Paiements avec status "initialisé": ${paies.length}');
+                                        setState(() {
+                                          widget.CNS = courses.length;
+                                        });
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(builder: (context) =>
+                                              ProfCoursesNonSigne(courses: courses,
+                                                ProfId: widget.profId!,)),
+                                        );
+
+                                      } else {
+                                        print('Request for "initialisé" failed with status: ${responseInitialise.statusCode}');
+                                      }
+                                    },
+
+                                  ),
+                                      Positioned(
+                                        right: 1,top: 1, // Ajustez la position verticale du texte selon vos besoins
+                                        child: Container(
+                                          width: 30,
+                                          height: 30,
+                                          decoration: BoxDecoration(color: Colors.lightGreenAccent,borderRadius: BorderRadius.circular(50)),
+                                          child: Center(
+                                            child: Text(
+                                              widget.CNS.toString(),
+                                              style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 25),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ] ),
+                                Stack(
+                                  // alignment: Alignment.center, // Centrez les enfants dans la stack
+                                    children: [
+                                      _customCard(
+                                        imageUrl: "paie1.png",
+                                    item: "Paiements Non Confirmés",
+                                    height: 180,
+                                    width: 160,
+                                    duration: "${widget.notif} Paies",
+                                        onPessed: ()async{
+                                          SharedPreferences prefs = await SharedPreferences.getInstance();
+                                          String token = prefs.getString("token")!;
+                                          String id = prefs.getString("id")!;
+                                          String nom = prefs.getString("nom")!;
+
+                                          var url = Uri.parse('http://192.168.43.73:5000/paiement/${widget.profId}/professeur');
+
+                                          var responseInitialise = await http.post(
+                                            url,
+                                            headers: {
+                                              'Authorization': 'Bearer $token',
+                                              'Content-Type': 'application/json', // Ajoutez le type de contenu
+                                            },
+                                            body: jsonEncode({"notification": ""}), // Encodez votre corps en JSON
+                                          );
+
+
+                                          if (responseInitialise.statusCode == 200) {
+                                            Map<String, dynamic> jsonResponse = jsonDecode(responseInitialise.body);
+                                            paies = jsonResponse['paiements'];
+                                            // print('Paiements avec status "initialisé": ${paies.length}');
+                                            setState(() {
+                                              widget.notif = paies.length;
+                                            });
+                                            print(paies);
+
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(builder: (context) =>
+                                                  Paie(paies: paies,
+                                                    ProfId: id,
+                                                    Id:  widget.profId!,
+                                                    ProfName: nom,)),
+                                            );
+
+                                          } else {
+                                            print('Request for "initialisé" failed with status: ${responseInitialise.statusCode}');
+                                          }
+                                        },
+
+
+                                      ),
+                                      Positioned(
+                                        right: 1,top: 1, // Ajustez la position verticale du texte selon vos besoins
+                                        child: Container(
+                                          width: 30,
+                                          height: 30,
+                                          decoration: BoxDecoration(color: Colors.lightGreenAccent,borderRadius: BorderRadius.circular(50)),
+                                          child: Center(
+                                            child: Text(
+                                              widget.notif.toString(),
+                                              style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 25),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ] ),
+
+                              ],
+                            ),
                             Row(
                               children: [
                                 _customCard(
@@ -681,6 +848,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                       setState(() {
                                         coursPN = paies.length;
                                       });
+
+                                      print(paies);
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(builder: (context) =>
@@ -729,6 +898,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                               ],
                             ),
+                            // SizedBox(height: 40,),
                           ],
                         ),
                       if (widget.role == "responsable")
@@ -1014,8 +1184,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                   SizedBox(width: 15,),
                                   _customCard(
                                     imageUrl: "grps4.jpg",
-                                    item: "Fillieres",
-                                    duration: "${fillieres?.length} Filliere",
+                                    item: "Filières",
+                                    duration: "${fillieres?.length} Filières",
                                     height: 150,
                                     width: 150,
                                     onPessed: (){

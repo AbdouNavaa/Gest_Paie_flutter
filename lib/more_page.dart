@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:gestion_payements/filliere.dart';
-import 'package:gestion_payements/semestre.dart';
 import 'package:gestion_payements/settings.dart';
 
 import 'Dashboard.dart';
-import 'auth/profile.dart';
+import 'auth/login.dart';
 import 'categories.dart';
-import 'group.dart';
 import 'matieres.dart';
 
 class MoreOptionsPage extends StatefulWidget {
@@ -95,33 +92,6 @@ class _MoreOptionsPageState extends State<MoreOptionsPage> {
                         Icon(Icons.logout_outlined, color: widget.isDark? Colors.green : Colors.black,),
                         SizedBox(width: 10,),
                         Text('Logout'),
-                      ],
-                    ),
-                  ),
-                ),
-                Container(
-                  height: MediaQuery.of(context).size.height/ 15,
-                  width: MediaQuery.of(context).size.width,
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                        foregroundColor: widget.isDark? Colors.white : Colors.black87,
-                        // //backgroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
-                    onPressed: () {
-                      // Navigate to ProfilePage
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>Semestres()
-                        ),
-                      );
-                    },
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Icon(Icons.date_range, color: widget.isDark? Colors.green : Colors.black,),
-                        SizedBox(width: 10,),
-                        Text('Semestres'),
                       ],
                     ),
                   ),
@@ -215,42 +185,15 @@ class _MoreOptionsPageState extends State<MoreOptionsPage> {
                      // Navigate to LogoutScreen
                      Navigator.push(
                        context,
-                       MaterialPageRoute(builder: (context) => Groups()),
+                       MaterialPageRoute(builder: (context) => LoginSection()),
                      );
                    },
                    child: Row(
                      mainAxisAlignment: MainAxisAlignment.start,
                      children: [
-                       Icon(Icons.file_copy_outlined, color: widget.isDark? Colors.green : Colors.black,),
+                       Icon(Icons.login_outlined, color: widget.isDark? Colors.green : Colors.black,),
                        SizedBox(width: 10,),
-                       Text('Groups'),
-                     ],
-                   ),
-                 ),
-               ),
-               Container(
-                 height: MediaQuery.of(context).size.height/ 15,
-                 width: MediaQuery.of(context).size.width,
-                 child: TextButton(
-                   style: TextButton.styleFrom(
-                       foregroundColor: widget.isDark? Colors.white : Colors.black87,
-                       // //backgroundColor: Colors.white,
-                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
-                   onPressed: () {
-                     // Navigate to ProfilePage
-                     Navigator.push(
-                       context,
-                       MaterialPageRoute(
-                           builder: (context) =>Semestres()
-                       ),
-                     );
-                   },
-                   child: Row(
-                     mainAxisAlignment: MainAxisAlignment.start,
-                     children: [
-                       Icon(Icons.date_range, color: widget.isDark? Colors.green : Colors.black,),
-                       SizedBox(width: 10,),
-                       Text('Semestres'),
+                       Text('Logout'),
                      ],
                    ),
                  ),

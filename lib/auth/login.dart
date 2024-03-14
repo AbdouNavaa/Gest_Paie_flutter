@@ -102,7 +102,7 @@ class _LoginSectionState extends State<LoginSection>
     double _width = MediaQuery.of(context).size.width;
     double _height = MediaQuery.of(context).size.height;
     return Scaffold(
-      backgroundColor: Color(0xff292C31),
+      backgroundColor: Colors.white,
       body: ScrollConfiguration(
         behavior: MyBehavior(),
         child: SingleChildScrollView(
@@ -110,7 +110,10 @@ class _LoginSectionState extends State<LoginSection>
             height: _height,
             child: Column(
               children: [
-                Expanded(child: SizedBox()),
+                Container(
+                  height: 300,
+                  child: HeaderWidget(300, true, 'assets/supnum.png'),
+                ),
                 Expanded(
                   flex: 4,
                   child: Column(
@@ -122,7 +125,7 @@ class _LoginSectionState extends State<LoginSection>
                         style: TextStyle(
                           fontSize: 25,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xffA9DED8),
+                          color: Color(0xff000000),
                         ),
                       ),
                       SizedBox(),
@@ -168,7 +171,7 @@ class _LoginSectionState extends State<LoginSection>
                             text: TextSpan(
                               text: 'Mot de passe oublie?',
                               style: TextStyle(
-                                color: Color(0xffA9DED8),
+                                color: Colors.blue.shade200,
                               ),
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () {
@@ -202,7 +205,7 @@ class _LoginSectionState extends State<LoginSection>
                               colors: [
                                 Colors.transparent,
                                 Colors.transparent,
-                                Color(0xff09090A),
+                                Colors.blueAccent,
                               ],
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
@@ -284,10 +287,12 @@ class _LoginSectionState extends State<LoginSection>
                                       // builder: (context) => LandingScreen(role: role,name: nom,), // Passer le rôle ici
                                       HomeScreen(role: role,name: name,email: email1,)),);
                                 }
-                              }else{
+                              }
+                              else{
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(' Email ou Password Incorrectes')),
-                                );}
+                                  SnackBar(content: Text(errorMessage != null ? errorMessage : 'Email ou mot de passe incorrect')),
+                                );
+                              }
                               // }
                             },
                             child: Container(
@@ -295,13 +300,13 @@ class _LoginSectionState extends State<LoginSection>
                               width: _width * .2,
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
-                                color: Color(0xffA9DED8),
+                                color: Colors.blueAccent,
                                 shape: BoxShape.circle,
                               ),
                               child: Text(
                                 'SIGN-IN',
                                 style: TextStyle(
-                                  color: Colors.black,
+                                  color: Colors.white,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -329,29 +334,29 @@ class _LoginSectionState extends State<LoginSection>
       alignment: Alignment.center,
       padding: EdgeInsets.only(right: _width / 30),
       decoration: BoxDecoration(
-        color: Color(0xff212428),
+        color: Colors.white,border: Border.all(color: Colors.black12),
         borderRadius: BorderRadius.circular(15),
       ),
       child: TextField(
         controller: text,
         onChanged: onChange,
-        style: TextStyle(color: Colors.white.withOpacity(.9)),
+        style: TextStyle(color: Colors.black12.withOpacity(.9)),
         obscureText: isPassword,
         keyboardType: isEmail ? TextInputType.emailAddress : TextInputType.text,
         decoration: InputDecoration(
           prefixIcon: IconButton(
             icon: Icon(
               icon,
-              color: Colors.white.withOpacity(.7),
+              color: Colors.black12.withOpacity(.7),
             ),
             onPressed:onPress,
           ),
           border: InputBorder.none,
           hintMaxLines: 1,
-          hintText: hintText,
+          hintText: hintText,iconColor: Colors.black12,
           hintStyle: TextStyle(
             fontSize: 14,
-            color: Colors.white.withOpacity(.5),
+            color: Colors.black12.withOpacity(.5),
           ),
         ),
       ),
@@ -389,10 +394,12 @@ class _LoginSectionState extends State<LoginSection>
     else {
       // Authentification échouée
       isLoginFailed = true;
-      errorMessage = 'Email ou mot de passe incorrect.';
+      var parse = jsonDecode(response.body);
+      errorMessage = parse["message"];
       // Mettez à jour l'état de l'interface utilisateur
       setState(() {});
     }
+
   }
 }
 

@@ -139,9 +139,9 @@ class _PaieState extends State<Paie> {
               children: [
                    TextButton(onPressed: (){
                     Navigator.pop(context);
-                  }, child: Icon(Icons.arrow_back_ios,color: Colors.black,)),
-                SizedBox(width: 5,),
-                Text("Paiements pour Confirmer",style: TextStyle(fontSize: 25),)
+                  }, child: Icon(Icons.arrow_back_ios,color: Colors.black,size: 20,)),
+                // SizedBox(width: 5,),
+                Text("Paiements à confirmer",style: TextStyle(fontSize: 20),)
               ],
             ),
           ),
@@ -176,16 +176,17 @@ class _PaieState extends State<Paie> {
                       showBottomBorder: true,
                       // headingRowColor: MaterialStateColor.resolveWith((states) => Colors.lightBlueAccent.shade100), // Couleur de la ligne d'en-tête
                       headingRowHeight: 50,
-                      columnSpacing: 8,
+                      columnSpacing: 8,headingTextStyle: TextStyle(fontWeight: FontWeight.bold),
                       dataRowHeight: 50,
                       columns: [
-                        DataColumn(label: Text('De')),
-                        DataColumn(label: Text('Vers')),
-                        // DataColumn(label: Text('Prof')),
-                        // DataColumn(label: Text('Banq')),
-                        DataColumn(label: Text('Status')),
-                        DataColumn(label: Text('confirmation')),
-                        DataColumn(label: Text('Action')),
+                        DataColumn(label: Text('Du')),
+                        DataColumn(label: Text('Au')),
+                        DataColumn(label: Text('NBC')),
+                        DataColumn(label: Text('NBH')),
+                        DataColumn(label: Text('MT')),
+                        // DataColumn(label: Text('Statut')),
+                        DataColumn(label: Text('Confirmation')),
+                        // DataColumn(label: Text('Action')),
                       ],
                       rows: [
                         for (var index = 0; index < (widget.paies?.length ?? 0); index++)
@@ -198,12 +199,21 @@ class _PaieState extends State<Paie> {
                                 DataCell(Text('${DateFormat('dd/MM ').format(DateTime.parse(widget.paies![index]["toDate"].toString()).toLocal())}',style: TextStyle(
                                   color: Colors.black,
                                 ),)),
-                                DataCell(Text('${widget.paies![index]["status"].toString()}',style: TextStyle(
+                                DataCell(Text('${widget.paies![index]["nbc"]}',style: TextStyle(
                                   color: Colors.black,
                                 ),)),
-                                DataCell(Text('${widget.paies![index]["confirmation"].toString()}',style: TextStyle(
+                                DataCell(Text('${widget.paies![index]["nbh"].toString()}',style: TextStyle(
                                   color: Colors.black,
                                 ),)),
+                                DataCell(Text('${widget.paies![index]["totalMontant"].toString()}',style: TextStyle(
+                                  color: Colors.black,
+                                ),)),
+                                // DataCell(Text('${widget.paies![index]["status"].toString()}',style: TextStyle(
+                                //   color: Colors.black,
+                                // ),)),
+                                // DataCell(Text('${widget.paies![index]["confirmation"].toString()}',style: TextStyle(
+                                //   color: Colors.black,
+                                // ),)),
                                 DataCell(
                                   Row(
                                     children: [
@@ -221,22 +231,33 @@ class _PaieState extends State<Paie> {
                                                     children: [
                                                       Text("Refusion"),
                                                       SizedBox(width: 90,),
-                                                      Icon(Icons.dangerous_outlined, color: Colors.redAccent.shade200,)
+                                                      Icon(Icons.thumb_down_off_alt_outlined, color: Colors.redAccent.shade200,)
                                                     ],
                                                   ),
-                                                  content: Text(
-                                                      "Êtes-vous sûr de vouloir refuser cet paiement ?"),
+                                                  content: Container(height: 200,
+                                                    child: Column(
+                                                      children: [
+                                                        Container(height: 40,
+                                                          child: Text(
+                                                              "Êtes-vous sûr de vouloir refuser ce paiement ?"),
+                                                        ),
+                                                        TextFormField(maxLines: 5,decoration: InputDecoration(border: OutlineInputBorder(borderSide: BorderSide(color: Colors.red.shade100))),
+                                                          initialValue: 'Message de Refusion',)
+                                                      ],
+                                                    ),
+                                                  ),
                                                   actions: <Widget>[
                                                     TextButton(
-                                                      child: Text("ANNULER"),
+                                                      child: Text("Annuler",style: TextStyle(color: Colors.red)),
+                                                      // child: Text("Non"),
                                                       onPressed: () {
                                                         Navigator.of(context).pop();
                                                       },
                                                     ),
                                                     TextButton(
                                                       child: Text(
-                                                        "OK",
-                                                        // style: TextStyle(color: Colors.red),
+                                                        "Envoyer",
+                                                        style: TextStyle(color: Colors.green),
                                                       ),
                                                       onPressed: () {
                                                         Navigator.of(context).pop();
@@ -254,12 +275,12 @@ class _PaieState extends State<Paie> {
                                                                   title: Row(
                                                                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                                                     children: [
-                                                                      Text("Alert de Succes"),
+                                                                      Text("Alerte de succès"),
                                                                       Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
                                                                     ],
                                                                   ),
                                                                   content: Text(
-                                                                      "Le paiement est Refuser"),
+                                                                      "Le paiement est refusé"),
 
                                                                   actions: [
                                                                     TextButton(
@@ -281,7 +302,7 @@ class _PaieState extends State<Paie> {
                                               },
                                             );
                                           }, // Disable button functionality
-                                          child: Icon(Icons.unpublished_outlined, color: Colors.black,),
+                                          child: Icon(Icons.thumb_down_alt_outlined, color: Colors.red,),
 
                                         ),
                                       ),
@@ -297,24 +318,25 @@ class _PaieState extends State<Paie> {
                                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
                                                   title: Row(
                                                     children: [
-                                                      Text("Confimation"),
+                                                      Text("Confirmation"),
                                                      SizedBox(width: 80,),
-                                                      Icon(Icons.done_all_sharp, color: Colors.lightGreen,)
+                                                      Icon(Icons.thumb_up_alt_outlined, color: Colors.lightGreen,)
                                                     ],
                                                   ),
                                                   content: Text(
-                                                      "Êtes-vous sûr de vouloir confirmer cet paiement ?"),
+                                                      "Êtes-vous sûr de vouloir confirmer ce paiement ?"),
                                                   actions: <Widget>[
                                                     TextButton(
-                                                      child: Text("ANNULER"),
+                                                      child: Text("Annuler",style: TextStyle(color: Colors.red)),
+                                                      // child: Text("Non"),
                                                       onPressed: () {
                                                         Navigator.of(context).pop();
                                                       },
                                                     ),
                                                     TextButton(
                                                       child: Text(
-                                                        "OK",
-                                                        // style: TextStyle(color: Colors.red),
+                                                        "Confirmer",
+                                                        style: TextStyle(color: Colors.green),
                                                       ),
                                                       onPressed: () {
                                                         Navigator.of(context).pop();
@@ -334,12 +356,12 @@ class _PaieState extends State<Paie> {
                                                                   title: Row(
                                                                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                                                     children: [
-                                                                      Text("Alert de Succes"),
+                                                                      Text("Alerte de succès"),
                                                                       Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
                                                                     ],
                                                                   ),
                                                                   content: Text(
-                                                                      "Le paiement est Confirme"),
+                                                                      "Le paiement est confirmé"),
 
                                                                   actions: [
                                                                     TextButton(
@@ -361,7 +383,7 @@ class _PaieState extends State<Paie> {
                                               },
                                             );
                                           }, // Disable button functionality
-                                          child: Icon(Icons.done_all_sharp, color: Colors.black,),
+                                          child: Icon(Icons.thumb_up_alt_outlined, color: Colors.lightGreen,),
 
                                         ),
                                       ),

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -127,14 +128,14 @@ class _PaieState extends State<ProfPaies> {
   //     // If date filters are applied
   //     totalType = widget.courses.where((course) {
   //       DateTime courseDate = DateTime.parse(course['date'].toString());
-  //       return (course['isSigned'] != "pas encore" && course['isPaid'] == "pas encore") && // Filter courses with signs
+  //       return (course['isSigned'] != "en attente" && course['isPaid'] == "en attente") && // Filter courses with signs
   //           (courseDate.isAtSameMomentAs(widget.dateDeb!.toLocal()) || (courseDate.isAfter(widget.dateDeb!.toLocal()) &&
   //               courseDate.isBefore(widget.dateFin!.toLocal().add(Duration(days: 1)))));
   //     }).map((course) => double.parse(course['TH'].toString())).fold(0, (prev, amount) => prev + amount);
   //
   //     somme = widget.courses.where((course) {
   //       DateTime courseDate = DateTime.parse(course['date'].toString());
-  //       return ( course['isSigned'] != "pas encore"&& course['isPaid'] == "pas encore") && // Filter courses with signs
+  //       return ( course['isSigned'] != "en attente"&& course['isPaid'] == "en attente") && // Filter courses with signs
   //           (courseDate.isAtSameMomentAs(widget.dateDeb!.toLocal()) ||
   //               (courseDate.isAfter(widget.dateDeb!.toLocal()) &&
   //                   courseDate.isBefore(
@@ -149,9 +150,9 @@ class _PaieState extends State<ProfPaies> {
   //     int startIndex = (currentPage - 1) * coursesPerPage;
   //     int endIndex = startIndex + coursesPerPage - 1;
   //     totalType = widget.courses.skip(startIndex).take(coursesPerPage).where((course) =>
-  //     (course['isSigned'] != 'pas encore' && course['isPaid'] == "pas encore")).map((course) => double.parse(course['TH'].toString())).fold(0, (prev, amount) => prev + amount);
+  //     (course['isSigned'] != 'en attente' && course['isPaid'] == "en attente")).map((course) => double.parse(course['TH'].toString())).fold(0, (prev, amount) => prev + amount);
   //     somme = widget.courses.skip(startIndex).take(coursesPerPage).where((course) =>
-  //     (course['isSigned'] != 'pas encore'&& course['isPaid'] == "pas encore" )).map((course) => double.parse(course['somme'].toString())).fold(0, (prev, amount) => prev + amount);
+  //     (course['isSigned'] != 'en attente'&& course['isPaid'] == "en attente" )).map((course) => double.parse(course['somme'].toString())).fold(0, (prev, amount) => prev + amount);
   //   }
   // }
 
@@ -191,9 +192,9 @@ class _PaieState extends State<ProfPaies> {
               children: [
                    TextButton(onPressed: (){
                     Navigator.pop(context);
-                  }, child: Icon(Icons.arrow_back_ios,color: Colors.black,)),
-                SizedBox(width: 40,),
-                Text("Etat de Paiement",style: TextStyle(fontSize: 25),)
+                  }, child: Icon(Icons.arrow_back_ios,color: Colors.black,size: 20,)),
+                // SizedBox(width: 40,),
+                Text("État de Paiement",style: TextStyle(fontSize: 20),)
               ],
             ),
           ),
@@ -229,15 +230,16 @@ class _PaieState extends State<ProfPaies> {
                       showCheckboxColumn: true,
                       showBottomBorder: true,
                       headingRowHeight: 50,
-                      columnSpacing: 8,
+                      columnSpacing: 8,headingTextStyle: TextStyle(fontWeight: FontWeight.bold),
                       dataRowHeight: 50,
                       columns: [
-                        DataColumn(label: Text('De')),
-                        DataColumn(label: Text('Vers')),
-                        // DataColumn(label: Text('Prof')),
-                        // DataColumn(label: Text('Banq')),
-                        DataColumn(label: Text('Status')),
-                        DataColumn(label: Text('confirmation')),
+                        DataColumn(label: Text('Du')),
+                        DataColumn(label: Text('Au')),
+                        DataColumn(label: Text('NBC')),
+                        DataColumn(label: Text('NBH')),
+                        DataColumn(label: Text('MT')),
+                        DataColumn(label: Text('Statut')),
+                        // DataColumn(label: Text('confirmation')),
                         // DataColumn(label: Text('Action')),
                       ],
                       rows: [
@@ -251,12 +253,23 @@ class _PaieState extends State<ProfPaies> {
                                 DataCell(Text('${DateFormat('dd/MM ').format(DateTime.parse(widget.paies![index]["toDate"].toString()).toLocal())}',style: TextStyle(
                                   color: Colors.black,
                                 ),)),
-                                DataCell(Text('${widget.paies![index]["status"].toString()}',style: TextStyle(
+                                DataCell(Center(
+                                  child: Text('${widget.paies![index]["nbc"]}',style: TextStyle(
+                                    color: Colors.black,
+                                  ),),
+                                )),
+                                DataCell(Text('${widget.paies![index]["nbh"].toString()}',style: TextStyle(
                                   color: Colors.black,
                                 ),)),
-                                DataCell(Text('${widget.paies![index]["confirmation"].toString()}',style: TextStyle(
+                                DataCell(Text('${widget.paies![index]["totalMontant"].toString()}',style: TextStyle(
                                   color: Colors.black,
                                 ),)),
+                                DataCell(Text('${widget.paies![index]["status"].toString().capitalizeFirst}',style: TextStyle(
+                                  color: Colors.black,
+                                ),)),
+                                // DataCell(Text('${widget.paies![index]["confirmation"].toString()}',style: TextStyle(
+                                //   color: Colors.black,
+                                // ),)),
 
 
                               ]),
@@ -303,7 +316,7 @@ class _PaieState extends State<ProfPaies> {
           //             // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
           //             columns: [
           //               DataColumn(label: Text('Enseignant')),
-          //               DataColumn(label: Text('Volume Horaire')),
+          //               DataColumn(label: Text('Volume horaire')),
           //               DataColumn(label: Text('Montant')),
           //             ],
           //             rows: [

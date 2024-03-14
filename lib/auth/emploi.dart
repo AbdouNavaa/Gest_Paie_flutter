@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:gestion_payements/auth/users.dart';
 import 'package:gestion_payements/element.dart';
 import 'package:gestion_payements/filliere.dart';
-import 'package:gestion_payements/group.dart';
+import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -11,7 +11,6 @@ import 'dart:convert';
 
 import '../matieres.dart';
 import '../professeures.dart';
-import '../semestre.dart';
 
 
 
@@ -113,26 +112,6 @@ class _EmploiState extends State<Emploi> {
     }
   }
 
-  List<Group> filterItemsBySem(Semestre? sem, List<Group> allItems) {
-    if (sem == null) {
-      return allItems;
-    } else {
-      return allItems.where((emp) => emp.semestre!.id == sem!.id).toList();
-    }
-  }
-
-// Méthode de mise à jour du groupe sélectionné
-  void updateSelectedGroup(Group? newGroup) {
-    setState(() {
-      selectedGroup = newGroup;
-    });
-  }
-  void updateSelectedFil(filliere? newGroup) {
-    setState(() {
-      selectedFil = newGroup;
-      selectedGroup = null;
-    });
-  }
 
 
   List<emploi> filterItemsByGroupAndSemester(List<emploi> items, Elem? selectedEle) {
@@ -144,7 +123,6 @@ class _EmploiState extends State<Emploi> {
   }
 
 
-  Group? selectedGroup;
   filliere? selectedFil;
   Elem? selectedELem;
   List<int> semestersList = [];
@@ -248,7 +226,7 @@ int? selectedSem ;
         builder: (BuildContext context){
           // final typeWithNonZeroNbh = findTypeWithNonZeroNbh(emp.types);
           return Container(
-            height: 680,
+            height: 550,
             padding: const EdgeInsets.all(25.0),
             child: SingleChildScrollView(
               child: Column(
@@ -256,7 +234,15 @@ int? selectedSem ;
                 crossAxisAlignment: CrossAxisAlignment.center,
                 // mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Emploi Infos',style: TextStyle(fontSize: 30),),
+                  Row(
+                    children: [
+                      Text('Emploi Infos',style: TextStyle(fontSize: 30),),
+                      SizedBox(width: 105),
+                      IconButton(onPressed: (){
+                        Navigator.pop(context);
+                      }, icon:Icon( Icons.close,size: 30,))
+                    ],
+                  ),
                   SizedBox(height: 50),
                   Row(
                     children: [
@@ -269,7 +255,7 @@ int? selectedSem ;
                         ),),
 
                       SizedBox(width: 10,),
-                      Text(emp.enseignat!,
+                      Text(emp.enseignat!.capitalize!,
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w400,
@@ -291,7 +277,7 @@ int? selectedSem ;
                         ),),
 
                       SizedBox(width: 10,),
-                      Text('${emp.mat}',
+                      Text('${emp.mat.capitalize}',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w400,
@@ -349,74 +335,28 @@ int? selectedSem ;
                   SizedBox(height: 25),
                   Row(
                     children: [
-                      Text('Jour:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
+                      Row(
+                        children: [
+                          Text('Jour:',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.italic,
+                              // color: Colors.lightBlue
+                            ),),
 
-                      SizedBox(width: 10,),
-                      Text(emp.jour!,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
+                          SizedBox(width: 10,),
+                          Text(emp.jour!.capitalize!,
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.italic,
+                              // color: Colors.lightBlue
+                            ),),
 
-                    ],
-                  ),
-                  SizedBox(height: 25),
-                  Row(
-                    children: [
-                      Text('Deb:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                      SizedBox(width: 10,),
-                      Text(emp.startTime!,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                    ],
-                  ),
-                  SizedBox(height: 25),
-                  Row(
-                    children: [
-                      Text('Fin:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                      SizedBox(width: 10,),
-                      Text(emp.finishTime!,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                    ],
-                  ),
-                  // SizedBox(height: 15),
-                  // if (typeWithNonZeroNbh != null)
-                  Column(
-                    children: [
-                      SizedBox(height: 25),
+                        ],
+                      ),
+                      SizedBox(width: 25),
                       Row(
                         children: [
                           Text('Type:',
@@ -438,27 +378,77 @@ int? selectedSem ;
                           ),
                         ],
                       ),
-                      SizedBox(height: 25),
+                    ],
+                  ),
+                  SizedBox(height: 25),
+                 // SizedBox(height: 15),
+                  // if (typeWithNonZeroNbh != null)
+                  Row(
+                    children: [
                       Row(
                         children: [
-                          Text('Nb Heures:',
+                          Text('Deb:',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w400,
                               fontStyle: FontStyle.italic,
                               // color: Colors.lightBlue
-                            ),
-                          ),
+                            ),),
+
                           SizedBox(width: 10,),
-                          Text('${emp.nbh}',
+                          Text(emp.startTime!,
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w400,
                               fontStyle: FontStyle.italic,
                               // color: Colors.lightBlue
-                            ),
-                          ),
+                            ),),
+
                         ],
+                      ),
+                      SizedBox(width: 25),
+                      Row(
+                        children: [
+                          Text('Fin:',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.italic,
+                              // color: Colors.lightBlue
+                            ),),
+
+                          SizedBox(width: 10,),
+                          Text(emp.finishTime!,
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.italic,
+                              // color: Colors.lightBlue
+                            ),),
+
+                        ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 25),
+                  Row(
+                    children: [
+                      Text('Nb Heures:',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                          // color: Colors.lightBlue
+                        ),
+                      ),
+                      SizedBox(width: 10,),
+                      Text('${emp.nbh}',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                          // color: Colors.lightBlue
+                        ),
                       ),
                     ],
                   ),
@@ -467,7 +457,7 @@ int? selectedSem ;
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      ElevatedButton(
+                      TextButton(
                         onPressed: () {
                           _selectedNum = emp.dayNumero;
                           _date.text = emp.startTime!;
@@ -491,17 +481,18 @@ int? selectedSem ;
                         },// Disable button functionality
 
                         child: Text('Modifier'),
-                        style: ElevatedButton.styleFrom(
+                        style: TextButton.styleFrom(
                           padding: EdgeInsets.only(left: 20,right: 20),
                           foregroundColor: Colors.lightGreen,
-                          backgroundColor: Colors.white,
-                          // side: BorderSide(color: Colors.black,),
-                          elevation: 3,
-                          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                            backgroundColor: Color(0xfffff1),
+                            side: BorderSide(color: Colors.black12,),
+                            // side: BorderSide(color: Colors.black,),
+                            elevation: 3,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))
                         ),
 
                       ),
-                      ElevatedButton(
+                      TextButton(
                         onPressed: () {
                           showDialog(
                             context: context,
@@ -542,13 +533,14 @@ int? selectedSem ;
                         }, // Disable button functionality
 
                         child: Text('Supprimer'),
-                        style: ElevatedButton.styleFrom(
+                        style: TextButton.styleFrom(
                           padding: EdgeInsets.only(left: 20,right: 20),
                           foregroundColor: Colors.redAccent,
-                          backgroundColor: Colors.white,
-                          // side: BorderSide(color: Colors.black,),
-                          elevation: 3,
-                          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                            backgroundColor: Color(0xfffff1),
+                            side: BorderSide(color: Colors.black12,),
+                            // side: BorderSide(color: Colors.black,),
+                            elevation: 3,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))
                         ),
 
                       ),
@@ -595,9 +587,9 @@ int? selectedSem ;
                
                      TextButton(onPressed: (){
                     Navigator.pop(context);
-                  }, child: Icon(Icons.arrow_back_ios,color: Colors.black,)),
-                  SizedBox(width: 50,),
-                  Text("Liste d\'Emplois",style: TextStyle(fontSize: 25),)
+                  }, child: Icon(Icons.arrow_back_ios,color: Colors.black,size: 20,)),
+                  // SizedBox(width: 50,),
+                  Text("Liste des emplois",style: TextStyle(fontSize: 20),)
                 ],
               ),
             ),
@@ -627,11 +619,13 @@ int? selectedSem ;
                     // Par exemple, filtrez les emploiesseurs dont le name ou le préname contient la valeur saisie
                     filteredItems = Emplois.where((emploi) =>
                     getProfesseurIdFromName(emploi.professor).toLowerCase().contains(value.toLowerCase()) ||
+                    getFilIdFromName(emploi.fil!).toLowerCase().contains(value.toLowerCase()) ||
                     // getEls(emploi.element)!.ProfTP!.toLowerCase().contains(value.toLowerCase()) ||
                     // getEls(emploi.element)!.ProfTP!.toLowerCase().contains(value.toLowerCase()) ||
                     getEls(emploi.element)!.nameMat!.toLowerCase().contains(value.toLowerCase()) ||
                     (days[emploi.dayNumero]).toLowerCase().contains(value.toLowerCase()) ||
-                        (emploi.startTime!).toLowerCase().contains(value.toLowerCase())
+                        (emploi.startTime!).toLowerCase().contains(value.toLowerCase()) ||
+                        ("S${emploi.SemNum!}").toLowerCase().contains(value.toLowerCase())
                     ).toList();
                   });
                 },
@@ -714,7 +708,6 @@ int? selectedSem ;
                                       }).toList(),
                                       onChanged: (value)  {
 
-                                        updateSelectedFil(value);
                                         setState(() {
                                           selectedFil = value;
                                           // elList1 = filterItemsByFil(selectedFil, elLis!);
@@ -966,13 +959,12 @@ int? selectedSem ;
       dayRows.add(
         DataRow(
           cells: [
-            DataCell(Container(width: 60,child: Text('N/A', style: TextStyle(color: Colors.black)))),
-            DataCell(Container(width: 50,child: Text('N/A', style: TextStyle(color: Colors.black)))),
-            DataCell(Container(width: 50,child: Text('N/A', style: TextStyle(color: Colors.black)))),
-            DataCell(Container(width: 50,child: Text('N/A', style: TextStyle(color: Colors.black)))),
-            DataCell(Container(width: 35,child: Text('N/A', style: TextStyle(color: Colors.black)))),
-            DataCell(Container(width: 35,child: Text('N/A', style: TextStyle(color: Colors.black)))),
-          ],
+            DataCell(Container(width: 40,child: Text('', style: TextStyle(color: Colors.black)))),
+            DataCell(Container(width: 40,child: Text('', style: TextStyle(color: Colors.black)))),
+            DataCell(Container(width: 40,child: Text('', style: TextStyle(color: Colors.black)))),
+            DataCell(Container(width: 40,child: Text('', style: TextStyle(color: Colors.black)))),
+            DataCell(Container(width: 40,child: Text('', style: TextStyle(color: Colors.black)))),
+            DataCell(Container(width: 40,child: Text('', style: TextStyle(color: Colors.black)))),          ],
         ),
       );
     }
@@ -984,9 +976,11 @@ int? selectedSem ;
           DataRow(
             cells: [
               DataCell(Container(width: 35,child: Text(emp.startTime!, style: TextStyle(color: Colors.black)))),
-              DataCell(Text(getProfesseurIdFromName(emp.professor!), style: TextStyle(color: Colors.black))),
+              DataCell(Text(getProfesseurIdFromName(emp.professor!.toString()).capitalize!, style: TextStyle(color: Colors.black))),
 
-              DataCell(Text('${emp.mat}')),
+              DataCell(Text('${emp.mat.capitalize}'),
+                onTap: () =>_showCourseDetails(context, emp),
+              ),
               DataCell(Container(width: 30, child: Text(getFilIdFromName(emp.fil!).toUpperCase()))),
               DataCell(Container(width: 25, child: Text('S${emp.SemNum!}'))),
               DataCell(
@@ -1010,14 +1004,14 @@ int? selectedSem ;
 
     // Construisez le DataTable pour le jour donné
     return Container(
-      width: MediaQuery.of(context).size.width,
+      width: MediaQuery.of(context).size.width + 100,
       child: DataTable(
         // showCheckboxColumn: true,
         // showBottomBorder: true,
         headingRowHeight: 50,
         columnSpacing: 15,
         dataRowHeight: 60,
-        headingRowColor: MaterialStateColor.resolveWith((states) => Colors.lightBlueAccent.shade100), // Couleur de la ligne d'en-tête
+        headingRowColor: MaterialStateColor.resolveWith((states) => Colors.blueGrey.shade100), // Couleur de la ligne d'en-tête
         horizontalMargin: 10,
 
         headingTextStyle: TextStyle(
@@ -1025,9 +1019,13 @@ int? selectedSem ;
           color: Colors.black,
         ),
         columns: [
-          DataColumn(label: Text(day,style: TextStyle(color: Colors.black,fontSize: 20,fontWeight: FontWeight.w500),),),
           DataColumn(label: Text('')),
           DataColumn(label: Text('')),
+          DataColumn(label: Container(width: 80,
+            child: Text(day,
+              style: TextStyle(color: Colors.black,fontSize: 20,fontWeight: FontWeight.w500),
+            ),
+          ),),
           DataColumn(label: Text('')),
           DataColumn(label: Text('')),
           DataColumn(label: Text('')),
@@ -1113,7 +1111,6 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
   TextEditingController _date = TextEditingController();
   int _selectedNum = 1;
 
-  Group? selectedGroup;
   filliere? selectedFil;
   int? selectedSem;
   Elem? selectedElem;
@@ -1152,15 +1149,11 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
   }
 
   List<Professeur> professeurList = [];
-  List<Group> grpList = [];
-  List<Group> grpList1 = [];
   List<Elem> elList = [];
   List<Elem> elList2 = [];
   List<Elem> elList1 = [];
   List<Matiere> matiereList = [];
   List<filliere> filList = [];
-  List<Semestre> SemList = [];
-  List<Semestre> SemList1 = [];
   List<int> semestersList = [];
 
 
@@ -1195,13 +1188,6 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
       setState(() {
         elList = data; // Assigner la liste renvoyée par emploiesseur à items
       });
-    }).catchError((error) {
-      print('Erreur: $error');
-    });
-    fetchGroup().then((data) {
-      setState(() {
-        grpList = data; // Assigner la liste renvoyée par emploiesseur à items
-      });
 
       fetchMatiere().then((data) {
         setState(() {
@@ -1215,6 +1201,7 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
       print('Erreur: $error');
     });
 
+
     fetchProfs().then((data) {
       setState(() {
         professeurList = data; // Assigner la liste renvoyée par emploiesseur à items
@@ -1226,17 +1213,6 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
     fetchfilliere().then((data) {
       setState(() {
         filList = data; // Assigner la liste renvoyée par emploiesseur à items
-      });
-
-
-
-    }).catchError((error) {
-      print('Erreur: $error');
-    });
-    fetchSemestre().then((data) {
-      setState(() {
-        SemList = data; // Assigner la liste renvoyée par emploiesseur à items
-        print("Sems${SemList}");
       });
 
 
@@ -1263,19 +1239,6 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
     }
   }
 
-  Future<void> updateElementList(String semestreId) async {
-    // try {
-    // Utilisez l'ID du semestre pour récupérer les éléments correspondants
-    List<Elem> elements = await fetchElementsBySemestre(semestreId);
-
-    setState(() {
-      elList = elements;
-      selectedElem = null; // Réinitialiser la sélection de l'élément
-    });
-    // } catch (error) {
-    //   print('Erreur lors de la récupération des éléments: $error');
-    // }
-  }
 
   List<Elem> filterItemsBySemestre(int? ele, List<Elem> allItems) {
     if (ele == 0) {
@@ -1681,12 +1644,12 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
                   title: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Text("Alert de Succes"),
+                      Text("Alerte de succès"),
                       Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
                     ],
                   ),
                   content: Text(
-                      "L\'emploi est ajouter avec succes"),
+                      "L\'emploi est ajouté avec succès"),
 
                   actions: [
                     TextButton(
@@ -1717,8 +1680,7 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
                      Icon(Icons.wrong_location_outlined,color: Colors.redAccent,)
                    ],
                  ),
-                 content: Text(
-                     "L\'emploi n\'est pas ajouter"),
+                 content: Text(jsonDecode(response.body)["message"]),
                );});
 
        });
@@ -1826,7 +1788,6 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
   bool showTime = false;
 
   Elem? selectedElem;
-  Group? selectedGroup;
   Matiere? selectedMat;
   Professeur? selectedProfesseur;
   List<Professeur> professeurs = [];
@@ -1926,19 +1887,6 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
     }
   }
 
-  Future<void> updateElementList(String semestreId) async {
-    // try {
-    // Utilisez l'ID du semestre pour récupérer les éléments correspondants
-    List<Elem> elements = await fetchElementsBySemestre(semestreId);
-
-    setState(() {
-      elList = elements;
-      selectedElem = null; // Réinitialiser la sélection de l'élément
-    });
-    // } catch (error) {
-    //   print('Erreur lors de la récupération des éléments: $error');
-    // }
-  }
 
   List<Elem> filterItemsBySemestre(int? ele, List<Elem> allItems) {
     if (ele == 0) {
@@ -2272,14 +2220,14 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
                 SizedBox(height:20),
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.of(context).pop();
-
-
+                    setState(() {
+                      Navigator.of(context).pop();
+                    });
+                       // fetchemploi();
 
                     String type = showType ? selectedTypeName : widget.TN;
                     num nbh = showNum ? selectedNbhValue : widget.TH;
                     int day = showdays ? _selectedNum : widget.day;
-                    String group = showgroup ? selectedGroup!.id : widget.GId;
                     String elem = showElem ? selectedElem!.id : widget.EId;
                     String time = showTime ? _date.text:widget.start;
 
@@ -2287,12 +2235,39 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
                         widget.empId,
                         type,
                         nbh,
-                        time,day,group,elem
+                        time,day,
+                        elem
                     );
 
                     setState(() {
-                      Navigator.pop(context);
+                      Navigator.of(context).pop();
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              surfaceTintColor: Color(0xB0AFAFA3),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                              title: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Text("Alert de Succes"),
+                                  Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
+                                ],
+                              ),
+                              content: Text(
+                                  "L\'emploi est modifier avec succes"),
+                              actions: [
+                                TextButton(
+                                  child: Text("Ok"),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+
+                              ],
+                            );});
                     });
+
 
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Le Type est mis à jour avec succès.')),
@@ -2321,7 +2296,7 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
   }
 
 
-  Future<void> UpdatEmp (id,String TN,num TH,String date,int days,String GpId,String ElemId) async {
+  Future<void> UpdatEmp (id,String TN,num TH,String date,int days,String ElemId) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token")!;
     final url = 'http://192.168.43.73:5000/emploi/'  + '/$id';
@@ -2335,7 +2310,6 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
       "nbh": TH,
       "startTime": date,
       "dayNumero": days,
-      "group": GpId,
       // "professeur": ProfId,
       "element": ElemId
     };
@@ -2351,7 +2325,8 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
         body: json.encode(body),
       );
 
-      if (response.statusCode == 201) {
+      print("Abd${response.statusCode}");
+      if (response.statusCode == 200) {
         // Course creation was successful
         print("Emploi Updated successfully!");
         final responseData = json.decode(response.body);
@@ -2359,12 +2334,42 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
         // You can handle the response data as needed
         setState(() {
           Navigator.pop(context);
-
         });
 
 
-      } else {
+
+      }
+      else {
         // Course creation failed
+        setState(() {
+          showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  surfaceTintColor: Color(0xB0AFAFA3),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Text("Alert d\'erreur"),
+                      Icon(Icons.wrong_location_outlined,color: Colors.redAccent,)
+                    ],
+                  ),
+                  content: Text(jsonDecode(response.body)["message"]),
+                  actions: [
+                    TextButton(
+                      child: Text("Retourne"),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+
+                  ],
+                );});
+
+        });
+        // var parse = jsonDecode(response.body);
+        // errorMessage = parse["message"];
         print("Failed to update. Status code: ${response.statusCode}");
         print("Error Message: ${response.body}");
       }

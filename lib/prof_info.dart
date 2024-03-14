@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:gestion_payements/matieres.dart';
 import 'dart:convert';
@@ -106,9 +107,25 @@ class _ProfesseurDetailsScreenState extends State<ProfesseurDetailsScreen> {
                   //   backgroundImage: NetworkImage(
                   //       'https://th.bing.com/th/id/R.8b167af653c2399dd93b952a48740620?rik=%2fIwzk0n3LnH7dA&pid=ImgRaw&r=0'),
                   // ),
+
+                  // SizedBox(height: 40,),
+                  Container(
+                    height: 50,
+                    child: Row(
+                      children: [
+                        TextButton(onPressed: (){
+                          Navigator.pop(context);
+                        }, child: Icon(Icons.arrow_back_ios,color: Colors.black,size: 20,)),
+                        // SizedBox(width: 3,),
+                        Text('Page de Profile',style: TextStyle(fontSize: 20),),
+                      ],
+                    ),
+                  ),
+
+                  // SizedBox(height: 10,),
                   SizedBox(child: Container(
                     child: Row(
-                     mainAxisAlignment: MainAxisAlignment.center,
+                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text("Mes Iformations", style: TextStyle(fontStyle: FontStyle.italic, fontWeight: FontWeight.bold ,color: Colors.black,
                           fontSize: 20,),),
@@ -261,70 +278,135 @@ class _ProfesseurDetailsScreenState extends State<ProfesseurDetailsScreen> {
                                     );
                                   });
                             }, // Disable button functionality
-
-                            icon: Icon(Icons.mode_edit_outline_outlined))
+                            icon: Icon(Icons.edit,color: Colors.green,))
                       ],
                     ),
                     // color: Colors.blue,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      // color: Colors.white,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black12,
+                          color: Colors.white,
                           blurRadius: 5,
                         ),
                       ],
                     ),
 
-                    width: 370, height: 50,)
-                  ),
+                    margin: EdgeInsets.only(left: 25,right: 26),
 
-                  SizedBox(
-                    height: 12.0,
-                  ),
-                  Container(     width: MediaQuery.of(context).size.width,
-                    decoration: BoxDecoration(
-                      color: Colors.white10,
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(20.0),
+                    width: MediaQuery.of(context).size.width - 40, height: 50,)),
+
+
+                  // SizedBox(
+                  //   height: 12.0,
+                  // ),
+                  Card(
+                    elevation: 3,
+                    child: Container(
+                      width: MediaQuery.of(context).size.width - 40,
+                      height: 350,
+                      decoration: BoxDecoration(
+                        color: Colors.white60,shape: BoxShape.rectangle,
                       ),
-                    ),
-                    // margin: EdgeInsets.only(left: 5, right: 10),
-                    // padding: EdgeInsets.only(left: 40, right: 38),
-                    child: DataTable(
-                      showCheckboxColumn: true,
-                      showBottomBorder: true,
-                      headingRowHeight: 50,
-                      columnSpacing: 55,
-                      dataRowHeight: 50,
-                      columns: [
-                        DataColumn(label: Text('Property')),
-                        DataColumn(label: Text('Value')),
-                      ],
-                      rows: [
-                        DataRow(
-                            cells: [
-                              DataCell(Text('Name')),
-                              DataCell(Text('${widget.nom} ')),
-                            ]),
-                        DataRow(
-                            cells: [
-                              DataCell(Text('Email')),
-                              DataCell(Text('${widget.mail} ')),
-                            ]),
-                        DataRow(cells: [
-                          DataCell(Text('Mobile')),
-                          DataCell(Text('${professeurData?['info']['mobile']}')),
-                        ]),
-                        DataRow(cells: [
-                          DataCell(Text('Compte')),
-                          DataCell(Text('${professeurData?['info']['accountNumero']}')),
-                        ]),
-                        DataRow(cells: [
-                          DataCell(Text('Banque')),
-                          DataCell(Text('${professeurData?['info']['banque']}')),
-                        ]),
-                      ],
+
+                      child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          SizedBox(height: 10,),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            // mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(width: 10,),
+                              Icon(Icons.person_outline_outlined),
+
+                              SizedBox(width: 30,),
+                              Column(
+                             crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Nom',style: TextStyle(fontWeight: FontWeight.w500,fontSize: 17,fontStyle: FontStyle.italic),),
+                                  Text('${widget.nom.capitalizeFirst} ${professeurData?['prenom'].toString().capitalizeFirst}',style: TextStyle(fontSize: 17,fontStyle: FontStyle.italic),),
+                                ],
+                              )
+                            ],
+                          ),
+
+                          // Divider(color: Colors.black38,),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            // mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(width: 10,),
+                              Icon(Icons.email_outlined),
+
+                              SizedBox(width: 30,),
+                              Column(
+                             crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('E-mail',style: TextStyle(fontWeight: FontWeight.w500,fontSize: 17,fontStyle: FontStyle.italic),),
+                                  Text('${widget.mail}',style: TextStyle(fontSize: 17,fontStyle: FontStyle.italic),),
+                                ],
+                              )
+                            ],
+                          ),
+                          // Divider(color: Colors.black38,),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            // crossAxisAlignment: CrossAxisAlignment.start,
+                            // mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(width: 10,),
+                              Icon(Icons.call_outlined),
+
+                              SizedBox(width: 30,),
+                              Column(
+                             crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Mobile',style: TextStyle(fontWeight: FontWeight.w500,fontSize: 17,fontStyle: FontStyle.italic),),
+                                  Text('${professeurData?['info']['mobile']}',style: TextStyle(fontSize: 17,fontStyle: FontStyle.italic),),
+                                ],
+                              )
+                            ],
+                          ),
+                          // Divider(color: Colors.black38,),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            // mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(width: 10,),
+                              Icon(Icons.account_balance_outlined),
+
+                              SizedBox(width: 30,),
+                              Column(
+                             crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Banque',style: TextStyle(fontWeight: FontWeight.w500,fontSize: 17,fontStyle: FontStyle.italic),),
+                                  Text('${professeurData?['info']['banque']}',style: TextStyle(fontSize: 17,fontStyle: FontStyle.italic),),
+                                ],
+                              )
+                            ],
+                          ),
+                          // Divider(color: Colors.black38,),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            // mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(width: 10,),
+                              Icon(Icons.account_box_outlined),
+
+                              SizedBox(width: 30,),
+                              Column(
+                             crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Compte Bancaire',style: TextStyle(fontWeight: FontWeight.w500,fontSize: 17,fontStyle: FontStyle.italic),),
+                                  Text('${professeurData?['info']['accountNumero']}',style: TextStyle(fontSize: 17,fontStyle: FontStyle.italic),),
+                                ],
+                              )
+                            ],
+                          ),
+                          SizedBox(height: 10,)
+                        ],
+                      ),
                     ),
                   ),
 
@@ -332,122 +414,125 @@ class _ProfesseurDetailsScreenState extends State<ProfesseurDetailsScreen> {
               ),
             ),
 
-            Divider(), // Add a divider between professor info and matieres
-
-            // Matieres Table
+            SizedBox(height: 20,),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                SizedBox(child: Container(child: Center(
-                  child: Text("Mes Matieres", style: TextStyle(fontStyle: FontStyle.italic, fontWeight: FontWeight.bold ,color: Colors.black,
-                    fontSize: 20,),),
-                ),
+                SizedBox(child: Container(child: Text("Mes Matières", style: TextStyle(fontStyle: FontStyle.italic, fontWeight: FontWeight.bold ,color: Colors.black,
+                  fontSize: 20,),),
                   // color: Colors.blue,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    // color: Colors.white,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black12,
+                        color: Colors.white,
                         blurRadius: 5,
                       ),
                     ],
                   ),
+                  margin: EdgeInsets.only(left: 28,right: 28),
 
-                  width: 370, height: 50,)),
+                  width: MediaQuery.of(context).size.width - 40, height: 50,)),
 
 
                 SingleChildScrollView(scrollDirection: Axis.horizontal,
-                  child: Container(     width: MediaQuery.of(context).size.width,
-                    decoration: BoxDecoration(
-                      color: Colors.white12,
-                      // boxShadow: [
-                      //   BoxShadow(
-                      //     color: Colors.black12,
-                      //     blurRadius: 5,
-                      //   ),
-                      // ],
+                  child: Card(
+                    // shape: RoundedRectangleBorder(
+                    //   borderRadius: BorderRadius.circular(15),
+                    // ),
+                    margin: EdgeInsets.only(left: 24,right: 50),
+                    child: Container(
+                      width: MediaQuery.of(context).size.width - 40,
+                      // width: MediaQuery.of(context).size.width,
+                      decoration: BoxDecoration(
+                        color: Colors.white60,
+                        // boxShadow: [
+                        //   BoxShadow(
+                        //     color: Colors.black12,
+                        //     blurRadius: 5,
+                        //   ),
+                        // ],
 
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(20.0),
+                        // borderRadius: BorderRadius.circular(15),
+
                       ),
-                    ),
-
-                    // margin: EdgeInsets.only(left: 10),
-                    // padding: EdgeInsets.only(left: 25, right: 23),
-
-                    child: DataTable(
-                      showCheckboxColumn: true,
-                      showBottomBorder: true,
-                      headingRowHeight: 50,
-                      columnSpacing: 13,
-                      dataRowHeight: 50,
-                      // headingRowColor: MaterialStateColor.resolveWith((states) =>  Colors.blue,), // Set row background color
-                      columns: [
-                        DataColumn(label: Text('Code')),
-                        DataColumn(label: Text('Nom')),
-                        DataColumn(label: Text('Prix')),
-                        DataColumn(label: Text('Action')),
-                      ],
-                      rows: [
-                        for (var matiere in matieres)
-                          DataRow(cells: [
-                            DataCell(Text(matiere['code']!)),
-                            DataCell(Text(matiere['name']!)),
-                            DataCell(Text(matiere['prix'].toString()!)),
-                            // DataCell(Text(getMatIdFromName(matiere).name)),
-                            // DataCell(Text(getMatIdFromName(matiere).taux.toString())),
-                            DataCell(
-                              ElevatedButton(
-                                onPressed: (){
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return AlertDialog(
-                                        surfaceTintColor: Color(0xB0AFAFA3),
-                                        backgroundColor: Colors.white,
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
-                                        title: Text('Supprimer Matiere'),
-                                        content: Text('Voulez vous supprimer: ${matiere['name']}?'),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.of(context).pop(); // Close the dialog
-                                            },
-                                            child: Text('Cancel'),
-                                          ),
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.of(context).pop(); // Close the dialog
-                                              String profId = professeurData?['_id']!;
-                                              String matiereId = matiere['_id']; // Replace 'matiere' with the actual matiere data
-                                              deleteMatiereFromProfesseur(profId, matiereId);
-                                              setState(() {
-                                                Navigator.pop(context);
-                                              });ScaffoldMessenger.of(context).showSnackBar(
-                                                SnackBar(
-                                                    content: Text('La matiere est Supprimer avec succès.',)),);
-
-                                            },
-                                            child: Text('Supprimer'),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  );
-                                },
-
-                                child: Icon(Icons.delete, color: Colors.red),
-                                style: ElevatedButton.styleFrom(
-                                  primary: Colors.white,
-                                  elevation: 0,
-                                  // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                    
+                      // margin: EdgeInsets.only(left: 28,right: 50),
+                      child: DataTable(
+                        showCheckboxColumn: true,
+                        showBottomBorder: true,
+                        border: TableBorder(left: BorderSide(width: 1,color: Colors.black12),right: BorderSide(width: 1,color: Colors.black12)),
+                        headingRowHeight: 50,
+                        columnSpacing: 13,
+                        dataRowHeight: 50,
+                        // headingRowColor: MaterialStateColor.resolveWith((states) =>  Colors.blue,), // Set row background color
+                        columns: [
+                          // DataColumn(label: Text('Code')),
+                          DataColumn(label: Text('Nom')),
+                          DataColumn(label: Text('Prix')),
+                          DataColumn(label: Text('Action')),
+                        ],
+                        rows: [
+                          for (var matiere in matieres)
+                            DataRow(cells: [
+                              // DataCell(Text(matiere['code']!)),
+                              DataCell(Text(matiere['name']!)),
+                              DataCell(Text(matiere['prix'].toString()!)),
+                              // DataCell(Text(getMatIdFromName(matiere).name)),
+                              // DataCell(Text(getMatIdFromName(matiere).taux.toString())),
+                              DataCell(
+                                TextButton(
+                                  onPressed: (){
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return AlertDialog(
+                                          surfaceTintColor: Color(0xB0AFAFA3),
+                                          backgroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                                          title: Text('Supprimer Matiere'),
+                                          content: Text('Voulez vous supprimer: ${matiere['name']}?'),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.of(context).pop(); // Close the dialog
+                                              },
+                                              child: Text('Cancel'),
+                                            ),
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.of(context).pop(); // Close the dialog
+                                                String profId = professeurData?['_id']!;
+                                                String matiereId = matiere['_id']; // Replace 'matiere' with the actual matiere data
+                                                deleteMatiereFromProfesseur(profId, matiereId);
+                                                setState(() {
+                                                  Navigator.pop(context);
+                                                });ScaffoldMessenger.of(context).showSnackBar(
+                                                  SnackBar(
+                                                      content: Text('La matiere est Supprimer avec succès.',)),);
+                    
+                                              },
+                                              child: Text('Supprimer'),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  },
+                    
+                                  child: Icon(Icons.delete_outlined, color: Colors.black26),
+                                  style: TextButton.styleFrom(
+                                    primary: Colors.white,
+                                    elevation: 0,
+                                    // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                                  ),
+                    
                                 ),
-
                               ),
-                            ),
-                          ]),
-                      ],
+                            ]),
+                        ],
+                      ),
                     ),
                   ),
                 ),
