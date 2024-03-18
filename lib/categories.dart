@@ -98,6 +98,7 @@ class _CategoriesState extends State<Categories> {
                 ],
               ),
             ),
+            Divider(),
             Container(
               margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               decoration: BoxDecoration(

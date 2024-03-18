@@ -112,7 +112,7 @@ class _LoginSectionState extends State<LoginSection>
               children: [
                 Container(
                   height: 300,
-                  child: HeaderWidget(300, true, 'assets/supnum.png'),
+                  child: HeaderWidget(300, false, ''),
                 ),
                 Expanded(
                   flex: 4,
@@ -205,7 +205,7 @@ class _LoginSectionState extends State<LoginSection>
                               colors: [
                                 Colors.transparent,
                                 Colors.transparent,
-                                Colors.blueAccent,
+                                Colors.black,
                               ],
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
@@ -300,7 +300,7 @@ class _LoginSectionState extends State<LoginSection>
                               width: _width * .2,
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
-                                color: Colors.blueAccent,
+                                color: Colors.black,
                                 shape: BoxShape.circle,
                               ),
                               child: Text(

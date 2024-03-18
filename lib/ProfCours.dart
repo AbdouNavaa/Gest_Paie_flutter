@@ -188,6 +188,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
               ],
             ),
           ),
+          Divider(),
 
           Container(
             margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),

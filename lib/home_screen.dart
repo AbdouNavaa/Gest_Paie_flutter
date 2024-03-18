@@ -572,16 +572,16 @@ class _HomeScreenState extends State<HomeScreen> {
         fit: StackFit.expand,
         children: [
           ClipPath(
-            // clipper: ClippingClass(),
+            clipper: ClippingClass(),
             child: Container(
               width: double.infinity,
               height: MediaQuery.of(context).size.height*4/7,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.center,
-                  end: Alignment.bottomCenter,
+                  end: Alignment.bottomLeft,
                   // colors: [ Colors.white,Colors.white],
-                  colors: [Colors.blueAccent.shade200, Colors.white],
+                  colors: [Colors.black, Colors.white],
                   // colors: [Color(0xB0AFAFA3), Colors.white],
                 ),
               ),
@@ -1308,11 +1308,12 @@ class ClippingClass extends CustomClipper<Path>{
 
   Path getClip(Size size) {
     var path = Path();
-    path.lineTo(0.0, size.height);
+    path.lineTo(0.0, size.height - 40);
     var controlPoint = Offset(size.width - (size.width / 2), size.height - 120);
     var endPoint = Offset(size.width, size.height);
-    path.quadraticBezierTo(
-        controlPoint.dx, controlPoint.dy, endPoint.dx, endPoint.dy);
+    // path.quadraticBezierTo(size.width -(size.width / 4),size.height,size.width,size.height - 40);
+    // path.quadraticBezierTo(size.width /4,size.height,size.width/2,size.height);
+    path.quadraticBezierTo(300, 300,300, 300);
     path.lineTo(size.width, 0.0);
     path.close();
     return path;

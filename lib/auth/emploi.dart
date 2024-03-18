@@ -593,6 +593,7 @@ int? selectedSem ;
                 ],
               ),
             ),
+            Divider(),
             Container(
               margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               decoration: BoxDecoration(
@@ -764,7 +765,7 @@ int? selectedSem ;
 
                                 ],
                               ),
-                                      SizedBox(height: 10,),
+                                      // SizedBox(height: 10,),
                                       buildDayDataTable('Lundi', filteredItems ?? items!),
                                       SizedBox(height: 10,),
                                       buildDayDataTable('Mardi', filteredItems ?? items!),
@@ -1011,7 +1012,7 @@ int? selectedSem ;
         headingRowHeight: 50,
         columnSpacing: 15,
         dataRowHeight: 60,
-        headingRowColor: MaterialStateColor.resolveWith((states) => Colors.blueGrey.shade100), // Couleur de la ligne d'en-tête
+        headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white12), // Couleur de la ligne d'en-tête
         horizontalMargin: 10,
 
         headingTextStyle: TextStyle(
@@ -2150,9 +2151,7 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
                   controller: _date,
                   // initialValue: widget.start!,
                   onChanged: (value) {
-                    setState(() {
-                      showTime = true;
-                    });
+
                   },
                   decoration: InputDecoration(
                       filled: true,
@@ -2162,7 +2161,14 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
                           borderSide: BorderSide.none,gapPadding: 1,
                           borderRadius: BorderRadius.all(Radius.circular(10.0)))),
                   // readOnly: true,
-                  onTap: () => selectTime(_date),
+                  onTap: () {
+                  setState(() {
+                    selectTime(_date);
+                    // _date.text = value;
+                    showTime = true;
+                  });
+
+                  }
                 ),
 
                 SizedBox(height: 10),
@@ -2231,6 +2237,7 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
                     String elem = showElem ? selectedElem!.id : widget.EId;
                     String time = showTime ? _date.text:widget.start;
 
+                    print('${type}, NbH:${nbh}, startTime:${time}, day:${day}, elem:${elem}');
                     UpdatEmp(
                         widget.empId,
                         type,
@@ -2314,9 +2321,7 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
       "element": ElemId
     };
 
-    if (date != null) {
-      body['startTime'] = date;
-    }
+
 
     try {
       final response = await http.patch(

@@ -221,19 +221,19 @@ class _PaiementsState extends State<Paiements> {
         // "nbh":nbh,
         // "nbc":nbc,
         // "totalMontant":mt,
-        "fromDate":fromDate?.toIso8601String() ,
-        "toDate": toDate?.toIso8601String() ,
+        "debit":fromDate?.toIso8601String() ,
+        "fin": toDate?.toIso8601String() ,
       }),
     );
     print("PaiStat${response.statusCode}");
     if (response.statusCode == 200) {
-      print('Category ajouter avec succes');
+      print('Paiement  ajoute avec succes');
 
       setState(() {
         Navigator.pop(context);
       });
     } else {
-      print("SomeThing Went Wrong");
+      print("Il y a un Erreur");
     }
   }
 
@@ -594,9 +594,10 @@ class _PaiementsState extends State<Paiements> {
               ],
             ),
           ),
+          Divider(),
 
 
-          Padding(padding: EdgeInsets.all(10)),
+          // Padding(padding: EdgeInsets.all(10)),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -673,7 +674,7 @@ class _PaiementsState extends State<Paiements> {
           ),
 
 
-          Padding(padding: EdgeInsets.all(10)),
+          // Padding(padding: EdgeInsets.all(10)),
           Container(
             margin: EdgeInsets.only(left: 230),
             child: TextButton(
@@ -881,6 +882,8 @@ class _PaiementsState extends State<Paiements> {
                 // Remettre la liste de sélection à zéro
                 setState(() {
                   selectedPayments = [];
+                  print('Deb1${_selectedDateDeb}');
+
                   Navigator.of(context).pop();
                 });
               },

@@ -226,6 +226,7 @@ class _ElementsState extends State<Elements> {
                 ],
               ),
             ),
+            Divider(),
             Container(
               margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               decoration: BoxDecoration(
@@ -2261,7 +2262,7 @@ class _UpdateElemScreenState extends State<UpdateElemScreen> {
           child: Column(
             // mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(height: 10),
+              SizedBox(height: 30),
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
@@ -2373,6 +2374,7 @@ class _UpdateElemScreenState extends State<UpdateElemScreen> {
                 },
               ),
 
+              SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

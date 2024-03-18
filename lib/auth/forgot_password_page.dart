@@ -155,7 +155,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                         );
                                       },
                                     style: TextStyle(
-                                        fontWeight: FontWeight.bold, color: Colors.lightBlue
+                                        fontWeight: FontWeight.bold, color: Colors.indigoAccent
 
 
                                     ),
@@ -179,7 +179,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                         );
                                       },
                                     style: TextStyle(
-                                        fontWeight: FontWeight.bold, color: Colors.lightBlue
+                                        fontWeight: FontWeight.bold, color: Colors.indigoAccent
 
 
                                     ),

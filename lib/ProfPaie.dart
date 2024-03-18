@@ -201,7 +201,9 @@ class _PaieState extends State<ProfPaies> {
 
 
 
-          Padding(padding: EdgeInsets.all(20)),
+          Divider(),
+
+          // Padding(padding: EdgeInsets.all(20)),
 
           Expanded(
             child: Container(

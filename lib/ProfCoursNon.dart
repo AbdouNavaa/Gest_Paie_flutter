@@ -193,6 +193,7 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
               ],
             ),
           ),
+          Divider(),
 
           Container(
             margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -347,7 +348,7 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
 // Define the pagination variables
 
 // Determine the total number of pages
-          Padding(padding: EdgeInsets.all(10)),
+//           Padding(padding: EdgeInsets.all(10)),
 
           Container(
             margin: EdgeInsets.only(left: 230),

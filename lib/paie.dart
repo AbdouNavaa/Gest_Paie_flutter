@@ -146,11 +146,12 @@ class _PaieState extends State<Paie> {
             ),
           ),
 
+          Divider(),
           // showPaid?
           Expanded(
             child: Container(
               width: MediaQuery.of(context).size.width,
-              margin: EdgeInsets.only(top: 30),
+              // margin: EdgeInsets.only(top: 30),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.only(

@@ -69,6 +69,7 @@ class _EmploiPageState extends State<EmploiPage> {
               ],
             ),
           ),
+          Divider(),
           Expanded(
             child: Container(
               width: MediaQuery.of(context).size.width,

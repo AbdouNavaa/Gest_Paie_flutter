@@ -104,6 +104,7 @@ class _UsersState extends State<Users> {
                 ],
               ),
             ),
+            Divider(),
             Container(
               margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               decoration: BoxDecoration(

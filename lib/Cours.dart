@@ -190,7 +190,7 @@ class _CoursesPageState extends State<CoursesPage> {
     // Apply your filtering criteria here
     DateTime courseDate = DateTime.parse(course['date'].toString());
     bool isMatch = (
-        course['matiere'].toLowerCase().contains(searchQuery.toLowerCase()) || course['professeur'].toLowerCase().contains(searchQuery.toLowerCase())
+        course['matiere'].toLowerCase().contains(searchQuery.toLowerCase()) || course['enseignant'].toLowerCase().contains(searchQuery.toLowerCase())
             || course['isSigned'].toString().contains(searchQuery.toLowerCase())
     );
     // || course['isPaid'].toString().contains(searchQuery.toLowerCase()));
@@ -242,6 +242,7 @@ bool showFloat = false;
               ],
             ),
           ),
+          Divider(),
           Container(
             width: MediaQuery.of(context).size.width/1.075,
             margin: EdgeInsets.only(left: 8,top: 5,bottom: 5),
@@ -1423,7 +1424,7 @@ bool showFloat = false;
                           Text('Date: Ancienne à Récente', style: TextStyle(fontWeight: FontWeight.w400,fontSize: 15 ),),
                           SizedBox(width: 100,),
                           Radio(
-                            value: 'responsable',
+                            value: '',
                             groupValue: sortByDateAscending,
                             onChanged: (value) {
                               setState(() {
@@ -2899,7 +2900,12 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
                           borderSide: BorderSide.none,gapPadding: 1,
                           borderRadius: BorderRadius.all(Radius.circular(10.0)))),
                   // readOnly: true,
-                  onTap: () => selectTime(_time),
+                  onTap: ()  {
+                    setState(() {
+                      selectTime(_time);
+                      showTime = true;
+                    });
+                  },
                 ),
 
 

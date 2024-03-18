@@ -16,7 +16,7 @@ class HeaderWidget extends StatefulWidget {
 
 class _HeaderWidgetState extends State<HeaderWidget> {
   // Color _primaryColor = HexColor('#FFFFFF');
-  Color _primaryColor =Colors.blueAccent;
+  Color _primaryColor =Colors.black;
 
   Color _accentColor =Colors.white;
   double _height;

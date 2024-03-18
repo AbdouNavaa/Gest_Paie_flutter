@@ -278,6 +278,7 @@ class _MatieresState extends State<Matieres> {
                   ],
                 ),
               ),
+              Divider(),
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 decoration: BoxDecoration(

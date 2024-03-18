@@ -43,8 +43,8 @@ class _SplashScreenState extends State<SplashScreen> {
           // mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              height: 600,
-              child: HeaderWidget(600, false, ''),
+              height: 400,
+              child: HeaderWidget(400, false, ''),
             ),
 
             AnimatedOpacity(
@@ -79,10 +79,15 @@ class _SplashScreenState extends State<SplashScreen> {
                 ],
               ),
             ),
-            // SizedBox(height: 10),
-            // CircularProgressIndicator(
-            //   valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
-            // ),
+            SizedBox(height: 100),
+            Stack(
+              children:[
+              CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.black,),
+              ),
+                // Text(DateTime..second.toString())
+              ]
+            ),
           ],
         ),
       ),

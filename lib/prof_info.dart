@@ -122,6 +122,7 @@ class _ProfesseurDetailsScreenState extends State<ProfesseurDetailsScreen> {
                     ),
                   ),
 
+                  Divider(),
                   // SizedBox(height: 10,),
                   SizedBox(child: Container(
                     child: Row(
@@ -325,7 +326,15 @@ class _ProfesseurDetailsScreenState extends State<ProfesseurDetailsScreen> {
                              crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text('Nom',style: TextStyle(fontWeight: FontWeight.w500,fontSize: 17,fontStyle: FontStyle.italic),),
-                                  Text('${widget.nom.capitalizeFirst} ${professeurData?['prenom'].toString().capitalizeFirst}',style: TextStyle(fontSize: 17,fontStyle: FontStyle.italic),),
+                                  Row(
+                                    children: [
+                                      Text('${widget.nom.capitalizeFirst} ${professeurData?['prenom'].toString().capitalizeFirst}',style: TextStyle(fontSize: 17,fontStyle: FontStyle.italic),),
+                                      // SizedBox(width: 90,),
+                                      // Icon(Icons.arrow_forward_ios)
+                                    ],
+                                  ),
+
+
                                 ],
                               )
                             ],

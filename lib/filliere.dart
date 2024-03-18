@@ -147,6 +147,7 @@ class _FilliereState extends State<Filliere> {
                 ],
               ),
             ),
+            Divider(),
             Container(
               margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               decoration: BoxDecoration(
@@ -1227,7 +1228,7 @@ class _FilEmploiPageState extends State<FilEmploiPage> {
               ],
             ),
           ),
-          // Divider(),
+          Divider(),
           Expanded(
             child: Container(
               width: MediaQuery.of(context).size.width,

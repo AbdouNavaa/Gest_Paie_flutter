@@ -237,6 +237,7 @@ class _ProfesseuresState extends State<Professeures> {
               ],
             ),
           ),
+          Divider(),
           Container(
             margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             decoration: BoxDecoration(
@@ -372,7 +373,7 @@ class _ProfesseuresState extends State<Professeures> {
         backgroundColor: Colors.white,
         label: Row(
           children: [
-            Icon(Icons.add,color: Colors.black,),
+            Icon(Icons.cloud_download_outlined,color: Colors.black,),
 
           ],
         ),
@@ -1420,8 +1421,8 @@ width: MediaQuery.of(context).size.width,
                 },
                 decoration: InputDecoration(
                   filled: true,
-                  // fillColor: Colors.white,
-                  fillColor: Color(0xA3B0AF1),
+                  fillColor: Colors.white,
+                  // fillColor: Color(0xA3B0AF1),
                   hintText: "....",hintStyle: TextStyle(fontSize: 20),
                   border: OutlineInputBorder(
                     borderSide: BorderSide.none,gapPadding: 1,
@@ -1452,7 +1453,8 @@ width: MediaQuery.of(context).size.width,
                 decoration: InputDecoration(
                   filled: true,
                   hintText: "....",hintStyle: TextStyle(fontSize: 20),
-                  fillColor: Color(0xA3B0AF1),
+                  // fillColor: Color(0xA3B0AF1),
+                  fillColor: Colors.white,
                   border: OutlineInputBorder(
                     borderSide: BorderSide.none,gapPadding: 1,
                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
