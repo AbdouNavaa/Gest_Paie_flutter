@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'auth/header_widget.dart';
@@ -25,10 +26,10 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void _navigateToNextScreen() async {
-    await Future.delayed(Duration(seconds: 5));
+    await Future.delayed(Duration(seconds: 500));
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => LoginSection()),
+      MaterialPageRoute(builder: (context) => KeyboardVisibilityProvider(child: LoginSection())),
     );
   }
 
@@ -68,7 +69,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   SizedBox(height: 10,),
                   Text(
                     "GP",
-                    style: GoogleFonts.italianno(
+                    style: GoogleFonts.abhayaLibre(
                       color: Colors.black,
                       fontSize: 70.0,
                       fontStyle: FontStyle.italic,
@@ -79,15 +80,45 @@ class _SplashScreenState extends State<SplashScreen> {
                 ],
               ),
             ),
-            SizedBox(height: 100),
-            Stack(
-              children:[
-              CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.black,),
+            SizedBox(height: 180),
+            // Stack(
+            //   children:[
+            //   CircularProgressIndicator(
+            //     valueColor: AlwaysStoppedAnimation<Color>(Colors.black,),
+            //   ),
+            //     // Text(DateTime..second.toString())
+            //   ]
+            // ),
+
+
+            ElevatedButton(
+              onPressed: (){
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => KeyboardVisibilityProvider(child: LoginSection())),
+                );
+              },
+              child: Text("Log In",
+                style: GoogleFonts.abhayaLibre(
+                color: Colors.black,
+                fontSize: 40.0,
+                fontStyle: FontStyle.italic,
+                fontWeight: FontWeight.w500,
+                letterSpacing: 2.0,
               ),
-                // Text(DateTime..second.toString())
-              ]
-            ),
+              ),
+
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xff0fb2ea),
+                foregroundColor: Colors.white,
+                elevation: 10,
+                minimumSize:  Size( MediaQuery.of(context).size.width -60 , MediaQuery.of(context).size.width/7),
+                // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
+                //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+              ),
+            )
+
           ],
         ),
       ),

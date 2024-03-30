@@ -24,6 +24,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 
+import 'home_screen.dart';
+
 class Professeures extends StatefulWidget {
   Professeures({Key ? key}) : super(key: key);
 
@@ -222,6 +224,7 @@ class _ProfesseuresState extends State<Professeures> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // drawer: buildDrawer(context),
       body: Column(
         children: [
           SizedBox(height: 40,),
@@ -386,6 +389,7 @@ class _ProfesseuresState extends State<Professeures> {
 
       ),
 
+//      bottomNavigationBar: BottomNav(),
 
     );
   }

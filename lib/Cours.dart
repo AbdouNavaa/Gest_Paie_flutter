@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'auth/emploi.dart';
 import 'element.dart';
 import 'filliere.dart';
+import 'home_screen.dart';
 import 'matieres.dart';
 
 
@@ -433,9 +434,9 @@ bool showFloat = false;
                                               ),
                                             ),
                                           DataCell(
-                                            Container(width: 35,
+                                            Container(width: 50,
                                               child: Text(
-                                                '${DateFormat('dd/M ').format(
+                                                '${DateFormat('dd MMM ').format(
                                                   DateTime.parse(widget.courses[index]['date'].toString()).toLocal(),
                                                 )}',style: TextStyle(
                                                 color: Colors.black,
@@ -619,8 +620,9 @@ bool showFloat = false;
           Visibility(
             visible: widget.courses.length > coursesPerPage,
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
+                SizedBox(width: 40,),
                 TextButton(
                   onPressed: () {
                     setState(() {
@@ -670,10 +672,9 @@ bool showFloat = false;
                               decoration: InputDecoration(
                                 filled: true,
                                 fillColor: Colors.white,
-                                hintText: "Sélecte Semestre",
                                 border: OutlineInputBorder(
                                   borderSide: BorderSide.none,
-                                  gapPadding: 1,
+                                  gapPadding: 2,
                                   borderRadius: BorderRadius.all(Radius.circular(10.0)),
                                 ),
                               ),
@@ -684,11 +685,11 @@ bool showFloat = false;
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          Text(currentPage.toString(),style: TextStyle(fontSize: 18),),
+                          Text(currentPage.toString(),style: TextStyle(fontSize: 15),),
                           SizedBox(width: 5,),
-                          Text('/',style: TextStyle(fontSize: 18)),
+                          Text('/',style: TextStyle(fontSize: 15)),
                           SizedBox(width: 5,),
-                          Text((widget.courses.length / coursesPerPage).ceil().toString(),style: TextStyle(fontSize: 18)),
+                          Text((widget.courses.length / coursesPerPage).ceil().toString(),style: TextStyle(fontSize: 15)),
                         ],
                       ),
                     ],
@@ -902,7 +903,7 @@ bool showFloat = false;
                       ),),
 
                     SizedBox(width: 10,),
-                    Text('${DateFormat('dd/M/yyyy ').format(DateTime.parse(course['date'].toString()).toLocal())}',
+                    Text('${DateFormat('dd MMMM yyyy ').format(DateTime.parse(course['date'].toString()).toLocal())}',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,
@@ -1246,9 +1247,9 @@ bool showFloat = false;
                     child: Column(
                       children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text('Date', style: TextStyle(fontWeight: FontWeight.w400,fontSize: 15 ),),
+                            Text('Date :', style: TextStyle(fontWeight: FontWeight.w700,fontSize: 15,textBaseline:  TextBaseline.alphabetic),),
                           ],
                         ),
 
@@ -1263,6 +1264,9 @@ bool showFloat = false;
                                   initialDate: DateTime.now(),
                                   firstDate: DateTime(2000),
                                   lastDate: DateTime(2030),
+                                  builder: (context, child){
+                                    return CalenderStyle(child: child!,);
+                                  }
                                 );
 
                                 if (selectedDateDeb != null) {
@@ -1280,11 +1284,13 @@ bool showFloat = false;
                                 ],
                               ),
                               style: ElevatedButton.styleFrom(
-                                          surfaceTintColor: Color(0xB0AFAFA3),
+                                surfaceTintColor: Colors.white,
+                                          // surfaceTintColor: Color(0xB0AFAFA3),
                                   foregroundColor: Colors.black,
-                                  side: BorderSide(color: Colors.black38),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-
+                                  // side: BorderSide(color: Colors.black38),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                elevation: 5,
+                              ),
                             ),
                             // Container(width: 50,
                             //   child:Text('total: ${totalType.toStringAsFixed(2)}'),
@@ -1296,7 +1302,10 @@ bool showFloat = false;
                                   initialDate: DateTime.now(),
                                   firstDate: DateTime(2000),
                                   lastDate: DateTime(2030),
-                                );
+                                    builder: (context, child){
+                                    return CalenderStyle(child: child!,);
+                                    }
+                                    );
 
                                 if (selectedDateFin != null) {
                                   setState(() {
@@ -1313,26 +1322,30 @@ bool showFloat = false;
                                 ],
                               ),
                               style: ElevatedButton.styleFrom(
-                                          surfaceTintColor: Color(0xB0AFAFA3),
+                                          surfaceTintColor: Colors.white,
                                   foregroundColor: Colors.black,
-                                  side: BorderSide(color: Colors.black38),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                                  // side: BorderSide(color: Colors.black38),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                elevation: 5,
+                              ),
                             ),
-                          ],          ),
+                          ],
+                        ),
 
                         SizedBox(height: 50,),
                         Row(
-                         mainAxisAlignment: MainAxisAlignment.start,
+                         mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text('Type', style: TextStyle(fontWeight: FontWeight.w400,fontSize: 15 ),),
+                            Text('Type :', style: TextStyle(fontWeight: FontWeight.w700,fontSize: 15,textBaseline:  TextBaseline.alphabetic),),
                           ],
                         ),
                         SizedBox(height: 10,),
                         Row(
 
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            ElevatedButton(onPressed: (){
+                            ElevatedButton(
+                              onPressed: (){
                               setState(() {
                                 showSigned = !showSigned;
                                 Navigator.of(context).pop();
@@ -1344,7 +1357,7 @@ bool showFloat = false;
                             }
                             , child: Row(
                               children: [
-                                Icon(Icons.check_circle_outline),
+                                Icon(Icons.task_alt),
                                 Text("Signé"),
                               ],
                             ),
@@ -1353,14 +1366,15 @@ bool showFloat = false;
                                 //         surfaceTintColor: Color(0xB0AFAFA3),
                                 surfaceTintColor: showSigned?  Colors.lightGreenAccent: Colors.white,
                                 foregroundColor: Colors.black,
-                                side: BorderSide(color: Colors.black38),
-                                elevation: 10,
-                                padding: EdgeInsets.only(left: 40, right: 40),
+                                // side: BorderSide(color: Colors.black38),
+                                elevation: 5,
+                                padding: EdgeInsets.only(left: 30, right: 30),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                               ),
                             ),
-                          SizedBox(width: 10,),
-                          ElevatedButton(onPressed: (){
+                          SizedBox(width: 50,),
+                          ElevatedButton(
+                            onPressed: (){
                               // Navigator.of(context).pop();
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(content: Text('Le filtre est appliquer avec succès.')),
@@ -1379,9 +1393,9 @@ bool showFloat = false;
                               style: ElevatedButton.styleFrom(
                                 surfaceTintColor: showPaid?  Colors.lightGreenAccent: Colors.white,
                                 foregroundColor: Colors.black,
-                                side: BorderSide(color: Colors.black38),
-                                elevation: 10,
-                                padding: EdgeInsets.only(left: 40, right: 40),
+                                // side: BorderSide(color: Colors.black38),
+                                elevation: 5,
+                                padding: EdgeInsets.only(left: 30, right: 30),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                               ),
                             )
@@ -1540,6 +1554,28 @@ bool showFloat = false;
 
 }
 
+class CalenderStyle extends StatelessWidget {
+   CalenderStyle({required this.child
+  });
+
+  Widget child ;
+
+  @override
+  Widget build(BuildContext context ) {
+    return Theme(data: Theme.of(context).copyWith(
+      colorScheme: ColorScheme.light(
+        primary: Colors.blue,surfaceTint: Colors.white,
+        secondary: Colors.white,
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          primary: Colors.black
+        )
+      )
+    ), child: child!);
+  }
+}
+
 
 class AddCoursScreen extends StatefulWidget {
   @override
@@ -1622,7 +1658,10 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
       initialDate: DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2030),
-    );
+        builder: (context, child){
+                                              return CalenderStyle(child: child!,);
+        }
+        );
 
     if (selectedDateTime != null) {
       String formattedDateTime = DateFormat('yyyy/MM/dd').format(selectedDateTime);
@@ -1653,7 +1692,10 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
     TimeOfDay? selectedTime = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
-    );
+        builder: (context, child){
+          return TimeCalender(child: child!,);
+        }
+        );
 
     if (selectedTime != null) {
       String formattedTime = selectedTime.format(context); // Utilise la méthode format avec le context
@@ -2291,7 +2333,10 @@ class _FiltrerState extends State<Filtrer> {
                         initialDate: DateTime.now(),
                         firstDate: DateTime(2000),
                         lastDate: DateTime(2030),
-                      );
+                          builder: (context, child){
+                                                                return CalenderStyle(child: child!,);
+                          }
+                          );
 
                       if (selectedDateDeb != null) {
                         setState(() {
@@ -2316,7 +2361,10 @@ class _FiltrerState extends State<Filtrer> {
                         initialDate: DateTime.now(),
                         firstDate: DateTime(2000),
                         lastDate: DateTime(2030),
-                      );
+                          builder: (context, child){
+                                                                return CalenderStyle(child: child!,);
+                          }
+                          );
 
                       if (selectedDateFin != null) {
                         setState(() {
@@ -2467,7 +2515,10 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
       initialDate: DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2030),
-    );
+        builder: (context, child){
+                                              return CalenderStyle(child: child!,);
+        }
+        );
 
     if (selectedDateTime != null) {
       String formattedDateTime = DateFormat('yyyy/MM/dd').format(selectedDateTime);
@@ -2519,6 +2570,9 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
     TimeOfDay? selectedTime = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
+        builder: (context, child){
+          return TimeCalender(child: child!,);
+        }
     );
 
     if (selectedTime != null) {
@@ -3082,6 +3136,27 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
     }
   }
 
+}
+
+class TimeCalender extends StatelessWidget {
+TimeCalender({required this.child
+});
+
+Widget child ;
+  @override
+  Widget build(BuildContext context) {
+    return Theme(data: Theme.of(context).copyWith(
+        colorScheme: ColorScheme.light(
+          primary: Colors.blue,surfaceTint: Colors.white,
+          secondary: Colors.black54,
+        ),
+        textButtonTheme: TextButtonThemeData(
+            style: TextButton.styleFrom(
+                primary: Colors.black
+            )
+        )
+    ), child: child!);
+  }
 }
 
 Future<List<Matiere>> fetchMatieresByCategory(String categoryId) async {

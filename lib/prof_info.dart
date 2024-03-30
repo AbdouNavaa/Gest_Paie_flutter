@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
    
 import 'Cours.dart';
 import 'categories.dart';
+import 'home_screen.dart';
 
 class ProfesseurDetailsScreen extends StatefulWidget {
   final String profId;
@@ -567,6 +568,7 @@ class _ProfesseurDetailsScreenState extends State<ProfesseurDetailsScreen> {
           ],
         ),
       ),
+//      bottomNavigationBar: BottomNav(),
     );
   }
 

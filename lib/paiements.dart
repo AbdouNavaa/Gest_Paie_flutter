@@ -17,6 +17,9 @@ import 'dart:io';
 import 'package:excel/excel.dart' as excel;
 import 'package:flutter/services.dart';
 
+import 'Cours.dart';
+import 'home_screen.dart';
+
 class Paiements extends StatefulWidget {
   final List<dynamic> courses;
 
@@ -608,7 +611,10 @@ class _PaiementsState extends State<Paiements> {
                     initialDate: widget.dateDeb ?? DateTime.now(),
                     firstDate: DateTime(2000),
                     lastDate: DateTime(2030),
-                  );
+                      builder: (context, child){
+                      return CalenderStyle(child: child!,);
+                      }
+                      );
 
                   if (selectedDateDeb != null) {
                     setState(() {
@@ -643,7 +649,10 @@ class _PaiementsState extends State<Paiements> {
                     initialDate: widget.dateFin ?? DateTime.now(),
                     firstDate: DateTime(2000),
                     lastDate: DateTime(2030),
-                  );
+                      builder: (context, child){
+                                                            return CalenderStyle(child: child!,);
+                      }
+                      );
 
                   if (selectedDateFin != null) {
                     setState(() {
@@ -983,6 +992,7 @@ class _PaiementsState extends State<Paiements> {
         ],
       ),
 
+      // bottomNavigationBar: BottomNav(),
 
     );
 
@@ -1744,6 +1754,7 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
         ],
       ),
 
+//      bottomNavigationBar: BottomNav(),
 
     );
 

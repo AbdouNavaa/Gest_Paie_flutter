@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:gestion_payements/auth/emploi.dart';
 import 'package:gestion_payements/element.dart';
 import 'package:gestion_payements/matieres.dart';
@@ -417,7 +418,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       onTap: () async{
                         SharedPreferences prefs = await SharedPreferences.getInstance();
                         await prefs.setString('token', '');
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => LoginSection()));
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) => KeyboardVisibilityProvider(child: LoginSection())));
+                            // MaterialPageRoute(builder: (context) => LoginSection()));
 
                       },
                     ),
@@ -558,7 +561,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       onTap: () async{
                         SharedPreferences prefs = await SharedPreferences.getInstance();
                         await prefs.setString('token', '');
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => LoginSection()));
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) => KeyboardVisibilityProvider(child: LoginSection())));
+                            // MaterialPageRoute(builder: (context) => LoginSection()));
 
                       },
                     ),
@@ -581,7 +586,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   begin: Alignment.center,
                   end: Alignment.bottomLeft,
                   // colors: [ Colors.white,Colors.white],
-                  colors: [Colors.black, Colors.white],
+                  colors: [Colors.blueAccent, Colors.white],
                   // colors: [Color(0xB0AFAFA3), Colors.white],
                 ),
               ),
@@ -891,7 +896,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                   onPessed:  () async {
                                     SharedPreferences prefs = await SharedPreferences.getInstance();
                                     await prefs.setString('token', '');
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => LoginSection()));
+                                    Navigator.push(context,
+                                        MaterialPageRoute(builder: (context) => KeyboardVisibilityProvider(child: LoginSection())));
+                                        // MaterialPageRoute(builder: (context) => LoginSection()));
                                   },
                                 ),
 
@@ -1024,7 +1031,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                   onPessed:  () async {
                                     SharedPreferences prefs = await SharedPreferences.getInstance();
                                     await prefs.setString('token', '');
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => LoginSection()));
+                                    Navigator.push(context,
+                                        MaterialPageRoute(builder: (context) => KeyboardVisibilityProvider(child: LoginSection())));
+                                        // MaterialPageRoute(builder: (context) => LoginSection()));
                                   },
                                 ),
 
@@ -1246,7 +1255,9 @@ class _HomeScreenState extends State<HomeScreen> {
           )
         ],
       ),
+    // bottomNavigationBar: BottomNav(),
     );
+
   }
 
   _customCard({required String imageUrl,required double height,required double width, required String item, required String duration,required final VoidCallback onPessed,}){
@@ -1303,6 +1314,357 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
+class BottomNav extends StatefulWidget {
+//  final String? role; // Assurez-vous que le rôle est accessible ici
+
+  BottomNav({Key ? key}) : super(key: key);
+
+  @override
+  _BottomNavState createState() => _BottomNavState();
+}
+
+class _BottomNavState extends State {
+  int _selectedIndex = 0;
+  bool chngColor = false;
+  bool isUser = true; // Change this based on your actual logic
+  bool isAdmin = true; // Change this based on your actual logic
+  bool isBook = false; // Change this based on your actual logic
+  bool isMenu = false; // Change this based on your actual logic
+
+  Color _getIconColor(int index) {
+    if ((isUser && index == _selectedIndex) || (isAdmin && index == _selectedIndex) ) {
+      return chngColor ? Colors.blueAccent : Colors.black;
+    } else {
+      return Colors.black87;
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Call the function to check user's role
+    checkUserRole();
+    checkAdminRole();
+  }
+
+  Future<void> checkUserRole() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String role = prefs.getString("role")!;
+    setState(() {
+      isUser = (role == "professeur");
+    });
+  }
+  Future<void> checkAdminRole() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String role = prefs.getString("role")!;
+    setState(() {
+      isAdmin = (role == "admin");
+    });
+  }
+
+  void _onItemTapped(int index) async {
+    setState(() {
+      _selectedIndex = index;
+      chngColor = true;
+      print('index ${_selectedIndex}');
+    });
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String role = prefs.getString("role")!;
+    if(role == "professeur") {
+      if (index == 0) {
+        // Handle Profile
+        String token = prefs.getString("token")!;
+        String id = prefs.getString("id")!;
+        String nom = prefs.getString("nom")!;
+        String mail = prefs.getString("email")!;
+        String? profId = await getProfId(token, id)!;
+        int? notif = await fetchPaiements(profId,token);
+        int? CNS = await CoursNS(profId,token);
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HomeScreen(
+                role: role,
+                name: nom,
+                email: mail,
+                profId: profId, // Passer l'ID du professeur à la page HomeScreen
+                notif: notif, // Passer l'ID du professeur à la page HomeScreen
+                CNS: CNS, // Passer l'ID du professeur à la page HomeScreen
+              ),
+            ));
+      }
+      if (index == 1) {
+        // Handle Profile
+        // index =1;
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        String token = prefs.getString("token")!;
+        String role = prefs.getString("role")!;
+        String email = prefs.getString("email")!;
+        String id = prefs.getString("id")!;
+        String nom = prefs.getString("nom")!;
+        print(role);
+        Navigator.push(context, MaterialPageRoute(
+          builder: (context) =>
+              ProfesseurDetailsScreen(profId: id, mail: email, nom: nom),
+          // builder: (context) => LandingScreen(role: role,name: nom,), // Passer le rôle ici
+        ),);
+      }
+      // else if (index == 1) {
+      //   // Handle Categories (only for 'responsable')
+      //
+      //   try {
+      //     SharedPreferences prefs = await SharedPreferences.getInstance();
+      //     String token = prefs.getString("token")!;
+      //     final professorData = await fetchProfessorInfo();
+      //     String id = professorData['professeur']['_id'];
+      //
+      //     print(id);
+      //     var response = await http.get(
+      //       Uri.parse('http://192.168.43.73:5000/professeur/$id/cours'),
+      //       headers: {
+      //         'Content-Type': 'application/json',
+      //         'Authorization': 'Bearer $token'
+      //       },
+      //     );
+      //     // print(response.body);
+      //
+      //     if (response.statusCode == 200) {
+      //       List<dynamic> courses = json.decode(
+      //           response.body)['data']['coursLL'];
+      //       int coursNum = json.decode(response.body)['data']['countLL'];
+      //       num heuresTV = json.decode(response.body)['data']['heuresTV'];
+      //       num sommeTV = json.decode(response.body)['data']['sommeTV'];
+      //       String ProfId = json.decode(response.body)['data']['id'];
+      //       Navigator.push(
+      //         context,
+      //         MaterialPageRoute(builder: (context) =>
+      //             ProfCoursesPage(courses: courses,
+      //               coursNum: coursNum,
+      //               heuresTV: heuresTV,
+      //               sommeTV: sommeTV, ProfId: ProfId,)),
+      //       );
+      //     }
+      //     else {
+      //       // Handle error
+      //       Navigator.pop(context);
+      //       print('Failed to fetch prof courses. Status Code: ${response
+      //           .statusCode}');
+      //     }
+      //   } catch (err) {
+      //     Navigator.pop(context);
+      //     print('Server Error: $err');
+      //   }
+      // }
+      else if (index == 2) {
+        Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => KeyboardVisibilityProvider(child: LoginSection())));
+        // MaterialPageRoute(builder: (context) => LogoutScreen()));
+      }
+    }
+
+    // else if (role == "responsable") {
+    //   if (index == 0) {
+    //     // Handle Profile
+    //     String email = prefs.getString("email")!;
+    //     String id = prefs.getString("id")!;
+    //     Navigator.push(
+    //         context, MaterialPageRoute(builder: (context) => Categories()));
+    //   }
+    //   else if (index == 1) {
+    //     // Handle Categories (only for 'responsable')
+    //
+    //     Navigator.push(
+    //         context, MaterialPageRoute(builder: (context) => Matieres()));
+    //     setState(() {
+    //       isMenu = true;
+    //     });
+    //   }
+    //   else if (index == 2) {
+    //     // Handle Matieres (only for 'responsable')
+    //     setState(() {
+    //       isBook = true;
+    //     });
+    //     String token = prefs.getString("token")!;
+    //     var response = await http.get(
+    //       Uri.parse('http://192.168.43.73:5000/cours'),
+    //       headers: {
+    //         'Content-Type': 'application/json',
+    //         'Authorization': 'Bearer $token'
+    //       },
+    //     );
+    //     // print(response.body);
+    //
+    //     if (response.statusCode == 200) {
+    //       List<dynamic> courses = json.decode(
+    //           response.body)['data']['coursLL'];
+    //       int coursNum = json.decode(response.body)['data']['countLL'];
+    //       num heuresTV = json.decode(response.body)['data']['heuresTV'];
+    //       num sommeTV = json.decode(response.body)['data']['sommeTV'];
+    //       Navigator.push(
+    //         context,
+    //         MaterialPageRoute(builder: (context) =>
+    //             CoursesPage(courses: courses,
+    //               coursNum: coursNum,
+    //               heuresTV: heuresTV,
+    //               sommeTV: sommeTV,)),
+    //       );
+    //     } else {
+    //       // Handle error
+    //       print('Failed to fetch prof courses. Status Code: ${response
+    //           .statusCode}');
+    //     }
+    //   }
+    //   else if (index == 3) {
+    //     // Handle ProfCourse (only for 'user')
+    //     String username = prefs.getString("nom")!;
+    //     String userRole = prefs.getString("role")!;
+    //     String userEmail = prefs.getString("email")!;
+    //
+    //     Navigator.push(
+    //         context, MaterialPageRoute(builder: (context) =>
+    //         MoreOptionsPage(username:username,userRole:userRole,userEmail: userEmail,)));
+    //   }
+    // }
+
+    else if(role == "admin") {
+      if (index == 0) {
+        // Handle Profile
+        String token = prefs.getString("token")!;
+        String id = prefs.getString("id")!;
+        String nom = prefs.getString("nom")!;
+        String mail = prefs.getString("email")!;
+        String? profId = await getProfId(token, id)!;
+        int? notif = await fetchPaiements(profId,token);
+        int? CNS = await CoursNS(profId,token);
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HomeScreen(
+                role: role,
+                name: nom,
+                email: mail,
+                profId: profId, // Passer l'ID du professeur à la page HomeScreen
+                notif: notif, // Passer l'ID du professeur à la page HomeScreen
+                CNS: CNS, // Passer l'ID du professeur à la page HomeScreen
+              ),
+            ));
+      }
+      if (index == 1) {
+        // Handle Profile
+        String email = prefs.getString("email")!;
+        String id = prefs.getString("id")!;
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => Users()));
+      }
+      if (index == 2) {
+        // Handle Profile
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => Professeures()));
+      }
+      else if (index == 3) {
+        // Handle ProfCourse (only for 'user')
+        String username = prefs.getString("nom")!;
+        String userRole = prefs.getString("role")!;
+        String userEmail = prefs.getString("email")!;
+
+        Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => KeyboardVisibilityProvider(child: LoginSection())));
+        // MaterialPageRoute(builder: (context) => MoreOptionsPage(username:username,userRole:userRole,userEmail: userEmail,)));
+      }
+
+    }
+
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 10, left: 10, right: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.all(Radius.circular(10)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.all(Radius.circular(10)),
+        child: BottomNavigationBar(
+          // selectedIconTheme: IconThemeData(color: chngColor ? Colors.blueAccent : Colors.black),
+          unselectedItemColor: Colors.black87,
+          showUnselectedLabels: true,
+          iconSize: chngColor ? 25 : 20,
+          currentIndex: _selectedIndex,
+          selectedItemColor: chngColor ? Colors.blueAccent : Colors.black,
+          showSelectedLabels: true,
+          onTap: _onItemTapped,
+          backgroundColor: Colors.white,
+          elevation: 5,
+          items: isUser
+              ? [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home_filled, color: _getIconColor(0)),
+              label: 'Acceuil',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.account_circle_outlined, color: _getIconColor(1)),
+              label: 'Profile',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.logout, color: _getIconColor(2)),
+              label: 'Logout',
+            ),
+          ]
+              : isAdmin
+              ? [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home, color: _getIconColor(0)),
+              label: 'Acceuil',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.supervised_user_circle_rounded, color: _getIconColor(1)),
+              label: 'Users',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_outline_rounded, color: _getIconColor(2)),
+              label: 'Profs',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.logout_rounded, color: _getIconColor(3)),
+              label: 'Logout',
+            ),
+          ]
+              : [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.local_offer_outlined, color: _getIconColor(0)),
+              label: 'Categories',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.school_outlined, color: _getIconColor(1)),
+              label: 'Matieres',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.book_outlined, color: _getIconColor(2)),
+              label: 'Courses',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.more_horiz_outlined, color: _getIconColor(3)),
+              label: 'More',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 class ClippingClass extends CustomClipper<Path>{
   @override
 

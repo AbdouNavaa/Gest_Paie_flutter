@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:gestion_payements/home_screen.dart';
 import 'package:http/http.dart' as http;
 
@@ -99,6 +100,7 @@ class _LoginSectionState extends State<LoginSection>
 
   @override
   Widget build(BuildContext context) {
+    bool isKeyboadVisible = KeyboardVisibilityProvider.isKeyboardVisible(context);
     double _width = MediaQuery.of(context).size.width;
     double _height = MediaQuery.of(context).size.height;
     return Scaffold(
@@ -110,6 +112,7 @@ class _LoginSectionState extends State<LoginSection>
             height: _height,
             child: Column(
               children: [
+                // isKeyboadVisible? SizedBox() :
                 Container(
                   height: 300,
                   child: HeaderWidget(300, false, ''),
@@ -125,7 +128,8 @@ class _LoginSectionState extends State<LoginSection>
                         style: TextStyle(
                           fontSize: 25,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xff000000),
+                          // color: Color(0xff000000),
+                          color: Colors.indigoAccent,
                         ),
                       ),
                       SizedBox(),
@@ -171,7 +175,7 @@ class _LoginSectionState extends State<LoginSection>
                             text: TextSpan(
                               text: 'Mot de passe oublie?',
                               style: TextStyle(
-                                color: Colors.blue.shade200,
+                                color: Colors.indigoAccent,
                               ),
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () {
@@ -205,7 +209,10 @@ class _LoginSectionState extends State<LoginSection>
                               colors: [
                                 Colors.transparent,
                                 Colors.transparent,
-                                Colors.black,
+                                // Colors.blueAccent,
+                                // Colors.blueAccent,
+                                // Colors.blueAccent,
+                                Colors.blueAccent,
                               ],
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
@@ -300,13 +307,15 @@ class _LoginSectionState extends State<LoginSection>
                               width: _width * .2,
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
-                                color: Colors.black,
+                                color: Colors.white,gradient: LinearGradient(
+                                  colors: [Colors.white12, Colors.white],),
+                                boxShadow: [BoxShadow(color: Colors.blueAccent)],
                                 shape: BoxShape.circle,
                               ),
                               child: Text(
                                 'SIGN-IN',
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: Colors.indigo,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -341,6 +350,7 @@ class _LoginSectionState extends State<LoginSection>
         controller: text,
         onChanged: onChange,
         style: TextStyle(color: Colors.black12.withOpacity(.9)),
+        // maxLines: 1,
         obscureText: isPassword,
         keyboardType: isEmail ? TextInputType.emailAddress : TextInputType.text,
         decoration: InputDecoration(

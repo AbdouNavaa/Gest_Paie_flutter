@@ -9,6 +9,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 
+import '../Cours.dart';
+import '../home_screen.dart';
 import '../matieres.dart';
 import '../professeures.dart';
 
@@ -557,21 +559,16 @@ int? selectedSem ;
     );
   }
 
+  bool Mon = false;
+  bool Tue = false;
+  bool Wed = false;
+  bool Thu = false;
+  bool Fri = false;
+  bool Sat = false;
+  bool San = false;
 
   @override
   Widget build(BuildContext context) {
-    // Sort the items list based on the semestre
-    // filteredItems?.sort((a, b) {
-    //   // final semestreOrder = {'Lundi': 1,'Mardi': 2, 'Mercredi': 3, 'Jeudi': 4, 'Vendredi': 5, 'Samedi': 6, 'Dimanch': 7};
-    //   final semestreComparison = days[a.dayNumero]!.compareTo(days[b.dayNumero]!);
-    //
-    //   if (semestreComparison != 0) {
-    //     return semestreComparison; // Sort by semestre if they are different
-    //   } else {
-    //     // Sort by code within the same semestre
-    //     return getEls(a.element)!.nameMat!.compareTo(getEls(b.element)!.nameMat!);
-    //   }
-    // });
     return Scaffold(
       body: Scaffold(
         // appBar: AppBar(
@@ -692,12 +689,12 @@ int? selectedSem ;
                               SingleChildScrollView(
                                   child: Column(
                                     children: [
-
-                              Row(
+                                      Row(
                                 children: [
                                   Container(
                                     width: MediaQuery.of(context).size.width /3,
-                                    height: 80,
+                                    height: 60,
+                                    // color: Colors.black12,
                                     child: DropdownButtonFormField<filliere>(
                                       dropdownColor: Colors.white,
                                       value: selectedFil,hint: Text("Fillieres"),
@@ -733,7 +730,7 @@ int? selectedSem ;
                                     ),
                                   ),
                                   Container(
-                                    height: 80,
+                                    height: 60,
                                     width: MediaQuery.of(context).size.width / 3,
                                     child: DropdownButtonFormField<int>(
                                       value: selectedSem,
@@ -766,19 +763,105 @@ int? selectedSem ;
                                 ],
                               ),
                                       // SizedBox(height: 10,),
-                                      buildDayDataTable('Lundi', filteredItems ?? items!),
-                                      SizedBox(height: 10,),
-                                      buildDayDataTable('Mardi', filteredItems ?? items!),
-                                      SizedBox(height: 10,),
-                                      buildDayDataTable('Mercredi', filteredItems ?? items!),             // buildDayDataTable('Mercredi', filteredItems ?? items!),
-                                      SizedBox(height: 10,),
-                                      buildDayDataTable('Jeudi', filteredItems ?? items!),
-                                      SizedBox(height: 10,),
-                                      buildDayDataTable('Vendredi', filteredItems ?? items!),
-                                      SizedBox(height: 10,),
-                                      buildDayDataTable('Samedi', filteredItems ?? items!),
-                                      SizedBox(height: 10,),
-                                      buildDayDataTable('Dimanch', filteredItems ?? items!),
+                                      SingleChildScrollView(scrollDirection: Axis.horizontal,
+                                        child:
+                                        Container(
+                                          // width: MediaQuery.of(context).size.width - 10,
+                                          height: 50,
+                                          decoration: BoxDecoration(
+                                          color: Colors.white,border: Border.all(color: Colors.black12,width: 2),
+                                            borderRadius: BorderRadius.all(Radius.circular(10))
+                                          ),
+
+                                          child: Row(
+                                            children: [
+                                              TextButton(
+                                                  onPressed: (){
+                                                setState(() {
+                                                  Mon = !Mon;
+                                                  Tue = false;Wed = false;Thu = false;Fri = false;Sat = false;San = false;
+                                                });
+                                              }, child: Text('Lun',),
+                                                style: buildStyleFrom(Mon),
+                                                // style: TextButton.styleFrom(backgroundColor: Mon? Colors.white:Colors.black12,padding: EdgeInsets.only(top: 15,bottom: 15),
+                                                // ),
+                                              ),
+                                              TextButton(onPressed: (){
+                                                setState(() {
+                                                  Tue = !Tue;
+                                                  Mon = false;Wed = false;Thu = false;Fri = false;Sat = false;San = false;                                                });
+                                              }, child: Text('Mar'),
+                                                style: buildStyleFrom(Tue),
+                                              ),
+                                              TextButton(onPressed: (){
+                                                setState(() {
+                                                  Wed = !Wed;
+                                                  Mon = false;Tue = false;Thu = false;Fri = false;Sat = false;San = false;
+                                                });
+                                              }, child: Text('Mer'),
+                                                style: buildStyleFrom(Wed),
+                                              ),
+                                              TextButton(
+                                                  onPressed: (){
+                                                setState(() {
+                                                  Thu = !Thu;
+                                                  Mon = false;Tue = false;Wed = false;Fri = false;Sat = false;San = false;
+                                                });
+                                              },
+                                                  child: Text('Jeu'),
+                                                style: buildStyleFrom(Thu),
+                                              ),
+                                              TextButton(
+                                                  onPressed: (){
+                                                setState(() {
+                                                  Fri = !Fri;
+                                                  Mon = false;Tue = false;Wed = false;Thu = false;Sat = false;San = false;
+                                                });
+                                              },
+                                                  child: Text('Ven'),
+                                                style: buildStyleFrom(Fri),
+                                              ),
+                                              TextButton(
+                                                  onPressed: (){
+                                                setState(() {
+                                                  Sat = !Sat;
+                                                  Mon = false;Tue = false;Wed = false;Thu = false;Fri = false;San = false;
+                                                });
+                                              },
+                                                  child: Text('Sam'),
+                                                style: buildStyleFrom(Sat),
+                                              ),
+                                              TextButton(
+                                                  onPressed: (){
+                                                setState(() {
+                                                  San = !San;
+                                                  Mon = false;Tue = false;Wed = false;Thu = false;Fri = false;Sat = false;
+                                                });
+                                              },
+                                                  child: Text('Dim'),
+                                                style: buildStyleFrom(San),
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      Mon? buildDayDataTable('Lundi', filteredItems ?? items!): Container(),
+                                      // Padding(
+                                      //   padding: const EdgeInsets.only(top: 20.0),
+                                      //   child: Container(child: Text('Cliquez sur l\'un des bouton',style: TextStyle(fontSize: 30),),),
+                                      // ),
+                                      // SizedBox(height: 10,),
+                                      Tue?buildDayDataTable('Mardi', filteredItems ?? items!): Container(),
+                                      // SizedBox(height: 10,),
+                                      Wed?buildDayDataTable('Mercredi', filteredItems ?? items!): Container(),             // buildDayDataTable('Mercredi', filteredItems ?? items!),
+                                      // SizedBox(height: 10,),
+                                      Thu?buildDayDataTable('Jeudi', filteredItems ?? items!): Container(),
+                                      // SizedBox(height: 10,),
+                                     Fri? buildDayDataTable('Vendredi', filteredItems ?? items!): Container(),
+                                      // SizedBox(height: 10,),
+                                      Sat?buildDayDataTable('Samedi', filteredItems ?? items!): Container(),
+                                      // SizedBox(height: 10,),
+                                      San?buildDayDataTable('Dimanch', filteredItems ?? items!): Container(),
                                     ],
                                   ),
 
@@ -794,16 +877,6 @@ int? selectedSem ;
             ),
           ],
         ),
-        // floatingActionButton: FloatingActionButton.extended(
-        //   // heroTag: 'uniqueTag',
-        //   tooltip: 'Ajouter un Emploi',
-        //   backgroundColor: Colors.white,
-        //   label: Row(
-        //     children: [Icon(Icons.add,color: Colors.black,)],
-        //   ),
-        //   onPressed: () => _displayTextInputDialog(context),
-        //
-        // ),
         floatingActionButton: showFloat ?
         Container(
           width: 260,
@@ -948,6 +1021,16 @@ int? selectedSem ;
       ),
       // bottomNavigationBar: BottomNav(),
 
+    );
+  }
+
+  ButtonStyle buildStyleFrom(bool bol) {
+    return TextButton.styleFrom(
+        backgroundColor: bol ? Color(0xFF4281B8) : Colors.white,
+        foregroundColor: bol ? Colors.white : Colors.indigo,
+        padding: EdgeInsets.only(top: 15, bottom: 15),minimumSize: Size.fromWidth(80),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadiusDirectional.only(topEnd: Radius.circular(18),bottomEnd: Radius.circular(18)))
+        // shape: BeveledRectangleBorder(borderRadius: BorderRadiusDirectional.only(topEnd: Radius.circular(5),bottomEnd: Radius.circular(5)))
     );
   }
 
@@ -1169,6 +1252,9 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
     TimeOfDay? selectedTime = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
+        builder: (context, child){
+          return TimeCalender(child: child!,);
+        }
     );
 
     if (selectedTime != null) {
@@ -1816,6 +1902,9 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
     TimeOfDay? selectedTime = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
+        builder: (context, child){
+          return TimeCalender(child: child!,);
+        }
     );
 
     if (selectedTime != null) {

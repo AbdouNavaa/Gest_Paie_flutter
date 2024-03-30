@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:gestion_payements/settings.dart';
 
 import 'Dashboard.dart';
@@ -153,13 +154,6 @@ class _MoreOptionsPageState extends State<MoreOptionsPage> {
              crossAxisAlignment: CrossAxisAlignment.start,
              mainAxisSize: MainAxisSize.max,
              children: [
-              // Container(
-              //   height: 100,child: Row(
-              //   children: [
-              //    SizedBox(width: 150,),
-              //     Icon(Icons.description_outlined, size: 70,color: Colors.black26,),
-              //   ],
-              // ),),
                SizedBox(height: 100,),
                SwitchListTile(
                    title: const Text('Dark Mode?',style: TextStyle(
@@ -185,7 +179,8 @@ class _MoreOptionsPageState extends State<MoreOptionsPage> {
                      // Navigate to LogoutScreen
                      Navigator.push(
                        context,
-                       MaterialPageRoute(builder: (context) => LoginSection()),
+                       MaterialPageRoute(builder: (context) => KeyboardVisibilityProvider(child: LoginSection())),
+                       // MaterialPageRoute(builder: (context) => LoginSection()),
                      );
                    },
                    child: Row(

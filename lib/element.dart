@@ -120,7 +120,10 @@ class _ElementsState extends State<Elements> {
       initialDate: DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2030),
-    );
+        builder: (context, child){
+        return CalenderStyle(child: child!,);
+        }
+        );
 
     if (selectedDateTime != null) {
       String formattedDateTime = DateFormat('yyyy/MM/dd').format(selectedDateTime);

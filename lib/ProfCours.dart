@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:gestion_payements/prof_info.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'Cours.dart';
 import 'Dashboard.dart';
 import 'categories.dart';
 import 'main.dart';
@@ -235,7 +236,10 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                       initialDate: DateTime.now(),
                       firstDate: DateTime(2000),
                       lastDate: DateTime(2030),
-                    );
+                        builder: (context, child){
+                                                              return CalenderStyle(child: child!,);
+                        }
+                        );
 
                     if (selectedDateDeb != null) {
                       setState(() {
@@ -273,7 +277,10 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                       initialDate: DateTime.now(),
                       firstDate: DateTime(2000),
                       lastDate: DateTime(2030),
-                    );
+                        builder: (context, child){
+                                                              return CalenderStyle(child: child!,);
+                        }
+                        );
 
                     if (selectedDateFin != null) {
                       setState(() {
@@ -418,7 +425,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                                             _showCourseDetails(context, widget.courses[index])),
                                     DataCell(
                                       Text(
-                                        '${DateFormat('dd/M ').format(
+                                        '${DateFormat('dd MMM ').format(
                                           DateTime.parse(widget.courses[index]['date'].toString()).toLocal(),
                                         )}',style: TextStyle(
                                         color: Colors.black,
@@ -624,7 +631,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                       ),),
 
                     SizedBox(width: 10,),
-                    Text('${DateFormat('dd/M/yyyy ').format(DateTime.parse(course['date'].toString()).toLocal())}',
+                    Text('${DateFormat('dd MMMM yyyy ').format(DateTime.parse(course['date'].toString()).toLocal())}',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,
@@ -928,12 +935,18 @@ class _UpdateProfCoursDialogState extends State<UpdateProfCoursDialog> {
       initialDate: DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2030),
-    );
+        builder: (context, child){
+        return CalenderStyle(child: child!,);
+        }
+        );
 
     if (selectedDateTime != null) {
       TimeOfDay? selectedTime = await showTimePicker(
         context: context,
         initialTime: TimeOfDay.now(),
+          builder: (context, child){
+            return TimeCalender(child: child!,);
+          }
       );
 
       if (selectedTime != null) {

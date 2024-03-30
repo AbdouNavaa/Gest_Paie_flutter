@@ -15,6 +15,7 @@ import 'dart:io';
  
 import '../matieres.dart';
 import 'element.dart';
+import 'home_screen.dart';
 
 
 
@@ -1168,6 +1169,8 @@ class _FilEmploiPageState extends State<FilEmploiPage> {
   late String description = '';
   late String niveau = '';
 
+  String day = 'Lundi';
+  bool coursesFound = false;
   @override
   void initState() {
     super.initState();
@@ -1229,6 +1232,84 @@ class _FilEmploiPageState extends State<FilEmploiPage> {
             ),
           ),
           Divider(),
+          SingleChildScrollView(scrollDirection: Axis.horizontal,
+            child:
+            Container(
+              // width: MediaQuery.of(context).size.width - 10,
+              height: 50,
+              decoration: BoxDecoration(
+                  color: Colors.white,border: Border.all(color: Colors.black12,width: 2),
+                  borderRadius: BorderRadius.all(Radius.circular(10))
+              ),
+
+              child: Row(
+                children: [
+                  TextButton(
+                      onPressed: (){
+                        setState(() {
+                          day = 'Lundi';
+                          // Reset the flag when the user selects a new day
+                          coursesFound = false;
+                        });
+                      }, child: Text('Lun',),
+                      style: buildStyleFrom('Lundi')
+                  ),
+                  TextButton(onPressed: (){
+                    setState(() {
+                      day = 'Mardi';
+                      // Tue = !Tue;
+                      // Mon = false;Wed = false;Thu = false;Fri = false;Sat = false;San = false;
+                    });
+                  }, child: Text('Mar'),
+                      style: buildStyleFrom('Mardi')
+                  ),
+                  TextButton(onPressed: (){
+                    setState(() {
+                      day = 'Mercredi';
+                    });
+                  }, child: Text('Mer'),
+                      style: buildStyleFrom('Mercredi')
+                  ),
+                  TextButton(
+                      onPressed: (){
+                        setState(() {
+                          day = 'Jeudi';
+                        });
+                      },
+                      child: Text('Jeu'),
+                      style: buildStyleFrom('Jeudi')
+                  ),
+                  TextButton(
+                      onPressed: (){
+                        setState(() {
+                          day = 'Vendredi';
+                        });
+                      },
+                      child: Text('Ven'),
+                      style: buildStyleFrom('Vendredi')
+                  ),
+                  TextButton(
+                      onPressed: (){
+                        setState(() {
+                          day = 'Samedi';
+                        });
+                      },
+                      child: Text('Sam'),
+                      style: buildStyleFrom('Samedi')
+                  ),
+                  TextButton(
+                      onPressed: (){
+                        setState(() {
+                          day = 'Dimanch';
+                        });
+                      },
+                      child: Text('Dim'),
+                      style: buildStyleFrom('Dimanch')
+                  )
+                ],
+              ),
+            ),
+          ),
           Expanded(
             child: Container(
               width: MediaQuery.of(context).size.width,
@@ -1250,89 +1331,119 @@ class _FilEmploiPageState extends State<FilEmploiPage> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          _buildDataRow(index),
+
+                          _buildDataRow(index,day),
+
+                          // coursesFound? Text('Aucun cours n\'est prévu pour le dans ce semestre.'):Container(),
+                          // Divider()
                         ],
                       ),
                     );
                   } else {
                     // Continue displaying rows for the current semester
-                    return _buildDataRow(index);
+                    return _buildDataRow(index,day);
                   }
+
                 },
+
               ),
+
             ),
           ),
+
         ],
       ),
     );
   }
 
-  Widget _buildDataRow(int index) {
-    return DataTable(
-      showCheckboxColumn: true,
-      showBottomBorder: true,
-      headingRowHeight: 50,
-      headingRowColor: MaterialStateColor.resolveWith((states) => Colors.blueGrey.shade100),
-      columnSpacing: 8,
-      dataRowHeight: 50,
-      columns: [
-        DataColumn(label: Text(emplois[index]['jour'].toString().capitalize!,style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold,fontStyle: FontStyle.italic),)),
-        DataColumn(label: Text('')),
-        DataColumn(label: Text('')),
-        DataColumn(label: Text('')),
-        DataColumn(label: Text('')),
-      ],
-      rows: [
-        DataRow(
-          cells: [
-            // DataCell(Container(
-            //   width: 60,
-            //   child: Text(
-            //     '${emplois[index]['jour']}',
-            //     style: TextStyle(
-            //       color: Colors.black,
-            //     ),
-            //   ),
-            // )),
-            DataCell(Text(
-              '${emplois[index]['enseignat'].toString().capitalize}',
-              style: TextStyle(
-                color: Colors.black,
-              ),
+  ButtonStyle buildStyleFrom(String jour) {
+    return TextButton.styleFrom(
+        backgroundColor:
+        day == jour ? Color(0xFF4281B8) : Colors.white,
+        foregroundColor: day == jour ? Colors.white : Colors.indigo,
+        padding: EdgeInsets.only(top: 15, bottom: 15),minimumSize: Size.fromWidth(80),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadiusDirectional.only(topEnd: Radius.circular(18),bottomEnd: Radius.circular(18)))
+    );
+  }
+
+
+
+
+
+  Widget _buildDataRow(int index, String day) {
+    return Column(
+      children: [
+        if (emplois[index]['jour'].toString().capitalize == day)
+        DataTable(
+          showCheckboxColumn: true,
+          showBottomBorder: true,
+          headingRowHeight: 50,
+          headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
+          columnSpacing: 8,
+          dataRowHeight: 50,
+          columns: [
+            DataColumn(label: Text('')),
+            DataColumn(label: Text(emplois[index]['jour'].toString().capitalize!,
+              // style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold,fontStyle: FontStyle.italic),
+              style: TextStyle(color: Colors.black,fontSize: 20,fontWeight: FontWeight.w500),
             )),
-            DataCell(Text(
-              '${emplois[index]['matiere'].toString().capitalize}',
-              style: TextStyle(
-                color: Colors.black,
-              ),
-            )),
-            DataCell(Container(
-              width: 40,
-              child: Text(
-                '${emplois[index]['type']}',
-                style: TextStyle(
-                  color: Colors.black,
-                ),
-              ),
-            )),
-            DataCell(Container(
-              width: 40,
-              child: Text(
-                '${emplois[index]['startTime']}',
-                style: TextStyle(
-                  color: Colors.black,
-                ),
-              ),
-            )),
-            DataCell(Container(
-              width: 40,
-              child: Text(
-                '${emplois[index]['finishTime']}',
-                style: TextStyle(
-                  color: Colors.black,
-                ),
-              ),
-            )),
+            DataColumn(label: Text('')),
+            DataColumn(label: Text('')),
+            DataColumn(label: Text('')),
+          ],
+          rows: [
+            DataRow(
+              cells: [
+                // DataCell(Container(
+                //   width: 60,
+                //   child: Text(
+                //     '${emplois[index]['jour']}',
+                //     style: TextStyle(
+                //       color: Colors.black,
+                //     ),
+                //   ),
+                // )),
+                DataCell(Text(
+                  '${emplois[index]['enseignat'].toString().capitalize}',
+                  style: TextStyle(
+                    color: Colors.black,
+                  ),
+                )),
+                DataCell(Text(
+                  '${emplois[index]['matiere'].toString().capitalize}',
+                  style: TextStyle(
+                    color: Colors.black,
+                  ),
+                )),
+                DataCell(Container(
+                  width: 40,
+                  child: Text(
+                    '${emplois[index]['type']}',
+                    style: TextStyle(
+                      color: Colors.black,
+                    ),
+                  ),
+                )),
+                DataCell(Container(
+                  width: 40,
+                  child: Text(
+                    '${emplois[index]['startTime']}',
+                    style: TextStyle(
+                      color: Colors.black,
+                    ),
+                  ),
+                )),
+                DataCell(Container(
+                  width: 40,
+                  child: Text(
+                    '${emplois[index]['finishTime']}',
+                    style: TextStyle(
+                      color: Colors.black,
+                    ),
+                  ),
+                )),
+              ],
+            ),
           ],
         ),
       ],
@@ -1561,6 +1672,9 @@ class _FilElemsPageState extends State<FilElemsPage> {
           ),
         ],
       ),
+
+//      bottomNavigationBar: BottomNav(),
+
     );
   }
 
