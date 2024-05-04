@@ -109,7 +109,7 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
 
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xff0fb2ea),
+                backgroundColor: Color(0xcaf5f5f1),
                 foregroundColor: Colors.white,
                 elevation: 10,
                 minimumSize:  Size( MediaQuery.of(context).size.width -60 , MediaQuery.of(context).size.width/7),

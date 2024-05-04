@@ -40,8 +40,8 @@ class _HeaderWidgetState extends State<HeaderWidget> {
               decoration: new BoxDecoration(
                 gradient: new LinearGradient(
                     colors: [
-                      _primaryColor.withOpacity(0.4),
-                      _accentColor.withOpacity(0.7),
+                      _primaryColor,
+                      _accentColor,
                     ],
                     begin: const FractionalOffset(0.0, 0.0),
                     end: const FractionalOffset(1.0, 0.0),
@@ -64,11 +64,11 @@ class _HeaderWidgetState extends State<HeaderWidget> {
               decoration: new BoxDecoration(
                 gradient: new LinearGradient(
                     colors: [
-                      _primaryColor.withOpacity(0.4),
-                      _accentColor.withOpacity(0.4),
+                      _primaryColor,
+                      _accentColor,
                     ],
-                    begin: const FractionalOffset(0.0, 0.0),
-                    end: const FractionalOffset(1.0, 0.0),
+                    begin: const FractionalOffset(100.0, 100.0),
+                    end: const FractionalOffset(100, 100.0),
                     stops: [0.0, 1.0],
                     tileMode: TileMode.clamp
                 ),

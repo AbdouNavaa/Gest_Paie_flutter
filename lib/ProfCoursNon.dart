@@ -127,17 +127,17 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
     return "";
   }
   List<Matiere> matieresList = [];
-  Future<void> fetchMats() async {
-    List<Matiere> matieres = await fetchMatiere();
-    setState(() {
-      matieresList = matieres;
-    });
-  }
+  // Future<void> fetchMats() async {
+  //   List<Matiere> matieres = await fetchMatiere();
+  //   setState(() {
+  //     matieresList = matieres;
+  //   });
+  // }
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    fetchMats();
+    // fetchMats();
     widget.courses;
   }
 
@@ -267,7 +267,7 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
                     // backgroundColor: Colors.blue,
                     // surfaceTintColor: Color(0xB0AFAFA3),
 
-                    side: BorderSide(color: Colors.black26),
+                    // side: BorderSide(color: Colors.black26),
                     foregroundColor: Colors.black, textStyle: TextStyle(fontWeight: FontWeight.bold),
                     padding:EdgeInsets.only(left: 20,right: 20),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -307,7 +307,7 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
                     // backgroundColor: Colors.blue,
                     // surfaceTintColor: Color(0xB0AFAFA3),
 
-                    side: BorderSide(color: Colors.black26),
+                    // side: BorderSide(color: Colors.black26),
                     foregroundColor: Colors.black, textStyle: TextStyle(fontWeight: FontWeight.bold),
                     padding:EdgeInsets.only(left: 20,right: 20),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -335,7 +335,7 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
                     // backgroundColor: Colors.blue,
                     // surfaceTintColor: Color(0xB0AFAFA3),
 
-                    side: BorderSide(color: Colors.black26),
+                    // side: BorderSide(color: Colors.black26),
                     foregroundColor: Colors.black, textStyle: TextStyle(fontWeight: FontWeight.bold),
                     padding: EdgeInsets.only(left: 5,right: 5),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -347,266 +347,291 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
               ],          ),
           ),
 
-          Divider(color: Colors.black26,),
-
-          // Display the calculated sums
-
-
-// Define the pagination variables
-
-// Determine the total number of pages
-//           Padding(padding: EdgeInsets.all(10)),
-
-          Container(
-            margin: EdgeInsets.only(left: 230),
-            child: TextButton(
-              onPressed: () {
-                setState(() {
-                  // Sélectionnez tous les cours
-                  selectedCourses = widget.courses.map((course) => course['_id']).toList();
-                });
-              },
-              child: Text('Sélectionner tous'),
-              style: TextButton.styleFrom(
-                // side: BorderSide(color: Colors.black26),
-                // padding: EdgeInsets.only(left: 20,right: 20),
-                foregroundColor: Colors.lightBlueAccent, textStyle: TextStyle(fontWeight: FontWeight.bold),
-                // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-
-            ),
-          ),
+            Divider(color: Colors.black26,),
 
           Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(1.0),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Container(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Column(
+                children: [
+                  Container(
+                    width: MediaQuery.of(context).size.width + 50,
                     decoration: BoxDecoration(
-                      color: Colors.white12,
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(20.0),
-                      ),
+                        color: Colors.blue,
+                        borderRadius: BorderRadius.all(Radius.circular(30))
                     ),
-                    margin: EdgeInsets.only(left: 10),
-                    child: Column(
-                      children: [
-                        DataTable(
-                          showCheckboxColumn: true,
-                          showBottomBorder: true,
-                          horizontalMargin: 1,
-                          headingRowHeight: 50,
-                          columnSpacing: 18,
-                          dataRowHeight: 50,
-                          headingTextStyle: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black, // Set header text color
-                          ),
-                          // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
-                          columns: [
-                            DataColumn(label: Text('Signe')),
-                            // DataColumn(label: Text('Payé')),
-                            DataColumn(label: Text('Matiere')),
-                            DataColumn(label: Text('Date')),
-                            DataColumn(label: Text('Eq.CM')),
-                            DataColumn(label: Text('Prix')),
-                            DataColumn(label: Text('Action')),
-                          ],
-                          rows: [
-                            for (var index = (currentPage - 1) * coursesPerPage;
-                            index < widget.courses.length && index < currentPage * coursesPerPage;
-                            index++)
-                              if (courseFitsCriteria(widget.courses[index]))
-                                DataRow(
-                                  onLongPress: () =>
-                                      _showCourseDetails(context, widget.courses[index]),
-                                  cells: [
+                    child: DataTable(
+                      headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white70),
+                      dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
+                      showCheckboxColumn: true,
+                      showBottomBorder: true,
+                      horizontalMargin: 1,
+                      headingRowHeight: 50,
+                      columnSpacing: 18,
+                      dataRowHeight: 50,
+                      headingTextStyle: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black, // Set header text color
+                      ),
+                      // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
+                      columns: [
+                        DataColumn(label: Text('Signe')),
+                        // DataColumn(label: Text('Payé')),
+                        DataColumn(label: Text('Matiere')),
+                        DataColumn(label: Text('Date')),
+                        DataColumn(label: Text('Eq.CM')),
+                        DataColumn(label: Text('Prix')),
+                        DataColumn(label: Text('Action')),
+                      ],
+                      rows: [
+                        for (var index = (currentPage - 1) * coursesPerPage;
+                        index < widget.courses.length && index < currentPage * coursesPerPage;
+                        index++)
+                          if (courseFitsCriteria(widget.courses[index]))
+                            DataRow(
+                              onLongPress: () =>
+                                  _showCourseDetails(context, widget.courses[index]),
+                              cells: [
 
-                                    // DataCell(
-                                    //     widget.courses[index]['isSigned'] == "effectué"? Icon(Icons.check_box_outlined,size: 27):CupertinoSwitch(
-                                    //       activeColor: Colors.black26,
-                                    //       value:  widget.courses[index]['isSigned'] == "effectué"? true: false,
-                                    //       onChanged: (value) async {
-                                    //
-                                    //
-                                    //
-                                    //         setState(() {
-                                    //           widget.courses[index]['isSigned'] = value;
-                                    //         });
-                                    //
-                                    //         Navigator.of(context).pop();
-                                    //
-                                    //         // final updatedDate = DateFormat('yyyy-MM-ddthH:mm').parse(widget.courses[index]['date']).toUtc();
-                                    //
-                                    //         // final matiereName = widget.courses[index]['somme'];
-                                    //         // final matiereId = getMatiereIdFromName(matiereName);
-                                    //         singeCours(
-                                    //             widget.courses[index]['_id'],
-                                    //             value
-                                    //         );
-                                    //
-                                    //         setState(() {
-                                    //           Navigator.of(context).pop();
-                                    //           showDialog(
-                                    //               context: context,
-                                    //               builder: (BuildContext context) {
-                                    //                 return AlertDialog(
-                                    //                   surfaceTintColor: Color(0xB0AFAFA3),
-                                    //                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
-                                    //                   title: Row(
-                                    //                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                    //                     children: [
-                                    //                       Text("Alerte de succès"),
-                                    //                       Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
-                                    //                     ],
-                                    //                   ),
-                                    //                   content: Text(
-                                    //                       "Le Cours est signe avec succes"),
-                                    //
-                                    //                   actions: [
-                                    //                     TextButton(
-                                    //                       child: Text("Ok"),
-                                    //                       onPressed: () {
-                                    //                         Navigator.of(context).pop();
-                                    //                       },
-                                    //                     ),
-                                    //
-                                    //                   ],
-                                    //
-                                    //                 );});
-                                    //         });
-                                    //
-                                    //       },
-                                    //     )
-                                    // ),
-                                    DataCell(
-                                      Checkbox(
-                                        value: selectedCourses.contains(widget.courses[index]['_id']),
-                                        onChanged: (value) {
-                                          setState(() {
-                                            if (value != null && value) {
-                                              selectedCourses.add(widget.courses[index]['_id']);
-                                            } else {
-                                              selectedCourses.remove(widget.courses[index]['_id']);
-                                            }
-                                          });
-                                        },
-                                      ),
-                                    ),
-
-                                    DataCell(Container(
-                                      width: 60,
-                                      child: Text('${widget.courses[index]['matiere'].toString().capitalize}',style: TextStyle(
-                                        color: Colors.black,
-                                      ),),
-                                    ),
-                                        onTap: () =>
-                                            _showCourseDetails(context, widget.courses[index])),
-                                    DataCell(
-                                      Text(
-                                        '${DateFormat('dd MMM ').format(
-                                          DateTime.parse(widget.courses[index]['date'].toString()).toLocal(),
-                                        )}',style: TextStyle(
-                                        color: Colors.black,
-                                      ),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      Text('${widget.courses[index]['th']}',style: TextStyle(
-                                        color: Colors.black,
-                                      ),),
-                                    ),
-                                    DataCell(
-                                      Text('${widget.courses[index]['prix']}',style: TextStyle(
-                                        color: Colors.black,
-                                      ),),
-                                    ),
-                                    DataCell(
-
-                                        Row(
-                                          children: [
-                                            Container(
-                                              width: 35,
-                                              child: TextButton(
-                                                onPressed: () =>_showCourseDetails(context, widget.courses[index]),// Disable button functionality
-
-                                                child: Icon(Icons.more_horiz, color: Colors.black54),
-                                                style: TextButton.styleFrom(
-                                                  primary: Colors.white,
-                                                  elevation: 0,
-                                                  // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
-                                                ),
-                                              ),
-
-                                            ),
-                                          ],
-                                        )
-                                    ),
-                                  ],
+                                // DataCell(
+                                //     widget.courses[index]['isSigned'] == "effectué"? Icon(Icons.check_box_outlined,size: 27):CupertinoSwitch(
+                                //       activeColor: Colors.black26,
+                                //       value:  widget.courses[index]['isSigned'] == "effectué"? true: false,
+                                //       onChanged: (value) async {
+                                //
+                                //
+                                //
+                                //         setState(() {
+                                //           widget.courses[index]['isSigned'] = value;
+                                //         });
+                                //
+                                //         Navigator.of(context).pop();
+                                //
+                                //         // final updatedDate = DateFormat('yyyy-MM-ddthH:mm').parse(widget.courses[index]['date']).toUtc();
+                                //
+                                //         // final matiereName = widget.courses[index]['somme'];
+                                //         // final matiereId = getMatiereIdFromName(matiereName);
+                                //         singeCours(
+                                //             widget.courses[index]['_id'],
+                                //             value
+                                //         );
+                                //
+                                //         setState(() {
+                                //           Navigator.of(context).pop();
+                                //           showDialog(
+                                //               context: context,
+                                //               builder: (BuildContext context) {
+                                //                 return AlertDialog(
+                                //                   surfaceTintColor: Color(0xB0AFAFA3),
+                                //                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                                //                   title: Row(
+                                //                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                //                     children: [
+                                //                       Text("Alerte de succès"),
+                                //                       Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
+                                //                     ],
+                                //                   ),
+                                //                   content: Text(
+                                //                       "Le Cours est signe avec succes"),
+                                //
+                                //                   actions: [
+                                //                     TextButton(
+                                //                       child: Text("Ok"),
+                                //                       onPressed: () {
+                                //                         Navigator.of(context).pop();
+                                //                       },
+                                //                     ),
+                                //
+                                //                   ],
+                                //
+                                //                 );});
+                                //         });
+                                //
+                                //       },
+                                //     )
+                                // ),
+                                DataCell(
+                                  Checkbox(
+                                    value: selectedCourses.contains(widget.courses[index]['_id']),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        if (value != null && value) {
+                                          selectedCourses.add(widget.courses[index]['_id']);
+                                        } else {
+                                          selectedCourses.remove(widget.courses[index]['_id']);
+                                        }
+                                      });
+                                    },
+                                  ),
                                 ),
-                            DataRow(cells: [
-                              DataCell(Text('totals')),
-                              // DataCell(Text('')),
-                              DataCell((widget.dateDeb != null && widget.dateFin != null)?
-                              Center(child: Text('${coursesNum} Cours',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400)))
-                                  :Text('${widget.courses.length} Cours',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
-                              ),
-                              DataCell(Text('')),
-                              DataCell((widget.dateDeb != null && widget.dateFin != null)?
-                              Text('${totalType}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
-                                  :Text('${totalType}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),),
-                              ),
 
-                              DataCell((widget.dateDeb != null && widget.dateFin != null)?
-                              Text('${somme}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400))
-                                  :Text('${somme}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
-                              ),
+                                DataCell(Container(
+                                  width: 60,
+                                  child: Text('${widget.courses[index]['matiere'].toString().capitalize}',style: TextStyle(
+                                    color: Colors.black,
+                                  ),),
+                                ),
+                                    onTap: () =>
+                                        _showCourseDetails(context, widget.courses[index])),
+                                DataCell(
+                                  Text(
+                                    '${DateFormat('dd MMM ').format(
+                                      DateTime.parse(widget.courses[index]['date'].toString()).toLocal(),
+                                    )}',style: TextStyle(
+                                    color: Colors.black,
+                                  ),
+                                  ),
+                                ),
+                                DataCell(
+                                  Text('${widget.courses[index]['th']}',style: TextStyle(
+                                    color: Colors.black,
+                                  ),),
+                                ),
+                                DataCell(
+                                  Text('${widget.courses[index]['somme']}',style: TextStyle(
+                                    color: Colors.black,
+                                  ),),
+                                ),
+                                DataCell(
 
-                              DataCell(Text('')),
-                            ])
+                                    Row(
+                                      children: [
+                                        Container(
+                                          width: 35,
+                                          child: TextButton(
+                                            onPressed: () =>_showCourseDetails(context, widget.courses[index]),// Disable button functionality
 
-                          ],
-                        ),
+                                            child: Icon(Icons.more_horiz, color: Colors.black54),
+                                            style: TextButton.styleFrom(
+                                              primary: Colors.white,
+                                              elevation: 0,
+                                              // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                                            ),
+                                          ),
+
+                                        ),
+                                      ],
+                                    )
+                                ),
+                              ],
+                            ),
+                        DataRow(cells: [
+                          DataCell(Text('totals')),
+                          // DataCell(Text('')),
+                          DataCell((widget.dateDeb != null && widget.dateFin != null)?
+                          Center(child: Text('${coursesNum} Cours',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400)))
+                              :Text('${widget.courses.length} Cours',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
+                          ),
+                          DataCell(Text('')),
+                          DataCell((widget.dateDeb != null && widget.dateFin != null)?
+                          Text('${totalType}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
+                              :Text('${totalType}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),),
+                          ),
+
+                          DataCell((widget.dateDeb != null && widget.dateFin != null)?
+                          Text('${somme}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400))
+                              :Text('${somme}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
+                          ),
+
+                          DataCell(Text('')),
+                        ])
 
                       ],
                     ),
-
                   ),
-                ),
+
+                ],
               ),
             ),
           ),
+          // Divider(color: Colors.black26,),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Container(
+                // margin: EdgeInsets.only(right: 220),
+                child: ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      // Sélectionnez tous les cours
+                      selectedCourses = widget.courses.map((course) => course['_id']).toList();
+                    });
+                  },
+                  child: Text('Sélectionner tous'),
+                  style: ElevatedButton.styleFrom(
+                    surfaceTintColor: Colors.white,
+                    foregroundColor: Colors.black,
+                    // side: BorderSide(color: Colors.black38),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    elevation: 5,
+                    // padding: EdgeInsets.only(left: 20,right: 20),
+                    backgroundColor: Colors.white,
+                    //   foregroundColor: Colors.black,
+                    textStyle: TextStyle(fontWeight: FontWeight.bold),
+                    // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                  ),
 
-          Container(
-            margin: EdgeInsets.only(left: 200),
-            child: TextButton(
-              onPressed: () {
-                // Confirmer et traiter les cours sélectionnés
-                singeCoursMultiple(selectedCourses);
-                // Remettre la liste de sélection à zéro
-                setState(() {
-                  selectedCourses = [];
-                  Navigator.of(context).pop();
-                });
-              },
-              child: Text('Confirmer la sélection'),
-              style: TextButton.styleFrom(
-                // side: BorderSide(color: Colors.black26),
-                // padding: EdgeInsets.only(left: 20,right: 20),
-                foregroundColor: Colors.lightBlueAccent, textStyle: TextStyle(fontWeight: FontWeight.bold),
-                // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+
+                ),
               ),
+              Container(
+                // margin: EdgeInsets.only(right: 200,top: 1),
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (selectedCourses.length == 0){
+                      buildShowNullDialog(context);
+                    }
+                    else{
+                      singeCoursMultiple(selectedCourses);
+                    // Remettre la liste de sélection à zéro
+                    setState(() {
+                      selectedCourses = [];
+                      Navigator.of(context).pop();
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              surfaceTintColor: Color(0xB0AFAFA3),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                              title: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Text("Alerte de succès"),
+                                  Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
+                                ],
+                              ),
+                              content: Text(
+                                  "l\'operation est effectuée avec succès"),
+                              actions: [
+                                TextButton(
+                                  child: Text("Ok"),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
 
-            ),
+                              ],
+                            );});
+                    });}
+
+                  },
+                  child: Text('Confirmer la sélection'),
+                  style: ElevatedButton.styleFrom(
+                    surfaceTintColor: Colors.white,
+                    foregroundColor: Colors.black,
+                    // side: BorderSide(color: Colors.black38),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    elevation: 5,
+                    // padding: EdgeInsets.only(left: 20,right: 20),
+                    backgroundColor: Colors.white,
+                    //   foregroundColor: Colors.black,
+                    textStyle: TextStyle(fontWeight: FontWeight.bold),
+                    // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                  ),
+
+                ),
+              ),
+            ],
           ),
           Padding(padding: EdgeInsets.all(105)),
 
@@ -714,257 +739,35 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
                     ],
                   ),
                   SizedBox(height: 30),
-                  Row(
-                    children: [
-                      Text('Matiere:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                      SizedBox(width: 10,),
-                      Text('${course['matiere'].toString().capitalize}',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                    ],
-                  ),
+                  rowInfos('Matiere:',course['matiere'].toString().capitalize),
                   SizedBox(height: 25),
-                  Row(
-                    children: [
-                      Text('Date:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                      SizedBox(width: 10,),
-                      Text('${DateFormat('dd MMMM yyyy ').format(DateTime.parse(course['date'].toString()).toLocal())}',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                    ],
-                  ),
+                  rowInfos('Date:',DateFormat('dd MMMM yyyy ').format(DateTime.parse(course['date'].toString()).toLocal())),
                   SizedBox(height: 25),
                   Row(children: [
-                    Row(
-                      children: [
-                        Text('Deb:',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w400,
-                            fontStyle: FontStyle.italic,
-                            // color: Colors.lightBlue
-                          ),),
+                    rowInfos('Deb:',course['startTime']),
 
-                        SizedBox(width: 10,),
-                        Text(course['startTime'],
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w400,
-                            fontStyle: FontStyle.italic,
-                            // color: Colors.lightBlue
-                          ),),
-
-                      ],
-                    ),
                     SizedBox(width: 15),
-                    Row(
-                      children: [
-                        Text('Fin:',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w400,
-                            fontStyle: FontStyle.italic,
-                            // color: Colors.lightBlue
-                          ),),
-
-                        SizedBox(width: 10,),
-                        Text(course['finishTime'],
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w400,
-                            fontStyle: FontStyle.italic,
-                            // color: Colors.lightBlue
-                          ),),
-
-                      ],
-                    ),
+                    rowInfos('Fin:',course['finishTime']),
                   ],),
                   SizedBox(height: 25),
 
                   Row(
                     children: [
-                      Row(
-                        children: [
-                          Text('Type:',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.italic,
-                              // color: Colors.lightBlue
-                            ),),
-
-                          SizedBox(width: 10,),
-                          Text('${course['type']}',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.italic,
-                              // color: Colors.lightBlue
-                            ),),
-
-                        ],
-                      ),
+                      rowInfos('Type:',course['type']),
                       SizedBox(width: 20),
-                      Row(
-                        children: [
-                          Text('NbH:',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.italic,
-                              // color: Colors.lightBlue
-                            ),),
-
-                          SizedBox(width: 10,),
-                          Text('${course['nbh']}',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.italic,
-                              // color: Colors.lightBlue
-                            ),),
-
-                        ],
-                      ),
-                      SizedBox(width: 20),
+                      rowInfos('NbH:',course['nbh']),
                     ],
                   ),
                   SizedBox(height: 25),
-                  Row(
-                    children: [
-                      Text('Taux:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                      SizedBox(width: 10,),
-                      Text('${course['prix']}',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                    ],
-                  ),
+                  rowInfos('Taux:',course['somme']),
                   SizedBox(height: 25),
-                  Row(
-                    children: [
-                      Text('Eq.CM:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                      SizedBox(width: 10,),
-                      Text('${course['th']}',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                    ],
-                  ),
+                  rowInfos('Eq.CM:',course['th']),
                   SizedBox(height: 25),
-                  Row(
-                    children: [
-                      Text('Montant Total:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                      SizedBox(width: 10,),
-                      Text('${course['somme']}',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                    ],
-                  ),
+                  rowInfos('Montant Total:',course['somme']),
                   SizedBox(height: 25),
-                  Row(
-                    children: [
-                      Text('Signed:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                      SizedBox(width: 10,),
-                      Text(
-                        '${course['isSigned'] == "effectué"? 'Effectué': 'Non'}',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                    ],
-                  ),
+                  rowInfos('Signed:',course['isSigned'] == "effectué"? 'Effectué': 'Non'),
                   SizedBox(height: 25),
-                  Row(
-                    children: [
-                      Text('Payé:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                      SizedBox(width: 10,),
-                      Text(
-                        '${course['isPaid'] == "effectué"||course['isPaid'] == "préparé"? 'Effectué': 'En attente'}',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                    ],
-                  ),
+                  rowInfos('Payé:',course['isPaid'] == "effectué"||course['isPaid'] == "préparé"? 'Effectué': 'En attente'),
                   SizedBox(height: 25,),
                   TextButton(
                     onPressed: () async{
@@ -998,6 +801,30 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
 
 
     );
+  }
+
+  Row rowInfos(name, value) {
+    return Row(
+                  children: [
+                    Text(name,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+
+                    SizedBox(width: 10,),
+                    Text('${value}',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+
+                  ],
+                );
   }
 
 
@@ -1245,6 +1072,29 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
       // Ajoutez votre logique pour traiter chaque cours sélectionné ici
       // Utilisez courseId comme nécessaire
     }
+  }
+
+  Future<dynamic> buildShowNullDialog(BuildContext context) {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          surfaceTintColor: Color(0xB0AFAFA3),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+          title: Text("Alert d\'erreur",style: TextStyle(color: Colors.red.shade900),),
+          content: Text(
+              "Il faut sélectioner quelques elements"),
+          actions: <Widget>[
+            TextButton(
+              child: Text("Réessayez"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
 

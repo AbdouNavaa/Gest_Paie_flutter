@@ -206,23 +206,14 @@ class _PaieState extends State<ProfPaies> {
           // Padding(padding: EdgeInsets.all(20)),
 
           Expanded(
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(1.0),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Container(
+            child: Padding(
+              padding: const EdgeInsets.all(1.0),
+              child: Column(
+                children: [
+                  Container(
                     width: MediaQuery.of(context).size.width ,
                     decoration: BoxDecoration(
-                      color: Colors.white12,
+                      color: Colors.blue,
                       borderRadius: BorderRadius.all(
                         Radius.circular(20.0),
                       ),
@@ -232,6 +223,9 @@ class _PaieState extends State<ProfPaies> {
                       showCheckboxColumn: true,
                       showBottomBorder: true,
                       headingRowHeight: 50,
+
+                      headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white70),
+                      dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
                       columnSpacing: 8,headingTextStyle: TextStyle(fontWeight: FontWeight.bold),
                       dataRowHeight: 50,
                       columns: [
@@ -263,7 +257,7 @@ class _PaieState extends State<ProfPaies> {
                                 DataCell(Text('${widget.paies![index]["nbh"].toString()}',style: TextStyle(
                                   color: Colors.black,
                                 ),)),
-                                DataCell(Text('${widget.paies![index]["totalMontant"].toString()}',style: TextStyle(
+                                DataCell(Text('${widget.paies![index]["somme"].toString()}',style: TextStyle(
                                   color: Colors.black,
                                 ),)),
                                 DataCell(Text('${widget.paies![index]["status"].toString().capitalizeFirst}',style: TextStyle(
@@ -279,7 +273,7 @@ class _PaieState extends State<ProfPaies> {
                     ),
 
                   ),
-                ),
+                ],
               ),
             ),
           )

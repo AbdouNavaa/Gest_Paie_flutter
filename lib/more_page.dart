@@ -90,7 +90,7 @@ class _MoreOptionsPageState extends State<MoreOptionsPage> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        Icon(Icons.logout_outlined, color: widget.isDark? Colors.green : Colors.black,),
+                        Icon(Icons.output, color: widget.isDark? Colors.green : Colors.black,),
                         SizedBox(width: 10,),
                         Text('Logout'),
                       ],
@@ -186,7 +186,7 @@ class _MoreOptionsPageState extends State<MoreOptionsPage> {
                    child: Row(
                      mainAxisAlignment: MainAxisAlignment.start,
                      children: [
-                       Icon(Icons.login_outlined, color: widget.isDark? Colors.green : Colors.black,),
+                       Icon(Icons.output, color: widget.isDark? Colors.green : Colors.black,),
                        SizedBox(width: 10,),
                        Text('Logout'),
                      ],

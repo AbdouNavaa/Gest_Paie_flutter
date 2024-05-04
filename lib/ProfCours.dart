@@ -114,25 +114,25 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
   }
 
 
-  String getMatiereIdFromName(String matiereName) {
-    final matiere = matieresList.firstWhere((matiere) => matiere.name == matiereName);
-    if (matiere != null) {
-      return matiere.id;
-    }
-    return "";
-  }
-  List<Matiere> matieresList = [];
-  Future<void> fetchMats() async {
-    List<Matiere> matieres = await fetchMatiere();
-    setState(() {
-      matieresList = matieres;
-    });
-  }
+  // String getMatiereIdFromName(String matiereName) {
+  //   final matiere = matieresList.firstWhere((matiere) => matiere.name == matiereName);
+  //   if (matiere != null) {
+  //     return matiere.id;
+  //   }
+  //   return "";
+  // }
+  // List<Matiere> matieresList = [];
+  // Future<void> fetchMats() async {
+  //   List<Matiere> matieres = await fetchMatiere();
+  //   setState(() {
+  //     matieresList = matieres;
+  //   });
+  // }
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    fetchMats();
+    // fetchMats();
     widget.courses;
   }
 
@@ -237,7 +237,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                       firstDate: DateTime(2000),
                       lastDate: DateTime(2030),
                         builder: (context, child){
-                                                              return CalenderStyle(child: child!,);
+                        return CalenderStyle(child: child!,);
                         }
                         );
 
@@ -262,7 +262,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                     // backgroundColor: Colors.blue,
                     // surfaceTintColor: Color(0xB0AFAFA3),
 
-                    side: BorderSide(color: Colors.black26),
+                    // side: BorderSide(color: Colors.black26),
                     foregroundColor: Colors.black, textStyle: TextStyle(fontWeight: FontWeight.bold),
                     padding:EdgeInsets.only(left: 20,right: 20),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -302,7 +302,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                     // backgroundColor: Colors.blue,
                     // surfaceTintColor: Color(0xB0AFAFA3),
 
-                    side: BorderSide(color: Colors.black26),
+                    // side: BorderSide(color: Colors.black26),
                     foregroundColor: Colors.black, textStyle: TextStyle(fontWeight: FontWeight.bold),
                     padding:EdgeInsets.only(left: 20,right: 20),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -330,7 +330,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                     // backgroundColor: Colors.blue,
                     // surfaceTintColor: Color(0xB0AFAFA3),
 
-                    side: BorderSide(color: Colors.black26),
+                    // side: BorderSide(color: Colors.black26),
                     foregroundColor: Colors.black, textStyle: TextStyle(fontWeight: FontWeight.bold),
                     padding: EdgeInsets.only(left: 5,right: 5),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -351,145 +351,140 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
 // Determine the total number of pages
 
           Expanded(
-            child: Container(
-              // margin: EdgeInsets.only(top: 30),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(1.0),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white12,
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(20.0),
+            child: Padding(
+              padding: const EdgeInsets.all(1.0),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Column(
+                  children: [
+                    Container(
+                      width: MediaQuery.of(context).size.width + 50,
+                      decoration: BoxDecoration(
+                          color: Colors.blue,
+                          borderRadius: BorderRadius.all(Radius.circular(30))
+                      ),
+                      child: DataTable(
+
+                        headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white70),
+                        dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
+                        showCheckboxColumn: true,
+                        showBottomBorder: true,
+                        horizontalMargin: 1,
+                        // headingRowColor: MaterialStateColor.resolveWith((states) => Colors.lightBlueAccent.shade100), // Couleur de la ligne d'en-tête
+                        headingRowHeight: 50,
+                        columnSpacing: 18,
+                        dataRowHeight: 60,
+                        headingTextStyle: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black, // Set header text color
+                        ),
+                        // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
+                        columns: [
+                          DataColumn(label: Text('Signé')),
+                          DataColumn(label: Text('Payé')),
+                          DataColumn(label: Text('Matière')),
+                          DataColumn(label: Text('Date')),
+                          DataColumn(label: Text('Eq.CM')),
+                          DataColumn(label: Text('MT')),
+                          DataColumn(label: Text('Action')),
+                        ],
+                        rows: [
+                          for (var index = (currentPage - 1) * coursesPerPage;
+                          index < widget.courses.length && index < currentPage * coursesPerPage;
+                          index++)
+                            if (courseFitsCriteria(widget.courses[index]))
+                              DataRow(
+                                mouseCursor: MaterialStateMouseCursor.clickable,
+                                // selected: true,onSelectChanged: (value) => true,
+                                onLongPress: () =>
+                                    _showCourseDetails(context, widget.courses[index]),
+                                cells: [
+
+                                  DataCell(
+                                      Icon(Icons.task_alt,size: 27,color: Colors.green,)
+                                  ),
+                                  DataCell(
+                                      widget.courses[index]['isPaid'] == "effectué" ? Container(child: Icon(Icons.task_alt,size: 27,color: Colors.green,))
+                                          :widget.courses[index]['isPaid'] == "préparé"?
+                                      Container(child: Icon(Icons.remove_circle_outline,size: 27,color: Colors.blueGrey,))
+                                          :Container(child: Icon(Icons.panorama_fish_eye,size: 27))
+                                  ),
+                                  DataCell(Container(
+                                    width: 60,
+                                    child: Text('${widget.courses[index]['matiere'].toString().capitalize}',style: TextStyle(
+                                      color: Colors.black,
+                                    ),),
+                                  ),
+                                      onTap: () =>
+                                          _showCourseDetails(context, widget.courses[index])),
+                                  DataCell(
+                                    Text(
+                                      '${DateFormat('dd MMM ').format(
+                                        DateTime.parse(widget.courses[index]['date'].toString()).toLocal(),
+                                      )}',style: TextStyle(
+                                      color: Colors.black,
+                                    ),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    Text('${widget.courses[index]['th']}',style: TextStyle(
+                                      color: Colors.black,
+                                    ),),
+                                  ),
+                                  DataCell(
+                                    Text('${widget.courses[index]['somme']}',style: TextStyle(
+                                      color: Colors.black,
+                                    ),),
+                                  ),
+                                  DataCell(
+
+                                      Row(
+                                        children: [
+                                          Container(
+                                            width: 35,
+                                            child: TextButton(
+                                              onPressed: () =>_showCourseDetails(context, widget.courses[index]),// Disable button functionality
+
+                                              child: Icon(Icons.more_horiz, color: Colors.black54),
+                                              style: TextButton.styleFrom(
+                                                primary: Colors.white,
+                                                elevation: 0,
+                                                // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                                              ),
+                                            ),
+
+                                          ),
+                                        ],
+                                      )
+                                  ),
+                                ],
+                              ),
+                          DataRow(
+                              // color:MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)),
+                              cells: [
+                            DataCell(Text('Total', style: TextStyle(fontWeight: FontWeight.bold),)),
+                            DataCell(Text('')),
+                            DataCell((widget.dateDeb != null && widget.dateFin != null)?
+                            Center(child: Text('${coursesNum} Cours',style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold)))
+                                :Text('${widget.courses.length} Cours',style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),)
+                            ),
+                            DataCell(Text('')),
+                            DataCell((widget.dateDeb != null && widget.dateFin != null)?
+                            Text('${totalType}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),)
+                                :Text('${totalType}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
+                            ),
+
+                            DataCell((widget.dateDeb != null && widget.dateFin != null)?
+                            Text('${somme}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold))
+                                :Text('${somme}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),)
+                            ),
+
+                            DataCell(Text('')),
+                          ])
+                        ],
                       ),
                     ),
-                    margin: EdgeInsets.only(left: 10),
-                    child: Column(
-                      children: [
-                        DataTable(
-                          showCheckboxColumn: true,
-                          showBottomBorder: true,
-                          horizontalMargin: 1,
-                          // headingRowColor: MaterialStateColor.resolveWith((states) => Colors.lightBlueAccent.shade100), // Couleur de la ligne d'en-tête
-                          headingRowHeight: 50,
-                          columnSpacing: 18,
-                          dataRowHeight: 60,
-                          headingTextStyle: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black, // Set header text color
-                          ),
-                          // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
-                          columns: [
-                            DataColumn(label: Text('Signé')),
-                            DataColumn(label: Text('Payé')),
-                            DataColumn(label: Text('Matière')),
-                            DataColumn(label: Text('Date')),
-                            DataColumn(label: Text('Eq.CM')),
-                            DataColumn(label: Text('MT')),
-                            DataColumn(label: Text('Action')),
-                          ],
-                          rows: [
-                            for (var index = (currentPage - 1) * coursesPerPage;
-                            index < widget.courses.length && index < currentPage * coursesPerPage;
-                            index++)
-                              if (courseFitsCriteria(widget.courses[index]))
-                                DataRow(
-                                  onLongPress: () =>
-                                      _showCourseDetails(context, widget.courses[index]),
-                                  cells: [
-
-                                    DataCell(
-                                        Icon(Icons.task_alt,size: 27,color: Colors.green,)
-                                    ),
-                                    DataCell(
-                                        widget.courses[index]['isPaid'] == "effectué" ? Container(child: Icon(Icons.task_alt,size: 27,color: Colors.green,))
-                                            :widget.courses[index]['isPaid'] == "préparé"?
-                                        Container(child: Icon(Icons.remove_circle_outline,size: 27,color: Colors.blueGrey,))
-                                            :Container(child: Icon(Icons.panorama_fish_eye,size: 27))
-                                    ),
-                                    DataCell(Container(
-                                      width: 60,
-                                      child: Text('${widget.courses[index]['matiere'].toString().capitalize}',style: TextStyle(
-                                        color: Colors.black,
-                                      ),),
-                                    ),
-                                        onTap: () =>
-                                            _showCourseDetails(context, widget.courses[index])),
-                                    DataCell(
-                                      Text(
-                                        '${DateFormat('dd MMM ').format(
-                                          DateTime.parse(widget.courses[index]['date'].toString()).toLocal(),
-                                        )}',style: TextStyle(
-                                        color: Colors.black,
-                                      ),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      Text('${widget.courses[index]['th']}',style: TextStyle(
-                                        color: Colors.black,
-                                      ),),
-                                    ),
-                                    DataCell(
-                                      Text('${widget.courses[index]['somme']}',style: TextStyle(
-                                        color: Colors.black,
-                                      ),),
-                                    ),
-                                    DataCell(
-
-                                        Row(
-                                          children: [
-                                            Container(
-                                              width: 35,
-                                              child: TextButton(
-                                                onPressed: () =>_showCourseDetails(context, widget.courses[index]),// Disable button functionality
-
-                                                child: Icon(Icons.more_horiz, color: Colors.black54),
-                                                style: TextButton.styleFrom(
-                                                  primary: Colors.white,
-                                                  elevation: 0,
-                                                  // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
-                                                ),
-                                              ),
-
-                                            ),
-                                          ],
-                                        )
-                                    ),
-                                  ],
-                                ),
-                            DataRow(cells: [
-                              DataCell(Text('Total')),
-                              DataCell(Text('')),
-                              DataCell((widget.dateDeb != null && widget.dateFin != null)?
-                              Center(child: Text('${coursesNum} Cours',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400)))
-                                  :Text('${widget.courses.length} Cours',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
-                              ),
-                              DataCell(Text('')),
-                              DataCell((widget.dateDeb != null && widget.dateFin != null)?
-                              Text('${totalType}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
-                                  :Text('${totalType}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),),
-                              ),
-
-                              DataCell((widget.dateDeb != null && widget.dateFin != null)?
-                              Text('${somme}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400))
-                                  :Text('${somme}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
-                              ),
-
-                              DataCell(Text('')),
-                            ])
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
+                  ],
                 ),
               ),
             ),
@@ -598,257 +593,34 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                   ],
                 ),
                 SizedBox(height: 50),
-                Row(
-                  children: [
-                    Text('Matiere:',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                    SizedBox(width: 10,),
-                    Text('${course['matiere'].toString().capitalize}',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                  ],
-                ),
+                rowInfos('Matiere:',course['matiere'].toString().capitalize),
                 SizedBox(height: 25),
-                Row(
-                  children: [
-                    Text('Date:',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                    SizedBox(width: 10,),
-                    Text('${DateFormat('dd MMMM yyyy ').format(DateTime.parse(course['date'].toString()).toLocal())}',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                  ],
-                ),
+                rowInfos('Date:',DateFormat('dd MMMM yyyy ').format(DateTime.parse(course['date'].toString()).toLocal())),
                 SizedBox(height: 25),
                 Row(children: [
-                  Row(
-                    children: [
-                      Text('Deb:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                      SizedBox(width: 10,),
-                      Text(course['startTime'],
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                    ],
-                  ),
+                  rowInfos('Deb:',course['startTime']),
                   SizedBox(width: 15),
-                  Row(
-                    children: [
-                      Text('Fin:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                      SizedBox(width: 10,),
-                      Text(course['finishTime'],
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                    ],
-                  ),
+                  rowInfos('Fin:',course['finishTime']),
                 ],),
                 SizedBox(height: 25),
 
                 Row(
                   children: [
-                    Row(
-                      children: [
-                        Text('Type:',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w400,
-                            fontStyle: FontStyle.italic,
-                            // color: Colors.lightBlue
-                          ),),
-
-                        SizedBox(width: 10,),
-                        Text('${course['type']}',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w400,
-                            fontStyle: FontStyle.italic,
-                            // color: Colors.lightBlue
-                          ),),
-
-                      ],
-                    ),
+                    rowInfos('Type:',course['type']),
                     SizedBox(width: 20),
-                    Row(
-                      children: [
-                        Text('NbH:',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w400,
-                            fontStyle: FontStyle.italic,
-                            // color: Colors.lightBlue
-                          ),),
-
-                        SizedBox(width: 10,),
-                        Text('${course['nbh']}',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w400,
-                            fontStyle: FontStyle.italic,
-                            // color: Colors.lightBlue
-                          ),),
-
-                      ],
-                    ),
-                    SizedBox(width: 20),
+                    rowInfos('NbH:',course['nbh']),
                   ],
                 ),
                 SizedBox(height: 25),
-                Row(
-                  children: [
-                    Text('Taux:',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                    SizedBox(width: 10,),
-                    Text('${course['prix']}',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                  ],
-                ),
+                rowInfos('Taux:',course['somme']),
                 SizedBox(height: 25),
-                Row(
-                  children: [
-                    Text('Eq.CM:',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                    SizedBox(width: 10,),
-                    Text('${course['th']}',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                  ],
-                ),
+                rowInfos('Eq.CM:',course['th']),
                 SizedBox(height: 25),
-                Row(
-                  children: [
-                    Text('Montant Total:',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                    SizedBox(width: 10,),
-                    Text('${course['somme']}',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                  ],
-                ),
+                rowInfos('Montant Total:',course['somme']),
                 SizedBox(height: 25),
-                Row(
-                  children: [
-                    Text('Signé ?:',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                    SizedBox(width: 10,),
-                    Text(
-                      '${course['isSigned'] == "effectué"? 'Oui': 'Non'}',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                  ],
-                ),
+                rowInfos('Signé ?:',course['isSigned'] == "effectué"? 'Oui': 'Non'),
                 SizedBox(height: 25),
-                Row(
-                  children: [
-                    Text('Payé ?:',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                    SizedBox(width: 10,),
-                    Text(
-                      '${course['isPaid'] == "effectué"||course['isPaid'] == "préparé"? 'Oui': 'En attente'}',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                  ],
-                ),
+                rowInfos('Payé ?:',course['isPaid'] == "effectué"||course['isPaid'] == "préparé"? 'Oui': 'En attente'),
                 SizedBox(height: 25,),
                 // ElevatedButton(
                 //   onPressed: () async{
@@ -881,6 +653,30 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
 
 
     );
+  }
+
+  Row rowInfos(name,value) {
+    return Row(
+                children: [
+                  Text(name,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w400,
+                      fontStyle: FontStyle.italic,
+                      // color: Colors.lightBlue
+                    ),),
+
+                  SizedBox(width: 10,),
+                  Text('${value}',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w400,
+                      fontStyle: FontStyle.italic,
+                      // color: Colors.lightBlue
+                    ),),
+
+                ],
+              );
   }
 
 }
@@ -1008,6 +804,7 @@ class _UpdateProfCoursDialogState extends State<UpdateProfCoursDialog> {
                             setState(() {
                               if (selectedTypes.contains(type)) {
                                 selectedTypes.remove(type);
+
                               } else {
                                 selectedTypes.add(type);
                               }

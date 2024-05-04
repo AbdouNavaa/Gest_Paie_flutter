@@ -12,6 +12,7 @@ import 'dart:convert';
 import '../matieres.dart';
 import 'Cours.dart';
 import 'categories.dart';
+import 'home_screen.dart';
 
 
 
@@ -49,21 +50,6 @@ class _ElementsState extends State<Elements> {
   Professeur? selectedProfesseurTP;
   Professeur? selectedProfesseurTD;
 
-  Future<void> updateProfesseurList() async {
-    if (selectedMat != null) {
-      List<Professeur> fetchedProfesseurs = await fetchProfesseursByMatiere(selectedMat!.id);
-      setState(() {
-        professeurs = fetchedProfesseurs;
-        selectedProfesseur = null;
-      });
-    } else {
-      List<Professeur> fetchedProfesseurs = await fetchProfs();
-      setState(() {
-        professeurs = fetchedProfesseurs;
-        selectedProfesseur = null;
-      });
-    }
-  }
 
   void DeleteElems(id) async{
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -108,7 +94,7 @@ class _ElementsState extends State<Elements> {
   }
   String getMatNameFromId(String id) {
     // Assuming you have a list of professeurs named 'professeursList'
-    final fil = filteredItems!.firstWhere((f) => '${f.id}' == id, orElse: () =>Elem(id: 'id', filId: 'filId', MatId: 'MatId'));
+    final fil = filteredItems!.firstWhere((f) => '${f.id}' == id, orElse: () =>Elem(id: 'id', filId: 'filId', ));
     print(fil.nameMat);
     return fil.nameMat!; // Return the ID if found, otherwise an empty string
 
@@ -188,19 +174,6 @@ class _ElementsState extends State<Elements> {
       categories = fetchedCategories;
     });
   }
-  Future<void> updateMatiereList() async {
-    if (selectedCategory != null) {
-      List<Matiere> fetchedmatieres = await fetchMatieresByCategory(selectedCategory!.id);
-      setState(() {
-        matiereList = fetchedmatieres;
-      });
-    } else {
-      List<Matiere> fetchedmatieres = await fetchMatiere();
-      setState(() {
-        matiereList = fetchedmatieres;
-      });
-    }
-  }
   TextEditingController _searchController = TextEditingController();
 
   int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
@@ -210,10 +183,10 @@ class _ElementsState extends State<Elements> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Scaffold(
         // appBar: AppBar(
         //   title: Center(child: Text(' ${filteredItems?.length} ')),
         // ),
+        drawer: MyDrawer(),
         body: Column(
           children: [
             SizedBox(height: 40,),
@@ -257,7 +230,7 @@ class _ElementsState extends State<Elements> {
                     // Par exemple, filtrez les emploiesseurs dont le name ou le préname contient la valeur saisie
                     filteredItems = Els.where((ele) =>
                         (ele.nameMat)!.toLowerCase().contains(value.toLowerCase()) ||
-                      (ele.fil!).toLowerCase().contains(value.toLowerCase()) ||
+                      (ele.filName!).toLowerCase().contains(value.toLowerCase()) ||
                       // (ele.ProfTP!).toLowerCase().contains(value.toLowerCase()) ||
                       // (ele.ProfTD!).toLowerCase().contains(value.toLowerCase())
                       ("S${ele.SemNum!}").toLowerCase().contains(value.toLowerCase())
@@ -370,10 +343,8 @@ class _ElementsState extends State<Elements> {
         ),
 
 
-      ),
-      // bottomNavigationBar: BottomNav(),
+      );
 
-    );
   }
 
   Future<void> _displayTextInputDialog(BuildContext context) async {
@@ -425,13 +396,15 @@ class _ElementsState extends State<Elements> {
   Future<void> _showElemDetails(BuildContext context, Elem ele,String EleID) {
     return showModalBottomSheet(
         context: context,backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
-            topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
         isScrollControlled: true, // Rendre le contenu déroulable
 
         builder: (BuildContext context){
           return Container(
             height: 700,
+            decoration: BoxDecoration(borderRadius: BorderRadius.only(
+                topRight: Radius.circular(20), topLeft: Radius.circular(20)),
+              color: Colors.white,
+            ),
             padding: const EdgeInsets.all(25.0),
             child: SingleChildScrollView(scrollDirection: Axis.vertical,
               child: Column(
@@ -491,7 +464,7 @@ class _ElementsState extends State<Elements> {
                           // color: Colors.lightBlue
                         ),),
                       SizedBox(width: 10,),
-                      Text(ele.fil!.toUpperCase(),
+                      Text(ele.filName!.toUpperCase(),
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w400,
@@ -541,8 +514,9 @@ class _ElementsState extends State<Elements> {
                           ),),
 
                         for (var prof in ele.ProCMId!)
+
                           Text(
-                            '-${getProfIdFromName(prof).capitalize }',
+                            '-${getProfIdFromName(prof['_id']).capitalize }',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w400,
@@ -566,7 +540,7 @@ class _ElementsState extends State<Elements> {
                           ),),
                         for (var prof in ele.ProTPId!)
                           Text(
-                            '-${getProfIdFromName(prof).capitalize }',
+                            '-${getProfIdFromName(prof['_id']).capitalize }',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w400,
@@ -590,7 +564,7 @@ class _ElementsState extends State<Elements> {
                           ),),
                         for (var prof in ele.ProTDId!)
                           Text(
-                            '-${getProfIdFromName(prof).capitalize }',
+                            '-${getProfIdFromName(prof['_id']).capitalize }',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w400,
@@ -671,9 +645,9 @@ class _ElementsState extends State<Elements> {
                   ),
                   SizedBox(height: 20,),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      TextButton(
+                      ElevatedButton(
                         onPressed: () {
                           // _selectedNum = emp.dayNumero;
                           // _date.text = ele.fil!;
@@ -685,7 +659,7 @@ class _ElementsState extends State<Elements> {
                                     UpdateElemScreen(eleId: ele.id,  Sem:ele.SemNum, Mat: ele.nameMat!,
                                       // ProCM: ele.ProfCM!, ProTP: ele.ProfTP!, ProTD: ele.ProfTD!,
                                       CredCM: ele.HCM!, CredTP: ele.HTP!,CredTD: ele.HTD!,
-                                      filId: ele.filId, MatId: ele.MatId, fil: ele.fil!,
+                                      filId: ele.filId, fil: ele.filName!,
                                       ProfCMId: ele.ProCMId, ProfTPId: ele.ProTPId,ProfTDId: ele.ProTDId,
                                     )));
                           });
@@ -695,20 +669,20 @@ class _ElementsState extends State<Elements> {
                         },// Disable button functionality
 
                         child: Text('Modifier'),
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.only(left: 20,right: 20),
-                          foregroundColor: Colors.lightGreen,
-                          // backgroundColor: Colors.white,
-                          // side: BorderSide(color: Colors.black,),
-
-                            backgroundColor: Color(0xfffff1),
-                            side: BorderSide(color: Colors.black12,),   elevation: 3,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))
-                          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                        style: ElevatedButton.styleFrom(
+                          surfaceTintColor: Colors.white,
+                          // side: BorderSide(color: Colors.black38),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          elevation: 5,
+                          padding: EdgeInsets.symmetric(horizontal: 20),
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.green,
+                          textStyle: TextStyle(fontWeight: FontWeight.bold),
+                          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                         ),
 
                       ),
-                      TextButton(
+                      ElevatedButton(
                           // print(ele.id);
                         onPressed: (){
                           showDialog(
@@ -862,18 +836,21 @@ class _ElementsState extends State<Elements> {
                         }, // Disable button functionality
 
                         child: Text('Ajouter Prof'),
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.only(left: 20,right: 20),
-                          foregroundColor: Color(0xff0fb2ea),
-                          // foregroundColor: Colors.lightGreen,
-                          backgroundColor: Color(0xfffff1),
-                          side: BorderSide(color: Colors.black12,),
-                          elevation: 3,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))
+                        style: ElevatedButton.styleFrom(
+                          surfaceTintColor: Colors.white,
+                          // side: BorderSide(color: Colors.black38),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          elevation: 5,
+                          padding: EdgeInsets.symmetric(horizontal: 15),
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.blue,
+                          textStyle: TextStyle(fontWeight: FontWeight.bold),
+                          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                         ),
 
+
                       ),
-                      TextButton(
+                      ElevatedButton(
                         onPressed: () {
                           showDialog(
                             context: context,
@@ -919,16 +896,18 @@ class _ElementsState extends State<Elements> {
                         }, // Disable button functionality
 
                         child: Text('Supprimer'),
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.only(left: 20,right: 20),
+                        style: ElevatedButton.styleFrom(
+                          surfaceTintColor: Colors.white,
+                          // side: BorderSide(color: Colors.black38),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          elevation: 5,
+                          padding: EdgeInsets.symmetric(horizontal: 20),
+                          backgroundColor: Colors.white,
                           foregroundColor: Colors.redAccent,
-
-                            backgroundColor: Color(0xfffff1),
-                            side: BorderSide(color: Colors.black12,), // side: BorderSide(color: Colors.black,),
-                          elevation: 3,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))
-                          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                          textStyle: TextStyle(fontWeight: FontWeight.bold),
+                          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                         ),
+
 
                       ),
                     ],
@@ -1250,7 +1229,7 @@ class YourDataSource extends DataTableSource {
       DataCell(Container(width: 80,
           child: Text(item.nameMat!.capitalize!))),
 
-      DataCell(Container(width: 30, child: Text(item.fil!.toUpperCase()))),
+      DataCell(Container(width: 30, child: Text(item.filName!.toUpperCase()))),
       DataCell(Container(width: 30, child: Text(item.HCM!.toString()))),
 
       DataCell(Container(width: 30, child: Text(item.HTP!.toString()))),
@@ -1283,7 +1262,7 @@ class Elem {
   String id;
   int? SemNum;
   String filId;
-  String MatId;
+  String? filName;
   List<dynamic>? ProCMId; // Le type exact des éléments peut être spécifié ici
   List<dynamic>? ProTPId;
   List<dynamic>? ProTDId;
@@ -1295,10 +1274,6 @@ class Elem {
   int? HTD;
   String? code;
   String? nameMat;
-  String? nameM;
-  int? taux;
-  // String? mat;
-  String? fil;
   // String? ProfCM;
   // String? ProfTP;
   // String? ProfTD;
@@ -1306,7 +1281,6 @@ class Elem {
   Elem({
     required this.id,
     required this.filId,
-    required this.MatId,
     this.ProCMId,
     this.ProTPId,
     this.ProTDId,
@@ -1316,10 +1290,8 @@ class Elem {
     this.SemNum,
     this.code,
     this.nameMat,
-    this.nameM,
     // this.mat,
-    this.fil,
-    this.taux,
+    this.filName,
     this.HCM,
     this.HTP,
     this.HTD,
@@ -1332,16 +1304,13 @@ class Elem {
     return Elem(
       id: json['_id'],
       SemNum: json['semestre'],
-      filId: json['filiere'],
-      MatId: json['matiere'],
+      filId: json['filiere']['_id'],
       HCM: json['heuresCM'],
       HTP: json['heuresTP'],
       HTD: json['heuresTD'],
       code: json['code'],
-      taux: json['taux'],
-      nameMat: json['matiere_mane'],
-      nameM: json['name'],
-      fil: json['filiere_name'],
+      nameMat: json['name'],
+      filName: json['filiere']['name'],
       // mat: json['matiere'],
       ProCMId: json['professeurCM'] ?? [],
       ProTPId: json['professeurTP'] ?? [],
@@ -1404,42 +1373,22 @@ class _AddElemScreenState extends State<AddElemScreen> {
   int semNum = 1;
   List<int> nbhValues = [0,10, 20];
 
-  Matiere? selectedMat;
+  Elem? selectedMat;
   Professeur? selectedProfesseurCM;
   Professeur? selectedProfesseurTP;
   Professeur? selectedProfesseurTD;
   List<Professeur> professeurs = [];
-  List<Matiere> matieres = [];
   DateTime? selectedDateTime;
 
   bool isChanged =false;
 
 
-  Future<void> updateProfesseurList() async {
-    if (selectedMat != null) {
-      List<Professeur> fetchedProfesseurs = await fetchProfesseursByMatiere(selectedMat!.id);
-      setState(() {
-        professeurs = fetchedProfesseurs;
-        selectedProfesseurCM = null;
-        selectedProfesseurTP = null;
-        selectedProfesseurTD = null;
-      });
-    } else {
-      List<Professeur> fetchedProfesseurs = await fetchProfs();
-      setState(() {
-        professeurs = fetchedProfesseurs;
-        selectedProfesseurCM = null;
-        selectedProfesseurTP = null;
-        selectedProfesseurTD = null;
-      });
-    }
-  }
 
-  List<Professeur> professeurList = [];
   Category? selectedCategory;
+  TextEditingController _name = TextEditingController();
   filliere? selectedFil;
   List<Category> categories = [];
-  List<Matiere> matiereList = [];
+  List<Elem> matiereList = [];
   List<filliere> filList = [];
   @override
   void initState() {
@@ -1448,8 +1397,16 @@ class _AddElemScreenState extends State<AddElemScreen> {
       setState(() {
         categories = data; // Assigner la liste renvoyée par emploiesseur à items
       });
+      fetchProfs().then((data) {
+        setState(() {
+          professeurs = data; // Assigner la liste renvoyée par emploiesseur à items
+          print('ProfList ${professeurs}');
+        });
+      }).catchError((error) {
+        print('Erreur: $error');
+      });
 
-      fetchMatiere().then((data) {
+      fetchElems().then((data) {
         setState(() {
           matiereList = data; // Assigner la liste renvoyée par emploiesseur à items
         });
@@ -1457,14 +1414,6 @@ class _AddElemScreenState extends State<AddElemScreen> {
         print('Erreur: $error');
       });
 
-    }).catchError((error) {
-      print('Erreur: $error');
-    });
-    fetchProfs().then((data) {
-      setState(() {
-        professeurList = data; // Assigner la liste renvoyée par emploiesseur à items
-        print('Hello');
-      });
     }).catchError((error) {
       print('Erreur: $error');
     });
@@ -1479,7 +1428,7 @@ class _AddElemScreenState extends State<AddElemScreen> {
 
     fetchCategories();
   }
-  void AddElem (String matId,int? sem,String filId,String? PCM,String? PTP,String? PTD,int? HCM,int? HTP,int? HTD,) async {
+  void AddElem (String catId,String matId,int? sem,String filId,String? PCM,String? PTP,String? PTD,int? HCM,int? HTP,int? HTD,) async {
 
     // Check if the prix parameter is provided, otherwise use the default value of 100
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -1487,7 +1436,8 @@ class _AddElemScreenState extends State<AddElemScreen> {
     print(token);
     Map<String, dynamic> body ={};
     body = {
-      "matiere": matId,
+      "categorie": catId,
+      "name": matId,
       "semestre": sem,
       "filiere": filId,
       "professeurCM": PCM ?? '',
@@ -1580,12 +1530,13 @@ class _AddElemScreenState extends State<AddElemScreen> {
   }
   Future<void> updateMatiereList() async {
     if (selectedCategory != null) {
-      List<Matiere> fetchedmatieres = await fetchMatieresByCategory(selectedCategory!.id);
+      List<Elem> fetchedmatieres = await fetchMatieresByCategory(selectedCategory!.id);
       setState(() {
         matiereList = fetchedmatieres;
       });
     } else {
-      List<Matiere> fetchedmatieres = await fetchMatiere();
+      List<Elem> fetchedmatieres = [];
+      // List<Elem> fetchedmatieres = await fetchElems();
       setState(() {
         matiereList = fetchedmatieres;
       });
@@ -1725,7 +1676,7 @@ class _AddElemScreenState extends State<AddElemScreen> {
                       selectedCategory = value;
                       selectedMat = null; // Reset the selected matière
                       // matieres = []; // Clear the matieres list when a category is selected
-                      updateMatiereList(); // Update the list of matières based on the selected category
+                      // updateMatiereList(); // Update the list of matières based on the selected category
                     });
                   },
                   decoration: InputDecoration(
@@ -1741,36 +1692,17 @@ class _AddElemScreenState extends State<AddElemScreen> {
                   ),
                 ),
                 SizedBox(height: 10),
-                DropdownButtonFormField<Matiere>(
-                  value: selectedMat,
-                  items: matiereList.map((mat) {
-                    return DropdownMenuItem<Matiere>(
-                      value: mat,
-                      child: Container(
-                          width: MediaQuery.of(context).size.width -100,
-                          child: Text('${(mat.name)} ')),
-                    );
-                  }).toList(),
-                  onChanged: (value)async {
-                    setState(()  {
-                      selectedMat = value;
-                      // updateSemList();
-                      selectedProfesseurCM = null;
-                      selectedProfesseurTP = null;
-                      selectedProfesseurTD = null;
-                      updateProfesseurList();
-                    });
-                  },
+                TextField(
+                  controller: _name,
+                  keyboardType: TextInputType.text,
                   decoration: InputDecoration(
-                    filled: true,
-                    // fillColor: Color(0xA3B0AF1),
-                    fillColor: Colors.white,
-                    hintText: "selection Matiere",
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,gapPadding: 1,
-                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    ),
-                  ),
+                      filled: true,
+                      // fillColor: Color(0xA3B0AF1),
+                      fillColor: Colors.white,
+                      hintText: "Nom",
+                      border: OutlineInputBorder(
+                          borderSide: BorderSide.none,gapPadding: 1,
+                          borderRadius: BorderRadius.all(Radius.circular(10.0)))),
                 ),
                 SizedBox(height: 10),
                 DropdownButtonFormField<Professeur>(
@@ -1952,7 +1884,7 @@ class _AddElemScreenState extends State<AddElemScreen> {
                     int CTP = selectedProfesseurTP != null ? HTP: 0;
                     String PrTD = selectedProfesseurTD != null ? selectedProfesseurTD!.id: '';
                     int CTD = selectedProfesseurTD != null ? HTD: 0;
-                    AddElem(selectedMat!.id!,semNum,selectedFil!.id, PrCM,PrTP,PrTD,CCM,CTP,CTD);
+                    AddElem(selectedCategory!.id,_name.text,semNum,selectedFil!.id, PrCM,PrTP,PrTD,CCM,CTP,CTD);
                     // AddElem(int.parse(_numero.text),date, selectedFil!.id!);
 
                     // Addfilliere(_name.text, _desc.text);
@@ -1990,7 +1922,6 @@ class UpdateElemScreen extends StatefulWidget {
   final String eleId;
   final String filId;
   final String fil;
-  final String MatId;
   // final String ProfCMId;
   // final String ProfTPId;
   // final String ProfTDId;
@@ -2007,7 +1938,7 @@ class UpdateElemScreen extends StatefulWidget {
   final int CredTD;
   UpdateElemScreen({Key? key, required this.eleId, required this.CredTD, required this.Sem, required this.Mat,required this.fil,
     // required this.ProCM, required this.ProTP, required this.ProTD,
-    required this.CredCM, required this.CredTP, required this.filId, required this.MatId,
+    required this.CredCM, required this.CredTP, required this.filId,
     required this.ProfCMId, required this.ProfTPId, required this.ProfTDId
   }) : super(key: key);
 
@@ -2036,25 +1967,6 @@ class _UpdateElemScreenState extends State<UpdateElemScreen> {
   bool isChanged =false;
 
 
-  Future<void> updateProfesseurList() async {
-    if (selectedMat != null) {
-      List<Professeur> fetchedProfesseurs = await fetchProfesseursByMatiere(selectedMat!.id);
-      setState(() {
-        professeurs = fetchedProfesseurs;
-        selectedProfesseurCM = null;
-        selectedProfesseurTP = null;
-        selectedProfesseurTD = null;
-      });
-    } else {
-      List<Professeur> fetchedProfesseurs = await fetchProfs();
-      setState(() {
-        professeurs = fetchedProfesseurs;
-        selectedProfesseurCM = null;
-        selectedProfesseurTP = null;
-        selectedProfesseurTD = null;
-      });
-    }
-  }
 
   List<Professeur> professeurList = [];
   Category? selectedCategory;
@@ -2062,7 +1974,7 @@ class _UpdateElemScreenState extends State<UpdateElemScreen> {
   int semNum = 1;
   filliere? selectedFil;
   List<Category> categories = [];
-  List<Matiere> matiereList = [];
+  List<Elem> matiereList = [];
   @override
   void initState() {
     super.initState();
@@ -2071,7 +1983,7 @@ class _UpdateElemScreenState extends State<UpdateElemScreen> {
         categories = data; // Assigner la liste renvoyée par emploiesseur à items
       });
 
-      fetchMatiere().then((data) {
+      fetchElems().then((data) {
         setState(() {
           matiereList = data; // Assigner la liste renvoyée par emploiesseur à items
         });
@@ -2097,13 +2009,14 @@ class _UpdateElemScreenState extends State<UpdateElemScreen> {
     // fetchPros();
   }
 
-  Future<void> UpdateElem (String id,String matId,String filId,List<dynamic> PCM,List<dynamic> PTP,List<dynamic> PTD,int sem,int? HCM,int? HTP,int? HTD) async {
+  Future<void> UpdateElem (String id,String filId,List<dynamic> PCM,
+      List<dynamic> PTP,List<dynamic> PTD,int sem,int? HCM,int? HTP,int? HTD) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token")!;
 
     Map<String, dynamic> body ={};
     body = {
-      "matiere": matId,
+      // "matiere": matId,
       //"categorie": CategId,
       "semestre": sem,
       "filiere": filId,
@@ -2200,28 +2113,7 @@ class _UpdateElemScreenState extends State<UpdateElemScreen> {
       categories = fetchedCategories;
     });
   }
-  // Future<void> fetchPros() async {
-  //   List<Professeur> fetchedprofs = await fetchProfs();
-  //
-  //   setState(() {
-  //     professeurs = fetchedprofs ;
-  //   });
-  // }
-  Future<void> updateMatiereList() async {
-    if (selectedCategory != null) {
-      List<Matiere> fetchedmatieres = await fetchMatieresByCategory(selectedCategory!.id);
-      setState(() {
-        matiereList = fetchedmatieres;
-        selectedMat = null;
-      });
-    } else {
-      List<Matiere> fetchedmatieres = await fetchMatiere();
-      setState(() {
-        matiereList = fetchedmatieres;
-        selectedMat = null;
-      });
-    }
-  }
+
 
   bool showSem = false;
   bool showFil = false;
@@ -2486,11 +2378,11 @@ class _UpdateElemScreenState extends State<UpdateElemScreen> {
                   int CTD = showPTP? (selectedProfesseurTD != null ? HTD :0): HTD;
                   // print("CategId:${selectedCategory!.id!}");
 
-                  String mat = showmat ? selectedMat!.id! : widget.MatId;
+                  // String mat = showmat ? selectedMat!.id! : widget.MatId;
                   int sem = showSem ? semNum! : widget.Sem!;
                   String fil = showFil ? selectedFil!.id! : widget.filId!;
 
-                  UpdateElem(widget.eleId,mat,fil,widget.ProfCMId!,widget.ProfTPId!,widget.ProfTDId!, sem,CCM,CTP,CTD);
+                  UpdateElem(widget.eleId,fil,widget.ProfCMId!,widget.ProfTPId!,widget.ProfTDId!, sem,CCM,CTP,CTD);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('L\'element a été ajouter avec succès.')),
                   );

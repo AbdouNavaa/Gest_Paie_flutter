@@ -3,6 +3,7 @@
 import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
 import 'package:gestion_payements/auth/users.dart';
+import 'package:gestion_payements/element.dart';
 import 'package:gestion_payements/matieres.dart';
 import 'package:gestion_payements/prof_info.dart';
 import 'package:get/get.dart';
@@ -110,8 +111,8 @@ class _ProfesseuresState extends State<Professeures> {
     String token = prefs.getString("token")!;
     print(token);
 
-    final response = await http.get(
-      Uri.parse('http://192.168.43.73:5000/professeur/'+'/$id'),
+    final response = await http.post(
+      Uri.parse('http://192.168.43.73:5000/professeur/'+'$id/elements'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -123,10 +124,11 @@ class _ProfesseuresState extends State<Professeures> {
 
     if (response.statusCode == 200) {
       Map<String, dynamic> professeursData = jsonDecode(response.body);
-      Map<String, dynamic> professeurData = professeursData['professeur'];
-      List<dynamic> matieres = professeursData['matieres'];
+      var professeurData = professeursData['professeur'];
+      var matieres = professeursData['elements'];
+      // _showDetails(context, professeurData,matieres);
       _showDetails(context, professeurData,matieres);
-      print("professeursData: ${professeursData}");
+      print("professeursData: ${professeurData}, MatData: ${matieres}");
 
     } else {
       throw Exception('Failed to load Matieres');
@@ -187,16 +189,18 @@ class _ProfesseuresState extends State<Professeures> {
   //   return professeur; // Return the ID if found, otherwise an empty string
   //
   // }
-  num? getUserMob(String name) {
-    final user = users.firstWhere((user) => '${user.name}' == name, orElse: () =>User(id: '', name: 'blbla', prenom: '', email: '', mobile: 0, role: '', banque: '',));
-    // print('MatID: ${matiereList}');
-    return user.mobile!; // Return the ID if found, otherwise an empty string
-
-  }
   String? getProfBanq(String name) {
     final user = filteredItems!.firstWhere((user) => '${user.nom}' == name, orElse: () =>Professeur(id: 'id'));
     // print('MatID: ${matiereList}');
     return user.banque!; // Return the ID if found, otherwise an empty string
+
+  }
+
+  User getUserInfo(String id) {
+    // Assuming you have a list of professeurs named 'professeursList'
+    final professeur = users.firstWhere((prof) => '${prof.id}' == id, orElse: () =>User(id: '', name: 'blbla', prenom: '', email: '',  role: '', ));
+    // print(professeur.name);
+    return professeur; // Return the ID if found, otherwise an empty string
 
   }
   String getMatIdFromNames(String elements) {
@@ -224,6 +228,7 @@ class _ProfesseuresState extends State<Professeures> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: MyDrawer(),
       // drawer: buildDrawer(context),
       body: Column(
         children: [
@@ -343,7 +348,7 @@ class _ProfesseuresState extends State<Professeures> {
                                           SizedBox(height: 10),
                                           Text(' ${filteredItems?[index].banque ?? items?[index].banque!}',style: TextStyle(color: Colors.black38),),
                                          SizedBox(height: 10),
-                                          Text(' ${filteredItems?[index].email ?? items?[index].email!}',style: TextStyle(color: Colors.black38),),
+                                          Text(' ${getUserInfo(filteredItems![index].user ?? items![index].user!).email}',style: TextStyle(color: Colors.black38),),
                                         ],
                                       ),
                                     ],
@@ -448,461 +453,430 @@ class _ProfesseuresState extends State<Professeures> {
     }
   }
 
-  Future<void> _showDetails(BuildContext context, Map<String, dynamic> prof,List<dynamic> mat) {
+  // Future<void> _showDetails(BuildContext context, Map<String, dynamic> prof, List<dynamic> matieres,) {
+  Future<void> _showDetails(BuildContext context, Map<String, dynamic> prof, matieres ) {
     return showModalBottomSheet(
         context: context,backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
-            topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
         isScrollControlled: true, // Rendre le contenu déroulable
 
         builder: (BuildContext context){
-          return Container(
-            height: 550,
-            padding: const EdgeInsets.all(25.0),
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  // for (var p in prof['professeur'])
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    // mainAxisAlignment: MainAxisAlignment.center,
+          return Column(
+            children: [
+              Expanded(flex: 3,
+                child: Container(margin: EdgeInsets.only(top: 30),
+                  decoration: BoxDecoration(image: DecorationImage(image: AssetImage("images/Design11.jpg",),fit: BoxFit.cover),
+                  color: Colors.white
+                ),
+                  padding: EdgeInsets.only(bottom: 100),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        // mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          // Spacer(),
-                          Text("Prof Infos", style: TextStyle(fontSize: 25),),
-                          Spacer(),
-                          InkWell(
-                            child: Icon(Icons.close,size: 25),
-                            onTap: (){
-                              Navigator.pop(context);
-                            },
-                          )
-                        ],
-                      ),
-                      SizedBox(height: 50),
-                      Row(
-                        children: [
-                          Text('Nom:',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.italic,
-                            ),),
-                          SizedBox(width: 10,),
-                          Text('${prof['nom'].toString().capitalize} ${prof['prenom'].toString().capitalize} ',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.italic,
-                            ),),
-                        ],
-                      ),
-                      SizedBox(height: 25),
-                      SingleChildScrollView(scrollDirection: Axis.horizontal,
-                        child: Container(width: MediaQuery.of(context).size.width,
-                          child: Row(
-                            children: [
-                              Text('Email:',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w400,
-                                  fontStyle: FontStyle.italic,
-                                ),),
-                              SizedBox(width: 10,),
-                              Text('${prof['email']}',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w400,
-                                  fontStyle: FontStyle.italic,
-                                ),),
-                            ],
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 25),
-                      Row(
-                        children: [
-                          Text('Mobile:',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.italic,
-                            ),),
-                          SizedBox(width: 10,),
-                          Text('${prof['info']['mobile']}',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.italic,
-                            ),),
-
-                        ],
-                      ),
-
-                      SizedBox(height: 25),
-                      Row(
-                        children: [
-                          Text('Banque:',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.italic,
-                            ),),
-                          SizedBox(width: 10,),
-                          Text('${prof['info']['banque']}',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.italic,
-                            ),),
-
-                        ],
-                      ),
-
-                      SizedBox(height: 25),
-                      Row(
-                        children: [
-                          Text('Compte:',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.italic,
-                            ),),
-                          SizedBox(width: 10,),
-                          Text('${prof['info']['accountNumero']}',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.italic,
-                            ),),
-
-                        ],
-                      ),
-
-                      SizedBox(height: 25),
-                      Container(width: MediaQuery.of(context).size.width,
-                        child: SingleChildScrollView(scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: [
-                              Text('Matieres:',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w400,
-                                  fontStyle: FontStyle.italic,
-                                ),),
-                              SizedBox(width: 10,),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  for (var matiere in mat) // Assuming items![index].matieres is a list of matieres for the professor
-                                    Row(
-                                      children: [
-                                        // Text('Matieres: [${getMatIdFromNames(getMatSemIdFromName(semestre['_id']).join(", "))}]',style: TextStyle(fontSize: 18)),
-                                        Text(matiere['name'].toString().capitalize ?? '',//abdou
-                                            style: TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.w400,
-                                              fontStyle: FontStyle.italic,
-                                            )),
-                                        TextButton(
-                                        onPressed: (){
-                                              showDialog(
-                                                context: context,
-                                                builder: (context) {
-                                                  return AlertDialog(
-                                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30),),elevation: 1,
-                                                    title: Text('Supprimer Matiere'),
-                                                    content: Text('Voulez vous supprimer: ${matiere['name']}?'),
-                                                    actions: [
-                                                      TextButton(
-                                                        onPressed: () {
-                                                          Navigator.of(context).pop(); // Close the dialog
-                                                        },
-                                                        child: Text('Cancel'),
-                                                      ),
-                                                      TextButton(
-                                                        onPressed: () {
-                                                          Navigator.of(context).pop(); // Close the dialog
-                                                          String profId = prof['_id']!;
-                                                          String matiereId = matiere['_id']; // Replace 'matiere' with the actual matiere data
-                                                          deleteMatiereFromProfesseur(profId, matiereId);
-                                                          setState(() {
-                                                            Navigator.pop(context);
-                                                          });ScaffoldMessenger.of(context).showSnackBar(
-                                                            SnackBar(
-                                                                content: Text('La matiere est Supprimer avec succès.',)),);
-
-                                                        },
-                                                        child: Text('Supprimer'),
-                                                      ),
-                                                    ],
-                                                  );
-                                                },
-                                              );
-                                            },
-                                            child: Icon(Icons.delete, color: Colors.red,))
-                                      ],
-                                    ),
-                                ],
-                              ),
-
-                            ],
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 20,),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          TextButton(
-                            onPressed: (){
-                              showDialog(
-                                  context: context,
-                                  builder: (context) {
-                                    return AlertDialog(
-                                      insetPadding: EdgeInsets.only(top: 190,),
-                                      surfaceTintColor: Color(0xB0AFAFA3),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.only(
-                                          topRight: Radius.circular(20),
-                                          topLeft: Radius.circular(20),
-                                        ),
-                                      ),
-                                      title:
-                                      Row(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        // mainAxisAlignment: MainAxisAlignment.start,
-                                        children: [
-                                          Text("Modifier Profile", style: TextStyle(fontSize: 25),),
-                                          Spacer(),
-                                          InkWell(
-                                            child: Icon(Icons.close),
-                                            onTap: (){
-                                              Navigator.pop(context);
-                                            },
-                                          )
-                                        ],
-                                      ),
-
-                                      content: Container(
-                                        height: 450,
-                                        width: MediaQuery.of(context).size.width,
-                                        // padding: const EdgeInsets.all(25.0),
-                                        child: SingleChildScrollView(
-                                          child: Column(
-                                            // mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              //hmmm
-                                              SizedBox(height: 40),
-                                              TextFormField(
-                                                controller: _mobile,
-                                                keyboardType: TextInputType.text,
-                                                // maxLines: 3,
-                                                decoration: InputDecoration(
-                                                    filled: true,
-
-                                                    // fillColor: Color(0xA3B0AF1),
-                                                    fillColor: Colors.white,
-                                                    hintText: "Mobile",
-                                                    border: OutlineInputBorder(
-                                                        borderSide: BorderSide.none,gapPadding: 1,
-                                                        borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                                              ),
-
-                                              SizedBox(height: 30),
-                                              TextFormField(
-                                                controller: _account,
-                                                decoration: InputDecoration(
-                                                    filled: true,
-
-                                                    // fillColor: Color(0xA3B0AF1),
-                                                    fillColor: Colors.white,
-                                                    hintText: "Compte",
-                                                    border: OutlineInputBorder(
-                                                        borderSide: BorderSide.none,gapPadding: 1,
-                                                        borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                                              ),
-
-                                              SizedBox(height: 30),
-                                              DropdownButtonFormField<String>(
-                                                value: _Banque,
-
-
-                                                items: [
-                                                  DropdownMenuItem<String>(
-                                                    child: Text('BMCI'),
-                                                    value: 'BMCI',
-                                                  ),
-                                                  DropdownMenuItem<String>(
-                                                    child: Text('BNM'),
-                                                    value: 'BNM',
-                                                  ),
-                                                  DropdownMenuItem<String>(
-                                                    child: Text('ORABANK'),
-                                                    value: 'ORABANK',
-                                                  ),
-                                                ],
-                                                onChanged: (value) {
-                                                  setState(() {
-                                                    _Banque = value!;
-                                                  });
-                                                },
-                                                decoration: InputDecoration(
-                                                  filled: true,
-                                                  fillColor: Colors.white,
-                                                  border: OutlineInputBorder(
-                                                    borderSide: BorderSide.none,gapPadding: 1,
-                                                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                                                  ),
-                                                ),
-                                              ),
-
-                                              SizedBox(height: 30),
-                                              ElevatedButton(
-                                                onPressed: () async{
-                                                  Navigator.of(context).pop();
-
-                                                  fetchProfs();
-
-                                                  String professeurId = prof['_id']; // Remplacez par l'ID de votre professeur
-                                                  Map<String, dynamic> updatedData = {
-                                                    'info': {
-                                                      'mobile': _mobile.text, // Remplacez par la nouvelle valeur
-                                                      'accountNumero': _account.text, // Remplacez par la nouvelle valeur
-                                                      'banque': _Banque, // Remplacez par la nouvelle valeur
-                                                    },
-                                                  };
-
-                                                  await updateProfesseurInfo(professeurId, updatedData);
-
-                                                  setState(() {
-                                                    Navigator.pop(context);
-                                                  //  fetchProfs();
-                                                       });
-                                                },
-                                                child: Text("Modifier"),
-
-                                                style: ElevatedButton.styleFrom(
-                                                  backgroundColor: Color(0xff0fb2ea),
-                                                  foregroundColor: Colors.white,
-                                                  elevation: 10,
-                                                  minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
-                                                  // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
-                                                  //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
-                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                                                ),
-                                              )
-                                            ],
-                                          ),
-
-
-                                        ),
-                                      ),
-
-                                    );
-                                  });
-                            }, // Disable button functionality
-
-                            child: Text('Modifier'),
-                            style: TextButton.styleFrom(
-                              padding: EdgeInsets.only(left: 20,right: 20),
-                              foregroundColor: Colors.lightGreen,
-                                backgroundColor: Color(0xfffff1),
-                                side: BorderSide(color: Colors.black12,),
-                                // side: BorderSide(color: Colors.black,),
-                                elevation: 3,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))
-                            ),
-
-                          ),
-                          TextButton(
-                            onPressed:() {
+                      // CircleAvatar(
+                      //   // radius: 10 * 5,
+                      //   backgroundColor: Colors.black,
+                      //   child: Image.asset("assets/supnum.png",width: 90),
+                      //   // backgroundImage: AssetImage('assets/user1.png'),
+                      // ),
+                      Container(margin: EdgeInsets.only(left: MediaQuery.of(context).size.width - 40),
+                        child: InkWell(
+                          child: Icon(Icons.arrow_forward_ios,size: 25,color: Colors.black,),
+                          onTap: (){
                             Navigator.pop(context);
-                              _AddProfMatriere(context,prof['_id']!);
-
-                            setState(() {
-                              fetchProfs();
-                            });
-                              },
-
-                            child: Text('Ajout Mat'),
-                            style: TextButton.styleFrom(
-                              padding: EdgeInsets.only(left: 20,right: 20),
-                              // foregroundColor: Colors.black,
-                              foregroundColor: Color(0xff0fb2ea),
-                              backgroundColor: Color(0xfffff1),
-                              side: BorderSide(color: Colors.black12,),
-                              // side: BorderSide(color: Colors.black,),
-                              elevation: 3,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))
-                            ),
-
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                            surfaceTintColor: Color(0xB0AFAFA3),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
-                                    title: Text("Confirmer la suppression"),
-                                    content: Text("Êtes-vous sûr de vouloir supprimer cet élément ?"),
-                                    actions: <Widget>[
-                                      TextButton(
-                                        child: Text("ANNULER"),
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                      ),
-                                      TextButton(
-                                        child: Text("SUPPRIMER"),
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-
-                                          DeleteProf(prof['professeur']['_id']!);
-                                          setState(() {
-                                            Navigator.pop(context);
-                                          });
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(content: Text('Le Professeur a été Supprimer avec succès.')),
-                                          );
-                                        },
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                            },
-                            child: Text('Supprimer'),
-                            style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.only(left: 20,right: 20),
-                              foregroundColor: Colors.redAccent,
-                                backgroundColor: Color(0xfffff1),
-                                side: BorderSide(color: Colors.black12,),
-                                // side: BorderSide(color: Colors.black,),
-                                elevation: 3,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))
-                            ),
-                          ),
-                        ],
+                          },
+                        ),
                       ),
-
                     ],
                   ),
-                ],
+                ),
               ),
-            ),
+              Expanded(flex: 7,
+                child: Container(
+                  height: 550,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(30), topLeft: Radius.circular(30)),
+                    color: Colors.white,
+                      // border: Border(top: BorderSide(color: Colors.black))
+                  ),
+                  padding: const EdgeInsets.all(25.0),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      // mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("Prof Infos", style: TextStyle(fontSize: 25,color: Colors.blueGrey),),
+                        SizedBox(height: 50),
+                        rowInfos("Nom:","${prof['user']['nom'].toString().capitalize} ${prof['user']['prenom'].toString().capitalize}"),
+                        SizedBox(height: 25),
+                        rowInfos("Email:","${prof['user']['email']}"),
+                        // rowInfos("Email:","${getUserInfo(prof['user']).email}"),
+                        // SizedBox(height: 25),
+                        // rowInfos("Mobile:","${getUserInfo(prof['user']).mobile}"),
+
+                        SizedBox(height: 25),
+                        rowInfos("Banque:","${prof['banque']}"),
+
+                        SizedBox(height: 25),
+                        rowInfos("Compte:","${prof['accountNumero']}"),
+
+                        SizedBox(height: 25),
+                        Container(width: MediaQuery.of(context).size.width,
+                          child: SingleChildScrollView(scrollDirection: Axis.horizontal,
+                            child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Matieres:',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w400,
+                                    fontStyle: FontStyle.italic,
+                                  ),),
+                                SizedBox(width: 10,),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    for (var matiere in matieres) // Assuming items![index].matieres is a list of matieres for the professor
+                                      Row(
+                                        children: [
+                                          // Text('Matieres: [${getMatIdFromNames(getMatSemIdFromName(semestre['_id']).join(", "))}]',style: TextStyle(fontSize: 18)),
+                                          Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(matiere['filiere'].toString().toUpperCase() ?? '',//abdou
+                                                  style: TextStyle(
+                                                    fontSize: 20,
+                                                    fontWeight: FontWeight.w400,
+                                                    fontStyle: FontStyle.italic,
+                                                  )),
+                                              Text(matiere['name'].toString().capitalize ?? '',//abdou
+                                                  style: TextStyle(
+                                                    fontSize: 20,
+                                                    fontWeight: FontWeight.w400,
+                                                    fontStyle: FontStyle.italic,
+                                                  )),
+                                            ],
+                                          ),
+                                          TextButton(
+                                          onPressed: (){
+                                                showDialog(
+                                                  context: context,
+                                                  builder: (context) {
+                                                    return AlertDialog(
+                                                      surfaceTintColor: Color(0xB0AFAFA3),
+                                                      backgroundColor: Colors.white,
+                                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                                                      title: Text('Supprimer Matiere'),
+                                                      content: Text('Voulez vous supprimer: ${matiere['name']}?'),
+                                                      actions: [
+                                                        TextButton(
+                                                          onPressed: () {
+                                                            Navigator.of(context).pop(); // Close the dialog
+                                                          },
+                                                          child: Text('Cancel'),
+                                                        ),
+                                                        TextButton(
+                                                          onPressed: () {
+                                                            Navigator.of(context).pop(); // Close the dialog
+                                                            String profId = prof['_id']!;
+                                                            String matiereId = matiere['_id']; // Replace 'matiere' with the actual matiere data
+                                                            deleteMatiereFromProfesseur(profId, matiereId);
+                                                            setState(() {
+                                                              Navigator.pop(context);
+                                                            });ScaffoldMessenger.of(context).showSnackBar(
+                                                              SnackBar(
+                                                                  content: Text('La matiere est Supprimer avec succès.',)),);
+
+                                                          },
+                                                          child: Text('Supprimer'),
+                                                        ),
+                                                      ],
+                                                    );
+                                                  },
+                                                );
+                                              },
+                                              child: Icon(Icons.delete, color: Colors.blueGrey,size: 30,))
+                                        ],
+                                      ),
+                                  ],
+                                ),
+
+                              ],
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 20,),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            ElevatedButton(
+                              onPressed: (){
+                                showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return AlertDialog(
+                                        insetPadding: EdgeInsets.only(top: 190,),
+                                        surfaceTintColor: Color(0xB0AFAFA3),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.only(
+                                            topRight: Radius.circular(20),
+                                            topLeft: Radius.circular(20),
+                                          ),
+                                        ),
+                                        title:
+                                        Row(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          // mainAxisAlignment: MainAxisAlignment.start,
+                                          children: [
+                                            Text("Modifier Profile", style: TextStyle(fontSize: 25),),
+                                            Spacer(),
+                                            InkWell(
+                                              child: Icon(Icons.close),
+                                              onTap: (){
+                                                Navigator.pop(context);
+                                              },
+                                            )
+                                          ],
+                                        ),
+
+                                        content: Container(
+                                          height: 450,
+                                          width: MediaQuery.of(context).size.width,
+                                          // padding: const EdgeInsets.all(25.0),
+                                          child: SingleChildScrollView(
+                                            child: Column(
+                                              // mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                //hmmm
+                                                SizedBox(height: 40),
+                                                TextFormField(
+                                                  controller: _mobile,
+                                                  keyboardType: TextInputType.text,
+                                                  // maxLines: 3,
+                                                  decoration: InputDecoration(
+                                                      filled: true,
+
+                                                      // fillColor: Color(0xA3B0AF1),
+                                                      fillColor: Colors.white,
+                                                      hintText: "Mobile",
+                                                      border: OutlineInputBorder(
+                                                          borderSide: BorderSide.none,gapPadding: 1,
+                                                          borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                                                ),
+
+                                                SizedBox(height: 30),
+                                                TextFormField(
+                                                  controller: _account,
+                                                  decoration: InputDecoration(
+                                                      filled: true,
+
+                                                      // fillColor: Color(0xA3B0AF1),
+                                                      fillColor: Colors.white,
+                                                      hintText: "Compte",
+                                                      border: OutlineInputBorder(
+                                                          borderSide: BorderSide.none,gapPadding: 1,
+                                                          borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                                                ),
+
+                                                SizedBox(height: 30),
+                                                DropdownButtonFormField<String>(
+                                                  value: _Banque,
+
+
+                                                  items: [
+                                                    DropdownMenuItem<String>(
+                                                      child: Text('BMCI'),
+                                                      value: 'BMCI',
+                                                    ),
+                                                    DropdownMenuItem<String>(
+                                                      child: Text('BNM'),
+                                                      value: 'BNM',
+                                                    ),
+                                                    DropdownMenuItem<String>(
+                                                      child: Text('ORABANK'),
+                                                      value: 'ORABANK',
+                                                    ),
+                                                  ],
+                                                  onChanged: (value) {
+                                                    setState(() {
+                                                      _Banque = value!;
+                                                    });
+                                                  },
+                                                  decoration: InputDecoration(
+                                                    filled: true,
+                                                    fillColor: Colors.white,
+                                                    border: OutlineInputBorder(
+                                                      borderSide: BorderSide.none,gapPadding: 1,
+                                                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                                                    ),
+                                                  ),
+                                                ),
+
+                                                SizedBox(height: 30),
+                                                ElevatedButton(
+                                                  onPressed: () async{
+                                                    Navigator.of(context).pop();
+
+                                                    fetchProfs();
+
+                                                    String professeurId = prof['_id']; // Remplacez par l'ID de votre professeur
+                                                    Map<String, dynamic> updatedData = {
+
+                                                        'mobile': _mobile.text, // Remplacez par la nouvelle valeur
+                                                        'accountNumero': _account.text, // Remplacez par la nouvelle valeur
+                                                        'banque': _Banque, // Remplacez par la nouvelle valeur
+                                                    };
+
+                                                    await updateProfesseurInfo(professeurId, updatedData);
+
+                                                    setState(() {
+                                                      Navigator.pop(context);
+                                                    //  fetchProfs();
+                                                         });
+                                                  },
+                                                  child: Text("Modifier"),
+
+                                                  style: ElevatedButton.styleFrom(
+                                                    backgroundColor: Color(0xff0fb2ea),
+                                                    foregroundColor: Colors.white,
+                                                    elevation: 10,
+                                                    minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
+                                                    // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
+                                                    //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
+                                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                                  ),
+                                                )
+                                              ],
+                                            ),
+
+
+                                          ),
+                                        ),
+
+                                      );
+                                    });
+                              }, // Disable button functionality
+
+                              child: Text('Modifier'),
+                              style: ElevatedButton.styleFrom(
+                                surfaceTintColor: Colors.white,
+                                // side: BorderSide(color: Colors.black38),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                elevation: 5,
+                                padding: EdgeInsets.symmetric(horizontal: 25),
+                                backgroundColor: Colors.white,
+                                foregroundColor: Colors.green,
+                                textStyle: TextStyle(fontWeight: FontWeight.bold),
+                                // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                              ),
+
+                            ),
+                            ElevatedButton(
+                              onPressed:() {
+                              Navigator.pop(context);
+                                _AddProfMatriere(context,prof['_id']!);
+
+                              setState(() {
+                                fetchProfs();
+                              });
+                                },
+
+                              child: Text('Ajout Mat'),
+                              style: ElevatedButton.styleFrom(
+                                surfaceTintColor: Colors.white,
+                                // side: BorderSide(color: Colors.black38),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                elevation: 5,
+                                padding: EdgeInsets.symmetric(horizontal: 15),
+                                backgroundColor: Colors.white,
+                                foregroundColor: Colors.blue,
+                                textStyle: TextStyle(fontWeight: FontWeight.bold),
+                                // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                              ),
+
+                            ),
+                            ElevatedButton(
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                              surfaceTintColor: Color(0xB0AFAFA3),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                                      title: Text("Confirmer la suppression"),
+                                      content: Text("Êtes-vous sûr de vouloir supprimer cet élément ?"),
+                                      actions: <Widget>[
+                                        TextButton(
+                                          child: Text("ANNULER"),
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                        ),
+                                        TextButton(
+                                          child: Text("SUPPRIMER"),
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+
+                                            DeleteProf(prof['professeur']['_id']!);
+                                            setState(() {
+                                              Navigator.pop(context);
+                                            });
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(content: Text('Le Professeur a été Supprimer avec succès.')),
+                                            );
+                                          },
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                              child: Text('Supprimer'),
+                              style: ElevatedButton.styleFrom(
+                                surfaceTintColor: Colors.white,
+                                // side: BorderSide(color: Colors.black38),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                elevation: 5,
+                                padding: EdgeInsets.symmetric(horizontal: 20),
+                                backgroundColor: Colors.white,
+                                foregroundColor: Colors.redAccent,
+                                textStyle: TextStyle(fontWeight: FontWeight.bold),
+                                // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           );
         }
 
 
     );
+  }
+
+  Row rowInfos(name,value) {
+    return Row(
+                      children: [
+                        Text(name,
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w400,
+                            fontStyle: FontStyle.italic,
+                          ),),
+                        SizedBox(width: 10,),
+                        Text(value,
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w400,
+                            fontStyle: FontStyle.italic,
+                          ),),
+                      ],
+                    );
   }
 
   Future<void> _AddProfMatriere(BuildContext context,String Id) async {
@@ -963,368 +937,6 @@ void AddProf (String user,String nom,num mobile,String email,String password,Str
   }
 }
 
-class FoldableOptions extends StatefulWidget {
-  @override
-  _FoldableOptionsState createState() => _FoldableOptionsState();
-}
-
-class _FoldableOptionsState extends State<FoldableOptions>
-    with SingleTickerProviderStateMixin {
-  final List<IconData> options = [
-    Icons.cloud_download_outlined,
-    Icons.person_add_alt_outlined,
-  ];
-
-
-
-  TextEditingController _name = TextEditingController();
-  TextEditingController _Banque = TextEditingController();
-  TextEditingController _account = TextEditingController();
-  TextEditingController _email = TextEditingController();
-  TextEditingController _mobile = TextEditingController();
-  
-  late Animation<Alignment> firstAnim;
-  late Animation<Alignment> secondAnim;
-  late Animation<Alignment> thirdAnim;
-  late Animation<double> verticalPadding;
-  late AnimationController controller;
-  final duration = Duration(milliseconds: 190);
-
-  Widget getItem(IconData source,VoidCallback onPress) {
-    final size = 45.0;
-    return GestureDetector(
-      onTap: () {
-        controller.reverse();
-      },
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: Colors.blue,
-          borderRadius: BorderRadius.all(
-            Radius.circular(40),
-          ),
-        ),
-        child: IconButton(
-          icon: Icon(source,size: 20),
-          color: Colors.white.withOpacity(1.0),
-          onPressed: onPress,
-        ),
-      ),
-    );
-  }
-
-  Widget buildPrimaryItem(IconData source) {
-    final size = 45.0;
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: Colors.blue,
-        borderRadius: BorderRadius.all(
-          Radius.circular(40),
-        ),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.blue.withOpacity(0.8),
-              blurRadius: verticalPadding.value),
-        ],
-      ),
-      child: Icon(
-        source,
-        color: Colors.white.withOpacity(1),
-        size: 20,
-      ),
-    );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    controller = AnimationController(vsync: this, duration: duration);
-
-    final anim = CurvedAnimation(parent: controller, curve: Curves.linear);
-    firstAnim =
-        Tween<Alignment>(begin: Alignment.centerRight, end: Alignment.topRight)
-            .animate(anim);
-    secondAnim =
-        Tween<Alignment>(begin: Alignment.centerRight, end: Alignment.topLeft)
-            .animate(anim);
-    verticalPadding = Tween<double>(begin: 0, end: 26).animate(anim);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 160,
-      height: 120,
-      margin: EdgeInsets.only(top: 15,right: 15),
-      child: AnimatedBuilder(
-        animation: controller,
-        builder: (context, child) {
-          return Stack(
-            children: <Widget>[
-              Align(
-                alignment: firstAnim.value,
-                child:Container(
-                  padding: EdgeInsets.only(
-                       bottom: verticalPadding.value),
-                  child: getItem(
-                    options.elementAt(0),
-                          ()=>_importData(context)
-                  ),
-                )
-              ),
-              Align(
-                alignment: secondAnim.value,
-                child:Container(
-                  padding: EdgeInsets.only(
-                      left: 73, top: verticalPadding.value),
-                  child: getItem(
-                    options.elementAt(1),
-                      ()=>_displayTextInputDialog(context)
-                  ),
-                )
-              ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: GestureDetector(
-                  onTap: () {
-                    controller.isCompleted
-                        ? controller.reverse()
-                        : controller.forward();
-                  },
-                  child: buildPrimaryItem(
-                    controller.isCompleted || controller.isAnimating
-                        ? Icons.close
-                        : Icons.add,
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-
-  Future<void> _importData(BuildContext context) async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['xlsx'],
-    );
-
-    if (result != null && result.files.isNotEmpty) {
-      File file = File(result.files.first.path!);
-
-      // String directoryPath = (await getApplicationDocumentsDirectory()).path;
-      // String filePath = '$directoryPath/${basename(file.path)}';
-      // await file.copy(filePath);
-
-      ByteData data = await file.readAsBytes().then((bytes) {
-        return ByteData.sublistView(Uint8List.fromList(bytes));
-      });
-      List<int> bytes = data.buffer.asUint8List();
-      var excel = Excel.Excel.decodeBytes(bytes);
-
-
-      for (var table in excel.tables.keys) {
-        print(table); // Nom de la feuille
-        print(excel.tables[table]!.maxCols);
-        print("hmm: ${excel.tables[table]!.maxCols}");
-        print(excel.tables[table]!.rows[0]); // Lecture de l'en-tête
-
-        // Commencer à traiter à partir de la deuxième ligne (index 1)
-        for (var i = 1; i < 100; i++) {
-          var row = excel.tables[table]!.rows[i];
-
-          print('taille: ${row.length}');
-          // if (row.length >= excel.tables[table]!.maxCols) {  // Vérifiez si la ligne a au moins le nombre maximum de colonnes
-          String nom = row[0]?.value?.toString() ?? "";
-          String banque = row[1]?.value?.toString() ?? "";
-          String compte = row[2]?.value?.toString() ?? "0";
-          String mobile = row[3]?.value?.toString() ?? "0";
-          // String email = extractEmail(row[5]);
-          String email = row[4]?.value?.toString() ?? "";
-          String password = row[5]?.value?.toString() ?? "";
-          String user = row[6]?.value?.toString() ?? "";
-
-          // Faites quelque chose avec les données, par exemple, ajoutez-les à votre liste de professeurs
-          print('les infos: $nom, Banque $compte');
-          AddProf(user,nom, num.parse(mobile), email, password, banque, num.parse(compte));
-          // } else {
-          //   print('La ligne $i n\'a pas suffisamment d\'éléments.');
-          // }
-        }
-
-
-      }
-      print("Hello ${excel.tables.values.first}");
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Données importées avec succès depuis le fichier Excel.')),
-      );
-    }
-  }
-
-
-  Future<void> _displayTextInputDialog(BuildContext context) async {
-
-    return showModalBottomSheet(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
-            topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
-        isScrollControlled: true, // Rendre le contenu déroulable
-
-
-        context: context,
-        builder: (BuildContext context) {
-          return SingleChildScrollView(
-            child: Container(
-              height: 590,
-              padding: const EdgeInsets.all(25.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    // mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text("Ajouter un Prof", style: TextStyle(fontSize: 25),),
-                      Spacer(),
-                      InkWell(
-                        child: Icon(Icons.close),
-                        onTap: (){
-                          Navigator.pop(context);
-                        },
-                      )
-                    ],
-                  ),
-                  SizedBox(height: 40),
-                  TextField(
-                    controller: _name,
-                    keyboardType: TextInputType.text,
-                    decoration: InputDecoration(
-                        filled: true,
-                        // fillColor: Color(0xA3B0AF1),
-                        // fillColor: Colors.white,
-                        hintText: "name",
-                        border: OutlineInputBorder(
-                            borderSide: BorderSide.none,gapPadding: 1,
-                            borderRadius: BorderRadius.all(
-                                Radius.circular(10.0)))),
-                  ),
-
-                  // SizedBox(height: 10),
-                  // TextField(
-                  //   controller: _prenom,
-                  //   keyboardType: TextInputType.text,
-                  //   decoration: InputDecoration(
-                  //       filled: true,
-                  //       // fillColor: Color(0xA3B0AF1),
-                  //       // fillColor: Colors.white,
-                  //       hintText: "Prenom",
-                  //       border: OutlineInputBorder(
-                  //           borderSide: BorderSide.none,gapPadding: 1,
-                  //           borderRadius: BorderRadius.all(
-                  //               Radius.circular(10.0)))),
-                  // ),
-
-                  SizedBox(height: 10),
-                  TextField(
-                    controller: _mobile,
-                    keyboardType: TextInputType.text,
-                    decoration: InputDecoration(
-                        filled: true,
-                        // fillColor: Color(0xA3B0AF1),
-                        // fillColor: Colors.white,
-                        hintText: "Mobile",
-                        border: OutlineInputBorder(
-                            borderSide: BorderSide.none,gapPadding: 1,
-                            borderRadius: BorderRadius.all(
-                                Radius.circular(10.0)))),
-                  ),
-
-                  SizedBox(height: 10),
-                  TextField(
-                    controller: _email,
-                    keyboardType: TextInputType.text,
-                    decoration: InputDecoration(
-                        filled: true,
-                        // fillColor: Color(0xA3B0AF1),
-                        // fillColor: Colors.white,
-                        hintText: "Email",
-                        border: OutlineInputBorder(
-                            borderSide: BorderSide.none,gapPadding: 1,
-                            borderRadius: BorderRadius.all(
-                                Radius.circular(10.0)))),
-                  ),
-
-                  SizedBox(height: 10),
-                  TextField(
-                    controller: _Banque,
-                    keyboardType: TextInputType.text,
-                    decoration: InputDecoration(
-                        filled: true,
-                        // fillColor: Color(0xA3B0AF1),
-                        // fillColor: Colors.white,
-                        hintText: "Banque",
-                        border: OutlineInputBorder(
-                            borderSide: BorderSide.none,gapPadding: 1,
-                            borderRadius: BorderRadius.all(
-                                Radius.circular(10.0)))),
-                  ),
-
-                  SizedBox(height: 10),
-                  TextField(
-                    controller: _account,
-                    keyboardType: TextInputType.text,
-                    decoration: InputDecoration(
-                        filled: true,
-                        // fillColor: Color(0xA3B0AF1),
-                        // fillColor: Colors.white,
-                        hintText: "Compte",
-                        border: OutlineInputBorder(
-                            borderSide: BorderSide.none,gapPadding: 1,
-                            borderRadius: BorderRadius.all(
-                                Radius.circular(10.0)))),
-                  ),
-                  SizedBox(height: 30),
-                  ElevatedButton(onPressed: () {
-                    Navigator.of(context).pop();
-                    fetchProfs();
-                    // AddProf(_name.text, _Banque.text, _account.text);
-                    // AddProf(_name.text, _desc.text);
-                    setState(() {
-                      Navigator.pop(context);
-                    });
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(
-                          'Le Prof a été ajouter avec succès.')),
-                    );
-                    setState(() {
-                      Navigator.of(context).pop();
-                    });
-                  }, child: Text("Ajouter"),
-
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xff0fb2ea),
-                      foregroundColor: Colors.white,
-                      elevation: 10,
-                      minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
-                      // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
-                      //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                    ),
-                  )
-                ],
-              ),
-            ),
-          );
-        });
-  }
-}
-
 class AddProfMat extends StatefulWidget {
   final String profId;
   const AddProfMat({Key? key, required this.profId}) : super(key: key);
@@ -1334,14 +946,13 @@ class AddProfMat extends StatefulWidget {
 }
 
 class _AddProfMatState extends State<AddProfMat> {
-  Matiere? selectedMat; // initialiser le type sélectionné à null
+  Elem? selectedMat; // initialiser le type sélectionné à null
   @override
   void initState()  {
     super.initState();
     fetchCategories();
 
   }
-  Category? selectedCateg; // initialiser le type sélectionné à null
   Future<void> fetchCategories() async {
     List<Category> fetchedCategories = await fetchCategory();
     setState(() {
@@ -1352,16 +963,17 @@ class _AddProfMatState extends State<AddProfMat> {
   // Future<Map<String, dynamic>> types =await  fetchProfessorInfo() ;
   // _id.text = items![index].name;
   Category? selectedCategory;
-  List<Matiere> matieres = [];
+  List<Elem> matieres = [];
   List<Category> categories =  [];
   Future<void> updateMatiereList() async {
     if (selectedCategory != null) {
-      List<Matiere> fetchedmatieres = await fetchMatieresByCategory(selectedCategory!.id);
+      List<Elem> fetchedmatieres = await fetchMatieresByCategory(selectedCategory!.id);
       setState(() {
         matieres = fetchedmatieres;
+        print('Mats: ${matieres}');
       });
     } else {
-      List<Matiere> fetchedmatieres = await fetchMatiere();
+      List<Elem> fetchedmatieres = await fetchElems();
       setState(() {
         matieres = fetchedmatieres;
       });
@@ -1440,12 +1052,12 @@ width: MediaQuery.of(context).size.width,
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 20),
-              DropdownButtonFormField<Matiere>(
+              DropdownButtonFormField<Elem>(
                 value: selectedMat,
                 items: matieres.map((matiere) {
-                  return DropdownMenuItem<Matiere>(
+                  return DropdownMenuItem<Elem>(
                     value: matiere,
-                    child: Text(matiere.name ?? ''),
+                    child: Text(matiere.nameMat ?? ''),
                   );
                 }).toList(),
                 onChanged: (value)async {
@@ -1510,13 +1122,13 @@ class Professeur {
   int? mobile;
   String? banque;
   String? user;
-  int? compte;
+  String? compte;
   num? nbh;
   num? nbc;
-  num? th;
+  // num? th;
   num? somme;
-  List<Info>? infos; // Change this field to be of type List<String>
-  List? matieres; // Change this field to be of type List<String>
+  // List<Info>? infos; // Change this field to be of type List<String>
+  // List? matieres; // Change this field to be of type List<String>
 
   Professeur({
     required this.id,
@@ -1529,10 +1141,10 @@ class Professeur {
     this.mobile,
     this.nbh,
     this.nbc,
-    this.th,
+    // this.th,
     this.somme,
-    this.infos, // Update the constructor parameter
-    this.matieres, // Update the constructor parameter
+    // this.infos, // Update the constructor parameter
+    // this.matieres, // Update the constructor parameter
   });
 
   // Add a factory method to create a Professeur object from a JSON map
@@ -1541,16 +1153,16 @@ class Professeur {
       id: json['_id'],
       nom: json['nom'],
       prenom: json['prenom'],
-      mobile: json['info']['mobile'] ,
-      banque: json['info']['banque'] ,
+      // mobile: json['info']['mobile'] ,
+      banque: json['banque'] ,
       user: json['user']?? '',
-      compte: json['info']['accountNumero'],
+      compte: json['accountNumero'],
       email: json['email'],
       nbh: json['nbh'],
       nbc: json['nbc'],
-      th: json['th'],
+      // th: json['th'],
       somme: json['somme'],
-      matieres: List.from(json['matieres']?? []), // Convert the 'matieres' list to List<String>
+      // matieres: List.from(json['matieres']?? []), // Convert the 'matieres' list to List<String>
       // infos: List.from(json['info']?? []), // Convert the 'matieres' list to List<String>
     );
   }

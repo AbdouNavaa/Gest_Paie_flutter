@@ -12,7 +12,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:excel/excel.dart' as Excel;
 
 import 'dart:io';
- 
+
 import '../matieres.dart';
 import 'element.dart';
 import 'home_screen.dart';
@@ -35,7 +35,7 @@ class _FilliereState extends State<Filliere> {
   List<filliere>? filteredItems;
 
   List<Professeur> professeurList = [];
-  List<Matiere> matiereList = [];
+  List<Elem> matiereList = [];
 
   bool showFloat = false;
 
@@ -79,7 +79,7 @@ class _FilliereState extends State<Filliere> {
     }).catchError((error) {
       print('Erreur: $error');
     });
-    fetchMatiere().then((data) {
+    fetchElems().then((data) {
       setState(() {
     matiereList  = data; // Assigner la liste renvoyée par filliereesseur à items
       });
@@ -98,24 +98,12 @@ class _FilliereState extends State<Filliere> {
   // Return the ID if found, otherwise an empty string
     return fil.id; // Return the ID if found, otherwise an empty string
   }
-  String getMatIdFromName(String id) {
+  Elem getMatIdFromName(String id) {
     // Assuming you have a list of professeurs named 'professeursList'
-    final professeur = matiereList.firstWhere((prof) => '${prof.id}' == id, orElse: () =>Matiere(id: '', name: '', categorieId: '', categorie_name: '', code: '',));
-    print(professeur.name);
-    return professeur.name; // Return the ID if found, otherwise an empty string
+    final professeur = matiereList.firstWhere((prof) => '${prof.id}' == id, orElse: () =>Elem(id: '', filId: ''));
+    // print(professeur.name);
+    return professeur; // Return the ID if found, otherwise an empty string
 
-  }
-  String getMatIdFromNames(String elements) {
-    List<dynamic> ids = elements.split(', '); // Sépare la chaîne en une liste d'IDs
-
-    // Traitez chaque ID individuellement ici
-    String result = '';
-    for (var id in ids) {
-      result += getMatIdFromName((id)) + '   '; // Traitez chaque ID avec getMatIdFromName
-    }
-
-    print(result);
-    return result.isNotEmpty ? result.substring(0, result.length - 2) : '';
   }
 
   TextEditingController _name = TextEditingController();
@@ -129,10 +117,10 @@ class _FilliereState extends State<Filliere> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Scaffold(
         // appBar: AppBar(
         //   title: Center(child: Text(' ${filteredItems?.length} ')),
         // ),
+        drawer: MyDrawer(),
         body: Column(
           children: [
             SizedBox(height: 40,),
@@ -204,90 +192,93 @@ class _FilliereState extends State<Filliere> {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return Center(child: CircularProgressIndicator());
                       } else {
-                        if (snapshot.hasError) {
-                          return Text('Error: ${snapshot.error}');
-                        } else {
+                        if (snapshot.hasData) {
                           List<filliere>? items = snapshot.data;
 
                           return SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
-                            child: Container(
-                              width: MediaQuery.of(context).size.width,
-                              decoration: BoxDecoration(
-                                color: Colors.white12,
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(20.0),
-                                ),
-                              ),
-                              // margin: EdgeInsets.only(left: 10),
-                              child:
-                              DataTable(
-                                showCheckboxColumn: true,
-                                showBottomBorder: true,
-                                headingRowHeight: 50,
-                                headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white70), // Couleur de la ligne d'en-tête
-                                columnSpacing: 15,
-                                dataRowHeight: 50,
-                                // border: TableBorder.all(color: Colors.black12, width: 2),
-                                headingTextStyle: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black, // Set header text color
-                                ),
-                                // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
-                                columns: [
-                                  DataColumn(label: Text('Nom')),
-                                  DataColumn(label: Text('Niveau')),
-                                  DataColumn(label: Text('Desc')),
-                                  // DataColumn(label: Text('Periode')),
-                                  DataColumn(label: Text('Action')),
-                                  // DataColumn(label: Text('Descrition')),
-                                ],
-                                rows: [
-                                  for (var fil in filteredItems!)
-                                    DataRow(
-                                        cells: [
-                                          DataCell(Container(child: Text('${fil.name.toUpperCase()}')),),
-                                          DataCell(Container(child: Text('${fil.niveau.capitalize}')),),
-                                          DataCell(Container(child: Text('${fil.description}')),),
-                                          // DataCell(Container(child: Text('${fil.periode}')),),
+                            child: Column(
+                              children: [
+                                Container(
 
-                                          DataCell(
-                                            Row(
-                                              children: [
-                                                Container(
-                                                  width: 35,
-                                                  child:
-                                                  TextButton(
-                                                    onPressed: (){
-                                                      print(fil.id);
-                                                      _showFilDetails(context,fil);
-                                                    },
+                                  width: MediaQuery.of(context).size.width - 10,
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue,
+                                    borderRadius: BorderRadius.all(Radius.circular(30)),
+                                  ),       // margin: EdgeInsets.only(left: 10),
+                                  child:
+                                  DataTable(
+                                    showCheckboxColumn: true,
+                                    showBottomBorder: true,
+                                    headingRowHeight: 50,
+                                    headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white70), // Couleur de la ligne d'en-tête
+                                    dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
+                                    columnSpacing: 15,
+                                    dataRowHeight: 50,
+                                    // border: TableBorder.all(color: Colors.black12, width: 2),
+                                    headingTextStyle: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black, // Set header text color
+                                    ),
+                                    // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
+                                    columns: [
+                                      DataColumn(label: Text('Nom')),
+                                      DataColumn(label: Text('Niveau')),
+                                      DataColumn(label: Text('Desc')),
+                                      // DataColumn(label: Text('Periode')),
+                                      DataColumn(label: Text('Action')),
+                                      // DataColumn(label: Text('Descrition')),
+                                    ],
+                                    rows: [
+                                      for (var fil in filteredItems!)
+                                        DataRow(
+                                            cells: [
+                                              DataCell(Container(child: Text('${fil.name.toUpperCase()}')),),
+                                              DataCell(Container(child: Text('${fil.niveau.capitalize}')),),
+                                              DataCell(Container(child: Text('${fil.description}')),),
+                                              // DataCell(Container(child: Text('${fil.periode}')),),
 
-                                                    // onPressed: () =>showFetchedDataModal(context, fetchData(fil.id!)),// Disable button functionality
+                                              DataCell(
+                                                Row(
+                                                  children: [
+                                                    Container(
+                                                      width: 35,
+                                                      child:
+                                                      TextButton(
+                                                        onPressed: (){
+                                                          print(fil.id);
+                                                          _showFilDetails(context,fil);
+                                                        },
 
-                                                    //Disable button functionality
+                                                        // onPressed: () =>showFetchedDataModal(context, fetchData(fil.id!)),// Disable button functionality
 
-                                                    child: Icon(Icons.more_horiz, color: Colors.black54),
-                                                    style: TextButton.styleFrom(
-                                                      primary: Colors.white,
-                                                      elevation: 0,
-                                                      // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                                                        //Disable button functionality
+
+                                                        child: Icon(Icons.more_horiz, color: Colors.black54),
+                                                        style: TextButton.styleFrom(
+                                                          primary: Colors.white,
+                                                          elevation: 0,
+                                                          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                                                        ),
+                                                      ),
                                                     ),
-                                                  ),
+
+                                                  ],
                                                 ),
-
-                                              ],
-                                            ),
-                                          ),
-                                          // DataCell(Container(width: 105,
-                                          //     child: Text('${fil.description}',)),),
+                                              ),
+                                              // DataCell(Container(width: 105,
+                                              //     child: Text('${fil.description}',)),),
 
 
-                                        ]),
-                                ],
-                              ),
+                                            ]),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
                           );
+                        } else {
+                          return CircularProgressIndicator();
                         }
                       }
                     },
@@ -357,7 +348,7 @@ class _FilliereState extends State<Filliere> {
           width: 60,
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(50)),
+            borderRadius: BorderRadius.all(Radius.circular(10)),
             boxShadow: [
               BoxShadow(
                 color: Colors.black12,
@@ -382,10 +373,8 @@ class _FilliereState extends State<Filliere> {
 
 
 
-      ),
-      // bottomNavigationBar: BottomNav(),
+      );
 
-    );
   }
 
   Future<void> _importData(BuildContext context) async {
@@ -481,19 +470,8 @@ class _FilliereState extends State<Filliere> {
                 children: [
                   //hmmm
                   SizedBox(height: 40),
-                  TextField(
-                    controller: _name,
-                    keyboardType: TextInputType.text,
-                    decoration: InputDecoration(
-                        filled: true,
-                        // fillColor: Color(0xA3B0AF1),
-                        fillColor: Colors.white,
-                        hintText: "Nom",
-                        border: OutlineInputBorder(
-                            borderSide: BorderSide.none,gapPadding: 1,
-                            borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                  ),
-              
+                  textField(_name,1,"Nom"),
+
                   SizedBox(height: 10),
                   DropdownButtonFormField<String>(
                     value: _selectedNiveau,
@@ -526,31 +504,19 @@ class _FilliereState extends State<Filliere> {
                       ),
                     ),
                   ),
-              
-              
+
+
                   SizedBox(height: 10),
-                  TextFormField(
-                    controller: _desc,
-                    keyboardType: TextInputType.text,
-                    maxLines: 3,
-                    decoration: InputDecoration(
-                        filled: true,
-              
-                        // fillColor: Color(0xA3B0AF1),
-                        fillColor: Colors.white,
-                        hintText: "description",
-                        border: OutlineInputBorder(
-                            borderSide: BorderSide.none,gapPadding: 1,
-                            borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                  ),
-              
+                  textField(_desc,3,"description"),
+
+
                   SizedBox(height: 15),
                   ElevatedButton(
                     onPressed: (){
                       Navigator.of(context).pop();
                       fetchfilliere();
                       _niveau.text = _selectedNiveau.toString();
-              
+
                       Addfilliere(_name.text,_niveau.text,_desc.text);
                       // Addfilliere(_name.text, _desc.text);
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -558,10 +524,13 @@ class _FilliereState extends State<Filliere> {
                       );
                       setState(() {
                         fetchfilliere();
+                        _name.text = '';
+                        _niveau.text = '';
+                        _desc.text = '';
                       });
                     },
                     child: Text("Ajouter"),
-              
+
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xff0fb2ea),
                       foregroundColor: Colors.white,
@@ -580,6 +549,22 @@ class _FilliereState extends State<Filliere> {
           );
         });
 
+  }
+
+  TextField textField(cont,maxL,hintT) {
+    return TextField(
+                  controller: cont,
+                  keyboardType: TextInputType.text,
+                  maxLines: maxL,
+                  decoration: InputDecoration(
+                      filled: true,
+                      // fillColor: Color(0xA3B0AF1),
+                      fillColor: Colors.white,
+                      hintText: hintT,
+                      border: OutlineInputBorder(
+                          borderSide: BorderSide.none,gapPadding: 1,
+                          borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                );
   }
 
 
@@ -629,373 +614,373 @@ class _FilliereState extends State<Filliere> {
   Future<void> _showFilDetails(BuildContext context, filliere fil) {
     return showModalBottomSheet(
         context: context,backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
-            topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
+        // shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
+        //     topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
         isScrollControlled: true, // Rendre le contenu déroulable
 
         builder: (BuildContext context){
-          return Container(
-            height: 500,
-            padding: const EdgeInsets.all(25.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              // mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Filière Infos',style: TextStyle(fontSize: 30),),
-                SizedBox(height: 40),
-                Row(
-                  children: [
-                    Text('Nom:',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-                    SizedBox(width: 10,),
-                    Container(
-                      width: 200,
-                      child: Text(fil.name.toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 25),
-                Row(
-                  children: [
-                    Text('Niveau:',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                    SizedBox(width: 10,),
-                    Text('${fil.niveau.capitalizeFirst}',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                        // color: Colors.lightBlue
-                      ),),
-
-                  ],
-                ),
-                SizedBox(height: 25),
-                SingleChildScrollView(scrollDirection: Axis.horizontal,
+          return Column(
+            children: [
+              Expanded(flex: 3,
+                child: Container(margin: EdgeInsets.only(top: 30),
+                  decoration: BoxDecoration(image: DecorationImage(image: AssetImage("images/Design11.jpg",),fit: BoxFit.cover),
+                      color: Colors.white
+                  ),
+                  padding: EdgeInsets.only(bottom: 100),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Description:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-                  
-                      SizedBox(width: 10,),
-                      Container(
-                        // width: 200,
-                        child: Text('${fil.description}',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w400,
-                            fontStyle: FontStyle.italic,
-                            // color: Colors.lightBlue
-                          ),),
+                      // CircleAvatar(
+                      //   // radius: 10 * 5,
+                      //   backgroundColor: Colors.black,
+                      //   child: Image.asset("assets/supnum.png",width: 90),
+                      //   // backgroundImage: AssetImage('assets/user1.png'),
+                      // ),
+                      Container(margin: EdgeInsets.only(left: MediaQuery.of(context).size.width - 40),
+                        child: InkWell(
+                          child: Icon(Icons.arrow_forward_ios,size: 25,color: Colors.black,),
+                          onTap: (){
+                            Navigator.pop(context);
+                          },
+                        ),
                       ),
-                  
                     ],
                   ),
                 ),
+              ),
+              Expanded(flex: 7,
+                child: Container(
+                  height: 500,
+                  decoration: BoxDecoration(borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(20), topLeft: Radius.circular(20)),
+                    color: Colors.white,
+                  ),
+                  padding: const EdgeInsets.all(25.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    // mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Filière Infos',style: TextStyle(fontSize: 30,color: Colors.blueGrey),),
+                      SizedBox(height: 40),
+                      rowInfos("Nom:", fil.name.toUpperCase()),
+                      SizedBox(height: 25),
+                      rowInfos("Niveau:", fil.niveau.capitalizeFirst),
+                      SizedBox(height: 25),
+                      rowInfos("Description:", fil.description),
 
-                SizedBox(height: 20),
-                Row(
-                  children: [
-                    Text(
-                      'Elements:',
-                      style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(width: 120,),
-                    IconButton(
-                        onPressed: () async {
-                          Navigator.push(
-                              context, MaterialPageRoute(
-                              builder: (context) => FilElemsPage(filiId: fil.id)));
-                        },
-                        icon: Icon(Icons.format_list_bulleted)),
-                    IconButton(
-                        onPressed: () async {
-                          String? filePath = await pickExcelFile();
-                          if (filePath != null) {
-                            uploadFileToBackend(filePath, fil.id);
-                          }
-                        },
-                        icon: Icon(Icons.cloud_upload_outlined))
+                      SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Text(
+                            'Elements:',
+                            style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(width: 120,),
+                          IconButton(
+                              onPressed: () async {
+                                Navigator.push(
+                                    context, MaterialPageRoute(
+                                    builder: (context) => FilElemsPage(filiId: fil.id)));
+                              },
+                              icon: Icon(Icons.format_list_bulleted)),
+                          IconButton(
+                              onPressed: () async {
+                                String? filePath = await pickExcelFile();
+                                if (filePath != null) {
+                                  uploadFileToBackend(filePath, fil.id);
+                                }
+                              },
+                              icon: Icon(Icons.cloud_upload_outlined))
 
 
-                  ],
-                ),
-                Row(
-                  children: [
-                    Text(
-                      'Emplois:',
-                      style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(width: 130,),
-                    IconButton(
-                        onPressed: () async {
-                          Navigator.push(
-                              context, MaterialPageRoute(
-                              builder: (context) => FilEmploiPage(filiId: fil.id)));
-                        },
-                        icon: Icon(Icons.format_list_bulleted_outlined))
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            'Emplois:',
+                            style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(width: 130,),
+                          IconButton(
+                              onPressed: () async {
+                                Navigator.push(
+                                    context, MaterialPageRoute(
+                                    builder: (context) => FilEmploiPage(filiId: fil.id)));
+                              },
+                              icon: Icon(Icons.format_list_bulleted_outlined))
 
 
-                  ],
-                ),
-                SizedBox(height: 25,),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    TextButton(
+                        ],
+                      ),
+                      SizedBox(height: 25,),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          ElevatedButton(
 
-                      onPressed: () async {
-                        // setState(() {
-                        //   // fetchfilliere();
-                        //   Navigator.pop(context);
-                        //
-                        // });
-                        _name.text = fil.name;
-                        _desc.text = fil.description!;
-                        _selectedNiveau = fil.niveau;
+                            onPressed: () async {
+                              // setState(() {
+                              //   // fetchfilliere();
+                              //   Navigator.pop(context);
+                              //
+                              // });
+                              _name.text = fil.name;
+                              _desc.text = fil.description!;
+                              _selectedNiveau = fil.niveau;
 
-                        showDialog(
-                            context: context,
-                            builder: (context) {
-                              return AlertDialog(
-                                insetPadding: EdgeInsets.only(top: 190,),
-                                surfaceTintColor: Color(0xB0AFAFA3),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.only(
-                                    topRight: Radius.circular(20),
-                                    topLeft: Radius.circular(20),
-                                  ),
-                                ),
-                                title:
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  // mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    Text("Modifier une Matiere", style: TextStyle(fontSize: 20),),
-                                    Spacer(),
-                                    InkWell(
-                                      child: Icon(Icons.close),
-                                      onTap: (){
-                                        Navigator.pop(context);
-                                      },
-                                    )
-                                  ],
-                                ),
-
-                                content: Container(
-                                  height: 450,
-                                  width: MediaQuery.of(context).size.width,
-                                  // padding: const EdgeInsets.all(25.0),
-                                  child: SingleChildScrollView(
-                                    child: Column(
-                                      // mainAxisSize: MainAxisSize.min,
-                                      children: [
-
-                                        SizedBox(height: 40),
-                                        TextField(
-                                          controller: _name,
-                                          keyboardType: TextInputType.text,
-                                          decoration: InputDecoration(
-                                              filled: true,
-                                              // fillColor: Color(0xA3B0AF1),
-                                              fillColor: Colors.white,
-                                              border: OutlineInputBorder(
-                                                  borderSide: BorderSide.none,gapPadding: 1,
-                                                  borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                              showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      insetPadding: EdgeInsets.only(top: 190,),
+                                      surfaceTintColor: Color(0xB0AFAFA3),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.only(
+                                          topRight: Radius.circular(20),
+                                          topLeft: Radius.circular(20),
                                         ),
-
-                                        SizedBox(height: 30),
-                                        DropdownButtonFormField<String>(
-                                          value: _selectedNiveau,
-                                          items: [
-                                            DropdownMenuItem<String>(
-                                              child: Text('Licence'),
-                                              value: "licence",
-                                            ),
-                                            DropdownMenuItem<String>(
-                                              child: Text('Master'),
-                                              value: "master",
-                                            ),
-                                            DropdownMenuItem<String>(
-                                              child: Text('Doctorat'),
-                                              value: "doctorat",
-                                            ),
-                                          ],
-                                          onChanged: (value) {
-                                            setState(() {
-                                              _selectedNiveau = value!;
-                                            });
-                                          },
-                                          decoration: InputDecoration(
-                                            filled: true,
-                                            // fillColor: Color(0xA3B0AF1),
-                                            fillColor: Colors.white,
-                                            border: OutlineInputBorder(
-                                              borderSide: BorderSide.none,gapPadding: 1,
-                                              borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(height: 30),
-
-                                        TextFormField(
-                                          controller: _desc,
-                                          keyboardType: TextInputType.text,
-                                          maxLines: 3,
-                                          decoration: InputDecoration(
-                                              filled: true,
-
-                                              // fillColor: Color(0xA3B0AF1),
-                                              fillColor: Colors.white,
-                                              hintText: "description",
-                                              border: OutlineInputBorder(
-                                                  borderSide: BorderSide.none,gapPadding: 1,
-                                                  borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                                        ),
-                                        ElevatedButton(
-                                          onPressed: () {
-                                            Navigator.of(context).pop();
-                                            _niveau.text = _selectedNiveau.toString();
-
-                                            fetchfilliere();
-
-                                            // AddCategory(_name.text, _desc.text);
-                                            UpdateFilliere(fil.id, _name.text,_selectedNiveau,_desc.text,);
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(content: Text('Le filière est mis à jour avec succès.')),
-                                            );
-                                            setState(() {
-                                              fetchfilliere();
+                                      ),
+                                      title:
+                                      Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        // mainAxisAlignment: MainAxisAlignment.start,
+                                        children: [
+                                          Text("Modifier une Matiere", style: TextStyle(fontSize: 20),),
+                                          Spacer(),
+                                          InkWell(
+                                            child: Icon(Icons.close),
+                                            onTap: (){
                                               Navigator.pop(context);
-                                            });
+                                            },
+                                          )
+                                        ],
+                                      ),
 
-                                          },
-                                          child: Text("Modifier"),
+                                      content: Container(
+                                        height: 450,
+                                        width: MediaQuery.of(context).size.width,
+                                        // padding: const EdgeInsets.all(25.0),
+                                        child: SingleChildScrollView(
+                                          child: Column(
+                                            // mainAxisSize: MainAxisSize.min,
+                                            children: [
 
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Color(0xff0fb2ea),
-                                            foregroundColor: Colors.white,
-                                            elevation: 10,
-                                            minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
-                                            // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
-                                            //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
-                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                              SizedBox(height: 40),
+                                              TextField(
+                                                controller: _name,
+                                                keyboardType: TextInputType.text,
+                                                decoration: InputDecoration(
+                                                    filled: true,
+                                                    // fillColor: Color(0xA3B0AF1),
+                                                    fillColor: Colors.white,
+                                                    border: OutlineInputBorder(
+                                                        borderSide: BorderSide.none,gapPadding: 1,
+                                                        borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                                              ),
+
+                                              SizedBox(height: 30),
+                                              DropdownButtonFormField<String>(
+                                                value: _selectedNiveau,
+                                                items: [
+                                                  DropdownMenuItem<String>(
+                                                    child: Text('Licence'),
+                                                    value: "licence",
+                                                  ),
+                                                  DropdownMenuItem<String>(
+                                                    child: Text('Master'),
+                                                    value: "master",
+                                                  ),
+                                                  DropdownMenuItem<String>(
+                                                    child: Text('Doctorat'),
+                                                    value: "doctorat",
+                                                  ),
+                                                ],
+                                                onChanged: (value) {
+                                                  setState(() {
+                                                    _selectedNiveau = value!;
+                                                  });
+                                                },
+                                                decoration: InputDecoration(
+                                                  filled: true,
+                                                  // fillColor: Color(0xA3B0AF1),
+                                                  fillColor: Colors.white,
+                                                  border: OutlineInputBorder(
+                                                    borderSide: BorderSide.none,gapPadding: 1,
+                                                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(height: 30),
+
+                                              TextFormField(
+                                                controller: _desc,
+                                                keyboardType: TextInputType.text,
+                                                maxLines: 3,
+                                                decoration: InputDecoration(
+                                                    filled: true,
+
+                                                    // fillColor: Color(0xA3B0AF1),
+                                                    fillColor: Colors.white,
+                                                    hintText: "description",
+                                                    border: OutlineInputBorder(
+                                                        borderSide: BorderSide.none,gapPadding: 1,
+                                                        borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                                              ),
+                                              ElevatedButton(
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+
+                                                  // fetchfilliere();
+
+                                                  // AddCategory(_name.text, _desc.text);
+                                                  UpdateFilliere(fil.id, _name.text,_selectedNiveau,_desc.text,);
+                                                  // ScaffoldMessenger.of(context).showSnackBar(
+                                                  //   SnackBar(content: Text('Le filière est mis à jour avec succès.')),
+                                                  // );
+                                                  setState(() {
+                                                    // fetchfilliere();
+                                                    Navigator.pop(context);
+                                                  });
+
+                                                },
+                                                child: Text("Modifier"),
+
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: Color(0xff0fb2ea),
+                                                  foregroundColor: Colors.white,
+                                                  elevation: 10,
+                                                  minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
+                                                  // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
+                                                  //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
+                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                                ),
+                                              )
+                                            ],
                                           ),
-                                        )
-                                      ],
-                                    ),
 
 
-                                  ),
-                                ),
+                                        ),
+                                      ),
 
-                              );
-                            });
-                      },
-
-
-                      child: Text('Modifier'),
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.only(left: 20,right: 20),
-                        foregroundColor: Colors.lightGreen,
-                          backgroundColor: Color(0xfffff1),
-                          side: BorderSide(color: Colors.black12,),
-                          elevation: 3,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))
-                        // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
-                      ),
-
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
-                              surfaceTintColor: Color(0xB0AFAFA3),
-                              title: Text("Confirmer la suppression"),
-                              content: Text(
-                                  "Êtes-vous sûr de vouloir supprimer cet élément ?"),
-                              actions: <Widget>[
-                                TextButton(
-                                  child: Text("ANNULER"),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                ),
-                                TextButton(
-                                  child: Text(
-                                    "SUPPRIMER",
-                                    // style: TextStyle(color: Colors.red),
-                                  ),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                    fetchfilliere();
-
-                                    DeleteFilliere(fil.id);
-
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('Le Filière a été Supprimer avec succès.')),
                                     );
+                                  });
+                            },
 
-                                    setState(() {
-                                      fetchfilliere();
-                                      Navigator.pop(context);
-                                    });
 
-                                  },
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      }, // Disable button functionality
+                            child: Text('Modifier'),
+                            style: ElevatedButton.styleFrom(
+                              surfaceTintColor: Colors.white,
+                              // side: BorderSide(color: Colors.black38),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              elevation: 5,
+                              padding: EdgeInsets.symmetric(horizontal: 25),
+                              backgroundColor: Colors.white,
+                              foregroundColor: Colors.green,
+                              textStyle: TextStyle(fontWeight: FontWeight.bold),
+                              // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                            ),
 
-                      child: Text('Supprimer'),
-                      style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.only(left: 20,right: 20),
-                        foregroundColor: Colors.redAccent,
-                          backgroundColor: Color(0xfffff1),
-                          side: BorderSide(color: Colors.black12,),
-                          elevation: 3,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                                    surfaceTintColor: Color(0xB0AFAFA3),
+                                    title: Text("Confirmer la suppression"),
+                                    content: Text(
+                                        "Êtes-vous sûr de vouloir supprimer cet élément ?"),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        child: Text("ANNULER"),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                      TextButton(
+                                        child: Text(
+                                          "SUPPRIMER",
+                                          // style: TextStyle(color: Colors.red),
+                                        ),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                          fetchfilliere();
+
+                                          DeleteFilliere(fil.id);
+
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(content: Text('Le Filière a été Supprimer avec succès.')),
+                                          );
+
+                                          setState(() {
+                                            fetchfilliere();
+                                            Navigator.pop(context);
+                                          });
+
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            }, // Disable button functionality
+
+                            child: Text('Supprimer'),
+                            style: ElevatedButton.styleFrom(
+                              surfaceTintColor: Colors.white,
+                              // side: BorderSide(color: Colors.black38),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              elevation: 5,
+                              padding: EdgeInsets.symmetric(horizontal: 25),
+                              backgroundColor: Colors.white,
+                              foregroundColor: Colors.redAccent,
+                              textStyle: TextStyle(fontWeight: FontWeight.bold),
+                              // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                            ),
+
+                          ),
+                        ],
                       ),
 
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-
-              ],
-            ),
+              ),
+            ],
           );
         }
 
 
     );
+  }
+
+  Row rowInfos(label,value) {
+    return Row(
+                children: [
+                  Text(label,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w400,
+                      fontStyle: FontStyle.italic,
+                      // color: Colors.lightBlue
+                    ),),
+                  SizedBox(width: 10,),
+                  Container(
+                    width: 200,
+                    child: Text(value,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+                  ),
+                ],
+              );
   }
 
   void Addfilliere (String name,String niveau,String description) async {
@@ -1062,16 +1047,61 @@ class _FilliereState extends State<Filliere> {
         // You can handle the response data as needed
 
         setState(() {
-          fetchfilliere().then((data) {
-            setState(() {
-              filteredItems = data; // Assigner la liste renvoyée par filliereesseur à items
-            });
-          }).catchError((error) {
-            print('Erreur: $error');
-          });
+          Navigator.of(context).pop();
+          showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  surfaceTintColor: Color(0xB0AFAFA3),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Text("Alerte de succès"),
+                      Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
+                    ],
+                  ),
+                  content: Text("L\'element est modifié avec succès"),
+                  actions: [
+                    TextButton(
+                      child: Text("Ok"),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        // Navigator.push(
+                        //     context, MaterialPageRoute(
+                        //     builder: (context) => Elements()));
+
+                      },
+                    ),
+
+                  ],
+
+                );});
         });
+
+        // print("L\'element est ajouté avec succès");
+
+
       } else {
-        // Course creation failed
+        setState(() {
+          showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  surfaceTintColor: Color(0xB0AFAFA3),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Text("Alerte d\'erreur"),
+                      Icon(Icons.wrong_location_outlined,color: Colors.redAccent,)
+                    ],
+                  ),
+                  content: Text(
+                      "L\'emploi n\'est pas modifier"),
+                );});
+
+        });
         print("Failed to update filliere. Status code: ${response.statusCode}");
         print("Error Message: ${response.body}");
       }
@@ -1171,10 +1201,36 @@ class _FilEmploiPageState extends State<FilEmploiPage> {
 
   String day = 'Lundi';
   bool coursesFound = false;
+  List<Professeur> professeurs = [];
+
+  List<Elem> matiereList = [];
+
+  Elem getMatIdFromName(String id) {
+    // Assuming you have a list of professeurs named 'professeursList'
+    final professeur = matiereList.firstWhere((prof) => '${prof.id}' == id, orElse: () =>Elem(id: '', filId: ''));
+    // print(professeur.name);
+    return professeur; // Return the ID if found, otherwise an empty string
+
+  }
+
   @override
   void initState() {
     super.initState();
     fetchFilEmploi();
+    fetchProfs().then((data) {
+      setState(() {
+        professeurs = data; // Assigner la liste renvoyée par Groupesseur à items
+      });
+    }).catchError((error) {
+      print('Erreur: $error');
+    });
+    fetchElems().then((data) {
+      setState(() {
+        matiereList = data; // Assigner la liste renvoyée par Groupesseur à items
+      });
+    }).catchError((error) {
+      print('Erreur: $error');
+    });
   }
 
   Future<void> fetchFilEmploi() async {
@@ -1232,224 +1288,147 @@ class _FilEmploiPageState extends State<FilEmploiPage> {
             ),
           ),
           Divider(),
-          SingleChildScrollView(scrollDirection: Axis.horizontal,
-            child:
-            Container(
-              // width: MediaQuery.of(context).size.width - 10,
-              height: 50,
-              decoration: BoxDecoration(
-                  color: Colors.white,border: Border.all(color: Colors.black12,width: 2),
-                  borderRadius: BorderRadius.all(Radius.circular(10))
-              ),
-
-              child: Row(
-                children: [
-                  TextButton(
-                      onPressed: (){
-                        setState(() {
-                          day = 'Lundi';
-                          // Reset the flag when the user selects a new day
-                          coursesFound = false;
-                        });
-                      }, child: Text('Lun',),
-                      style: buildStyleFrom('Lundi')
-                  ),
-                  TextButton(onPressed: (){
-                    setState(() {
-                      day = 'Mardi';
-                      // Tue = !Tue;
-                      // Mon = false;Wed = false;Thu = false;Fri = false;Sat = false;San = false;
-                    });
-                  }, child: Text('Mar'),
-                      style: buildStyleFrom('Mardi')
-                  ),
-                  TextButton(onPressed: (){
-                    setState(() {
-                      day = 'Mercredi';
-                    });
-                  }, child: Text('Mer'),
-                      style: buildStyleFrom('Mercredi')
-                  ),
-                  TextButton(
-                      onPressed: (){
-                        setState(() {
-                          day = 'Jeudi';
-                        });
-                      },
-                      child: Text('Jeu'),
-                      style: buildStyleFrom('Jeudi')
-                  ),
-                  TextButton(
-                      onPressed: (){
-                        setState(() {
-                          day = 'Vendredi';
-                        });
-                      },
-                      child: Text('Ven'),
-                      style: buildStyleFrom('Vendredi')
-                  ),
-                  TextButton(
-                      onPressed: (){
-                        setState(() {
-                          day = 'Samedi';
-                        });
-                      },
-                      child: Text('Sam'),
-                      style: buildStyleFrom('Samedi')
-                  ),
-                  TextButton(
-                      onPressed: (){
-                        setState(() {
-                          day = 'Dimanch';
-                        });
-                      },
-                      child: Text('Dim'),
-                      style: buildStyleFrom('Dimanch')
-                  )
-                ],
-              ),
-            ),
-          ),
           Expanded(
             child: Container(
               width: MediaQuery.of(context).size.width,
-              child: ListView.builder(
-                itemCount: emplois.length,
-                itemBuilder: (BuildContext context, int index) {
-                  // Check if the current semester is different from the previous one
-                  if (index == 0 || emplois[index]['semestre'] != emplois[index - 1]['semestre']) {
-                    // Display semester header
-                    return Padding(
-                      padding: const EdgeInsets.only(top: 10.0),
-                      child: Column(
-
-                        children: [
-                          Text(
-                            'Semestre ${emplois[index]['semestre']}',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-
-                          _buildDataRow(index,day),
-
-                          // coursesFound? Text('Aucun cours n\'est prévu pour le dans ce semestre.'):Container(),
-                          // Divider()
-                        ],
-                      ),
-                    );
-                  } else {
-                    // Continue displaying rows for the current semester
-                    return _buildDataRow(index,day);
-                  }
-
-                },
-
-              ),
-
+              child: _buildGroupedEmploisList(emplois)
             ),
           ),
-
         ],
       ),
     );
   }
 
-  ButtonStyle buildStyleFrom(String jour) {
-    return TextButton.styleFrom(
-        backgroundColor:
-        day == jour ? Color(0xFF4281B8) : Colors.white,
-        foregroundColor: day == jour ? Colors.white : Colors.indigo,
-        padding: EdgeInsets.only(top: 15, bottom: 15),minimumSize: Size.fromWidth(80),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadiusDirectional.only(topEnd: Radius.circular(18),bottomEnd: Radius.circular(18)))
+
+  Map<String, Map<int, List<dynamic>>> groupEmploisByJourSemestre(List<dynamic> emplois) {
+    // Map<String, Map<int, List<dynamic>>> groupedEmplois = {};
+
+    for (var emploi in emplois) {
+      String jour = emploi['jour'];
+      int semestre = getMatIdFromName(emploi['element']).SemNum ?? 0;
+
+      if (!groupedEmplois.containsKey(jour)) {
+        groupedEmplois[jour] = {};
+      }
+
+      if (!groupedEmplois[jour]!.containsKey(semestre)) {
+        groupedEmplois[jour]![semestre] = [];
+      }
+
+      groupedEmplois[jour]![semestre]!.add(emploi);
+    }
+
+    return groupedEmplois;
+  }
+  Widget _buildGroupedEmploisList(List<dynamic> emplois) {
+    Map<String, Map<int, List<dynamic>>> groupedEmplois = groupEmploisByJourSemestre(emplois);
+
+    return ListView.builder(
+      itemCount: groupedEmplois.length,
+      itemBuilder: (BuildContext context, int index) {
+        String jour = groupedEmplois.keys.elementAt(index);
+        Map<int, List<dynamic>> semestresEmplois = groupedEmplois[jour]!;
+
+        // Affichez les emplois pour chaque semestre du jour
+        return Padding(
+          padding: const EdgeInsets.only(top: 10.0),
+          child: Column(
+            children: [
+              ...semestresEmplois.entries.map((entry) {
+                int semestre = entry.key;
+                List<dynamic> emplois = entry.value;
+
+                // Affichez les emplois pour ce semestre dans une seule table
+                return Padding(
+                  padding: const EdgeInsets.only(top: 10.0),
+                  child: Column(
+                    children: [
+                      if (_shouldDisplaySemestre(index, semestre))
+                        Text(
+                          'Semestre $semestre',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      _buildSemestreEmploisTable(emplois, jour),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ],
+          ),
+        );
+      },
     );
   }
 
+  Map<String, Map<int, List<dynamic>>> groupedEmplois = {};
+  bool _shouldDisplaySemestre(int index, int semestre) {
+    if (index == 0) {
+      // Affichez toujours le premier semestre
+      return true;
+    } else {
+      // Affichez le semestre si différent du précédent
+      String previousJour = groupedEmplois.keys.elementAt(index - 1);
+      int previousSemestre = groupedEmplois[previousJour]!.keys.first;
+      return semestre != previousSemestre;
+    }
+  }
 
 
+  Widget _buildSemestreEmploisTable(List<dynamic> emplois, String jour) {
+    return Container(
+      width: MediaQuery.of(context).size.width ,
+      decoration: BoxDecoration(
+        color: Colors.blue,
+        borderRadius: BorderRadius.all(Radius.circular(30)),
+      ),
+      child: DataTable(
+        showCheckboxColumn: true,
+        showBottomBorder: true,
+        headingRowHeight: 50,
+        headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white70),
+        dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
+        columnSpacing: 8,
+        dataRowHeight: 50,
+        columns: [
+          DataColumn(label: Text(jour.capitalize!, style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic))),
+          DataColumn(label: Text('')),
+          DataColumn(label: Text('')),
+          DataColumn(label: Text('')),
+          // DataColumn(label: Text('')),
+        ],
+        rows: emplois.map<DataRow>((emploi) => _buildEmploiDataRow(emploi)).toList(),
+      ),
+    );
+  }
 
-
-  Widget _buildDataRow(int index, String day) {
-    return Column(
-      children: [
-        if (emplois[index]['jour'].toString().capitalize == day)
-        DataTable(
-          showCheckboxColumn: true,
-          showBottomBorder: true,
-          headingRowHeight: 50,
-          headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
-          columnSpacing: 8,
-          dataRowHeight: 50,
-          columns: [
-            DataColumn(label: Text('')),
-            DataColumn(label: Text(emplois[index]['jour'].toString().capitalize!,
-              // style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold,fontStyle: FontStyle.italic),
-              style: TextStyle(color: Colors.black,fontSize: 20,fontWeight: FontWeight.w500),
-            )),
-            DataColumn(label: Text('')),
-            DataColumn(label: Text('')),
-            DataColumn(label: Text('')),
-          ],
-          rows: [
-            DataRow(
-              cells: [
-                // DataCell(Container(
-                //   width: 60,
-                //   child: Text(
-                //     '${emplois[index]['jour']}',
-                //     style: TextStyle(
-                //       color: Colors.black,
-                //     ),
-                //   ),
-                // )),
-                DataCell(Text(
-                  '${emplois[index]['enseignat'].toString().capitalize}',
-                  style: TextStyle(
-                    color: Colors.black,
-                  ),
-                )),
-                DataCell(Text(
-                  '${emplois[index]['matiere'].toString().capitalize}',
-                  style: TextStyle(
-                    color: Colors.black,
-                  ),
-                )),
-                DataCell(Container(
-                  width: 40,
-                  child: Text(
-                    '${emplois[index]['type']}',
-                    style: TextStyle(
-                      color: Colors.black,
-                    ),
-                  ),
-                )),
-                DataCell(Container(
-                  width: 40,
-                  child: Text(
-                    '${emplois[index]['startTime']}',
-                    style: TextStyle(
-                      color: Colors.black,
-                    ),
-                  ),
-                )),
-                DataCell(Container(
-                  width: 40,
-                  child: Text(
-                    '${emplois[index]['finishTime']}',
-                    style: TextStyle(
-                      color: Colors.black,
-                    ),
-                  ),
-                )),
-              ],
-            ),
-          ],
-        ),
+  DataRow _buildEmploiDataRow(dynamic emploi) {
+    return DataRow(
+      cells: [
+        DataCell(Text(getProfIdFromName(emploi['professeur']['_id'],professeurs))),
+        DataCell(Text(getMatIdFromName(emploi['element']).nameMat.toString().capitalize!)),
+        DataCell(Text(emploi['type'])),
+        DataCell(Text(emploi['startTime'])),
+        // DataCell(Text(emploi['finishTime'])),
       ],
     );
   }
+
+
+
+
+
 }
+String getProfIdFromName(String nom,professeurs) {
+  // Assuming you have a list of professeurs named 'professeursList'
+  final professeur = professeurs.firstWhere((prof) => '${prof.id}' == nom, orElse: () =>Professeur(id: ''));
+  print("ProfName:${professeur.nom}");
+  return "${professeur.nom} ${professeur.prenom}".toString().capitalize!; // Return the ID if found, otherwise an empty string
+
+}
+
 
 
 class FilElemsPage extends StatefulWidget {
@@ -1550,8 +1529,14 @@ class _FilElemsPageState extends State<FilElemsPage> {
               child: SingleChildScrollView(scrollDirection: Axis.horizontal,
                 child: Container(
                   height: 700,
+                  decoration: BoxDecoration(
+                    color: emplois.length > 0 ? Colors.blue:Colors.white,
+                    borderRadius: BorderRadius.all(Radius.circular(30)),
+                  ),       // margin: EdgeInsets.only(left: 10),
                   child: SingleChildScrollView(scrollDirection: Axis.vertical,
                     child: DataTable(
+                      headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white70),
+                      dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
                       showCheckboxColumn: true,
                       showBottomBorder: true,
                       headingRowHeight: 50,
@@ -1562,9 +1547,10 @@ class _FilElemsPageState extends State<FilElemsPage> {
                         DataColumn(label: Text('#')),
                         DataColumn(label: Text('Sem')),
                         DataColumn(label: Text('Matiere')),
-                        DataColumn(label: Text('ProfCM')),
-                        DataColumn(label: Text('ProfTP')),
-                        DataColumn(label: Text('ProfTD')),
+                        // DataColumn(label: RichText(text: TextSpan(children: [TextSpan(text: 'ProfCM')]))),
+                        DataColumn(label: Text('Professeur CM')),
+                        DataColumn(label: Text('Professeur TP')),
+                        DataColumn(label: Text('Professeur TD')),
                         // DataColumn(label: Text('HCM')),
                         // DataColumn(label: Text('HTP')),
                         // DataColumn(label: Text('HTD')),
@@ -1592,7 +1578,7 @@ class _FilElemsPageState extends State<FilElemsPage> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       for (var prof in emplois?[index]['professeurCM'])
-                                      Text('${getProfIdFromName(prof).capitalize} /',style: TextStyle(
+                                      Text('${getProfIdFromName(prof['_id'],professeurs)} /',style: TextStyle(
                                         color: Colors.black,
                                       ),),
                                     ],
@@ -1604,7 +1590,7 @@ class _FilElemsPageState extends State<FilElemsPage> {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           for (var prof in emplois?[index]['professeurTP'])
-                                            Text('${getProfIdFromName(prof).capitalize} /',style: TextStyle(
+                                    Text('${getProfIdFromName(prof['_id'],professeurs)} /',style: TextStyle(
                                             color: Colors.black,
                                           ),),
                                         ],
@@ -1617,7 +1603,7 @@ class _FilElemsPageState extends State<FilElemsPage> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       for (var prof in emplois?[index]['professeurTD'])
-                                        Text('${getProfIdFromName(prof).capitalize} /',style: TextStyle(
+                                    Text('${getProfIdFromName(prof['_id'],professeurs)} /',style: TextStyle(
                                         color: Colors.black,
                                       ),),
                                     ],
@@ -1688,6 +1674,10 @@ class _FilElemsPageState extends State<FilElemsPage> {
         builder: (BuildContext context){
           return Container(
             height: 700,
+            decoration: BoxDecoration(borderRadius: BorderRadius.only(
+                topRight: Radius.circular(20), topLeft: Radius.circular(20)),
+              color: Colors.white,
+            ),
             padding: const EdgeInsets.all(25.0),
             child: SingleChildScrollView(scrollDirection: Axis.vertical,
               child: Column(
@@ -1707,7 +1697,6 @@ class _FilElemsPageState extends State<FilElemsPage> {
                           setState(() {
                             Navigator.pop(context);
                           });
-                          Navigator.pop(context);
                         },
                       )
                     ],
@@ -1774,7 +1763,7 @@ class _FilElemsPageState extends State<FilElemsPage> {
 
                         for (var prof in emplois?[index]['professeurCM'])
                           // for (var prof in ele?[index]['info']['CM'])
-                          Text("${getProfIdFromName(prof).capitalize}",
+                          Text('${getProfIdFromName(prof['_id'],professeurs)} /',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w400,
@@ -1799,7 +1788,7 @@ class _FilElemsPageState extends State<FilElemsPage> {
 
                           // for (var prof in ele?[index]['info']['TP'])
                         for (var prof in emplois?[index]['professeurTP'])
-                          Text("${getProfIdFromName(prof).capitalize}",
+                          Text('${getProfIdFromName(prof['_id'],professeurs)} /',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w400,
@@ -1824,7 +1813,7 @@ class _FilElemsPageState extends State<FilElemsPage> {
 
                           // for (var prof in ele?[index]['info']['TD'])
                         for (var prof in emplois?[index]['professeurTD'])
-                          Text("${getProfIdFromName(prof).capitalize}",
+                          Text("${getProfIdFromName(prof['_id'],professeurs)}",
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w400,
@@ -1904,7 +1893,7 @@ class _FilElemsPageState extends State<FilElemsPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      TextButton(
+                      ElevatedButton(
                         onPressed: () {
                           // _selectedNum = emp.dayNumero;
                           // _date.text = ele.fil!;
@@ -1916,7 +1905,7 @@ class _FilElemsPageState extends State<FilElemsPage> {
                                     UpdateElemScreen(eleId: ele[index]['_id'],  Sem:ele[index]['semestre'], Mat: ele[index]['name'],
                                       // ProCM: ele.ProfCM!, ProTP: ele.ProfTP!, ProTD: ele.ProfTD!,
                                       CredCM: ele[index]['heuresCM'], CredTP: ele[index]['heuresTP'],CredTD: ele[index]['heuresTD'],
-                                      filId: ele[index]['filiere'], MatId: ele[index]['matiere'], fil: fill!,
+                                      filId: ele[index]['filiere']['_id'],  fil: ele[index]['filiere']['name'],
                                       ProfCMId: ele[index]['professeurCM'], ProfTPId: ele[index]['professeurTP'],ProfTDId: ele[index]['professeurTD'],
                                     )));
                           });
@@ -1926,20 +1915,20 @@ class _FilElemsPageState extends State<FilElemsPage> {
                         },// Disable button functionality
 
                         child: Text('Modifier'),
-                        style: TextButton.styleFrom(
-                            padding: EdgeInsets.only(left: 20,right: 20),
-                            foregroundColor: Colors.lightGreen,
-                            // backgroundColor: Colors.white,
-                            // side: BorderSide(color: Colors.black,),
-
-                            backgroundColor: Color(0xfffff1),
-                            side: BorderSide(color: Colors.black12,),   elevation: 3,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))
-                          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                        style: ElevatedButton.styleFrom(
+                          surfaceTintColor: Colors.white,
+                          // side: BorderSide(color: Colors.black38),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          elevation: 5,
+                          padding: EdgeInsets.symmetric(horizontal: 20),
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.green,
+                          textStyle: TextStyle(fontWeight: FontWeight.bold),
+                          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                         ),
 
                       ),
-                      TextButton(
+                      ElevatedButton(
                         // print(ele.id);
                         onPressed: (){
                           showDialog(
@@ -2093,18 +2082,20 @@ class _FilElemsPageState extends State<FilElemsPage> {
                         }, // Disable button functionality
 
                         child: Text('Ajouter Prof'),
-                        style: TextButton.styleFrom(
-                            padding: EdgeInsets.only(left: 20,right: 20),
-                            foregroundColor: Color(0xff0fb2ea),
-                            // foregroundColor: Colors.lightGreen,
-                            backgroundColor: Color(0xfffff1),
-                            side: BorderSide(color: Colors.black12,),
-                            elevation: 3,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))
+                        style: ElevatedButton.styleFrom(
+                          surfaceTintColor: Colors.white,
+                          // side: BorderSide(color: Colors.black38),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          elevation: 5,
+                          padding: EdgeInsets.symmetric(horizontal: 15),
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.blue,
+                          textStyle: TextStyle(fontWeight: FontWeight.bold),
+                          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                         ),
 
                       ),
-                      TextButton(
+                      ElevatedButton(
                         onPressed: () {
                           showDialog(
                             context: context,
@@ -2150,15 +2141,16 @@ class _FilElemsPageState extends State<FilElemsPage> {
                         }, // Disable button functionality
 
                         child: Text('Supprimer'),
-                        style: TextButton.styleFrom(
-                            padding: EdgeInsets.only(left: 20,right: 20),
-                            foregroundColor: Colors.redAccent,
-
-                            backgroundColor: Color(0xfffff1),
-                            side: BorderSide(color: Colors.black12,), // side: BorderSide(color: Colors.black,),
-                            elevation: 3,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))
-                          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                        style: ElevatedButton.styleFrom(
+                          surfaceTintColor: Colors.white,
+                          // side: BorderSide(color: Colors.black38),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          elevation: 5,
+                          padding: EdgeInsets.symmetric(horizontal: 20),
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.redAccent,
+                          textStyle: TextStyle(fontWeight: FontWeight.bold),
+                          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                         ),
 
                       ),
@@ -2325,13 +2317,6 @@ class _FilElemsPageState extends State<FilElemsPage> {
     }
   }
 
-  String getProfIdFromName(String nom) {
-    // Assuming you have a list of professeurs named 'professeursList'
-    final professeur = professeurs.firstWhere((prof) => '${prof.id}' == nom, orElse: () =>Professeur(id: ''));
-    print("ProfName:${professeur.nom}");
-    return "${professeur.nom} ${professeur.prenom}"; // Return the ID if found, otherwise an empty string
-
-  }
 
 
 }

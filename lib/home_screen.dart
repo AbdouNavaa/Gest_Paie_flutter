@@ -31,7 +31,7 @@ import 'filliere.dart';
 
 
 class HomeScreen extends StatefulWidget {
-   HomeScreen({Key? key, this.role, this.name, this.email, this.profId, this.notif, this.CNS}) : super(key: key);
+  HomeScreen({Key? key, this.role, this.name, this.email, this.profId, this.notif, this.CNS}) : super(key: key);
   final String? role;
   final String? name;
   final String? email;
@@ -110,468 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
       // )
       //     : null,
 
-      drawer: Drawer(width: 250,
-        child: Container(color: Colors.white,
-          child: ListView(
-            children: [
-              DrawerHeader(
-
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    stops: [0.0, 1.0],
-                    colors: [ Colors.lightBlueAccent,Colors.black],
-
-                  ),
-                ),
-                child: Container(
-                  alignment: Alignment.topLeft,
-
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          InkWell(
-                            onTap:() async {
-                              if (widget.role == "professeur") {
-                                SharedPreferences prefs = await SharedPreferences.getInstance();
-                                String token = prefs.getString("token")!;
-                                String role = prefs.getString("role")!;
-                                String email = prefs.getString("email")!;
-                                String name = prefs.getString("nom")!;
-                                String id = prefs.getString("id")!;
-                                print(id);
-                                Navigator.push(context, MaterialPageRoute(
-                                  builder: (context) =>
-                                  // ProfesseurInfoPage(id: id, email: email, role: role),
-                                  ProfesseurDetailsScreen(
-                                    profId: widget.profId!,
-                                    nom: name,
-                                    mail: email,
-                                  ),
-                                  // builder: (context) => LandingScreen(role: role,name: nom,), // Passer le rôle ici
-                                ),);
-
-                              }
-
-                              else{
-                                Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage(  username: widget.name,
-                                  role: widget.role,
-                                  email: widget.email,)));
-                              }
-
-                            },
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(100),
-
-                              child: Image.asset("assets/user1.png",width: 90),
-                            ),
-                          ),
-                          widget.role == "professeur"?
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Stack(
-                                alignment: Alignment.center, // Centrez les enfants dans la stack
-                                children: [
-                                  IconButton(
-                                    onPressed: ()async{
-                                      SharedPreferences prefs = await SharedPreferences.getInstance();
-                                      String token = prefs.getString("token")!;
-                                      String id = prefs.getString("id")!;
-                                      String nom = prefs.getString("nom")!;
-
-                                      var url = Uri.parse('http://192.168.43.73:5000/professeur/${widget.profId}/cours-non');
-
-                                      var responseInitialise = await http.get(
-                                        url,
-                                        headers: {
-                                          'Authorization': 'Bearer $token',
-                                          'Content-Type': 'application/json', // Ajoutez le type de contenu
-                                        },
-                                        // body: jsonEncode({"notification": ""}), // Encodez votre corps en JSON
-                                      );
-
-
-                                      if (responseInitialise.statusCode == 200) {
-                                        Map<String, dynamic> jsonResponse = jsonDecode(responseInitialise.body);
-                                        courses = jsonResponse['cours'];
-                                        // print('Paiements avec status "initialisé": ${paies.length}');
-                                        setState(() {
-                                          widget.CNS = courses.length;
-                                        });
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(builder: (context) =>
-                                              ProfCoursesNonSigne(courses: courses,
-                                                ProfId: widget.profId!,)),
-                                        );
-
-                                      } else {
-                                        print('Request for "initialisé" failed with status: ${responseInitialise.statusCode}');
-                                      }
-                                    },
-                                    icon: Icon(Icons.message_outlined, color: Colors.white,size: 30),
-                                  ),
-                                  Positioned(
-                                    right: 2,top: 5, // Ajustez la position verticale du texte selon vos besoins
-                                    child: Text(
-                                      widget.CNS.toString(),
-                                      style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Stack(
-                                alignment: Alignment.center, // Centrez les enfants dans la stack
-                                children: [
-                                  IconButton(
-                                    onPressed: ()async{
-                                      SharedPreferences prefs = await SharedPreferences.getInstance();
-                                      String token = prefs.getString("token")!;
-                                      String id = prefs.getString("id")!;
-                                      String nom = prefs.getString("nom")!;
-
-                                      var url = Uri.parse('http://192.168.43.73:5000/paiement/${widget.profId}/professeur');
-
-                                      var responseInitialise = await http.post(
-                                        url,
-                                        headers: {
-                                          'Authorization': 'Bearer $token',
-                                          'Content-Type': 'application/json', // Ajoutez le type de contenu
-                                        },
-                                        body: jsonEncode({"notification": ""}), // Encodez votre corps en JSON
-                                      );
-
-
-                                      if (responseInitialise.statusCode == 200) {
-                                        Map<String, dynamic> jsonResponse = jsonDecode(responseInitialise.body);
-                                        paies = jsonResponse['paiements'];
-                                        // print('Paiements avec status "initialisé": ${paies.length}');
-                                        setState(() {
-                                          widget.notif = paies.length;
-                                        });
-                                        print(paies);
-
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(builder: (context) =>
-                                              Paie(paies: paies,
-                                                ProfId: id,
-                                                Id:  widget.profId!,
-                                                ProfName: nom,)),
-                                        );
-
-                                      } else {
-                                        print('Request for "initialisé" failed with status: ${responseInitialise.statusCode}');
-                                      }
-                                    },
-
-                                    icon: Icon(Icons.notifications_none, color: Colors.white,size: 30,),
-                                  ),
-                                  Positioned(
-                                    right: 8,top: 5, // Ajustez la position verticale du texte selon vos besoins
-                                    child: Text(
-                                      widget.notif.toString(),
-                                      style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                ],
-                              ),
-
-                            ],
-                          ):Container()
-
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Text(
-                              "BienVenue",
-                              style: GoogleFonts.slabo27px(
-                                color: Colors.white,
-                                fontSize: 20,
-                              )
-                          ),
-                          Text(
-                            " ${widget.name!.toUpperCase()}",
-                            style: GoogleFonts.slabo27px(
-                              color: Colors.white,
-                              fontSize: 20.0,
-                              fontStyle: FontStyle.italic,
-                              fontWeight: FontWeight.bold,
-                              // letterSpacing: 2.0,
-                            ),
-                          ),
-                          SizedBox(width: 10,),
-                        ],
-                      ),
-
-                    ],
-                  ),
-
-                ),
-              ),
-              if (widget.role == "professeur")
-                Column(
-                  children: [
-                    ListTile(
-                        leading: Icon(Icons.book_outlined, size: _drawerIconSize, color: Colors.black,),
-                        title: Text('Mes Cours', style: TextStyle(fontSize: 17, color: Colors.black),),
-                        onTap: ()async{
-                          SharedPreferences prefs = await SharedPreferences.getInstance();
-                          String token = prefs.getString("token")!;
-                          String id = prefs.getString("id")!;
-                          String nom = prefs.getString("nom")!;
-
-                          var url = Uri.parse('http://192.168.43.73:5000/professeur/${widget.profId}/cours-oui');
-
-                          var responseInitialise = await http.get(
-                            url,
-                            headers: {
-                              'Authorization': 'Bearer $token',
-                              'Content-Type': 'application/json', // Ajoutez le type de contenu
-                            },
-                            // body: jsonEncode({"notification": ""}), // Encodez votre corps en JSON
-                          );
-
-
-                          if (responseInitialise.statusCode == 200) {
-                            Map<String, dynamic> jsonResponse = jsonDecode(responseInitialise.body);
-                            courses = jsonResponse['cours'];
-                            // print('Paiements avec status "initialisé": ${courses.length}');
-                            setState(() {
-                              coursCN = courses.length;
-                            });
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) =>
-                                  ProfCoursesPage(courses: courses,
-                                    ProfId: widget.profId!,)),
-                            );
-
-                          } else {
-                            print('Request for "initialisé" failed with status: ${responseInitialise.statusCode}');
-                          }
-                        }
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.payment_outlined,size: _drawerIconSize,color: Colors.black),
-                      title: Text('Paiements', style: TextStyle(fontSize: _drawerFontSize, color: Colors.black),
-                      ),
-                      onTap:()async{
-                        // try {
-                        SharedPreferences prefs = await SharedPreferences.getInstance();
-                        String token = prefs.getString("token")!;
-                        String id = prefs.getString("id")!;
-                        String nomComplet = prefs.getString("nom")!;
-                        String nom = nomComplet;
-
-                        var url = Uri.parse('http://192.168.43.73:5000/paiement/${widget.profId}/professeur');
-
-                        var responseInitialise = await http.post(
-                          url,
-                          headers: {
-                            'Authorization': 'Bearer $token',
-                            'Content-Type': 'application/json', // Ajoutez le type de contenu
-                          },
-                          body: jsonEncode({}), // Encodez votre corps en JSON
-                        );
-
-
-                        if (responseInitialise.statusCode == 200) {
-                          Map<String, dynamic> jsonResponse = jsonDecode(responseInitialise.body);
-                          paies = jsonResponse['paiements'];
-                          setState(() {
-                            coursPN = paies.length;
-                          });
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) =>
-                                ProfPaies(paies: paies,
-                                  ProfId: id,
-                                  Id:  widget.profId!,
-                                  ProfName: nom,)),
-                          );
-                          print('Paiements avec status "initialisé": ${paies.length}');
-                        } else {
-                          print('Request for "initialisé" failed with status: ${responseInitialise.statusCode}');
-                        }
-
-
-                      },
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.calendar_month, size: _drawerIconSize,color: Colors.black,),
-                      title: Text('Mon Emploi',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
-                      onTap:() async {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => EmploiPage(profId: widget.profId!,)));
-                      },
-                    ),
-                    //Divider(color: Theme.of(context).primaryColor, height: 1,),
-                    ListTile(
-                      leading: Icon(Icons.logout_rounded, size: _drawerIconSize,color: Colors.black,),
-                      title: Text('Logout',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
-                      onTap: () async{
-                        SharedPreferences prefs = await SharedPreferences.getInstance();
-                        await prefs.setString('token', '');
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (context) => KeyboardVisibilityProvider(child: LoginSection())));
-                            // MaterialPageRoute(builder: (context) => LoginSection()));
-
-                      },
-                    ),
-                  ],
-                ),
-              // if (widget.role == "responsable")
-              if (widget.role == "admin")
-                Column(
-                  children: [
-                    ListTile(
-                      leading: Icon(Icons.supervised_user_circle_outlined, size: _drawerIconSize, color: Colors.black,),
-                      title: Text('Users', style: TextStyle(fontSize: 17, color: Colors.black),),
-                      onTap: (){
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => Users()));
-                      },
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.groups,size: _drawerIconSize,color: Colors.black),
-                      title: Text('Professeures', style: TextStyle(fontSize: _drawerFontSize, color: Colors.black),
-                      ),
-                      onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => Professeures()),);
-                      },
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.featured_play_list_outlined,size: _drawerIconSize,color: Colors.black),
-                      title: Text('Elements', style: TextStyle(fontSize: _drawerFontSize, color: Colors.black),
-                      ),
-                      onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => Elements()),);
-                      },
-                    ),
-                    //Divider(color: Theme.of(context).primaryColor, height: 1,),
-                    //Divider(color: Theme.of(context).primaryColor, height: 1,),
-                    ListTile(
-                      leading: Icon(Icons.play_lesson_outlined, size: _drawerIconSize,color: Colors.black,),
-                      title: Text('Cours',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
-                      onTap: ()async{
-                        SharedPreferences prefs = await SharedPreferences.getInstance();
-                        String token = prefs.getString("token")!;
-                        String role = prefs.getString("role")!;
-                        var response = await http.get(
-                          Uri.parse('http://192.168.43.73:5000/cours'),
-                          headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': 'Bearer $token'
-                          },
-                        );
-                        // print(response.body);
-
-                        if (response.statusCode == 200) {
-                          List<dynamic> courses = json.decode(
-                              response.body)['cours'];
-                          // this.coursNum = json.decode(response.body)['data']['countLL'];
-                          // num heuresTV = json.decode(response.body)['data']['heuresTV'];
-                          // num sommeTV = json.decode(response.body)['data']['sommeTV'];
-                          // setState(() {
-                          this.coursNum = json.decode(response.body)['cours'].length;
-                          //
-                          // });
-                          print('Mes Cours :${json.decode(response.body)['cours']}');
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) =>
-                                CoursesPage(courses: courses,
-                                  coursNum: coursNum,
-                                  // heuresTV: heuresTV,
-                                  // sommeTV: sommeTV,
-                                  role: role,)),
-                          );
-                        } else {
-                          // Handle error
-                          print('Failed to fetch prof courses. Status Code: ${response
-                              .statusCode}');
-                        }
-                      },
-                    ),
-                    // Divider(color: Colors.black38, height: 1,),
-                    ListTile(
-                        leading: Icon(Icons.payment_outlined, size: _drawerIconSize,color: Colors.black,),
-                        title: Text('Paiements',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
-                        onTap: ()async{
-                          SharedPreferences prefs = await SharedPreferences.getInstance();
-                          String token = prefs.getString("token")!;
-                          String role = prefs.getString("role")!;
-                          var response = await http.get(
-                            Uri.parse('http://192.168.43.73:5000/cours'),
-                            headers: {
-                              'Content-Type': 'application/json',
-                              'Authorization': 'Bearer $token'
-                            },
-                          );
-                          // print(response.body);
-
-                          if (response.statusCode == 200) {
-                            List<dynamic> courses = json.decode(
-                                response.body)['cours'];
-                            this.coursNum = json.decode(response.body)['cours'].length;
-                            // print('Mes cours: ${json.decode(response.body)['cours']}');
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => Paiements(courses: courses,)),
-                            );
-                          } else {
-                            // Handle error
-                            print('Failed to fetch prof courses. Status Code: ${response
-                                .statusCode}');
-                          }
-                        }
-                    ),
-
-                    ListTile(
-                      leading: Icon(Icons.calendar_month, size: _drawerIconSize,color: Colors.black,),
-                      title: Text('Emplois',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
-                      onTap: () {
-                        Navigator.push( context, MaterialPageRoute(builder: (context) => Emploi()), );
-                      },
-                    ),
-                    //Divider(color: Theme.of(context).primaryColor, height: 1,),
-                    ListTile(
-                      leading: Icon(Icons.folder_special_outlined, size: _drawerIconSize,color: Colors.black),
-                      title: Text('Filières',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
-                      onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => Filliere()),);
-                      },
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.read_more, size: _drawerIconSize,color: Colors.black),
-                      title: Text('Autres',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
-                      onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => MoreOptionsPage(username: widget.name!,
-                            userRole: widget.role!, userEmail: widget.email!)));
-                      },
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.logout_rounded, size: _drawerIconSize,color: Colors.black,),
-                      title: Text('Logout',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
-                      onTap: () async{
-                        SharedPreferences prefs = await SharedPreferences.getInstance();
-                        await prefs.setString('token', '');
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (context) => KeyboardVisibilityProvider(child: LoginSection())));
-                            // MaterialPageRoute(builder: (context) => LoginSection()));
-
-                      },
-                    ),
-                  ],)
-            ],
-          ),
-        ),
-      ),
+      drawer: MyDrawer(),
       body: Stack(
         // overflow: Overflow.visible,
         fit: StackFit.expand,
@@ -586,6 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   begin: Alignment.center,
                   end: Alignment.bottomLeft,
                   // colors: [ Colors.white,Colors.white],
+                  // stops: [0.0, 2],
                   colors: [Colors.blueAccent, Colors.white],
                   // colors: [Color(0xB0AFAFA3), Colors.white],
                 ),
@@ -646,49 +186,50 @@ class _HomeScreenState extends State<HomeScreen> {
                                   // alignment: Alignment.center, // Centrez les enfants dans la stack
                                     children: [
                                       _customCard(
-                                    imageUrl: "cours2.png",
-                                    item: "Cours Non Signé",
-                                    height: 180,
-                                    width: 160,
-                                    duration: "${widget.CNS} Cours",
-                                    onPessed: ()async{
-                                      SharedPreferences prefs = await SharedPreferences.getInstance();
-                                      String token = prefs.getString("token")!;
-                                      String id = prefs.getString("id")!;
-                                      String nom = prefs.getString("nom")!;
+                                        imageUrl: "cours2.png",
+                                        item: "Cours Non Signé",
+                                        height: 180,
+                                        width: 160,
+                                        duration: "${widget.CNS} Cours",
+                                        onPessed: ()async{
+                                          SharedPreferences prefs = await SharedPreferences.getInstance();
+                                          String token = prefs.getString("token")!;
+                                          String id = prefs.getString("id")!;
+                                          String nom = prefs.getString("nom")!;
 
-                                      var url = Uri.parse('http://192.168.43.73:5000/professeur/${widget.profId}/cours-non');
+                                          var url = Uri.parse('http://192.168.43.73:5000/cours?professeur=${widget.profId}&isSigned=en attente');
+                                          // var url = Uri.parse('http://192.168.43.73:5000/cours/non-signe-professeur/${widget.profId}');
 
-                                      var responseInitialise = await http.get(
-                                        url,
-                                        headers: {
-                                          'Authorization': 'Bearer $token',
-                                          'Content-Type': 'application/json', // Ajoutez le type de contenu
+                                          var responseInitialise = await http.get(
+                                            url,
+                                            headers: {
+                                              'Authorization': 'Bearer $token',
+                                              'Content-Type': 'application/json', // Ajoutez le type de contenu
+                                            },
+                                            // body: jsonEncode({}), // Encodez votre corps en JSON
+                                          );
+
+
+                                          if (responseInitialise.statusCode == 200) {
+                                            Map<String, dynamic> jsonResponse = jsonDecode(responseInitialise.body);
+                                            courses = jsonResponse['cours'];
+                                            // print('Paiements avec status "initialisé": ${paies.length}');
+                                            setState(() {
+                                              widget.CNS = courses.length;
+                                            });
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(builder: (context) =>
+                                                  ProfCoursesNonSigne(courses: courses,
+                                                    ProfId: widget.profId!,)),
+                                            );
+
+                                          } else {
+                                            print('Request for "initialisé" failed with status: ${responseInitialise.statusCode}');
+                                          }
                                         },
-                                        // body: jsonEncode({"notification": ""}), // Encodez votre corps en JSON
-                                      );
 
-
-                                      if (responseInitialise.statusCode == 200) {
-                                        Map<String, dynamic> jsonResponse = jsonDecode(responseInitialise.body);
-                                        courses = jsonResponse['cours'];
-                                        // print('Paiements avec status "initialisé": ${paies.length}');
-                                        setState(() {
-                                          widget.CNS = courses.length;
-                                        });
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(builder: (context) =>
-                                              ProfCoursesNonSigne(courses: courses,
-                                                ProfId: widget.profId!,)),
-                                        );
-
-                                      } else {
-                                        print('Request for "initialisé" failed with status: ${responseInitialise.statusCode}');
-                                      }
-                                    },
-
-                                  ),
+                                      ),
                                       Positioned(
                                         right: 1,top: 1, // Ajustez la position verticale du texte selon vos besoins
                                         child: Container(
@@ -709,10 +250,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                     children: [
                                       _customCard(
                                         imageUrl: "paie1.png",
-                                    item: "Paiements Non Confirmés",
-                                    height: 180,
-                                    width: 160,
-                                    duration: "${widget.notif} Paies",
+                                        item: "Paiements Non Confirmés",
+                                        height: 180,
+                                        width: 160,
+                                        duration: "${widget.notif} Paies",
                                         onPessed: ()async{
                                           SharedPreferences prefs = await SharedPreferences.getInstance();
                                           String token = prefs.getString("token")!;
@@ -788,7 +329,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     String id = prefs.getString("id")!;
                                     String nom = prefs.getString("nom")!;
 
-                                    var url = Uri.parse('http://192.168.43.73:5000/professeur/${widget.profId}/cours-oui');
+                                    var url = Uri.parse('http://192.168.43.73:5000/cours?professeur=${widget.profId}&isSigned=effectué');
 
                                     var responseInitialise = await http.get(
                                       url,
@@ -898,7 +439,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     await prefs.setString('token', '');
                                     Navigator.push(context,
                                         MaterialPageRoute(builder: (context) => KeyboardVisibilityProvider(child: LoginSection())));
-                                        // MaterialPageRoute(builder: (context) => LoginSection()));
+                                    // MaterialPageRoute(builder: (context) => LoginSection()));
                                   },
                                 ),
 
@@ -956,8 +497,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                     String token = prefs.getString("token")!;
                                     String role = prefs.getString("role")!;
                                     var response = await http.get(
-                                      Uri.parse('http://192.168.43.73:5000/cours'),
-                                      headers: {
+                                      Uri.parse('http://192.168.43.73:5000/cours?isPaid=en attente'),
+                                       headers: {
                                         'Content-Type': 'application/json',
                                         'Authorization': 'Bearer $token'
                                       },
@@ -982,6 +523,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                               // heuresTV: heuresTV,
                                               // sommeTV: sommeTV,
                                               role: role,
+                                              paid: false,
                                             )),
                                       );
                                     } else {
@@ -1033,7 +575,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     await prefs.setString('token', '');
                                     Navigator.push(context,
                                         MaterialPageRoute(builder: (context) => KeyboardVisibilityProvider(child: LoginSection())));
-                                        // MaterialPageRoute(builder: (context) => LoginSection()));
+                                    // MaterialPageRoute(builder: (context) => LoginSection()));
                                   },
                                 ),
 
@@ -1094,8 +636,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                       String token = prefs.getString("token")!;
                                       String role = prefs.getString("role")!;
                                       var response = await http.get(
-                                        Uri.parse('http://192.168.43.73:5000/cours'),
-                                        headers: {
+                                        Uri.parse('http://192.168.43.73:5000/cours?isPaid=en attente'),
+                                         headers: {
                                           'Content-Type': 'application/json',
                                           'Authorization': 'Bearer $token'
                                         },
@@ -1109,8 +651,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                         // num heuresTV = json.decode(response.body)['data']['heuresTV'];
                                         // num sommeTV = json.decode(response.body)['data']['sommeTV'];
                                         setState(() {
-                                        this.coursNum = json.decode(response.body)['cours'].length;
-                                        //
+                                          this.coursNum = json.decode(response.body)['cours'].length;
+                                          //
                                         });
                                         print('Mes Cours :${json.decode(response.body)['cours']}');
                                         print("Mes CN${coursNum}");
@@ -1120,6 +662,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                               CoursesPage(courses: courses,
                                                 coursNum: coursNum,
                                                 // heuresTV: heuresTV,
+                                                paid: false,
                                                 // sommeTV: sommeTV,
                                                 role: role,)),
                                         );
@@ -1255,7 +798,7 @@ class _HomeScreenState extends State<HomeScreen> {
           )
         ],
       ),
-    // bottomNavigationBar: BottomNav(),
+      // bottomNavigationBar: BottomNav(),
     );
 
   }
@@ -1313,6 +856,636 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+
+
+class MyDrawer extends StatefulWidget {
+  MyDrawer({Key? key}) : super(key: key);
+
+
+  @override
+  State<MyDrawer> createState() => _MyDrawerState();
+}
+
+class _MyDrawerState extends State<MyDrawer> {
+
+  String role = '';
+  String name = '';
+  String email = '';
+  String? profId;
+  int notif = 0;
+  int CNS = 0;
+  final double _drawerIconSize = 24;
+  final double _drawerFontSize = 17;
+  int coursNum = 0;
+  int coursCN = 0;
+  int coursPN = 0;
+
+  getPref() async {
+    SharedPreferences prefs = await SharedPreferences
+        .getInstance();
+    String token = prefs.getString("token")!;
+    String? id;
+    setState(() {
+      role = prefs.getString("role")!;
+      email = prefs.getString("email")!;
+      id = prefs.getString("id")!;
+      name = prefs.getString("nom")!;
+    });
+    if (token != null && role == "professeur") {
+      profId = (await getProfId(token, id!)!)!;
+
+      notif = (await fetchPaiements(profId,token))!;
+      CNS = (await CoursNS(profId,token))!;
+
+    }
+    print('hello, Role: $role , ProfName $name, Email $email , ProfId:$profId, Notif:$notif, CNS:$CNS');
+  }
+
+  @override
+  void initState() {
+    getPref();
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Drawer(width: 250,
+      child: Container(color: Colors.white,
+        child: ListView(
+          children: [
+            DrawerHeader(
+
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  stops: [0.0, 2],
+                  colors: [ Colors.blue,Colors.white],
+
+                ),
+              ),
+              child: Container(
+                alignment: Alignment.topLeft,
+
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        InkWell(
+                          onTap:() async {
+                            if (role == "professeur") {
+                              SharedPreferences prefs = await SharedPreferences.getInstance();
+                              String token = prefs.getString("token")!;
+                              String role = prefs.getString("role")!;
+                              String email = prefs.getString("email")!;
+                              String name = prefs.getString("nom")!;
+                              String id = prefs.getString("id")!;
+                              print(id);
+                              Navigator.push(context, MaterialPageRoute(
+                                builder: (context) =>
+                                // ProfesseurInfoPage(id: id, email: email, role: role),
+                                ProfesseurDetailsScreen(
+                                  profId: profId!,
+                                  nom: name,
+                                  mail: email,
+                                ),
+                                // builder: (context) => LandingScreen(role: role,name: nom,), // Passer le rôle ici
+                              ),);
+
+                            }
+
+                            else{
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage(  username: name,
+                                role: role,
+                                email: email,)));
+                            }
+
+                          },
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(100),
+
+                            child: Image.asset("assets/user1.png",width: 90),
+                          ),
+                        ),
+                        role == "professeur"?
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Stack(
+                              alignment: Alignment.center, // Centrez les enfants dans la stack
+                              children: [
+                                IconButton(
+                                  onPressed: ()async{
+                                    SharedPreferences prefs = await SharedPreferences.getInstance();
+                                    String token = prefs.getString("token")!;
+                                    String id = prefs.getString("id")!;
+                                    String nom = prefs.getString("nom")!;
+
+                                    var url = Uri.parse('http://192.168.43.73:5000/cours?professeur=${profId}&isSigned=en attente');
+                                    // var url = Uri.parse('http://192.168.43.73:5000/cours/non-signe-professeur/${profId}');
+
+                                    print('Agg:${profId}');
+                                    var responseInitialise = await http.get(
+                                      url,
+                                      headers: {
+                                        'Authorization': 'Bearer $token',
+                                        'Content-Type': 'application/json', // Ajoutez le type de contenu
+                                      },
+                                      // body: jsonEncode({"notification": ""}), // Encodez votre corps en JSON
+                                    );
+
+
+                                    if (responseInitialise.statusCode == 200) {
+                                      Map<String, dynamic> jsonResponse = jsonDecode(responseInitialise.body);
+                                      var cours = jsonResponse['cours'];
+                                      print('Agg:${cours}');
+                                      // print('Paiements avec status "initialisé": ${paies.length}');
+                                      setState(() {
+                                        CNS = cours.length;
+                                      });
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(builder: (context) =>
+                                            ProfCoursesNonSigne(courses: cours,
+                                              ProfId: profId!,)),
+                                      );
+
+                                    } else {
+                                      print('Request for "initialisé" failed with status: ${responseInitialise.statusCode}');
+                                    }
+                                  },
+                                  icon: Icon(Icons.message_outlined, color: Colors.white,size: 30),
+                                ),
+                                Positioned(
+                                  right: 2,top: 5, // Ajustez la position verticale du texte selon vos besoins
+                                  child: Text(
+                                    CNS.toString(),
+                                    style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Stack(
+                              alignment: Alignment.center, // Centrez les enfants dans la stack
+                              children: [
+                                IconButton(
+                                  onPressed: ()async{
+                                    SharedPreferences prefs = await SharedPreferences.getInstance();
+                                    String token = prefs.getString("token")!;
+                                    String id = prefs.getString("id")!;
+                                    String nom = prefs.getString("nom")!;
+
+                                    var url = Uri.parse('http://192.168.43.73:5000/paiement/${profId}/professeur');
+
+                                    var responseInitialise = await http.post(
+                                      url,
+                                      headers: {
+                                        'Authorization': 'Bearer $token',
+                                        'Content-Type': 'application/json', // Ajoutez le type de contenu
+                                      },
+                                      body: jsonEncode({"notification": ""}), // Encodez votre corps en JSON
+                                    );
+
+
+                                    if (responseInitialise.statusCode == 200) {
+                                      Map<String, dynamic> jsonResponse = jsonDecode(responseInitialise.body);
+                                      paies = jsonResponse['paiements'];
+                                      // print('Paiements avec status "initialisé": ${paies.length}');
+                                      setState(() {
+                                        notif = paies.length;
+                                      });
+                                      print(paies);
+
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(builder: (context) =>
+                                            Paie(paies: paies,
+                                              ProfId: id,
+                                              Id:  profId!,
+                                              ProfName: nom,)),
+                                      );
+
+                                    } else {
+                                      print('Request for "initialisé" failed with status: ${responseInitialise.statusCode}');
+                                    }
+                                  },
+
+                                  icon: Icon(Icons.notifications_none, color: Colors.white,size: 30,),
+                                ),
+                                Positioned(
+                                  right: 8,top: 5, // Ajustez la position verticale du texte selon vos besoins
+                                  child: Text(
+                                    notif.toString(),
+                                    style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                          ],
+                        ):Container()        ],  ),
+                    Row(
+                      children: [
+                        Text(
+                            "BienVenue",
+                            style: GoogleFonts.slabo27px(
+                              color: Colors.white,
+                              fontSize: 20,
+                            )
+                        ),
+                        Text(
+                          " ${name!.toUpperCase()}",
+                          style: GoogleFonts.slabo27px(
+                            color: Colors.white,
+                            fontSize: 20.0,
+                            fontStyle: FontStyle.italic,
+                            fontWeight: FontWeight.bold,
+                            // letterSpacing: 2.0,
+                          ),
+                        ),
+                        SizedBox(width: 10,),
+                      ],
+                    ),      ],    ),  ),  ),
+            if (role == "professeur")
+              Column(
+                children: [
+                  ListTile(
+                    leading: Icon(Icons.dashboard_customize_outlined, size: _drawerIconSize, color: Colors.black,),
+                    title: Text('Acceuil', style: TextStyle(fontSize: 17, color: Colors.black),),
+                    onTap: (){
+                       if (profId != null) {
+                                                          Navigator.push(
+                                                            context,
+                                                            MaterialPageRoute(
+                                                              builder: (context) => HomeScreen(
+                                                                role: role,
+                                                                name: name,
+                                                                email: email,
+                                                                profId: profId, // Passer l'ID du professeur à la page HomeScreen
+                                                                notif: notif, // Passer l'ID du professeur à la page HomeScreen
+                                                                CNS: CNS, // Passer l'ID du professeur à la page HomeScreen
+                                                              ),
+                                                            ),
+                                                          );
+                                                        } else {
+                                                          // Gérer le cas où l'ID du prof n'est pas disponible
+                                                          // Peut-être afficher un message d'erreur ou rediriger vers une autre page
+                                                        }
+
+                    },
+                  ),
+                  ListTile(
+                      leading: Icon(Icons.book_outlined, size: _drawerIconSize, color: Colors.black,),
+                      title: Text('Mes Cours', style: TextStyle(fontSize: 17, color: Colors.black),),
+                      onTap: ()async{
+                        SharedPreferences prefs = await SharedPreferences.getInstance();
+                        String token = prefs.getString("token")!;
+                        String id = prefs.getString("id")!;
+                        String nom = prefs.getString("nom")!;
+
+                        var url = Uri.parse('http://192.168.43.73:5000/cours?professeur=${profId}&isSigned=effectué');
+
+                        var responseInitialise = await http.get(
+                          url,
+                          headers: {
+                            'Authorization': 'Bearer $token',
+                            'Content-Type': 'application/json', // Ajoutez le type de contenu
+                          },
+                          // body: jsonEncode({"notification": ""}), // Encodez votre corps en JSON
+                        );
+
+
+                        if (responseInitialise.statusCode == 200) {
+                          Map<String, dynamic> jsonResponse = jsonDecode(responseInitialise.body);
+                          courses = jsonResponse['cours'];
+                          // print('Paiements avec status "initialisé": ${courses.length}');
+                          setState(() {
+                            coursCN = courses.length;
+                          });
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) =>
+                                ProfCoursesPage(courses: courses,
+                                  ProfId: profId!,)),
+                          );
+
+                        } else {
+                          print('Request for "initialisé" failed with status: ${responseInitialise.statusCode}');
+                        }
+                      }
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.payment_outlined,size: _drawerIconSize,color: Colors.black),
+                    title: Text('Paiements', style: TextStyle(fontSize: _drawerFontSize, color: Colors.black),
+                    ),
+                    onTap:()async{
+                      // try {
+                      SharedPreferences prefs = await SharedPreferences.getInstance();
+                      String token = prefs.getString("token")!;
+                      String id = prefs.getString("id")!;
+                      String nomComplet = prefs.getString("nom")!;
+                      String nom = nomComplet;
+
+                      var url = Uri.parse('http://192.168.43.73:5000/paiement/${profId}/professeur');
+
+                      var responseInitialise = await http.post(
+                        url,
+                        headers: {
+                          'Authorization': 'Bearer $token',
+                          'Content-Type': 'application/json', // Ajoutez le type de contenu
+                        },
+                        body: jsonEncode({}), // Encodez votre corps en JSON
+                      );
+
+
+                      if (responseInitialise.statusCode == 200) {
+                        Map<String, dynamic> jsonResponse = jsonDecode(responseInitialise.body);
+                        paies = jsonResponse['paiements'];
+                        setState(() {
+                          coursPN = paies.length;
+                        });
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) =>
+                              ProfPaies(paies: paies,
+                                ProfId: id,
+                                Id:  profId!,
+                                ProfName: nom,)),
+                        );
+                        print('Paiements avec status "initialisé": ${paies.length}');
+                      } else {
+                        print('Request for "initialisé" failed with status: ${responseInitialise.statusCode}');
+                      }
+
+
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.calendar_month, size: _drawerIconSize,color: Colors.black,),
+                    title: Text('Mon Emploi',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
+                    onTap:() async {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => EmploiPage(profId: profId!,)));
+                    },
+                  ),
+                  //Divider(color: Theme.of(context).primaryColor, height: 1,),
+                  ListTile(
+                    leading: Icon(Icons.logout_rounded, size: _drawerIconSize,color: Colors.black,),
+                    title: Text('Logout',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
+                    onTap: () async{
+                      SharedPreferences prefs = await SharedPreferences.getInstance();
+                      await prefs.setString('token', '');
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => KeyboardVisibilityProvider(child: LoginSection())));
+                      // MaterialPageRoute(builder: (context) => LoginSection()));
+
+                    },
+                  ),
+                ],
+              ),
+            if (role == "admin")
+              Column(
+                children: [
+                  ListTile(
+                    leading: Icon(Icons.home, size: _drawerIconSize, color: Colors.black,),
+                    // leading: Icon(Icons.dashboard_customize_outlined, size: _drawerIconSize, color: Colors.black,),
+                    title: Text('Acceuil', style: TextStyle(fontSize: 17, color: Colors.black),),
+                    onTap: (){
+                      Navigator.push(context, MaterialPageRoute(
+                          builder: (context) =>
+                          // ProfesseurInfoPage(
+                          //     id: id, email: email, role: role),
+                          // builder: (context) => LandingScreen(role: role,name: nom,), // Passer le rôle ici
+                          HomeScreen(role: role,name: name,email: email,)),);
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.supervisor_account_outlined, size: _drawerIconSize, color: Colors.black,),
+                    title: Text('Utilisateurs', style: TextStyle(fontSize: 17, color: Colors.black),),
+                    onTap: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => Users()));
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.groups,size: _drawerIconSize,color: Colors.black),
+                    title: Text('Professeurs', style: TextStyle(fontSize: _drawerFontSize, color: Colors.black),
+                    ),
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => Professeures()),);
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.featured_play_list_outlined,size: _drawerIconSize,color: Colors.black),
+                    title: Text('Elements', style: TextStyle(fontSize: _drawerFontSize, color: Colors.black),
+                    ),
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => Elements()),);
+                    },
+                  ),
+                  //Divider(color: Theme.of(context).primaryColor, height: 1,),
+                  //Divider(color: Theme.of(context).primaryColor, height: 1,),
+                  ListTile(
+                    leading: Icon(Icons.bookmark_border, size: _drawerIconSize,color: Colors.black,),
+                    title: Text('Cours',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
+                    onTap: ()async{
+                      SharedPreferences prefs = await SharedPreferences.getInstance();
+                      String token = prefs.getString("token")!;
+                      String role = prefs.getString("role")!;
+                      var response = await http.get(
+                        Uri.parse('http://192.168.43.73:5000/cours?isPaid=en attente'),
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'Authorization': 'Bearer $token'
+                        },
+                      );
+                      // print(response.body);
+
+                      if (response.statusCode == 200) {
+                        List<dynamic> courses = json.decode(
+                            response.body)['cours'];
+                        // this.coursNum = json.decode(response.body)['data']['countLL'];
+                        // num heuresTV = json.decode(response.body)['data']['heuresTV'];
+                        // num sommeTV = json.decode(response.body)['data']['sommeTV'];
+                        // setState(() {
+                        this.coursNum = json.decode(response.body)['cours'].length;
+                        //
+                        // });
+                        print('Mes Cours :${json.decode(response.body)['cours']}');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) =>
+                              CoursesPage(courses: courses,
+                                coursNum: coursNum,
+                                paid: false,
+                                // heuresTV: heuresTV,
+                                // sommeTV: sommeTV,
+                                role: role,)),
+                        );
+                      } else {
+                        // Handle error
+                        print('Failed to fetch prof courses. Status Code: ${response
+                            .statusCode}');
+                      }
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.bookmark_remove_outlined, size: _drawerIconSize,color: Colors.black,),
+                    title: Text('Cours a paye',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
+                    onTap: ()async{
+                      SharedPreferences prefs = await SharedPreferences.getInstance();
+                      String token = prefs.getString("token")!;
+                      String role = prefs.getString("role")!;
+                      var response = await http.get(
+                        Uri.parse('http://192.168.43.73:5000/cours?isPaid=préparé'),
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'Authorization': 'Bearer $token'
+                        },
+                      );
+                      // print(response.body);
+
+                      if (response.statusCode == 200) {
+                        List<dynamic> courses = json.decode(
+                            response.body)['cours'];
+                        // this.coursNum = json.decode(response.body)['data']['countLL'];
+                        // num heuresTV = json.decode(response.body)['data']['heuresTV'];
+                        // num sommeTV = json.decode(response.body)['data']['sommeTV'];
+                        // setState(() {
+                        this.coursNum = json.decode(response.body)['cours'].length;
+                        //
+                        // });
+                        print('Mes Cours :${json.decode(response.body)['cours']}');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) =>
+                              CoursesPage(courses: courses,
+                                coursNum: coursNum,paid: true,
+                                // heuresTV: heuresTV,
+                                // sommeTV: sommeTV,
+                                role: role,)),
+                        );
+                      } else {
+                        // Handle error
+                        print('Failed to fetch prof courses. Status Code: ${response
+                            .statusCode}');
+                      }
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.bookmark_added_outlined, size: _drawerIconSize,color: Colors.black,),
+                    title: Text('Cours  paye',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
+                    onTap: ()async{
+                      SharedPreferences prefs = await SharedPreferences.getInstance();
+                      String token = prefs.getString("token")!;
+                      String role = prefs.getString("role")!;
+                      var response = await http.get(
+                        Uri.parse('http://192.168.43.73:5000/cours?isPaid=effectué'),
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'Authorization': 'Bearer $token'
+                        },
+                      );
+                      // print(response.body);
+
+                      if (response.statusCode == 200) {
+                        List<dynamic> courses = json.decode(
+                            response.body)['cours'];
+                        // this.coursNum = json.decode(response.body)['data']['countLL'];
+                        // num heuresTV = json.decode(response.body)['data']['heuresTV'];
+                        // num sommeTV = json.decode(response.body)['data']['sommeTV'];
+                        // setState(() {
+                        this.coursNum = json.decode(response.body)['cours'].length;
+                        //
+                        // });
+                        print('Mes Cours :${json.decode(response.body)['cours']}');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) =>
+                              CoursesPage(courses: courses,
+                                coursNum: coursNum,paid: true,
+                                // heuresTV: heuresTV,
+                                // sommeTV: sommeTV,
+                                role: role,)),
+                        );
+                      } else {
+                        // Handle error
+                        print('Failed to fetch prof courses. Status Code: ${response
+                            .statusCode}');
+                      }
+                    },
+                  ),
+                  // Divider(color: Colors.black38, height: 1,),
+                  ListTile(
+                      leading: Icon(Icons.payment_outlined, size: _drawerIconSize,color: Colors.black,),
+                      title: Text('Paiements',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
+                      onTap: ()async{
+                        SharedPreferences prefs = await SharedPreferences.getInstance();
+                        String token = prefs.getString("token")!;
+                        String role = prefs.getString("role")!;
+                        var response = await http.get(
+                          Uri.parse('http://192.168.43.73:5000/cours'),
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer $token'
+                          },
+                        );
+                        // print(response.body);
+
+                        if (response.statusCode == 200) {
+                          List<dynamic> courses = json.decode(
+                              response.body)['cours'];
+                          this.coursNum = json.decode(response.body)['cours'].length;
+                          // print('Mes cours: ${json.decode(response.body)['cours']}');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => Paiements(courses: courses,)),
+                          );
+                        } else {
+                          // Handle error
+                          print('Failed to fetch prof courses. Status Code: ${response
+                              .statusCode}');
+                        }
+                      }
+                  ),
+
+                  ListTile(
+                    leading: Icon(Icons.calendar_month, size: _drawerIconSize,color: Colors.black,),
+                    title: Text('Emplois',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
+                    onTap: () {
+                      Navigator.push( context, MaterialPageRoute(builder: (context) => Emploi()), );
+                    },
+                  ),
+                  //Divider(color: Theme.of(context).primaryColor, height: 1,),
+                  ListTile(
+                    leading: Icon(Icons.folder_special_outlined, size: _drawerIconSize,color: Colors.black),
+                    title: Text('Filières',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => Filliere()),);
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.read_more, size: _drawerIconSize,color: Colors.black),
+                    title: Text('Autres',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => MoreOptionsPage(username: name!,
+                          userRole: role!, userEmail: email!)));
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.logout_rounded, size: _drawerIconSize,color: Colors.black,),
+                    title: Text('Logout',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
+                    onTap: () async{
+                      SharedPreferences prefs = await SharedPreferences.getInstance();
+                      await prefs.setString('token', '');
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => KeyboardVisibilityProvider(child: LoginSection())));
+                      // MaterialPageRoute(builder: (context) => LoginSection()));
+
+                    },
+                  ),
+                ],)
+          ],   ),   ),  ); }}
 
 class BottomNav extends StatefulWidget {
 //  final String? role; // Assurez-vous que le rôle est accessible ici
@@ -1464,69 +1637,6 @@ class _BottomNavState extends State {
       }
     }
 
-    // else if (role == "responsable") {
-    //   if (index == 0) {
-    //     // Handle Profile
-    //     String email = prefs.getString("email")!;
-    //     String id = prefs.getString("id")!;
-    //     Navigator.push(
-    //         context, MaterialPageRoute(builder: (context) => Categories()));
-    //   }
-    //   else if (index == 1) {
-    //     // Handle Categories (only for 'responsable')
-    //
-    //     Navigator.push(
-    //         context, MaterialPageRoute(builder: (context) => Matieres()));
-    //     setState(() {
-    //       isMenu = true;
-    //     });
-    //   }
-    //   else if (index == 2) {
-    //     // Handle Matieres (only for 'responsable')
-    //     setState(() {
-    //       isBook = true;
-    //     });
-    //     String token = prefs.getString("token")!;
-    //     var response = await http.get(
-    //       Uri.parse('http://192.168.43.73:5000/cours'),
-    //       headers: {
-    //         'Content-Type': 'application/json',
-    //         'Authorization': 'Bearer $token'
-    //       },
-    //     );
-    //     // print(response.body);
-    //
-    //     if (response.statusCode == 200) {
-    //       List<dynamic> courses = json.decode(
-    //           response.body)['data']['coursLL'];
-    //       int coursNum = json.decode(response.body)['data']['countLL'];
-    //       num heuresTV = json.decode(response.body)['data']['heuresTV'];
-    //       num sommeTV = json.decode(response.body)['data']['sommeTV'];
-    //       Navigator.push(
-    //         context,
-    //         MaterialPageRoute(builder: (context) =>
-    //             CoursesPage(courses: courses,
-    //               coursNum: coursNum,
-    //               heuresTV: heuresTV,
-    //               sommeTV: sommeTV,)),
-    //       );
-    //     } else {
-    //       // Handle error
-    //       print('Failed to fetch prof courses. Status Code: ${response
-    //           .statusCode}');
-    //     }
-    //   }
-    //   else if (index == 3) {
-    //     // Handle ProfCourse (only for 'user')
-    //     String username = prefs.getString("nom")!;
-    //     String userRole = prefs.getString("role")!;
-    //     String userEmail = prefs.getString("email")!;
-    //
-    //     Navigator.push(
-    //         context, MaterialPageRoute(builder: (context) =>
-    //         MoreOptionsPage(username:username,userRole:userRole,userEmail: userEmail,)));
-    //   }
-    // }
 
     else if(role == "admin") {
       if (index == 0) {
@@ -1670,13 +1780,18 @@ class ClippingClass extends CustomClipper<Path>{
 
   Path getClip(Size size) {
     var path = Path();
-    path.lineTo(0.0, size.height - 40);
-    var controlPoint = Offset(size.width - (size.width / 2), size.height - 120);
-    var endPoint = Offset(size.width, size.height);
+    // path.lineTo(0.0, size.height - 40);
+    // var controlPoint = Offset(size.width - (size.width / 2), size.height - 120);
+    // var endPoint = Offset(size.width, size.height);
     // path.quadraticBezierTo(size.width -(size.width / 4),size.height,size.width,size.height - 40);
     // path.quadraticBezierTo(size.width /4,size.height,size.width/2,size.height);
-    path.quadraticBezierTo(300, 300,300, 300);
-    path.lineTo(size.width, 0.0);
+    // path.lineTo(0,size.height);
+    // path.quadraticBezierTo(300, 300,300, 300);
+
+
+    path.lineTo(0,(size.height /2));
+    path.cubicTo(size.width /4,(size.height /2) ,(size.width /4) * 3,size.height /4,size.width,size.height * 0.3,);
+    path.lineTo(size.width, 0);
     path.close();
     return path;
   }

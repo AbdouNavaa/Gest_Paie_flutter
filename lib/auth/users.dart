@@ -50,8 +50,8 @@ class _UsersState extends State<Users> {
     var jsonResponse = jsonDecode(response.body);
     print(response.statusCode);
     if(response.statusCode ==200){
-      fetchUser();
-      Navigator.pop(context);
+      // fetchUser();
+      // Navigator.pop(context);
     }
 
   }
@@ -70,12 +70,16 @@ class _UsersState extends State<Users> {
   }
   TextEditingController _searchController = TextEditingController();
 
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController _name = TextEditingController();
   TextEditingController _prenom = TextEditingController();
   TextEditingController _mobile = TextEditingController();
   TextEditingController _pass = TextEditingController();
   TextEditingController _confpass = TextEditingController();
   TextEditingController _email = TextEditingController();
+
+  int good = 1;
+  String error = '';
   String _role ="professeur";
   String _banque  ="BMCI";
   TextEditingController _compte = TextEditingController();
@@ -86,10 +90,10 @@ class _UsersState extends State<Users> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Scaffold(
         // appBar: AppBar(
         //   title: Center(child: Text(' ${filteredItems?.length} ')),
         // ),
+        drawer: MyDrawer(),
         body: Column(
           children: [
             SizedBox(height: 40,),
@@ -144,24 +148,194 @@ class _UsersState extends State<Users> {
               ,
             ),
 
-            Container(
-              margin: EdgeInsets.only(left: 230),
-              child: TextButton(
-                onPressed: () {
-                  setState(() {
-                    // Sélectionnez tous les cours
-                    selectedUsers = filteredItems!;
-                  });
-                },
-                child: Text('Sélectionner tous'),
-                style: TextButton.styleFrom(
-                  // side: BorderSide(color: Colors.black26),
-                  // padding: EdgeInsets.only(left: 20,right: 20),
-                  foregroundColor: Colors.lightBlueAccent, textStyle: TextStyle(fontWeight: FontWeight.bold),
-                  // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(flex: 1,
+                  child: Container(
+                    // margin: EdgeInsets.only(bottom: 50),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          // Sélectionnez tous les cours
+                          selectedUsers = filteredItems!;
+                        });
+                      },
+                      child: Text('Sélectionner tous', style: TextStyle(fontSize: 13),),
+                      style: ElevatedButton.styleFrom(
+                        surfaceTintColor: Colors.white,
+                        foregroundColor: Colors.black,
+                        // side: BorderSide(color: Colors.black38),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        elevation: 5,
+                        padding: EdgeInsets.only(left: 10,right: 10),
+                        backgroundColor: Colors.white,
+                        //   foregroundColor: Colors.black,
+                        textStyle: TextStyle(fontWeight: FontWeight.bold),
+                        // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                      ),
 
-              ),
+                    ),
+                  ),
+                ),
+                Expanded(flex: 1,
+                  child: Container(
+                    // margin: EdgeInsets.only(bottom: 20,right: 200),
+                    child: TextButton(
+                      onPressed: () {
+                        // Confirmer et traiter les cours sélectionnés
+                        if (selectedUsers.length == 0){
+                          buildShowNullDialog(context);
+                        }
+                        else{ activerOuDesactiverUser(selectedUsers);
+                        // Remettre la liste de sélection à zéro
+                        setState(() {
+                          selectedUsers = [];
+                          Navigator.of(context).pop();
+                          showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  surfaceTintColor: Color(0xB0AFAFA3),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                                  title: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      Text("Alerte de succès"),
+                                      Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
+                                    ],
+                                  ),
+                                  content: Text(
+                                      "l\'operation est effectuée avec succès"),
+                                  actions: [
+                                    TextButton(
+                                      child: Text("Ok"),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+
+                                  ],
+                                );});
+                        });}
+                      },
+                      child: Row(
+                        children: [
+                          Text('Activation', style: TextStyle(fontSize: 13),),
+                          Icon(Icons.check_box_outline_blank_outlined),
+                        ],
+                      ),
+                      style: TextButton.styleFrom(
+                        surfaceTintColor: Colors.white,
+                        foregroundColor: Colors.black,
+                        // side: BorderSide(color: Colors.black38),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        elevation: 5,
+                        padding: EdgeInsets.symmetric(horizontal: 15),
+                        backgroundColor: Colors.white,
+                        //   foregroundColor: Colors.black,
+                        textStyle: TextStyle(fontWeight: FontWeight.bold),
+                        // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                      ),
+
+                    ),
+                  ),
+                ),
+                Expanded(flex: 1,
+                  child: Container(
+                    child: TextButton(
+                      onPressed: () {
+                        // Navigator.pop(context);
+                        if (selectedUsers.length == 0){
+                          buildShowNullDialog(context);
+                        }else{
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                surfaceTintColor: Color(0xB0AFAFA3),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                                title: Text("Confirmer la suppression"),
+                                content: Text(
+                                    "Êtiez-vous sûr de vouloir supprimer ces éléments ?"),
+                                actions: <Widget>[
+                                  TextButton(
+                                    child: Text("ANNULER"),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                  TextButton(
+                                    child: Text(
+                                      "SUPPRIMER",
+                                      // style: TextStyle(color: Colors.red),
+                                    ),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                      // Confirmer et traiter les cours sélectionnés
+                                      SupprimerUsers(selectedUsers);
+                                      // Remettre la liste de sélection à zéro
+                                      setState(() {
+                                        selectedUsers = [];
+                                        showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return AlertDialog(
+                                                surfaceTintColor: Color(0xB0AFAFA3),
+                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                                                title: Row(
+                                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                  children: [
+                                                    Text("Alerte de succès"),
+                                                    Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
+                                                  ],
+                                                ),
+                                                content: Text(
+                                                    "l\'operation est effectuée avec succès"),
+                                                actions: [
+                                                  TextButton(
+                                                    child: Text("Ok"),
+                                                    onPressed: () {
+                                                      Navigator.of(context).pop();
+                                                    },
+                                                  ),
+
+                                                ],
+                                              );});
+                                      });
+                                    },
+
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        }
+
+                      }, // Disable button functionality
+                      child: Row(
+                        children: [
+                          Text('Supprimer', style: TextStyle(fontSize: 13),),
+                          Icon(Icons.delete_outline_outlined),
+                        ],
+                      ),
+                      style: TextButton.styleFrom(
+                        surfaceTintColor: Colors.white,
+                        foregroundColor: Colors.black,
+                        // side: BorderSide(color: Colors.black38),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        elevation: 5,
+                        padding: EdgeInsets.symmetric(horizontal: 15),
+                        backgroundColor: Colors.white,
+                        //   foregroundColor: Colors.black,
+                        textStyle: TextStyle(fontWeight: FontWeight.bold),
+                        // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                      ),
+
+                    ),
+                  ),
+                ),
+              ],
             ),
 
             Expanded(
@@ -196,8 +370,17 @@ class _UsersState extends State<Users> {
                                   data: ThemeData(
                                     // Modifiez les couleurs de DataTable ici
                                     dataTableTheme: DataTableThemeData(
-                                      dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white), // Couleur des lignes de données
                                       headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white70), // Couleur de la ligne d'en-tête
+                                      dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
+                                      // Couleur des lignes de données
+
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(20),
+                                          topRight: Radius.circular(20),
+                                        ),
+                                      ),
 
                                     ),
                                   ),
@@ -222,7 +405,13 @@ class _UsersState extends State<Users> {
                                       DataColumn(label: Text('Nom')),
                                       DataColumn(label: Text('E-mail')),
                                       DataColumn(label: Text('Role')),
-                                      DataColumn(label: Text('Banque')),
+                                      // DataColumn(label: Text('Banque')),
+                                      // DataColumn(
+                                      //   label: Text('Supprimer'),
+                                      //   onSort: (columnIndex, ascending) {
+                                      //     // Code pour gérer la sélection ici
+                                      //   },
+                                      // ),
                                       // DataColumn(label: Text('Action')),
                                     ],
                                     source: YourDataSource(filteredItems ?? items!,updateState,selectedUsers),
@@ -240,54 +429,6 @@ class _UsersState extends State<Users> {
                 ),
               ),
             ),
-            Container(
-              margin: EdgeInsets.only(left: 200),
-              child: TextButton(
-                onPressed: () {
-                  // Confirmer et traiter les cours sélectionnés
-                  activerOuDesactiverUser(selectedUsers);
-                  // Remettre la liste de sélection à zéro
-                  setState(() {
-                    selectedUsers = [];
-                    Navigator.of(context).pop();
-                    showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            surfaceTintColor: Color(0xB0AFAFA3),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
-                            title: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                Text("Alerte de succès"),
-                                Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
-                              ],
-                            ),
-                            content: Text(
-                                "l\'operation est effectuée avec succès"),
-                            actions: [
-                              TextButton(
-                                child: Text("Ok"),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                              ),
-
-                            ],
-                          );});
-                  });
-                },
-                child: Text('Confirmer la sélection'),
-                style: TextButton.styleFrom(
-                  // side: BorderSide(color: Colors.black26),
-                  // padding: EdgeInsets.only(left: 20,right: 20),
-                  foregroundColor: Colors.lightBlueAccent, textStyle: TextStyle(fontWeight: FontWeight.bold),
-                  // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-
-              ),
-            ),
-
           ],
         ),
         floatingActionButton:
@@ -350,7 +491,7 @@ class _UsersState extends State<Users> {
           width: 60,
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(50)),
+            borderRadius: BorderRadius.all(Radius.circular(10)),
             boxShadow: [
               BoxShadow(
                 color: Colors.black12,
@@ -374,10 +515,31 @@ class _UsersState extends State<Users> {
         ),
 
 
-      ),
-      // bottomNavigationBar: BottomNav(),
+      );
 
-    );
+  }
+
+  Future<dynamic> buildShowNullDialog(BuildContext context) {
+    return showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          surfaceTintColor: Color(0xB0AFAFA3),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                          title: Text("Alert d\'erreur",style: TextStyle(color: Colors.red.shade900),),
+                          content: Text(
+                              "Il faut sélectioner quelques elements"),
+                          actions: <Widget>[
+                            TextButton(
+                              child: Text("Réessayez"),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    );
   }
 
 
@@ -422,7 +584,7 @@ class _UsersState extends State<Users> {
 
           // Faites quelque chose avec les données, par exemple, ajoutez-les à votre liste de professeurs
           // print('Code: $nom, Nom $niveau,Desc $desc,');
-          AddUser(nom,prenom,int.parse(mobile),email,pass,pass,banque,role,int.parse(compte));
+          AddUser(nom,prenom,int.parse(mobile),email,pass,pass,banque,role,compte);
           // } else {
           //   print('La ligne $i n\'a pas suffisamment d\'éléments.');
           // }
@@ -457,184 +619,117 @@ class _UsersState extends State<Users> {
               content: Container(
                 width: MediaQuery.of(context).size.width,
                 child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      TextField(
-                        controller: _name,
-                        keyboardType: TextInputType.text,
-                        decoration: InputDecoration(
-                            filled: true,
-                            // fillColor: Color(0xA3B0AF1),
-                            fillColor: Colors.white,
-                            hintText: "Nom",
-                            border: OutlineInputBorder(
-                                borderSide: BorderSide.none,gapPadding: 1,
-                                borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        // Exemple d'utilisation
+                        textField(_name, validateName, TextInputType.text, 'Nom'),
+                        SizedBox(height: 10),
+                        textField(_prenom, validateName, TextInputType.text, 'Prénom'),
+                        SizedBox(height: 10),
+                        textField(_mobile, validateMobile, TextInputType.phone, 'Mobile'),
+                        SizedBox(height: 10),
+                        textField(_email, validateEmail, TextInputType.emailAddress, 'Email'),
+                        SizedBox(height: 10),
+                        textField(_pass, validatePassword, TextInputType.visiblePassword, 'Mot de Passe'),
+                        SizedBox(height: 10),
+                        textField(_confpass, validatePassword, TextInputType.visiblePassword, 'Confirmation'),
+                        SizedBox(height: 10),
+                        textField(_compte, validateCompte, TextInputType.text, 'Compte'),
+                        SizedBox(height: 10),
+                        DropdownButtonFormField<String>(
+                          value: _banque,
 
-                      ),
-                      SizedBox(height: 10),
-                      TextField(
-                        controller: _prenom,
-                        keyboardType: TextInputType.text,
-                        decoration: InputDecoration(
+                          items: [
+                            DropdownMenuItem<String>(
+                              child: Text('BMCI'),
+                              value: 'BMCI',
+                            ),
+                            DropdownMenuItem<String>(
+                              child: Text('BNM'),
+                              value: 'BNM',
+                            ),
+                            DropdownMenuItem<String>(
+                              child: Text('ORABANK'),
+                              value: 'ORABANK',
+                            ),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              _banque = value!;
+                            });
+                          },
+                          decoration: InputDecoration(
                             filled: true,
                             fillColor: Colors.white,
-                            hintText: "Prenom",
                             border: OutlineInputBorder(
-                                borderSide: BorderSide.none,gapPadding: 1,
-                                borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                      ),
-                      SizedBox(height: 10),
-                      TextField(
-                        controller: _mobile,
-                        keyboardType: TextInputType.text,
-                        decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.white,
-                            hintText: "Mobile",
-                            border: OutlineInputBorder(
-                                borderSide: BorderSide.none,gapPadding: 1,
-                                borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                      ),
-                      SizedBox(height: 10),
-                      TextField(
-                        controller: _email,
-                        keyboardType: TextInputType.text,
-                        decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.white,
-                            hintText: "email",
-                            border: OutlineInputBorder(
-                                borderSide: BorderSide.none,gapPadding: 1,
-                                borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                      ),
-
-
-                      SizedBox(height: 10),
-                      TextField(
-                        controller: _pass,
-                        keyboardType: TextInputType.text,
-                        decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.white,
-                            hintText: "Mot de Passe",
-                            border: OutlineInputBorder(
-                                borderSide: BorderSide.none,gapPadding: 1,
-                                borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                      ),
-                      SizedBox(height: 10),
-                      TextField(
-                        controller: _confpass,
-                        keyboardType: TextInputType.text,
-                        decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.white,
-                            hintText: "Confirmation",
-                            border: OutlineInputBorder(
-                                borderSide: BorderSide.none,gapPadding: 1,
-                                borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                      ),
-                      SizedBox(height: 10),
-                      DropdownButtonFormField<String>(
-                        value: _banque,
-
-                        items: [
-                          DropdownMenuItem<String>(
-                            child: Text('BMCI'),
-                            value: 'BMCI',
-                          ),
-                          DropdownMenuItem<String>(
-                            child: Text('BNM'),
-                            value: 'BNM',
-                          ),
-                          DropdownMenuItem<String>(
-                            child: Text('ORABANK'),
-                            value: 'ORABANK',
-                          ),
-                        ],
-                        onChanged: (value) {
-                          setState(() {
-                            _banque = value!;
-                          });
-                        },
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide.none,gapPadding: 1,
-                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                              borderSide: BorderSide.none,gapPadding: 1,
+                              borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                            ),
                           ),
                         ),
-                      ),
 
-                      SizedBox(height: 10),
-                      DropdownButtonFormField<String>(
-                        value: _role,
-                        items: [
-                          DropdownMenuItem<String>(
-                            child: Text('Professeur'),
-                            value: 'professeur',
-                          ),
-                          DropdownMenuItem<String>(
-                            child: Text('Responsable'),
-                            value: 'responsable',
-                          ),
-                        ],
-                        onChanged: (value) {
-                          setState(() {
-                            _role = value!;
-                          });
-                        },
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide.none,gapPadding: 1,
-                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      TextField(
-                        controller: _compte,
-                        keyboardType: TextInputType.text,
-                        decoration: InputDecoration(
+                        SizedBox(height: 10),
+                        DropdownButtonFormField<String>(
+                          value: _role,
+                          items: [
+                            DropdownMenuItem<String>(
+                              child: Text('Professeur'),
+                              value: 'professeur',
+                            ),
+                            DropdownMenuItem<String>(
+                              child: Text('Responsable'),
+                              value: 'responsable',
+                            ),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              _role = value!;
+                            });
+                          },
+                          decoration: InputDecoration(
                             filled: true,
                             fillColor: Colors.white,
-                            hintText: "Compte",
                             border: OutlineInputBorder(
-                                borderSide: BorderSide.none,gapPadding: 1,
-                                borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                      ),
-
-
-                      SizedBox(height: 20),
-                      ElevatedButton(onPressed: (){
-                        Navigator.of(context).pop();
-                        fetchUser();
-                       print("${_role} ${_banque} et ${int.parse(_compte.text)}");
-                        AddUser(_name.text,_prenom.text,int.parse(_mobile.text),_email.text,_pass.text,_confpass.text,_banque,_role,int.parse(_compte.text));
-                        // AddUser(_name.text, _desc.text);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('L\'utilisateur a été ajouté avec succès.')),
-                        );
-                        setState(() {
-                          fetchUser();
-                        });
-                      }, child: Text("Ajouter"),
-
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xff0fb2ea),
-                          foregroundColor: Colors.white,
-                          elevation: 10,
-                          minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
-                          // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
-                          //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                              borderSide: BorderSide.none,gapPadding: 1,
+                              borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                            ),
+                          ),
                         ),
-                      )
-                    ],
+                        SizedBox(height: 10),
+
+
+                        SizedBox(height: 20),
+                        ElevatedButton(onPressed: (){
+                          if (_formKey.currentState!.validate()) {
+                            Navigator.of(context).pop();
+                            fetchUser();
+                            print("${_role} ${_banque} et ${int.parse(_compte.text)}");
+                            AddUser(_name.text,_prenom.text,int.parse(_mobile.text),_email.text,_pass.text,_confpass.text,_banque,_role,_compte.text);
+                            // AddUser(_name.text, _desc.text);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('L\'utilisateur a été ajouté avec succès.')),
+                            );
+                            setState(() {
+                              fetchUser();
+                            });  }
+
+                        }, child: Text("Ajouter"),
+
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xff0fb2ea),
+                            foregroundColor: Colors.white,
+                            elevation: 10,
+                            minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
+                            // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
+                            //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                          ),
+                        )
+                      ],
+                    ),
                   ),
                 ),
               )
@@ -642,8 +737,81 @@ class _UsersState extends State<Users> {
         });
   }
 
+  TextFormField textField(TextEditingController controller, String? Function(String?)? validator, TextInputType keyboardType, String hintText) {
+    return TextFormField(
+      controller: controller,
+      validator: validator,
+      keyboardType: keyboardType,
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: Colors.white,
+        hintText: hintText,
+        border: OutlineInputBorder(
+          borderSide: BorderSide.none,
+          gapPadding: 1,
+          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+        ),
+      ),
+    );
+  }
 
-  void AddUser (String name,String prenom,int mobile,String email,String pass,String confPass,String banque,String role,int compte) async {
+// Validation spécifique pour le nom et le prénom
+  String? validateName(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Le champ ne peut pas être vide';
+    }
+    if (value.length < 5) {
+      return 'Le champ doit contenir au moins 5 caractères';
+    }
+    return null;
+  }
+
+// Validation spécifique pour le numéro de mobile
+  String? validateMobile(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Le champ ne peut pas être vide';
+    }
+    if (value.length != 8) {
+      return 'Le numéro de mobile doit contenir exactement 8 chiffres';
+    }
+    return null;
+  }
+
+// Validation spécifique pour l'email
+  String? validateEmail(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Le champ ne peut pas être vide';
+    }
+    if (!RegExp(r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$").hasMatch(value)) {
+      return 'Entrez une adresse email valide';
+    }
+    return null;
+  }
+
+// Validation spécifique pour le mot de passe et la confirmation
+  String? validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Le champ ne peut pas être vide';
+    }
+    if (value.length < 8) {
+      return 'Le champ doit contenir au moins 8 caractères';
+    }
+    return null;
+  }
+
+// Validation spécifique pour le compte
+  String? validateCompte(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Le champ ne peut pas être vide';
+    }
+    if (value.length < 10) {
+      return 'Le champ doit contenir au moins 10 caractères';
+    }
+    return null;
+  }
+
+
+  void AddUser (String name,String prenom,int mobile,String email,String pass,String confPass,String banque,String role,String compte) async {
     final Map<String, dynamic> data = {
       "nom":name,
       "prenom":prenom,
@@ -672,10 +840,69 @@ class _UsersState extends State<Users> {
     if (response.statusCode == 200) {
       print('User ajouter avec succes');
       setState(() {
-        Navigator.pop(context);
+        Navigator.of(context).pop();
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                surfaceTintColor: Color(0xB0AFAFA3),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Text("Alerte de succès"),
+                    Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
+                  ],
+                ),
+                content: Text(
+                    "L\'utilisateur est ajouté avec succès"),
+
+                actions: [
+                  TextButton(
+                    child: Text("Ok"),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+
+                ],
+
+              );});
       });
-    } else {
-      print("SomeThing Went Wrong");
+
+
+    }
+    else {
+      setState(() {
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                surfaceTintColor: Color(0xB0AFAFA3),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Text("Alert d\'erreur"),
+                    Icon(Icons.wrong_location_outlined,color: Colors.redAccent,)
+                  ],
+                ),
+                content: Text(jsonDecode(response.body)["message"]),
+                actions: [
+                  TextButton(
+                    child: Text("Ok"),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+
+                ],
+              );});
+
+      });
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text('Échec de l\'ajout de l\'emploi.')),
+      // );
     }
   }
 
@@ -720,6 +947,13 @@ class _UsersState extends State<Users> {
       );
     }
   }
+  void SupprimerUsers(List<User> selectedUsers) {
+    for (User user in selectedUsers) {
+      DeleteUser(
+        user.id,
+      );
+    }
+  }
   void updateState(void Function() callback) {
     setState(() {
       callback();
@@ -743,32 +977,6 @@ class YourDataSource extends DataTableSource {
 
     final item = _items[index];
     return DataRow(cells: [
-      // DataCell(
-      //     CupertinoSwitch(
-      //       activeColor: Colors.black26,
-      //       // thumbColor: Colors.blueAccent,
-      //       value: item.isActive!,
-      //       onChanged: (value) async {
-      //         // Continue with the rest of your onChanged logic if the types string is in the expected format
-      //         // setState(() {
-      //           // filteredItems![index].isActive = value;
-      //           // fetchUser();
-      //         // });
-      //
-      //         // Navigator.of(context).pop();
-      //
-      //         // fetchUser().then((data) {
-      //         //   setState(() {
-      //         //     filteredItems = data; // Assigner la liste renvoyée par Useresseur à items
-      //         //   });});
-      //
-      //         ActiveUser(
-      //           item.id,
-      //         );
-      //       },
-      //     )
-      //
-      // ),
       DataCell(
         Row(
           children: [
@@ -796,7 +1004,7 @@ class YourDataSource extends DataTableSource {
       ),
 
 
-      DataCell(Container(width: 70,
+      DataCell(Container(width: 100,
           child: Text('${item.name.capitalize } ${item.prenom.capitalize}',style: TextStyle(
             color: Colors.black,
           ),))),
@@ -805,10 +1013,6 @@ class YourDataSource extends DataTableSource {
             color: Colors.black,
           ),)),),
       DataCell(Container(width: 80, child: Text('${item.role.capitalizeFirst}',style: TextStyle(
-            color: Colors.black,
-          ),)),),
-      DataCell(Container(width: 68,
-          child: Text('${item.banque}',style: TextStyle(
             color: Colors.black,
           ),)),),
 
@@ -835,7 +1039,7 @@ class User {
   final num? mobile;
   final String email;
   final String role;
-  final String banque;
+  // final String banque;
    late final bool? isActive;
 
 
@@ -846,7 +1050,7 @@ class User {
     required this.email,
      this.mobile,
     required this.role,
-    required this.banque,
+    // required this.banque,
      this.isActive,
   });
 
@@ -858,7 +1062,7 @@ class User {
       email: json['email'],
       mobile: json['mobile'],
       role: json['role'],
-      banque: json['banque'],
+      // banque: json['banque'],
       isActive: json['active'],
     );
   }
@@ -895,6 +1099,7 @@ Future<List<User>> fetchUser() async {
     throw Exception('Failed to load User');
   }
 }
+
 
 Future<void> ActiveUser( id) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();

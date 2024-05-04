@@ -38,42 +38,9 @@ class Paiements extends StatefulWidget {
 class _PaiementsState extends State<Paiements> {
   double totalType = 0;
   double somme = 0;
-  void calculateTotalType() {
-    if (widget.dateDeb != null && widget.dateFin != null) {
-      // If date filters are applied
-      totalType = widget.courses.where((course) {
-        DateTime courseDate = DateTime.parse(course['date'].toString());
-        // print(widget.dateDeb);
-        return (course['isSigned'] != "en attente" && course['isPaid'] != "effectué" && course['isPaid'] != "préparé") && // Filter courses with signs
-            (courseDate.isAtSameMomentAs(widget.dateDeb!) || (courseDate.isAfter(widget.dateDeb!.toLocal()) &&
-                courseDate.isBefore(widget.dateFin!.toLocal().add(Duration(days: 1)))));
-      }).map((course) => double.parse(course['th'].toString())).fold(0, (prev, amount) => prev + amount);
-
-      somme = widget.courses.where((course) {
-        DateTime courseDate = DateTime.parse(course['date'].toString());
-        return ( course['isSigned'] != "en attente" && course['isPaid'] != "effectué" && course['isPaid'] != "préparé" ) && // Filter courses with signs
-            (courseDate.isAtSameMomentAs(widget.dateDeb!.toLocal()) ||
-                (courseDate.isAfter(widget.dateDeb!.toLocal()) &&
-                    courseDate.isBefore(
-                        widget.dateFin!.toLocal().add(Duration(days: 1)))));
-      }).map((course) => double.parse(course['somme'].toString())).fold(0, (prev, amount) => prev + amount);
-    } else if ((widget.dateDeb != null && widget.dateFin == null) || (widget.dateDeb == null && widget.dateFin != null)) {
-      // If date filters are applied
-      totalType = 0;
-      somme = 0;
-    } else {
-      // If no date filters are applied
-      int startIndex = (currentPage - 1) * coursesPerPage;
-      int endIndex = startIndex + coursesPerPage - 1;
-      totalType = widget.courses.skip(startIndex).take(coursesPerPage).where((course) =>
-      (course['isSigned'] != null && course['isSigned'] != '')).map((course) => double.parse(course['th'].toString())).fold(0, (prev, amount) => prev + amount);
-      somme = widget.courses.skip(startIndex).take(coursesPerPage).where((course) =>
-      (course['isSigned'] != null && course['isSigned'] != '')).map((course) => double.parse(course['somme'].toString())).fold(0, (prev, amount) => prev + amount);
-    }
-  }
 
 
-  DateTime defaultDateDeb = DateTime(2024, 1, 1);
+  DateTime defaultDateDeb = DateTime(2024, 4, 1);
   DateTime defaultDateFin = DateTime(2024, 4, 1);
   @override
   void initState() {
@@ -103,7 +70,7 @@ class _PaiementsState extends State<Paiements> {
     widget.dateFin = defaultDateFin;
 
     // Groupe les cours en utilisant les dates par défaut
-    ( _selectedDateDeb != null ||_selectedDateFin != null) ? groupCoursesByProfesseur(_selectedDateDeb!, _selectedDateFin!)
+    ( _selectedDateDeb != null ||_selectedDateFin != null) ? groupCoursesByProfesseur(widget.dateDeb!, widget.dateFin!)
         :
     groupCoursesByProfesseur(_selectedDateDeb, _selectedDateFin);
   }
@@ -146,7 +113,7 @@ class _PaiementsState extends State<Paiements> {
   Professeur getProfesseurIdFromName(String id) {
     // Assuming you have a list of professeurs named 'professeursList'
     final professeur = professeurList.firstWhere((prof) => '${prof.id}' == id, orElse: () =>
-        Professeur(id: '',   user: '', matieres: [], ));
+        Professeur(id: '',   user: '',  ));
     print(professeur.banque);
     return professeur; // Return the ID if found, otherwise an empty string
 
@@ -159,16 +126,17 @@ class _PaiementsState extends State<Paiements> {
     somme = 0;
     for (var course in widget.courses) {
       String profId = course['professeur'];
+      // String profId = course['professeur']['_id'];
       DateTime courseDate = DateTime.parse(course['date'].toString());
 
 
-      if (course['isSigned'] != "en attente" && course['isPaid'] != "effectué" && course['isPaid'] != "préparé" &&
-          (Deb == null || courseDate.isAfter(Deb!.toLocal())) &&
+      if (course['isSigned'] == "effectué" && course['isPaid'] == "en attente" &&
+          (Deb == null || courseDate.isAfter(Deb!.toLocal().subtract(Duration(days: 1)))) &&
           (Fin == null || courseDate.isBefore(Fin!.toLocal().add(Duration(days: 1))))) {
           if (!professeurData.containsKey(profId)) {
             // Initialiser les données du professeur
             professeurData[profId] = {
-              'professeur': course['enseignant'],
+              'professeur': ("${course['nom']} ${course['prenom']}").capitalize,
               'email': course['email'],
               'th_total': 0.0,
               'somme_total': 0.0,
@@ -220,11 +188,11 @@ class _PaiementsState extends State<Paiements> {
         'Authorization': 'Bearer $token',
       },
       body: jsonEncode(<String, dynamic>{
-        "professeurs":prof,
+        "ids":prof,
         // "nbh":nbh,
         // "nbc":nbc,
         // "totalMontant":mt,
-        "debit":fromDate?.toIso8601String() ,
+        "fromDate":fromDate?.toIso8601String() ,
         "fin": toDate?.toIso8601String() ,
       }),
     );
@@ -232,9 +200,9 @@ class _PaiementsState extends State<Paiements> {
     if (response.statusCode == 200) {
       print('Paiement  ajoute avec succes');
 
-      setState(() {
-        Navigator.pop(context);
-      });
+      // setState(() {
+        // Navigator.pop(context);
+      // });
     } else {
       print("Il y a un Erreur");
     }
@@ -636,7 +604,7 @@ class _PaiementsState extends State<Paiements> {
                   // backgroundColor: Colors.blue,
                   // surfaceTintColor: Color(0xB0AFAFA3),
 
-                  side: BorderSide(color: Colors.black26),
+                  // side: BorderSide(color: Colors.black26),
                   foregroundColor: Colors.black, textStyle: TextStyle(fontWeight: FontWeight.bold),
                   padding:widget.dateDeb != null ? EdgeInsets.only(left: 20,right: 20): EdgeInsets.only(left: 20,right: 20),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -673,7 +641,7 @@ class _PaiementsState extends State<Paiements> {
                 // child: Text(_selectedDateFin == null ? DateFormat('yyyy/MM/dd').format(widget.dateFin!) :DateFormat('yyyy/MM/dd').format(_selectedDateFin!) ),
                 style: TextButton.styleFrom(
                   // backgroundColor: Colors.blue,
-                  side: BorderSide(color: Colors.black26),
+                  // side: BorderSide(color: Colors.black26),
                   foregroundColor: Colors.black, textStyle: TextStyle(fontWeight: FontWeight.bold),
                   padding:widget.dateFin != null ? EdgeInsets.only(left: 20,right: 20): EdgeInsets.only(left: 20,right: 20),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -684,227 +652,267 @@ class _PaiementsState extends State<Paiements> {
 
 
           // Padding(padding: EdgeInsets.all(10)),
-          Container(
-            margin: EdgeInsets.only(left: 230),
-            child: TextButton(
-              onPressed: () {
-                setState(() {
-                  // Sélectionnez tous les paiements
-                  selectedPayments = professeurData.keys.toList();
-                });
-              },
-              child: Text('Sélectionner tous'),
-              style: TextButton.styleFrom(
-                // side: BorderSide(color: Colors.black26),
-                // padding: EdgeInsets.only(left: 20,right: 20),
-                foregroundColor: Colors.lightBlueAccent, textStyle: TextStyle(fontWeight: FontWeight.bold),
-                // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-
-            ),
-          ),
           Expanded(
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(1.0),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.vertical,
-                  child: Column(
-                    children: [
-                      Container(
-                        // width: MediaQuery.of(context).size.width,
-                        decoration: BoxDecoration(
-                          color: Colors.white12,
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(20.0),
-                          ),
-                        ),
-                        margin: EdgeInsets.only(left: 10),
-                        child: DataTable(
-                          showCheckboxColumn: true,
-                          showBottomBorder: true,
-                          horizontalMargin: 1,
-                          headingRowHeight: 50,
-                          columnSpacing: 10,
-                          dataRowHeight: 50,
-                          headingTextStyle: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black, // Set header text color
-                          ),
-                          // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
-                          columns: [
-                            DataColumn(label: Text('Professeur')),
-                            DataColumn(label: Text('Banque')),
-                            DataColumn(label: Text('Compte')),
-                            DataColumn(label: Text('VH')),
-                            // DataColumn(label: Text('NbC')),
-                            DataColumn(label: Text('MT')),
-                            // DataColumn(label: Text('Action')),
-                            DataColumn(
-                              label: Text('Action'),
-                              onSort: (columnIndex, ascending) {
-                                // Code pour gérer la sélection ici
-                              },
-                            ),
-                          ],
-                          rows:
-                          professeurData.entries.map(
-                                  (entry) {
-                                String profId = entry.key;
-                                Map<String, dynamic> profData = entry.value;
-
-
-                                return DataRow(
-                                  cells: [
-                                    DataCell(
-                                        Container(width: 65,
-                                            child: Text(profData['professeur'].toString().capitalize!))),
-                                    DataCell(Text(getProfesseurIdFromName(profId).banque.toString())),
-                                    DataCell(Text(getProfesseurIdFromName(profId).compte.toString())),
-                                    DataCell(Text(profData['th_total'].toString())),
-                                    // DataCell(Text(profData['NbC'].toString())),
-                                    DataCell(Text(profData['somme_total'].toString())),
-                                    // DataCell(
-                                    //   Container(
-                                    //     width: 35,
-                                    //     child: TextButton(
-                                    //       onPressed: () {
-                                    //         _selectedDateDeb == null || _selectedDateFin == null ?
-                                    //         AddPaie(profId, widget.dateDeb, widget.dateFin)
-                                    //         :AddPaie(profId, _selectedDateDeb, _selectedDateFin);
-                                    //         print(profId);
-                                    //         setState(() {
-                                    //           Navigator.of(context).pop();
-                                    //           showDialog(
-                                    //               context: context,
-                                    //               builder: (BuildContext context) {
-                                    //                 return AlertDialog(
-                                    //                   surfaceTintColor: Color(0xB0AFAFA3),
-                                    //                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
-                                    //                   title: Row(
-                                    //                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                    //                     children: [
-                                    //                       Text("Alert de Succes"),
-                                    //                       Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
-                                    //                     ],
-                                    //                   ),
-                                    //                   content: Text(
-                                    //                       "Le paiement est en Cours il faut que son Profeseur va Confirmer"),
-                                    //
-                                    //                   actions: [
-                                    //                     TextButton(
-                                    //                       child: Text("Ok"),
-                                    //                       onPressed: () {
-                                    //                         Navigator.of(context).pop();
-                                    //                       },
-                                    //                     ),
-                                    //
-                                    //                   ],
-                                    //
-                                    //                 );});
-                                    //         });
-                                    //         print('Id: ${profId} De: ${widget.dateDeb} Vers: ${widget.dateFin}');
-                                    //       },// Disable button functionality
-                                    //
-                                    //       child: Icon(Icons.panorama_fish_eye, color: Colors.black54),
-                                    //       style: TextButton.styleFrom(
-                                    //         primary: Colors.white,
-                                    //         elevation: 0,
-                                    //         // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
-                                    //       ),
-                                    //     ),
-                                    //   ),
-                                    // ),
-                                    DataCell(
-                                      Checkbox(
-                                        value: selectedPayments.contains(profId),
-                                        onChanged: (value) {
-                                          setState(() {
-                                            if (value != null && value) {
-                                              selectedPayments.add(profId);
-                                            } else {
-                                              selectedPayments.remove(profId);
-                                            }
-                                          });
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                );
-
-                              }).toList(),
-
-
-                        ),
+            child: Padding(
+              padding: const EdgeInsets.all(1.0),
+              child: Column(
+                children: [
+                  Container(
+                    width: MediaQuery.of(context).size.width,
+                    decoration: BoxDecoration(
+                      color: Colors.blue,
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(20.0),
+                        topLeft: Radius.circular(20.0),
                       ),
-                      Container(
-                        width: MediaQuery.of(context).size.width-20,
-                        decoration: BoxDecoration(
-                          color: Colors.white12,
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(20.0),
-                          ),
-                        ),
-                        margin: EdgeInsets.only(left: 10,top: 20),
-                        child: Row(
-                          children: [
-                            Text('Totals', style: TextStyle(fontWeight: FontWeight.bold),),
-
-                            SizedBox(width: 195,),
-                            (widget.dateDeb != null && widget.dateFin != null)?
-                            Text('${totalType}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
-                                :Text('${totalType}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),),
-
-                            SizedBox(width: 11,),
-
-                            (widget.dateDeb != null && widget.dateFin != null)?
-                            Container(child: Text('${somme}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400)))
-                                :Text('${somme}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
-
-                          ],
-                        )
+                    ),
+                    // margin: EdgeInsets.only(left: 10),
+                    child: DataTable(
+                      showCheckboxColumn: true,
+                      showBottomBorder: true,
+                      horizontalMargin: 1,
+                      headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white70),
+                      dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
+                      headingRowHeight: 50,
+                      columnSpacing: 10,
+                      dataRowHeight: 50,
+                      headingTextStyle: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black, // Set header text color
                       ),
+                      // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
+                      columns: [
+                        DataColumn(label: Text('Professeur')),
+                        DataColumn(label: Text('Banque')),
+                        DataColumn(label: Text('Compte')),
+                        DataColumn(label: Text('VH')),
+                        // DataColumn(label: Text('NbC')),
+                        DataColumn(label: Text('MT')),
+                        // DataColumn(label: Text('Action')),
+                        DataColumn(
+                          label: Text('Action'),
+                          onSort: (columnIndex, ascending) {
+                            // Code pour gérer la sélection ici
+                          },
+                        ),
+                      ],
+                      rows:
+                      professeurData.entries.map(
+                              (entry) {
+                            String profId = entry.key;
+                            Map<String, dynamic> profData = entry.value;
 
-                    ],
+
+                            return DataRow(
+                              cells: [
+                                DataCell(
+                                    Container(width: 65,margin: EdgeInsets.only(left: 5),
+                                        child: Text(profData['professeur'].toString().capitalize!))),
+                                DataCell(Text(getProfesseurIdFromName(profId).banque.toString())),
+                                DataCell(Container(width: 75,child: Text(getProfesseurIdFromName(profId).compte.toString()))),
+                                DataCell(Text(profData['th_total'].toString())),
+                                // DataCell(Text(profData['NbC'].toString())),
+                                DataCell(Text(profData['somme_total'].toString())),
+                                // DataCell(
+                                //   Container(
+                                //     width: 35,
+                                //     child: TextButton(
+                                //       onPressed: () {
+                                //         _selectedDateDeb == null || _selectedDateFin == null ?
+                                //         AddPaie(profId, widget.dateDeb, widget.dateFin)
+                                //         :AddPaie(profId, _selectedDateDeb, _selectedDateFin);
+                                //         print(profId);
+                                //         setState(() {
+                                //           Navigator.of(context).pop();
+                                //           showDialog(
+                                //               context: context,
+                                //               builder: (BuildContext context) {
+                                //                 return AlertDialog(
+                                //                   surfaceTintColor: Color(0xB0AFAFA3),
+                                //                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                                //                   title: Row(
+                                //                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                //                     children: [
+                                //                       Text("Alert de Succes"),
+                                //                       Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
+                                //                     ],
+                                //                   ),
+                                //                   content: Text(
+                                //                       "Le paiement est en Cours il faut que son Profeseur va Confirmer"),
+                                //
+                                //                   actions: [
+                                //                     TextButton(
+                                //                       child: Text("Ok"),
+                                //                       onPressed: () {
+                                //                         Navigator.of(context).pop();
+                                //                       },
+                                //                     ),
+                                //
+                                //                   ],
+                                //
+                                //                 );});
+                                //         });
+                                //         print('Id: ${profId} De: ${widget.dateDeb} Vers: ${widget.dateFin}');
+                                //       },// Disable button functionality
+                                //
+                                //       child: Icon(Icons.panorama_fish_eye, color: Colors.black54),
+                                //       style: TextButton.styleFrom(
+                                //         primary: Colors.white,
+                                //         elevation: 0,
+                                //         // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                                //       ),
+                                //     ),
+                                //   ),
+                                // ),
+                                DataCell(
+                                  Checkbox(
+                                    value: selectedPayments.contains(profId),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        if (value != null && value) {
+                                          selectedPayments.add(profId);
+                                        } else {
+                                          selectedPayments.remove(profId);
+                                        }
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ],
+                            );
+
+                          }).toList(),
+
+
+                    ),
                   ),
-                ),
+                  Container(
+                    width: MediaQuery.of(context).size.width +35,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      // color: Colors.blue.shade100,
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(20.0),
+                        bottomRight: Radius.circular(20.0),
+                      ),
+                    ),
+                    // margin: EdgeInsets.only(left: 10,top: 20),
+                    child: Row(
+                      children: [
+                        Text('Totals', style: TextStyle(fontWeight: FontWeight.bold),),
+
+                        SizedBox(width: 232,),
+                        (widget.dateDeb != null && widget.dateFin != null)?
+                        Text('${totalType}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
+                            :Text('${totalType}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),),
+
+                        SizedBox(width: 11,),
+
+                        (widget.dateDeb != null && widget.dateFin != null)?
+                        Container(child: Text('${somme}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400)))
+                            :Text('${somme}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
+
+                      ],
+                    )
+                  ),
+
+                ],
               ),
             ),
           ),
-          Container(
-            margin: EdgeInsets.only(left: 200),
-            child: TextButton(
-              onPressed: () {
-                // Confirmer et ajouter les paiements sélectionnés
-                print('Deb${widget.dateDeb}');
-                _selectedDateDeb == null || _selectedDateFin == null ?
-                AddPaie(selectedPayments, widget.dateDeb!, widget.dateFin!,):
-                AddPaie(selectedPayments, _selectedDateDeb!, _selectedDateFin!);
-                // Remettre la liste de sélection à zéro
-                setState(() {
-                  selectedPayments = [];
-                  print('Deb1${_selectedDateDeb}');
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    // Sélectionnez tous les paiements
+                    selectedPayments = professeurData.keys.toList();
+                  });
+                },
+                child: Text('Sélectionner tous'),
+                style: ElevatedButton.styleFrom(
+                  surfaceTintColor: Colors.white,
+                  foregroundColor: Colors.black,
+                  // side: BorderSide(color: Colors.black38),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  elevation: 5,
+                  // padding: EdgeInsets.only(left: 20,right: 20),
+                  backgroundColor: Colors.white,
+                  //   foregroundColor: Colors.black,
+                  textStyle: TextStyle(fontWeight: FontWeight.bold),
+                  // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                ),
 
-                  Navigator.of(context).pop();
-                });
-              },
-              child: Text('Confirmer la sélection'),
-              style: TextButton.styleFrom(
-                // side: BorderSide(color: Colors.black26),
-                // padding: EdgeInsets.only(left: 20,right: 20),
-                foregroundColor: Colors.lightBlueAccent, textStyle: TextStyle(fontWeight: FontWeight.bold),
-                // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
+              ElevatedButton(
+                onPressed: () {
+                  // Confirmer et ajouter les paiements sélectionnés
+                  if (selectedPayments.length == 0){
+                    buildShowNullDialog(context);
+                  }
 
-            ),
+                  else{
+                    print('Deb${widget.dateDeb}');
+                    _selectedDateDeb == null || _selectedDateFin == null ?
+                    AddPaie(selectedPayments, widget.dateDeb!, widget.dateFin!,):
+                    AddPaie(selectedPayments, _selectedDateDeb!, _selectedDateFin!);
+                    // Remettre la liste de sélection à zéro
+                    // setState(() {
+                    //   // selectedPayments = [];
+                    //   print('Deb1${selectedPayments}');
+                    //
+                    //   Navigator.of(context).pop();
+                    // });
+                    setState(() {
+                      selectedPayments = [];
+                      Navigator.of(context).pop();
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              surfaceTintColor: Color(0xB0AFAFA3),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                              title: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Text("Alerte de succès"),
+                                  Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
+                                ],
+                              ),
+                              content: Text(
+                                  "l\'operation est effectuée avec succès"),
+                              actions: [
+                                TextButton(
+                                  child: Text("Ok"),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+
+                              ],
+                            );});
+                    });
+                  }
+
+
+                },
+                child: Text('Confirmer la sélection'),
+                style: ElevatedButton.styleFrom(
+                  surfaceTintColor: Colors.white,
+                  foregroundColor: Colors.black,
+                  // side: BorderSide(color: Colors.black38),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  elevation: 5,
+                  padding: EdgeInsets.symmetric(horizontal: 15),
+                  backgroundColor: Colors.white,
+                  //   foregroundColor: Colors.black,
+                  textStyle: TextStyle(fontWeight: FontWeight.bold),
+                  // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                ),
+
+              ),
+            ],
           ),
 
           // TextButton(
@@ -936,18 +944,25 @@ class _PaiementsState extends State<Paiements> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              TextButton(
+              ElevatedButton(
                 onPressed: ()  {
                   Navigator.push(context, MaterialPageRoute(builder: (context) => EtatPaiemens(courses: widget.courses)));
 
                 },
-                child: Text('Etats'),
-                style: TextButton.styleFrom(
-                  side: BorderSide(color: Colors.black26),
-                  padding: EdgeInsets.only(left: 50,right: 50),
-                  foregroundColor: Colors.black, textStyle: TextStyle(fontWeight: FontWeight.bold),
+                child: Text('Les Etats'),
+                style: ElevatedButton.styleFrom(
+                  surfaceTintColor: Colors.white,
+                  foregroundColor: Colors.black,
+                  // side: BorderSide(color: Colors.black38),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  elevation: 5,
+                  padding: EdgeInsets.symmetric(horizontal: 35),
+                  backgroundColor: Colors.white,
+                  //   foregroundColor: Colors.black,
+                  textStyle: TextStyle(fontWeight: FontWeight.bold),
+                  // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                 ),
+
               ),
               IconButton(onPressed: (){
               setState(() {
@@ -996,6 +1011,29 @@ class _PaiementsState extends State<Paiements> {
 
     );
 
+  }
+
+  Future<dynamic> buildShowNullDialog(BuildContext context) {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          surfaceTintColor: Color(0xB0AFAFA3),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+          title: Text("Alert d\'erreur",style: TextStyle(color: Colors.red.shade900),),
+          content: Text(
+              "Il faut sélectioner quelques elements"),
+          actions: <Widget>[
+            TextButton(
+              child: Text("Réessayez"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 
@@ -1087,7 +1125,7 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
   Professeur getProfesseurIdFromName(String id) {
     // Assuming you have a list of professeurs named 'professeursList'
     final professeur = professeurList.firstWhere((prof) => '${prof.id}' == id, orElse: () =>
-        Professeur(id: '',   user: '', matieres: [], ));
+        Professeur(id: '',   user: '',  ));
     print("Profs${professeurList}");
     return professeur; // Return the ID if found, otherwise an empty string
 
@@ -1148,6 +1186,7 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: MyDrawer(),
       body: Column(
         children: [
           SizedBox(height: 30,),
@@ -1181,7 +1220,7 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                 children: [
                   Row(
                     children: [
-                      TextButton(
+                      ElevatedButton(
                         onPressed: () {
                           setState(() {
                             showPaid = !showPaid;
@@ -1189,12 +1228,17 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                             showConf =false;
                           });
                         },
-                        style: TextButton.styleFrom(
-                          side: BorderSide(color: Colors.black26),
-                          // backgroundColor: Colors.black54,
-                          padding: EdgeInsets.only(left: 15,right: 15),
-                          foregroundColor: Colors.blueGrey, textStyle: TextStyle(fontWeight: FontWeight.bold),
+                        style: ElevatedButton.styleFrom(
+                          surfaceTintColor: Colors.white,
+                          foregroundColor: Colors.blueGrey,
+                          // side: BorderSide(color: Colors.black38),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          elevation: 5,
+                          padding: EdgeInsets.symmetric(horizontal: 15),
+                          backgroundColor: Colors.white,
+                          //   foregroundColor: Colors.black,
+                          textStyle: TextStyle(fontWeight: FontWeight.bold),
+                          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                         ),
 
                         child: Row(
@@ -1207,7 +1251,7 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
 
                       ),
                       SizedBox(width: 5),
-                      TextButton(
+                      ElevatedButton(
                         onPressed: () {
                           setState(() {
                             showPaid = false;
@@ -1217,12 +1261,17 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
 
                           });
                         },
-                        style: TextButton.styleFrom(
-                          side: BorderSide(color: Colors.black26),
-                          // backgroundColor: Colors.red.shade400,
-                          padding: EdgeInsets.only(left: 15,right: 15),
-                          foregroundColor: Colors.red, textStyle: TextStyle(fontWeight: FontWeight.bold),
+                        style: ElevatedButton.styleFrom(
+                          surfaceTintColor: Colors.white,
+                          foregroundColor: Colors.red,
+                          // side: BorderSide(color: Colors.black38),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          elevation: 5,
+                          padding: EdgeInsets.symmetric(horizontal: 15),
+                          backgroundColor: Colors.white,
+                          //   foregroundColor: Colors.black,
+                          textStyle: TextStyle(fontWeight: FontWeight.bold),
+                          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                         ),
                         child: Row(
                           children: [
@@ -1233,7 +1282,7 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                         ),
                       ),
                       SizedBox(width: 5),
-                      TextButton(
+                      ElevatedButton(
                         onPressed: () {
                           setState(() {
                             showPaid = false;
@@ -1243,12 +1292,15 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
 
                           });
                         },
-                        style: TextButton.styleFrom(
-                          side: BorderSide(color: Colors.black26),
-                          // backgroundColor: Colors.lightGreen.shade400,
-                          padding: EdgeInsets.only(left: 15,right: 15),
-                          foregroundColor: Colors.green, textStyle: TextStyle(fontWeight: FontWeight.bold),
+                        style: ElevatedButton.styleFrom(
+                          surfaceTintColor: Colors.white,
+                          foregroundColor: Colors.lightGreen,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          elevation: 5,
+                          padding: EdgeInsets.symmetric(horizontal: 15),
+                          backgroundColor: Colors.white,
+                          textStyle: TextStyle(fontWeight: FontWeight.bold),
+                          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                         ),
                         child: Row(
                           children: [
@@ -1266,25 +1318,15 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
             ),
           ),
            showPaid?
-           Expanded(
-             child: Container(
-               width: MediaQuery.of(context).size.width,
-               height: MediaQuery.of(context).size.height/ 1.8,
-               decoration: BoxDecoration(
-                 color: Colors.white,
-                 borderRadius: BorderRadius.only(
-                   topLeft: Radius.circular(20),
-                   topRight: Radius.circular(20),
-                 ),
-               ),
-               child: Padding(
-                 padding: const EdgeInsets.all(1.0),
-                 child: SingleChildScrollView(
-                   scrollDirection: Axis.horizontal,
+           Padding(
+             padding: const EdgeInsets.all(1.0),
+             child: Column(
+               children: [
+                 SingleChildScrollView(scrollDirection: Axis.horizontal,
                    child: Container(
-                     // width: MediaQuery.of(context).size.width ,
+                     width: MediaQuery.of(context).size.width ,
                      decoration: BoxDecoration(
-                       color: Colors.white12,
+                       color: Colors.blue,
                        borderRadius: BorderRadius.all(
                          Radius.circular(20.0),
                        ),
@@ -1293,6 +1335,8 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                      child: DataTable(
                        showCheckboxColumn: true,
                        showBottomBorder: true,
+                       headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white70),
+                       dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
                        headingRowHeight: 50,
                        columnSpacing: 8,
                        headingTextStyle: TextStyle(fontWeight: FontWeight.bold),
@@ -1300,139 +1344,29 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                        columns: [
                          DataColumn(label: Text('De')),
                          DataColumn(label: Text('Au')),
-                         DataColumn(label: Text('Professeur')),
+                         DataColumn(label: Text('Prof')),
                          DataColumn(label: Text('NBC')),
                          DataColumn(label: Text('NBH')),
-                         DataColumn(label: Text('MT')),
-                         DataColumn(label: Text('Confirme?')),
+                         DataColumn(label: Text('Confirm')),
                          DataColumn(label: Text('Action')),
                        ],
-                       rows: [
-                         for (var index = 0; index < (filteredItems?.length ?? 0); index++)
-                         // for (var categ in filteredItems!)
-                           if ((!showPaid ||filteredItems![index].conf == 'vide'))
-                             DataRow(
-                               cells: [
-                                 DataCell(Text('${DateFormat('dd/MM ').format(DateTime.parse(filteredItems![index].fromDate.toString()).toLocal())}',style: TextStyle(
-                                   color: Colors.black,
-                                 ),)),
-                                 DataCell(Text('${DateFormat('dd/MM ').format(DateTime.parse(filteredItems![index].toDate.toString()).toLocal())}',style: TextStyle(
-                                   color: Colors.black,
-                                 ),)),
-                                 DataCell(Container(width: 60,
-                                   child: Text('${getProfesseurIdFromName(filteredItems![index].prof!).nom.toString().capitalize} '
-                                       '${getProfesseurIdFromName(filteredItems![index].prof!).prenom.toString().capitalize}',style: TextStyle(
-                                     color: Colors.black,
-                                   ),),
-                                 )),
-                                 DataCell(Text('${filteredItems![index].nbc}',style: TextStyle(
-                                   color: Colors.black,
-                                 ),)),
-                                 DataCell(Text('${filteredItems![index].nbh}',style: TextStyle(
-                                   color: Colors.black,
-                                 ),)),
-                                 DataCell(Text('${filteredItems![index].totalMontant}',style: TextStyle(
-                                   color: Colors.black,
-                                 ),)),
-                                 // DataCell(Text('${filteredItems![index].somme!}',style: TextStyle(
-                                 //   color: Colors.black,
-                                 // ),)),
-                                 DataCell(Text( "En Cours", style: TextStyle(fontWeight: FontWeight.bold,color: Colors.blueGrey),),
-                                 ),
-                                 DataCell(
-                                   Row(
-                                     children: [
-                                       Container(
-                                         width: 35,
-                                         child: TextButton(
-
-                                           onPressed: ()=>_showPaieDetails(context, filteredItems![index], filteredItems![index].id), // Disable button functionality
-                                           child: Icon(Icons.more_horiz, color: Colors.black,),
-
-                                         ),
-                                       ),
-                                       Container(
-                                         width: 35,
-                                         child: TextButton(
-                                           onPressed: () {
-                                             showDialog(
-                                               context: context,
-                                               builder: (BuildContext context) {
-                                                 return AlertDialog(
-                                                           surfaceTintColor: Color(0xB0AFAFA3),
-                                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
-                                                   title: Text("Confirmer la suppression"),
-                                                   content: Text(
-                                                       "Êtes-vous sûr de vouloir supprimer ce paiement ?"),
-                                                   actions: <Widget>[
-                                                     TextButton(
-                                                       child: Text("ANNULER"),
-                                                       onPressed: () {
-                                                         Navigator.of(context).pop();
-                                                       },
-                                                     ),
-                                                     TextButton(
-                                                       child: Text(
-                                                         "SUPPRIMER",
-                                                         // style: TextStyle(color: Colors.red),
-                                                       ),
-                                                       onPressed: () {
-                                                         Navigator.of(context).pop();
-
-                                                         // fetchCategory();
-                                                         DeletePaie(filteredItems?[index]!.id);
-                                                         print(filteredItems?[index].id!);
-                                                         // Navigator.of(context).pop();
-                                                         ScaffoldMessenger.of(context).showSnackBar(
-                                                           SnackBar(content: Text('Le Paiement a été Supprimer avec succès.')),
-                                                         );
-                                                         setState(() {
-                                                           // fetchCategory();
-                                                         });
-                                                       },
-                                                     ),
-                                                   ],
-                                                 );
-                                               },
-                                             );
-                                           }, // Disable button functionality
-                                           child: Icon(Icons.delete_sweep, color: Colors.red,),
-
-                                         ),
-                                       ),
-
-                                     ],
-                                   ),
-                                 ),
-                               ]),
-                       ],
+                       rows: rows(context,'vide',showPaid,Colors.blueGrey),
                      ),
-
+                   
                    ),
                  ),
-               ),
+               ],
              ),
            )
                :showRef?
            Expanded(
-             child: Container(
-               width: MediaQuery.of(context).size.width,
-               height: MediaQuery.of(context).size.height/ 1.8,
-               decoration: BoxDecoration(
-                 color: Colors.white,
-                 borderRadius: BorderRadius.only(
-                   topLeft: Radius.circular(20),
-                   topRight: Radius.circular(20),
-                 ),
-               ),
-               child: Padding(
-                 padding: const EdgeInsets.all(1.0),
-                 child: SingleChildScrollView(
-                   scrollDirection: Axis.horizontal,
+             child: Column(
+               children: [
+                 SingleChildScrollView(scrollDirection: Axis.horizontal,
                    child: Container(
-                     // width: MediaQuery.of(context).size.width ,
+                     width: MediaQuery.of(context).size.width ,
                      decoration: BoxDecoration(
-                       color: Colors.white12,
+                       color: Colors.blue,
                        borderRadius: BorderRadius.all(
                          Radius.circular(20.0),
                        ),
@@ -1441,6 +1375,8 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                      child: DataTable(
                        showCheckboxColumn: true,
                        showBottomBorder: true,
+                       headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white70),
+                       dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
                        headingRowHeight: 50,
                        headingTextStyle: TextStyle(fontWeight: FontWeight.bold),
                        columnSpacing: 8,
@@ -1448,139 +1384,30 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                        columns: [
                          DataColumn(label: Text('De')),
                          DataColumn(label: Text('Au')),
-                         DataColumn(label: Text('Professeur')),
-                         DataColumn(label: Text('NbC')),
-                         DataColumn(label: Text('NbH')),
+                         DataColumn(label: Text('Prof')),
+                         DataColumn(label: Text('Banq')),
                          DataColumn(label: Text('MT')),
-                         DataColumn(label: Text('Confirme?')),
+                         DataColumn(label: Text('Confirm')),
                          DataColumn(label: Text('Action')),
                        ],
-                       rows: [
-                         for (var index = 0; index < (filteredItems?.length ?? 0); index++)
-                         // for (var categ in filteredItems!)
-                           if ((!showRef ||filteredItems![index].conf == 'refusé'))
-                             DataRow(
-                                 cells: [
-                                   DataCell(Text('${DateFormat('dd/MM ').format(DateTime.parse(filteredItems![index].fromDate.toString()).toLocal())}',style: TextStyle(
-                                     color: Colors.black,
-                                   ),)),
-                                   DataCell(Text('${DateFormat('dd/MM ').format(DateTime.parse(filteredItems![index].toDate.toString()).toLocal())}',style: TextStyle(
-                                     color: Colors.black,
-                                   ),)),
-                                   DataCell(Container(width: 60,
-                                     child: Text('${getProfesseurIdFromName(filteredItems![index].prof!).nom.toString().capitalize} '
-                                         '${getProfesseurIdFromName(filteredItems![index].prof!).prenom.toString().capitalize}',style: TextStyle(
-                                       color: Colors.black,
-                                     ),),
-                                   )),
-                                   DataCell(Center(
-                                     child: Text('${filteredItems![index].nbc}',style: TextStyle(
-                                       color: Colors.black,
-                                     ),),
-                                   )),
-                                   DataCell(Text('${filteredItems![index].nbh}',style: TextStyle(
-                                     color: Colors.black,
-                                   ),)),
-                                   DataCell(Text('${filteredItems![index].totalMontant}',style: TextStyle(
-                                     color: Colors.black,
-                                   ),)),
-                                   DataCell(Text( "Refuser", style: TextStyle(fontWeight: FontWeight.bold,color: Colors.red),),),
-                                   DataCell(
-                                     Row(
-                                       children: [
-                                         Container(
-                                           width: 35,
-                                           child: TextButton(
 
-                                             onPressed: ()=>_showPaieDetails(context, filteredItems![index], filteredItems![index].id), // Disable button functionality
-                                             child: Icon(Icons.more_horiz, color: Colors.black,),
-
-                                           ),
-                                         ),
-                                         Container(
-                                           width: 35,
-                                           child: TextButton(
-                                             onPressed: () {
-                                               showDialog(
-                                                 context: context,
-                                                 builder: (BuildContext context) {
-                                                   return AlertDialog(
-                                                             surfaceTintColor: Color(0xB0AFAFA3),
-                                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
-                                                     title: Text("Alerte de Suppression"),
-                                                     content: Text(
-                                                         "Êtes-vous sûr de vouloir supprimer cet élément ?"),
-                                                     actions: <Widget>[
-                                                       TextButton(
-                                                         child: Text("ANNULER"),
-                                                         onPressed: () {
-                                                           Navigator.of(context).pop();
-                                                         },
-                                                       ),
-                                                       TextButton(
-                                                         child: Text(
-                                                           "SUPPRIMER",
-                                                           // style: TextStyle(color: Colors.red),
-                                                         ),
-                                                         onPressed: () {
-                                                           Navigator.of(context).pop();
-
-                                                           // fetchCategory();
-                                                           DeletePaie(filteredItems?[index]!.id);
-                                                           print(filteredItems?[index].id!);
-                                                           // Navigator.of(context).pop();
-                                                           ScaffoldMessenger.of(context).showSnackBar(
-                                                             SnackBar(content: Text('Le Paiement a été Supprimer avec succès.')),
-                                                           );
-                                                           setState(() {
-                                                             // fetchCategory();
-                                                           });
-                                                         },
-                                                       ),
-                                                     ],
-                                                   );
-                                                 },
-                                               );
-                                             }, // Disable button functionality
-                                             child: Icon(Icons.delete_sweep, color: Colors.red,),
-
-                                           ),
-                                         ),
-
-                                       ],
-                                     ),
-                                   ),
-
-
-                                 ]),
-                       ],
+                       rows: rows(context,'refusé',showRef,Colors.redAccent),
                      ),
 
                    ),
                  ),
-               ),
+               ],
              ),
            ):
            showConf?
            Expanded(
-             child: Container(
-               height: MediaQuery.of(context).size.height/ 1.8,
-               width: MediaQuery.of(context).size.width,
-               decoration: BoxDecoration(
-                 color: Colors.white,
-                 borderRadius: BorderRadius.only(
-                   topLeft: Radius.circular(20),
-                   topRight: Radius.circular(20),
-                 ),
-               ),
-               child: Padding(
-                 padding: const EdgeInsets.all(1.0),
-                 child: SingleChildScrollView(
-                   scrollDirection: Axis.horizontal,
+             child: Column(
+               children: [
+                 SingleChildScrollView(scrollDirection: Axis.horizontal,
                    child: Container(
-                     // width: MediaQuery.of(context).size.width ,
+                     width: MediaQuery.of(context).size.width ,
                      decoration: BoxDecoration(
-                       color: Colors.white12,
+                       color: Colors.blue,
                        borderRadius: BorderRadius.all(
                          Radius.circular(20.0),
                        ),
@@ -1589,6 +1416,8 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                      child: DataTable(
                        showCheckboxColumn: true,
                        showBottomBorder: true,
+                       headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white70),
+                       dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
                        headingRowHeight: 50,
                        headingTextStyle: TextStyle(fontWeight: FontWeight.bold),
                        columnSpacing: 8,
@@ -1596,126 +1425,18 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                        columns: [
                          DataColumn(label: Text('De')),
                          DataColumn(label: Text('Au')),
-                         DataColumn(label: Text('Professeur')),
-                         DataColumn(label: Text('NbC')),
-                         DataColumn(label: Text('NbH')),
+                         DataColumn(label: Text('Prof')),
+                         DataColumn(label: Text('Banq')),
                          DataColumn(label: Text('MT')),
-                         DataColumn(label: Text('Confirme?')),
+                         DataColumn(label: Text('Confirm')),
                          DataColumn(label: Text('Action')),
                        ],
-                       rows: [
-                         for (var index = 0; index < (filteredItems?.length ?? 0); index++)
-                         // for (var categ in filteredItems!)
-                           if ((!showConf ||filteredItems![index].conf == 'accepté'))
-                             DataRow(
-                                 cells: [
-                                   DataCell(Text('${DateFormat('dd/MM ').format(DateTime.parse(filteredItems![index].fromDate.toString()).toLocal())}',style: TextStyle(
-                                     color: Colors.black,
-                                   ),)),
-                                   DataCell(Text('${DateFormat('dd/MM ').format(DateTime.parse(filteredItems![index].toDate.toString()).toLocal())}',style: TextStyle(
-                                     color: Colors.black,
-                                   ),)),
-                                   DataCell(Container(width: 60,
-                                     child: Text('${getProfesseurIdFromName(filteredItems![index].prof!).nom.toString().capitalize} '
-                                         '${getProfesseurIdFromName(filteredItems![index].prof!).prenom.toString().capitalize}',style: TextStyle(
-                                       color: Colors.black,
-                                     ),),
-                                   )),
-                                   DataCell(Center(
-                                     child: Text('${filteredItems![index].nbc}',style: TextStyle(
-                                       color: Colors.black,
-                                     ),),
-                                   )),
-                                   DataCell(Text('${filteredItems![index].nbh}',style: TextStyle(
-                                     color: Colors.black,
-                                   ),)),
-                                   DataCell(Text('${filteredItems![index].totalMontant}',style: TextStyle(
-                                     color: Colors.black,
-                                   ),)),
-                                   // DataCell(Text('${getProfesseurIdFromName(filteredItems![index].prof!).banque}',style: TextStyle(
-                                   //   color: Colors.black,
-                                   // ),)),
-                                   // DataCell(Text('${getProfesseurIdFromName(filteredItems![index].prof!).compte}',style: TextStyle(
-                                   //   color: Colors.black,
-                                   // ),)),
-                                   DataCell(Text( "Accepte", style: TextStyle(fontWeight: FontWeight.bold,color: Colors.green),),
-                                   ),
-                                   DataCell(
-                                     Row(
-                                       children: [
-                                         Container(
-                                           width: 35,
-                                           child: TextButton(
-
-                                             onPressed: ()=>_showPaieDetails(context, filteredItems![index], filteredItems![index].id), // Disable button functionality
-                                             child: Icon(Icons.more_horiz, color: Colors.black,),
-
-                                           ),
-                                         ),
-                                         Container(
-                                           width: 35,
-                                           child: TextButton(
-                                             onPressed: () {
-                                               showDialog(
-                                                 context: context,
-                                                 builder: (BuildContext context) {
-                                                   return AlertDialog(
-                                                             surfaceTintColor: Color(0xB0AFAFA3),
-                                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
-                                                     title: Text("Alerte de Suppression"),
-                                                     content: Text(
-                                                         "Êtes-vous sûr de vouloir supprimer cet élément ?"),
-                                                     actions: <Widget>[
-                                                       TextButton(
-                                                         child: Text("ANNULER"),
-                                                         onPressed: () {
-                                                           Navigator.of(context).pop();
-                                                         },
-                                                       ),
-                                                       TextButton(
-                                                         child: Text(
-                                                           "SUPPRIMER",
-                                                           // style: TextStyle(color: Colors.red),
-                                                         ),
-                                                         onPressed: () {
-                                                           Navigator.of(context).pop();
-
-                                                           // fetchCategory();
-                                                           DeletePaie(filteredItems?[index]!.id);
-                                                           print(filteredItems?[index].id!);
-                                                           // Navigator.of(context).pop();
-                                                           ScaffoldMessenger.of(context).showSnackBar(
-                                                             SnackBar(content: Text('Le Paiement a été Supprimer avec succès.')),
-                                                           );
-                                                           setState(() {
-                                                             // fetchCategory();
-                                                           });
-                                                         },
-                                                       ),
-                                                     ],
-                                                   );
-                                                 },
-                                               );
-                                             }, // Disable button functionality
-                                             child: Icon(Icons.delete_sweep, color: Colors.red,),
-
-                                           ),
-                                         ),
-
-                                       ],
-                                     ),
-                                   ),
-                                   // DataCell(Container(width: 105,
-                                   //     child: Text('${categ.description}',)),),
-
-
-                                 ]),
-                       ],
+                       rows: rows(context,'accepté',showConf,Colors.green),
                      ),
 
                    ),
                  ),
-               ),
+               ],
              ),
            ):
            Expanded(
@@ -1760,6 +1481,51 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
 
   }
 
+  List<DataRow> rows(BuildContext context,conf,show,myColor) {
+    return [
+                       for (var index = 0; index < (filteredItems?.length ?? 0); index++)
+                       // for (var categ in filteredItems!)
+                         if ((!show ||filteredItems![index].conf == conf))
+                           DataRow(
+                             cells: [
+                               DataCell(Text('${DateFormat('dd-MM ').format(DateTime.parse(filteredItems![index].fromDate.toString()).toLocal())}',style: TextStyle(
+                                 color: Colors.black,
+                               ),)),
+                               DataCell(Text('${DateFormat('dd-MM ').format(DateTime.parse(filteredItems![index].toDate.toString()).toLocal())}',style: TextStyle(
+                                 color: Colors.black,
+                               ),)),
+                               DataCell(Text('${filteredItems![index].nomComp.toString().capitalize} '
+                                 ,style: TextStyle(
+                                 color: Colors.black,
+                               ),)),
+                               DataCell(Center(
+                                 child: Text('${filteredItems![index].nbc}',style: TextStyle(
+                                   color: Colors.black,
+                                 ),),
+                               )),
+                               DataCell(Center(
+                                 child: Text('${filteredItems![index].nbh}',style: TextStyle(
+                                   color: Colors.black,
+                                 ),),
+                               )),
+                               DataCell(Text( conf =='vide' ? 'En Cours' : conf.toString()!.capitalize!, style: TextStyle(fontWeight: FontWeight.bold,color: myColor),),
+                               ),
+                               DataCell(
+                                 buildTextButton(context, index),
+                               ),
+                             ]),
+                     ];
+  }
+
+  TextButton buildTextButton(BuildContext context, int index) {
+    return TextButton(
+
+                                     onPressed: ()=>_showPaieDetails(context, filteredItems![index], filteredItems![index].id), // Disable button functionality
+                                     child: Icon(Icons.more_vert_outlined, color: Colors.black,),
+
+                                   );
+  }
+
   Future<void> _showPaieDetails(BuildContext context, Paies paie,String EleID) {
     return showModalBottomSheet(
         context: context,backgroundColor: Colors.white,
@@ -1768,217 +1534,288 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
         isScrollControlled: true, // Rendre le contenu déroulable
 
         builder: (BuildContext context){
-          return Container(
-            height: 500,
-            padding: const EdgeInsets.all(25.0),
-            child: SingleChildScrollView(scrollDirection: Axis.vertical,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                // mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    // mainAxisAlignment: MainAxisAlignment.start,
+          return Column(
+            children: [
+              Expanded(flex: 3,
+                child: Container(margin: EdgeInsets.only(top: 30),
+                  decoration: BoxDecoration(image: DecorationImage(image: AssetImage("images/Design35.jpg",),fit: BoxFit.cover),
+                      color: Colors.white
+                  ),
+                  padding: EdgeInsets.only(bottom: 100),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text("Paiement Infos", style: TextStyle(fontSize: 25),),
-                      Spacer(),
-                      InkWell(
-                        child: Icon(Icons.close),
-                        onTap: (){
-                          setState(() {
-                            fetchPaie().then((data) {
-                              setState(() {
-                                filteredItems = data; // Assigner la liste renvoyée par Professeur à items
-                              });
-
-                            }).catchError((error) {
-                              print('Erreur: $error');
-                            });
-                          });
-                          Navigator.pop(context);
-                        },
-                      )
+                      // CircleAvatar(
+                      //   // radius: 10 * 5,
+                      //   backgroundColor: Colors.black,
+                      //   child: Image.asset("assets/supnum.png",width: 90),
+                      //   // backgroundImage: AssetImage('assets/user1.png'),
+                      // ),
+                      Container(margin: EdgeInsets.only(left: MediaQuery.of(context).size.width - 40),
+                        child: InkWell(
+                          child: Icon(Icons.arrow_forward_ios,size: 25,color: Colors.black,),
+                          onTap: (){
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ),
                     ],
                   ),
-                  SizedBox(height: 30),
-                  Row(
-                    children: [
-                      Text('Professeur:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-                      SizedBox(width: 10,),
-                      Text("${paie.enseignant.toString().capitalize}",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                         ],
-                  ),
-                  SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Text('Date Fin:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-                      SizedBox(width: 10,),
-                      Text("${DateFormat('dd/MM/yyyy ').format(DateTime.parse(paie.toDate.toString()).toLocal())}",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                         ],
-                  ),
-                  SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Text('Date Deb:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-                      SizedBox(width: 10,),
-                      Text("${DateFormat('dd/MM/yyyy ').format(DateTime.parse(paie.fromDate.toString()).toLocal())}",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                         ],
-                  ),
-                  SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Text('Banque:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-                      SizedBox(width: 10,),
-                      Text("${getProfesseurIdFromName(paie.prof!).banque}",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                         ],
-                  ),
-                  SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Text('Compte:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-                      SizedBox(width: 10,),
-                      Text("${getProfesseurIdFromName(paie.prof!).compte}",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                         ],
-                  ),
-
-                  SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Text('Nombre de Cours:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-                      SizedBox(width: 10,),
-                      Text("${paie.nbc}",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                    ],
-                  ),
-
-                  SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Text('Nombre d\'heures:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-                      SizedBox(width: 10,),
-                      Text("${paie.nbh}",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                    ],
-                  ),
-
-
-                  SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Text('Montant Total',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-                      SizedBox(width: 10,),
-                      Text("${paie.totalMontant}",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                    ],
-                  ),
-
-
-
-                ],
+                ),
               ),
-            ),
+              Expanded(flex: 7,
+                child: Container(
+                  height: 500,
+                  decoration: BoxDecoration(borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(20), topLeft: Radius.circular(20)),
+                    color: Colors.white,
+                  ),
+                  padding: const EdgeInsets.all(25.0),
+                  child: SingleChildScrollView(scrollDirection: Axis.vertical,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      // mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text("Paiement Infos", style: TextStyle(fontSize: 25, color: Colors.blueGrey),),
+                        SizedBox(height: 50),
+                        Row(
+                          children: [
+                            Text('Professeur:',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w400,
+                                fontStyle: FontStyle.italic,
+                                // color: Colors.lightBlue
+                              ),),
+                            SizedBox(width: 10,),
+                            Text("${paie.nomComp.toString().capitalize}",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w400,
+                                fontStyle: FontStyle.italic,
+                                // color: Colors.lightBlue
+                              ),),
+
+                               ],
+                        ),
+                        SizedBox(height: 25),
+                        Row(
+                          children: [
+                            Text('Date Deb:',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w400,
+                                fontStyle: FontStyle.italic,
+                                // color: Colors.lightBlue
+                              ),),
+                            SizedBox(width: 10,),
+                            Text("${DateFormat('dd MMMM yyyy ').format(DateTime.parse(paie.fromDate.toString()).toLocal())}",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w400,
+                                fontStyle: FontStyle.italic,
+                                // color: Colors.lightBlue
+                              ),),
+
+                          ],
+                        ),
+                        SizedBox(height: 25),
+                        Row(
+                          children: [
+                            Text('Date Fin:',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w400,
+                                fontStyle: FontStyle.italic,
+                                // color: Colors.lightBlue
+                              ),),
+                            SizedBox(width: 10,),
+                            Text("${DateFormat('dd MMMM yyyy ').format(DateTime.parse(paie.toDate.toString()).toLocal())}",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w400,
+                                fontStyle: FontStyle.italic,
+                                // color: Colors.lightBlue
+                              ),),
+
+                               ],
+                        ),
+                          SizedBox(height: 25),
+                        Row(
+                          children: [
+                            Text('Banque:',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w400,
+                                fontStyle: FontStyle.italic,
+                                // color: Colors.lightBlue
+                              ),),
+                            SizedBox(width: 10,),
+                            Text("${paie.banq}",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w400,
+                                fontStyle: FontStyle.italic,
+                                // color: Colors.lightBlue
+                              ),),
+
+                               ],
+                        ),
+                        SizedBox(height: 25),
+                        Row(
+                          children: [
+                            Text('Compte:',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w400,
+                                fontStyle: FontStyle.italic,
+                                // color: Colors.lightBlue
+                              ),),
+                            SizedBox(width: 10,),
+                            Text("${paie.comp}",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w400,
+                                fontStyle: FontStyle.italic,
+                                // color: Colors.lightBlue
+                              ),),
+
+                               ],
+                        ),
+
+                        SizedBox(height: 25),
+                        Row(
+                          children: [
+                            Text('Nombre de Cours:',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w400,
+                                fontStyle: FontStyle.italic,
+                                // color: Colors.lightBlue
+                              ),),
+                            SizedBox(width: 10,),
+                            Text("${paie.nbc}",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w400,
+                                fontStyle: FontStyle.italic,
+                                // color: Colors.lightBlue
+                              ),),
+
+                          ],
+                        ),
+
+                        SizedBox(height: 25),
+                        Row(
+                          children: [
+                            Text('Nombre d\'heures:',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w400,
+                                fontStyle: FontStyle.italic,
+                                // color: Colors.lightBlue
+                              ),),
+                            SizedBox(width: 10,),
+                            Text("${paie.nbh}",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w400,
+                                fontStyle: FontStyle.italic,
+                                // color: Colors.lightBlue
+                              ),),
+
+                          ],
+                        ),
+
+                        SizedBox(height: 25),
+                        Row(
+                          children: [
+                            Text('Montant Total:',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w400,
+                                fontStyle: FontStyle.italic,
+                                // color: Colors.lightBlue
+                              ),),
+                            SizedBox(width: 10,),
+                            Text("${paie.totalMontant}",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w400,
+                                fontStyle: FontStyle.italic,
+                                // color: Colors.lightBlue
+                              ),),
+
+                          ],
+                        ),
+
+                        SizedBox(height: 25),
+                        ElevatedButton(
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  surfaceTintColor: Color(0xB0AFAFA3),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                                  title: Text("Confirmer la suppression"),
+                                  content: Text(
+                                      "Êtes-vous sûr de vouloir supprimer ce paiement ?"),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      child: Text("ANNULER"),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                    TextButton(
+                                      child: Text(
+                                        "SUPPRIMER",
+                                        // style: TextStyle(color: Colors.red),
+                                      ),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+
+                                        // fetchCategory();
+                                        DeletePaie(paie.id);
+                                        print(paie.id!);
+                                        // Navigator.of(context).pop();
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text('Le Paiement a été Supprimer avec succès.')),
+                                        );
+                                        setState(() {
+                                          Navigator.of(context).pop();
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          }, // Disable button functionality
+                          child: Text('Supprimer'),
+                          style: ElevatedButton.styleFrom(
+                            surfaceTintColor: Colors.white,
+                            // side: BorderSide(color: Colors.black38),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            elevation: 5,
+                            padding: EdgeInsets.symmetric(horizontal: 30),
+                            backgroundColor: Colors.white,
+                            foregroundColor: Colors.redAccent,
+                            textStyle: TextStyle(fontWeight: FontWeight.bold),
+                            // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                          ),
+
+                        ),
+
+
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           );
         }
 
@@ -2013,7 +1850,7 @@ class Paies {
   String? banq;
   String? status;
   String? conf;
-  int? comp;
+  String? comp;
   num? nbh;
   num? th;
   int? nbc;
@@ -2046,18 +1883,18 @@ class Paies {
         fromDate: DateTime.parse(json['fromDate']),
       toDate: DateTime.parse(json['toDate']),
       prof: json['professeur'],
-      enseignant: json['enseignant'],
+      // enseignant: json['enseignant'],
       nomComp: json['nomComplet'] ,
-      email: json['email'] ,
-      mobile: json['mobile'] ,
+      // email: json['email'] ,
+      // mobile: json['mobile'] ,
       banq: json['banque'],
       comp: json['accountNumero'],
       status: json['status'],
       conf: json['confirmation'],
       nbh: json['nbh'] ?? 0,
       nbc: json['nbc'] ?? 0,
-      th: json['th'] ?? 0,
-      totalMontant: json['totalMontant'] ?? 0,
+      // th: json['th'] ?? 0,
+      totalMontant: json['somme'] ?? 0,
     );
   }
 }

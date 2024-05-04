@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:google_sign_in/google_sign_in.dart';
 
+import '../prof_info.dart';
 import '../theme_helper.dart';
 import 'forgot_password_page.dart';
 import 'header_widget.dart';
@@ -39,8 +40,29 @@ class _LoginSectionState extends State<LoginSection>
   late Animation<double> _animation;
 
 
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
    TextEditingController _emailController = TextEditingController();
    TextEditingController _passwordController = TextEditingController();
+
+   // savePref(String role, String email,String name,String id,String? profId, int? notif, int? CNS) async {
+   //   SharedPreferences prefs = await SharedPreferences
+   //       .getInstance();
+   //   String token = prefs.getString("token")!;
+   //    role = prefs.getString("role")!;
+   //    email = prefs.getString("email")!;
+   //    id = prefs.getString("id")!;
+   //    name = prefs.getString("nom")!;
+   //   // String lastname = prefs.getString("prenom")!;
+   //   print(name);
+   //   print(email);
+   //
+   //   if (token != null && role == "professeur") {
+   //      profId = (await getProfId(token, id)!)!;
+   //
+   //      notif = (await fetchPaiements(profId,token))!;
+   //     CNS = (await CoursNS(profId,token))!;
+   //   }
+   // }
   bool isPass = false;
   bool hidePassword = true;
   bool isLoginFailed = false;
@@ -49,6 +71,12 @@ class _LoginSectionState extends State<LoginSection>
   bool isPasswordValid = true;
   String emailErrorMessage = '';
   String passwordErrorMessage = '';
+
+
+  String _Banque = 'BMCI';
+  TextEditingController _account = TextEditingController();
+  TextEditingController _mobile = TextEditingController();
+
   bool validateEmail(String value) {
     // Expression régulière pour valider l'email
     final emailRegExp = RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$');
@@ -61,6 +89,7 @@ class _LoginSectionState extends State<LoginSection>
   }
   @override
   void initState() {
+    // savePref();
     super.initState();
 
     _emailController = TextEditingController();
@@ -135,38 +164,42 @@ class _LoginSectionState extends State<LoginSection>
                       SizedBox(),
                       // component1(Icons.account_circle_outlined, 'User name...',
                       //     false, false),
-                      component1(Icons.email_outlined,_emailController!,(){}, (value){
-                      _emailController.text = value;
-                      isEmailValid = validateEmail(value); // Appeler une fonction de validation pour l'email//abdou
-                      if (!isEmailValid) {
-                      emailErrorMessage = 'Email invalide.';
-                      } else {
-                      emailErrorMessage = '';
-                      }
-                      },'Email...', false, true,isEmailValid),
-                      if (!isEmailValid)
-                        Text(
-                          emailErrorMessage,
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      SizedBox(height: 2.0),
-                      component1(
-                          Icons.lock_outline, _passwordController!,() => isPass = !isPass
-                      ,(value) {
-                        _passwordController.text = value;
-                        isPasswordValid = validatePassword(value); // Appeler une fonction de validation pour le m  de passe
-                        if (!isPasswordValid) {
-                          passwordErrorMessage = 'Mot de passe invalide (4 caractères minimum).';
-                        }
-                        else {
-                          passwordErrorMessage = '';
-                        }
-                      },'Password...', isPass, false,isPasswordValid),
-                      if (!isPasswordValid)
-                        Text(
-                          passwordErrorMessage,
-                          style: TextStyle(color: Colors.white),
-                        ),    SizedBox(height: 15.0),
+                   Form(key: _formKey,
+                       child: Column(children: [
+                     component1(Icons.email_outlined,_emailController!,(){}, (value){
+                       if (value == null || value.isEmpty) {
+                         return 'Le champ ne peut pas être vide';
+                       }
+                       if (!RegExp(r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$").hasMatch(value)) {
+                         return 'Entrez une adresse email valide';
+                       }
+                       return null;
+                     }, 'Email...', false, true,isEmailValid,30),
+                     SizedBox(height: 2.0),
+                     component1(Icons.lock_outline, _passwordController!, () => isPass = !isPass,(value) {
+                       if (value == null || value.isEmpty) {
+                         return 'Le champ ne peut pas être vide';
+                       }
+                       if (value.length < 8) {
+                         return 'Le champ doit contenir au moins 8 caractères';
+                       }
+                       return null;
+                     },'Password...', isPass, false,isPasswordValid,11),
+
+                   ],)),
+
+                      // if (!isEmailValid)
+                      //   Text(
+                      //     emailErrorMessage,
+                      //     style: TextStyle(color: Colors.white),
+                      //   ),
+                      //
+                      // if (!isPasswordValid)
+                      //   Text(
+                      //     passwordErrorMessage,
+                      //     style: TextStyle(color: Colors.white),
+                      //   ),
+                      SizedBox(height: 15.0),
 
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
@@ -227,80 +260,81 @@ class _LoginSectionState extends State<LoginSection>
                             splashColor: Colors.transparent,
                             highlightColor: Colors.transparent,
                             onTap: ()  async {
-                              setState(() {
-                                isLoginFailed = false; // Réinitialisation de la variable d'erreur
-                              });
-                              // if (isEmailValid && isPasswordValid) {
-                              await login(_emailController.text, _passwordController.text);
-                              SharedPreferences prefs = await SharedPreferences
-                                  .getInstance();
-                              String token = prefs.getString("token")!;
-                              String role = prefs.getString("role")!;
-                              String email1 = prefs.getString("email")!;
-                              String id = prefs.getString("id")!;
-                              String name = prefs.getString("nom")!;
-                              // String lastname = prefs.getString("prenom")!;
-                              print(name);
-                              print(email1);
+                              if (_formKey.currentState!.validate()){
+                                setState(() {
+                                  isLoginFailed = false; // Réinitialisation de la variable d'erreur
+                                });
+                                // if (isEmailValid && isPasswordValid) {
+                                await login(_emailController.text, _passwordController.text);
+                                SharedPreferences prefs = await SharedPreferences
+                                    .getInstance();
+                                String token = prefs.getString("token")!;
+                                String role = prefs.getString("role")!;
+                                String email1 = prefs.getString("email")!;
+                                String id = prefs.getString("id")!;
+                                String name = prefs.getString("nom")!;
+                                // String lastname = prefs.getString("prenom")!;
+                                print(name);
+                                print(email1);
 
-                              if (!isLoginFailed) { // Vérifiez si l'authentification a réussi
-                                if (token != null && role == "professeur") {
-                                  String? profId = await getProfId(token, id)!;
+                                if (!isLoginFailed) { // Vérifiez si l'authentification a réussi
+                                  if (token != null && role == "professeur") {
+                                    String? profId = await getProfId(token, id)!;
 
-                                  int? notif = await fetchPaiements(profId,token);
-                                  int? CNS = await CoursNS(profId,token);
+                                    int? notif = await fetchPaiements(profId,token);
+                                    int? CNS = await CoursNS(profId,token);
 
-                                  print("AbdouId: ${notif}");
-                                  if (profId != null) {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => HomeScreen(
-                                          role: role,
-                                          name: name,
-                                          email: email1,
-                                          profId: profId, // Passer l'ID du professeur à la page HomeScreen
-                                          notif: notif, // Passer l'ID du professeur à la page HomeScreen
-                                          CNS: CNS, // Passer l'ID du professeur à la page HomeScreen
+                                    print("AbdouId: ${notif}");
+                                    if (profId != null) {
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => HomeScreen(
+                                            role: role,
+                                            name: name,
+                                            email: email1,
+                                            profId: profId, // Passer l'ID du professeur à la page HomeScreen
+                                            notif: notif, // Passer l'ID du professeur à la page HomeScreen
+                                            CNS: CNS, // Passer l'ID du professeur à la page HomeScreen
+                                          ),
                                         ),
-                                      ),
-                                    );
-                                  } else {
-                                    // Gérer le cas où l'ID du prof n'est pas disponible
-                                    // Peut-être afficher un message d'erreur ou rediriger vers une autre page
+                                      );
+                                    } else {
+                                      // Gérer le cas où l'ID du prof n'est pas disponible
+                                      // Peut-être afficher un message d'erreur ou rediriger vers une autre page
+                                    }
+                                  }
+                                  else if (token != null && role == "responsable") {
+                                    // Navigator.push(
+                                    //     context, MaterialPageRoute(
+                                    //     builder: (context) => Categories()));
+
+                                    Navigator.push(context, MaterialPageRoute(
+                                        builder: (context) =>
+                                        // ProfesseurInfoPage(
+                                        //     id: id, email: email, role: role),
+                                        // builder: (context) => LandingScreen(role: role,name: nom,), // Passer le rôle ici
+                                        HomeScreen(role: role,name: name,email: email1,)),);
+
+                                  }
+                                  else if (token != null && role == "admin") {
+                                    // Navigator.push(
+                                    //     context, MaterialPageRoute(
+                                    //     builder: (context) => Users()));
+                                    Navigator.pushReplacement(context, MaterialPageRoute(
+                                        builder: (context) =>
+                                        // ProfesseurInfoPage(
+                                        //     id: id, email: email, role: role),
+                                        // builder: (context) => LandingScreen(role: role,name: nom,), // Passer le rôle ici
+                                        HomeScreen(role: role,name: name,email: email1,)),);
                                   }
                                 }
-                                else if (token != null && role == "responsable") {
-                                  // Navigator.push(
-                                  //     context, MaterialPageRoute(
-                                  //     builder: (context) => Categories()));
-
-                                  Navigator.push(context, MaterialPageRoute(
-                                      builder: (context) =>
-                                      // ProfesseurInfoPage(
-                                      //     id: id, email: email, role: role),
-                                      // builder: (context) => LandingScreen(role: role,name: nom,), // Passer le rôle ici
-                                      HomeScreen(role: role,name: name,email: email1,)),);
-
-                                }
-                                else if (token != null && role == "admin") {
-                                  // Navigator.push(
-                                  //     context, MaterialPageRoute(
-                                  //     builder: (context) => Users()));
-                                  Navigator.push(context, MaterialPageRoute(
-                                      builder: (context) =>
-                                      // ProfesseurInfoPage(
-                                      //     id: id, email: email, role: role),
-                                      // builder: (context) => LandingScreen(role: role,name: nom,), // Passer le rôle ici
-                                      HomeScreen(role: role,name: name,email: email1,)),);
+                                else{
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(errorMessage != null ? errorMessage : 'Email ou mot de passe incorrect')),
+                                  );
                                 }
                               }
-                              else{
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(errorMessage != null ? errorMessage : 'Email ou mot de passe incorrect')),
-                                );
-                              }
-                              // }
                             },
                             child: Container(
                               height: _width * .2,
@@ -334,32 +368,25 @@ class _LoginSectionState extends State<LoginSection>
     );
   }
 
-  Widget component1(
-      IconData icon,TextEditingController text,VoidCallback onPress,void Function(String)? onChange, String hintText, bool isPassword, bool isEmail,bool valid) {
-    double _width = MediaQuery.of(context).size.width;
-    return Container(
-      height: _width / 7,
-      width: _width / 1.22,
-      alignment: Alignment.center,
-      padding: EdgeInsets.only(right: _width / 30),
-      decoration: BoxDecoration(
-        color: Colors.white,border: Border.all(color: Colors.black12),
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: TextField(
+  Widget component1(IconData icon,TextEditingController text,VoidCallback onPress, onChange, String hintText, bool isPassword,
+      bool isEmail,bool vali,MaxL ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 35.0),
+      child: TextFormField(
         controller: text,
-        onChanged: onChange,
+        // validator: myvalidator,
+        maxLength: MaxL,
+        validator: onChange,
         style: TextStyle(color: Colors.black12.withOpacity(.9)),
         // maxLines: 1,
         obscureText: isPassword,
         keyboardType: isEmail ? TextInputType.emailAddress : TextInputType.text,
-        decoration: InputDecoration(
-          prefixIcon: IconButton(
-            icon: Icon(
-              icon,
-              color: Colors.black12.withOpacity(.7),
-            ),
-            onPressed:onPress,
+        decoration: InputDecoration(prefixIcon: IconButton(
+          icon: Icon(
+          icon,
+          color: Colors.black12.withOpacity(.7),
+          ),
+          onPressed:onPress,
           ),
           border: InputBorder.none,
           hintMaxLines: 1,
@@ -368,11 +395,36 @@ class _LoginSectionState extends State<LoginSection>
             fontSize: 14,
             color: Colors.black12.withOpacity(.5),
           ),
+          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15),borderSide: BorderSide(color: Colors.black12,),),
+            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15),borderSide: BorderSide(color: Colors.black12)),
+            errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15),borderSide: BorderSide(color: Colors.redAccent.shade100)),
+            focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15),borderSide: BorderSide(color: Colors.black12)),
+            contentPadding: EdgeInsets.symmetric(vertical: 18)
         ),
       ),
     );
   }
+// Validation spécifique pour l'email
+  String? validateMail(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Le champ ne peut pas être vide';
+    }
+    if (!RegExp(r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$").hasMatch(value)) {
+      return 'Entrez une adresse email valide';
+    }
+    return null;
+  }
 
+// Validation spécifique pour le mot de passe et la confirmation
+  String? validatePass(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Le champ ne peut pas être vide';
+    }
+    if (value.length < 8) {
+      return 'Le champ doit contenir au moins 8 caractères';
+    }
+    return null;
+  }
   login(email, password) async {
     var url = "http://192.168.43.73:5000/auth/login"; // iOS
     final response = await http.post(
@@ -389,6 +441,7 @@ class _LoginSectionState extends State<LoginSection>
     if (response.statusCode == 200) {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       var parse = jsonDecode(response.body);
+      String token = prefs.getString("token")!;
 
       var nom = parse["data"]["user"]["nom"];
       var role = parse["data"]["user"]["role"];
@@ -407,7 +460,169 @@ class _LoginSectionState extends State<LoginSection>
       var parse = jsonDecode(response.body);
       errorMessage = parse["message"];
       // Mettez à jour l'état de l'interface utilisateur
-      setState(() {});
+      if(parse['message'] == "Votre compte est inaccessible, veuillez visiter la page d'inscrition pour completer votre information par la numero de compte !")
+      setState(() {
+        showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                insetPadding: EdgeInsets.only(top: 190,),
+                surfaceTintColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(20),
+                    topLeft: Radius.circular(20),
+                  ),
+                ),
+                title:
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  // mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text("Ajouter Infos", style: TextStyle(fontSize: 25),),
+                    Spacer(),
+                    InkWell(
+                      child: Icon(Icons.close),
+                      onTap: (){
+                        Navigator.pop(context);
+                      },
+                    )
+                  ],
+                ),
+
+                content: Container(
+                  height: 450,
+                  width: MediaQuery.of(context).size.width,
+                  // padding: const EdgeInsets.all(25.0),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      // mainAxisSize: MainAxisSize.min,
+                      children: [
+                        //hmmm
+                        SizedBox(height: 35),
+                        TextFormField(
+                          controller: _account,
+                          decoration: InputDecoration(
+                              filled: true,
+
+                              // fillColor: Color(0xA3B0AF1),
+                              fillColor: Colors.blueGrey.shade50,
+                              hintText: "Compte",
+                              border: OutlineInputBorder(
+                                  borderSide: BorderSide.none,gapPadding: 1,
+                                  borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                        ),
+
+                        SizedBox(height: 35),
+                        DropdownButtonFormField<String>(
+                          value: _Banque,
+
+
+                          items: [
+                            DropdownMenuItem<String>(
+                              child: Text('BMCI'),
+                              value: 'BMCI',
+                            ),
+                            DropdownMenuItem<String>(
+                              child: Text('BNM'),
+                              value: 'BNM',
+                            ),
+                            DropdownMenuItem<String>(
+                              child: Text('ORABANK'),
+                              value: 'ORABANK',
+                            ),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              _Banque = value!;
+                            });
+                          },
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.blueGrey.shade50,
+                            // fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide.none,gapPadding: 1,
+                              borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                            ),
+                          ),
+                        ),
+
+                        SizedBox(height: 35),
+                        ElevatedButton(
+                          onPressed: () async{
+                            Navigator.of(context).pop();
+
+                            await signUp(_emailController.text,_passwordController.text, _Banque,_account.text,);
+
+                            setState(() {
+                              Navigator.pop(context);
+                              //  fetchProfs();
+                            });
+                          },
+                          child: Text("Ajouter"),
+
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xff0fb2ea),
+                            foregroundColor: Colors.white,
+                            elevation: 10,
+                            minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
+                            // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
+                            //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                          ),
+                        )
+                      ],
+                    ),
+
+
+                  ),
+                ),
+
+              );
+            });
+
+      });
+    }
+
+  }
+  signUp(email, password,banque,account) async {
+    var url = "http://192.168.43.73:5000/auth/signup"; // iOS
+    final response = await http.post(
+      Uri.parse(url),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'email': email,
+        'password': password,
+        // 'mobile': mobile,
+        'banque': banque,
+        'accountNumero': account,
+      }),
+    );
+    print(response.body);
+    if (response.statusCode == 200) {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      var parse = jsonDecode(response.body);
+      String token = prefs.getString("token")!;
+
+      var nom = parse["data"]["user"]["nom"];
+      var role = parse["data"]["user"]["role"];
+      var id = parse["data"]["user"]["_id"];
+      var email1 = parse["data"]["user"]["email"];
+      await prefs.setString('token', parse["token"]);
+      await prefs.setString('role', role);
+      await prefs.setString('id', id);
+      await prefs.setString('email', email1);
+      await prefs.setString('nom', nom);
+      print('Welcom $email1');
+    }
+    else {
+      // Authentification échouée
+      isLoginFailed = true;
+      var parse = jsonDecode(response.body);
+      errorMessage = parse["message"];
     }
 
   }
@@ -458,14 +673,6 @@ Future<int?> fetchPaiements(id, String token) async {
     body: jsonEncode({"notification": ""}), // Encodez votre corps en JSON
   );
 
-  // var responseValide = await http.post(
-  //   url,
-  //   headers: {
-  //     'Authorization': 'Bearer $token',
-  //     'Content-Type': 'application/json', // Ajoutez le type de contenu
-  //   },
-  //   body: jsonEncode({}), // Ou d'autres valeurs pour "validé"
-  // );
 
   if (responseInitialise.statusCode == 200) {
     Map<String, dynamic> jsonResponse = jsonDecode(responseInitialise.body);
@@ -476,22 +683,14 @@ Future<int?> fetchPaiements(id, String token) async {
     print('Request for "initialisé" failed with status: ${responseInitialise.statusCode}');
   }
 
-  // if (responseValide.statusCode == 200) {
-  //   Map<String, dynamic> jsonResponse = jsonDecode(responseValide.body);
-  //   paies = jsonResponse['paiements'];
-  //   print('Paiements avec status "validé": $paies');
-  // }
-  // else {
-  //   print('Request for "validé" failed with status: ${responseValide.statusCode}');
-  // }
 }
 Future<int?> CoursNS(id, String token) async {
   // SharedPreferences prefs = await SharedPreferences.getInstance();
   // String token = prefs.getString("token")!;
 
-  var url = Uri.parse('http://192.168.43.73:5000/professeur/${id}/cours-non');
+  var url = Uri.parse('http://192.168.43.73:5000/cours/non-signe-professeur/${id}/');
 
-  var responseInitialise = await http.get(
+  var responseInitialise = await http.post(
     url,
     headers: {
       'Authorization': 'Bearer $token',

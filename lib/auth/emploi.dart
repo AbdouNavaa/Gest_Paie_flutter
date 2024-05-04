@@ -46,7 +46,7 @@ class _EmploiState extends State<Emploi> {
     // Assuming you have a list of professeurs named 'professeursList'
     // awai
     final professeur = professeurList.firstWhere((prof) => '${prof.id}' == id, orElse: () =>
-        Professeur(id: '', nom:'',user: '', matieres: [],  ));
+        Professeur(id: '', nom:'',user: '',  ));
     print("Nom: ${professeurList}");
     return "${professeur.nom!} ${ professeur.prenom!}"; // Return the ID if found, otherwise an empty string
 
@@ -54,24 +54,17 @@ class _EmploiState extends State<Emploi> {
 
   Elem getEls(String id) {
     // Assuming you have a list of professeurs named 'professeursList'
-    final element = elLis.firstWhere((g) => '${g.id}' == id, orElse: () => Elem(id: '', filId: '', MatId: '', ));
+    final element = elLis.firstWhere((g) => '${g.id}' == id, orElse: () => Elem(id: '', filId: '',  ));
     print( "Els:${element}");
     return element!; // Return the ID if found, otherwise an empty string
 
   }
 
-  String getMatIdFromName(String id) {
+  Elem getMatIdFromName(String id) {
     // Assuming you have a list of professeurs named 'professeursList'
-    final professeur = matiereList.firstWhere((prof) => '${prof.id}' == id, orElse: () =>Matiere(id: '', name: '',  categorieId: '', categorie_name: '', code: '',));
-    // print(professeur.name);
-    return professeur.name; // Return the ID if found, otherwise an empty string
-
-  }
-  String getUserIdFromName(String id) {
-    // Assuming you have a list of professeurs named 'professeursList'
-    final professeur = users.firstWhere((prof) => '${prof.id}' == id, orElse: () =>User(id: '', name: 'blbla', prenom: '', email: '', mobile: 0, role: '', banque: '',));
-    // print(professeur.name);
-    return professeur.name; // Return the ID if found, otherwise an empty string
+    final professeur = elLis.firstWhere((prof) => '${prof.id}' == id, orElse: () =>Elem(id: '', filId: ''));
+    print(professeur.SemNum);
+    return professeur; // Return the ID if found, otherwise an empty string
 
   }
 
@@ -84,20 +77,14 @@ class _EmploiState extends State<Emploi> {
   }
 
   bool showed = true;
-  // List<emploi> filterItemsByGroup(Group? group, List<emploi> allItems) {
-  //   if (group == null) {
-  //     return allItems;
-  //   } else {
-  //     return allItems.where((emp) => emp.group == group.id).toList();
-  //   }
-  // }
 
-  List<emploi> filterItemsBySemestre(int? ele,filliere? filiere, List<emploi> allItems) {
+
+  List<emploi> filterItemsBySem(int? ele,filliere? filiere, List<emploi> allItems) {
     if (ele == null) {
       return allItems;
     } else {
-      // print("ElID:${ele.id}");
-      return allItems.where((emp) => emp.SemNum == ele && emp.fil == filiere!.id).toList();
+      print("ElID:${ele}");
+      return allItems.where((emp) => getMatIdFromName(emp.element).SemNum! == ele && emp.fil == filiere!.id).toList();
     }
   }
 
@@ -119,7 +106,7 @@ class _EmploiState extends State<Emploi> {
   List<emploi> filterItemsByGroupAndSemester(List<emploi> items, Elem? selectedEle) {
     return items.where((emp) {
       String groupIdentifier = emp.element;
-      String semester = "S${emp.SemNum!}";
+      String semester = "S${getMatIdFromName(emp.element).SemNum!}";
       return groupIdentifier == selectedEle!.id && semester == selectedEle.SemNum;
     }).toList();
   }
@@ -221,337 +208,191 @@ int? selectedSem ;
   Future<void> _showCourseDetails(BuildContext context, emploi emp) {
     return showModalBottomSheet(
         context: context,backgroundColor: Colors.white,
+
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
             topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
         isScrollControlled: true, // Rendre le contenu déroulable
 
         builder: (BuildContext context){
           // final typeWithNonZeroNbh = findTypeWithNonZeroNbh(emp.types);
-          return Container(
-            height: 550,
-            padding: const EdgeInsets.all(25.0),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                // mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Row(
-                    children: [
-                      Text('Emploi Infos',style: TextStyle(fontSize: 30),),
-                      SizedBox(width: 105),
-                      IconButton(onPressed: (){
-                        Navigator.pop(context);
-                      }, icon:Icon( Icons.close,size: 30,))
-                    ],
+          return Column(
+            children: [
+              Expanded(flex: 3,
+                child: Container(margin: EdgeInsets.only(top: 30),
+                  decoration: BoxDecoration(image: DecorationImage(image: AssetImage("images/Design35.jpg",),fit: BoxFit.cover),
+                      color: Colors.white
                   ),
-                  SizedBox(height: 50),
-                  Row(
+                  padding: EdgeInsets.only(bottom: 100),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Professeur:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                      SizedBox(width: 10,),
-                      Text(emp.enseignat!.capitalize!,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                    ],
-                  ),
-                  SizedBox(height: 25),
-                  Row(
-                    children: [
-                      Text('Matiere:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                      SizedBox(width: 10,),
-                      Text('${emp.mat.capitalize}',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                    ],
-                  ),
-
-                  SizedBox(height: 25),
-                  Row(
-                    children: [
-                      Text('Semestre:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                      SizedBox(width: 10,),
-                      Text( 'S${emp.SemNum!}',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                    ],
-                  ),
-                  SizedBox(height: 25),
-                  Row(
-                    children: [
-                      Text('Filiere:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                      SizedBox(width: 10,),
-                      Text(getFilIdFromName(emp.fil!).toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                    ],
-                  ),
-                  SizedBox(height: 25),
-                  Row(
-                    children: [
-                      Row(
-                        children: [
-                          Text('Jour:',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.italic,
-                              // color: Colors.lightBlue
-                            ),),
-
-                          SizedBox(width: 10,),
-                          Text(emp.jour!.capitalize!,
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.italic,
-                              // color: Colors.lightBlue
-                            ),),
-
-                        ],
-                      ),
-                      SizedBox(width: 25),
-                      Row(
-                        children: [
-                          Text('Type:',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.italic,
-                              // color: Colors.lightBlue
-                            ),
-                          ),
-                          SizedBox(width: 10,),
-                          Text('${emp.type}',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.italic,
-                              // color: Colors.lightBlue
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 25),
-                 // SizedBox(height: 15),
-                  // if (typeWithNonZeroNbh != null)
-                  Row(
-                    children: [
-                      Row(
-                        children: [
-                          Text('Deb:',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.italic,
-                              // color: Colors.lightBlue
-                            ),),
-
-                          SizedBox(width: 10,),
-                          Text(emp.startTime!,
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.italic,
-                              // color: Colors.lightBlue
-                            ),),
-
-                        ],
-                      ),
-                      SizedBox(width: 25),
-                      Row(
-                        children: [
-                          Text('Fin:',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.italic,
-                              // color: Colors.lightBlue
-                            ),),
-
-                          SizedBox(width: 10,),
-                          Text(emp.finishTime!,
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.italic,
-                              // color: Colors.lightBlue
-                            ),),
-
-                        ],
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 25),
-                  Row(
-                    children: [
-                      Text('Nb Heures:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),
-                      ),
-                      SizedBox(width: 10,),
-                      Text('${emp.nbh}',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
+                      // CircleAvatar(
+                      //   // radius: 10 * 5,
+                      //   backgroundColor: Colors.black,
+                      //   child: Image.asset("assets/supnum.png",width: 90),
+                      //   // backgroundImage: AssetImage('assets/user1.png'),
+                      // ),
+                      Container(margin: EdgeInsets.only(left: MediaQuery.of(context).size.width - 40),
+                        child: InkWell(
+                          child: Icon(Icons.arrow_forward_ios,size: 25,color: Colors.black,),
+                          onTap: (){
+                            Navigator.pop(context);
+                          },
                         ),
                       ),
                     ],
                   ),
-
-                  SizedBox(height: 25,),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          _selectedNum = emp.dayNumero;
-                          _date.text = emp.startTime!;
-                          setState(() {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => UpdateEmploiScreen(empId: emp.id, day: _selectedNum, start: _date.text,
-                                GN: '',
-                                EM: emp.mat,
-                                Prof:emp.enseignat!,
-                                Fil:getFilIdFromName(emp.fil!),
-                                SemN:emp.SemNum!,
-                                // getEls( emp.element)!.ProfCM!
-                                //     :(emp.type == "TP" ? getEls( emp.element)!.ProfCM!:getEls( emp.element)!.ProfCM!),
-                                TN: emp.type!, TH: emp.nbh!, GId: '',EId: emp.element,)),
-                            );
-                          });
-                          // selectedMat = emp.nameMat!;
-
-
-                        },// Disable button functionality
-
-                        child: Text('Modifier'),
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.only(left: 20,right: 20),
-                          foregroundColor: Colors.lightGreen,
-                            backgroundColor: Color(0xfffff1),
-                            side: BorderSide(color: Colors.black12,),
-                            // side: BorderSide(color: Colors.black,),
-                            elevation: 3,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))
-                        ),
-
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                        surfaceTintColor: Color(0xB0AFAFA3),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
-                                title: Text("Confirmer la suppression"),
-                                content: Text(
-                                    "Êtes-vous sûr de vouloir supprimer cet élément ?"),
-                                actions: <Widget>[
-                                  TextButton(
-                                    child: Text("ANNULER"),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                  ),
-                                  TextButton(
-                                    child: Text(
-                                      "SUPPRIMER",
-                                      // style: TextStyle(color: Colors.red),
-                                    ),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                      DeleteEmploi(emp.id);
-                                      setState(() {
-                                        Navigator.pop(context);
-                                      });
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text('Le Category a été Supprimer avec succès.')),
-                                      );
-                                    },
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        }, // Disable button functionality
-
-                        child: Text('Supprimer'),
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.only(left: 20,right: 20),
-                          foregroundColor: Colors.redAccent,
-                            backgroundColor: Color(0xfffff1),
-                            side: BorderSide(color: Colors.black12,),
-                            // side: BorderSide(color: Colors.black,),
-                            elevation: 3,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))
-                        ),
-
-                      ),
-                    ],
-                  ),
-
-                ],
+                ),
               ),
-            ),
+              Expanded(flex: 8,
+                child: Container(
+                  height: 550,
+                  decoration: BoxDecoration(borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(20), topLeft: Radius.circular(20)),
+                    color: Colors.white,
+                  ),
+                  padding: const EdgeInsets.all(25.0),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      // mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('Emploi Infos',style: TextStyle(fontSize: 30,color: Colors.blueGrey),),
+                        SizedBox(height: 50),
+                        rowInfos('Professeur:',getProfesseurIdFromName(emp.professor!.toString()).capitalize!),
+                
+                        SizedBox(height: 25),
+                        rowInfos('Matiere:',getMatIdFromName(emp.element).nameMat!.capitalize),
+                
+                        SizedBox(height: 25),
+                        rowInfos('Semestre:',getMatIdFromName(emp.element).SemNum.toString()),
+                
+                        SizedBox(height: 25),
+                        rowInfos('Filiere:',emp.fil!),
+                
+                        SizedBox(height: 25),
+                        rowInfos('Jour:',emp.jour!.capitalize!),
+                
+                        SizedBox(height: 25),
+                       // SizedBox(height: 15),
+                        // if (typeWithNonZeroNbh != null)
+                        Row(
+                          children: [
+                            rowInfos('Deb:',emp.startTime!),
+                
+                            SizedBox(width: 25),
+                            rowInfos('Fin:',emp.finishTime!),
+                          ],
+                        ),
+                
+                        SizedBox(height: 25),
+                        rowInfos('Nb Heures:','${emp.nbh}'),
+                
+                        SizedBox(height: 25,),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            ElevatedButton(
+                              onPressed: () {
+                                _selectedNum = emp.dayNumero;
+                                _date.text = emp.startTime!;
+                                setState(() {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => UpdateEmploiScreen(empId: emp.id, day: _selectedNum, start: _date.text,
+                                      GN: '',
+                                      EM: getMatIdFromName(emp.element).nameMat!,
+                                      Prof:emp.enseignat!,
+                                      Fil:emp.fil!,
+                                        SemN: getMatIdFromName(emp.element).SemNum!,
+                                      // getEls( emp.element)!.ProfCM!
+                                      //     :(emp.type == "TP" ? getEls( emp.element)!.ProfCM!:getEls( emp.element)!.ProfCM!),
+                                      TN: emp.type!, TH: emp.nbh!, GId: '',EId: emp.element,)),
+                                  );
+                                });
+                                // selectedMat = emp.nameMat!;
+                
+                
+                              },// Disable button functionality
+                
+                              child: Text('Modifier'),
+                              style: ElevatedButton.styleFrom(
+                                surfaceTintColor: Colors.white,
+                                // side: BorderSide(color: Colors.black38),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                elevation: 5,
+                                padding: EdgeInsets.symmetric(horizontal: 35),
+                                backgroundColor: Colors.white,
+                                  foregroundColor: Colors.green,
+                                textStyle: TextStyle(fontWeight: FontWeight.bold),
+                                // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                              ),
+                
+                            ),
+                            ElevatedButton(
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                              surfaceTintColor: Color(0xB0AFAFA3),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                                      title: Text("Confirmer la suppression"),
+                                      content: Text(
+                                          "Êtes-vous sûr de vouloir supprimer cet élément ?"),
+                                      actions: <Widget>[
+                                        TextButton(
+                                          child: Text("ANNULER"),
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                        ),
+                                        TextButton(
+                                          child: Text(
+                                            "SUPPRIMER",
+                                            // style: TextStyle(color: Colors.red),
+                                          ),
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                            DeleteEmploi(emp.id);
+                                            setState(() {
+                                              Navigator.pop(context);
+                                            });
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(content: Text('Le Category a été Supprimer avec succès.')),
+                                            );
+                                          },
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              }, // Disable button functionality
+                
+                              child: Text('Supprimer'),
+                              style: ElevatedButton.styleFrom(
+                                surfaceTintColor: Colors.white,
+                                // side: BorderSide(color: Colors.black38),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                elevation: 5,
+                                padding: EdgeInsets.symmetric(horizontal: 35),
+                                backgroundColor: Colors.white,
+                                foregroundColor: Colors.redAccent,
+                                textStyle: TextStyle(fontWeight: FontWeight.bold),
+                                // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                              ),
+                
+                            ),
+                          ],
+                        ),
+                
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           );
         }
 
@@ -559,21 +400,45 @@ int? selectedSem ;
     );
   }
 
-  bool Mon = false;
-  bool Tue = false;
-  bool Wed = false;
-  bool Thu = false;
-  bool Fri = false;
-  bool Sat = false;
-  bool San = false;
+  Row rowInfos(name,value) {
+    return Row(
+                  children: [
+                    Text(name,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+
+                    SizedBox(width: 10,),
+                    Text(value,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+
+                  ],
+                );
+  }
+
+  bool Mon = true;
+  bool Tue = true;
+  bool Wed = true;
+  bool Thu = true;
+  bool Fri = true;
+  bool Sat = true;
+  bool San = true;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Scaffold(
         // appBar: AppBar(
         //   title: Center(child: Text(' ${filteredItems?.length} ')),
         // ),
+        drawer: MyDrawer(),
         body: Column(
           children: [
             SizedBox(height: 40,),
@@ -623,7 +488,7 @@ int? selectedSem ;
                     getEls(emploi.element)!.nameMat!.toLowerCase().contains(value.toLowerCase()) ||
                     (days[emploi.dayNumero]).toLowerCase().contains(value.toLowerCase()) ||
                         (emploi.startTime!).toLowerCase().contains(value.toLowerCase()) ||
-                        ("S${emploi.SemNum!}").toLowerCase().contains(value.toLowerCase())
+                        ("S${getMatIdFromName(emploi.element).SemNum!}").toLowerCase().contains(value.toLowerCase())
                     ).toList();
                   });
                 },
@@ -668,7 +533,7 @@ int? selectedSem ;
                             } else {
                               // Sort by code within the same semestre
                               // return getEls(a.element)!.mat!.compareTo(getEls(b.element)!.mat!);
-                              return a.SemNum!.compareTo(b.SemNum!);
+                              return getMatIdFromName(a.element).SemNum!.compareTo(getMatIdFromName(b.element).SemNum!);
                             }
                           });
 
@@ -734,7 +599,7 @@ int? selectedSem ;
                                     width: MediaQuery.of(context).size.width / 3,
                                     child: DropdownButtonFormField<int>(
                                       value: selectedSem,
-                                      hint: Text('Semestre'),
+                                      hint: Text('Semestres'),
                                       items: semestersList.map((sem) {
                                         return DropdownMenuItem<int>(
                                           value: sem,
@@ -744,7 +609,8 @@ int? selectedSem ;
                                       onChanged: (value) async {
                                         setState(() {
                                           selectedSem = value;
-                                          filteredItems = filterItemsBySemestre(selectedSem,selectedFil, items!);
+                                          filteredItems = filterItemsBySem(selectedSem,selectedFil, items!);
+                                          print("Emps:${filteredItems}, ${items}, ${selectedSem} $selectedFil");
                                         });
                                       },
                                       decoration: InputDecoration(
@@ -778,7 +644,7 @@ int? selectedSem ;
                                               TextButton(
                                                   onPressed: (){
                                                 setState(() {
-                                                  Mon = !Mon;
+                                                  Mon = true;
                                                   Tue = false;Wed = false;Thu = false;Fri = false;Sat = false;San = false;
                                                 });
                                               }, child: Text('Lun',),
@@ -788,14 +654,14 @@ int? selectedSem ;
                                               ),
                                               TextButton(onPressed: (){
                                                 setState(() {
-                                                  Tue = !Tue;
+                                                  Tue = true;
                                                   Mon = false;Wed = false;Thu = false;Fri = false;Sat = false;San = false;                                                });
                                               }, child: Text('Mar'),
                                                 style: buildStyleFrom(Tue),
                                               ),
                                               TextButton(onPressed: (){
                                                 setState(() {
-                                                  Wed = !Wed;
+                                                  Wed = true;
                                                   Mon = false;Tue = false;Thu = false;Fri = false;Sat = false;San = false;
                                                 });
                                               }, child: Text('Mer'),
@@ -804,7 +670,7 @@ int? selectedSem ;
                                               TextButton(
                                                   onPressed: (){
                                                 setState(() {
-                                                  Thu = !Thu;
+                                                  Thu = true;
                                                   Mon = false;Tue = false;Wed = false;Fri = false;Sat = false;San = false;
                                                 });
                                               },
@@ -814,7 +680,7 @@ int? selectedSem ;
                                               TextButton(
                                                   onPressed: (){
                                                 setState(() {
-                                                  Fri = !Fri;
+                                                  Fri = true;
                                                   Mon = false;Tue = false;Wed = false;Thu = false;Sat = false;San = false;
                                                 });
                                               },
@@ -824,7 +690,7 @@ int? selectedSem ;
                                               TextButton(
                                                   onPressed: (){
                                                 setState(() {
-                                                  Sat = !Sat;
+                                                  Sat = true;
                                                   Mon = false;Tue = false;Wed = false;Thu = false;Fri = false;San = false;
                                                 });
                                               },
@@ -834,7 +700,7 @@ int? selectedSem ;
                                               TextButton(
                                                   onPressed: (){
                                                 setState(() {
-                                                  San = !San;
+                                                  San = true;
                                                   Mon = false;Tue = false;Wed = false;Thu = false;Fri = false;Sat = false;
                                                 });
                                               },
@@ -845,22 +711,23 @@ int? selectedSem ;
                                           ),
                                         ),
                                       ),
+                                      SizedBox(height: 10,),
                                       Mon? buildDayDataTable('Lundi', filteredItems ?? items!): Container(),
                                       // Padding(
                                       //   padding: const EdgeInsets.only(top: 20.0),
                                       //   child: Container(child: Text('Cliquez sur l\'un des bouton',style: TextStyle(fontSize: 30),),),
                                       // ),
-                                      // SizedBox(height: 10,),
+                                      SizedBox(height: 10,),
                                       Tue?buildDayDataTable('Mardi', filteredItems ?? items!): Container(),
-                                      // SizedBox(height: 10,),
+                                      SizedBox(height: 10,),
                                       Wed?buildDayDataTable('Mercredi', filteredItems ?? items!): Container(),             // buildDayDataTable('Mercredi', filteredItems ?? items!),
-                                      // SizedBox(height: 10,),
+                                      SizedBox(height: 10,),
                                       Thu?buildDayDataTable('Jeudi', filteredItems ?? items!): Container(),
-                                      // SizedBox(height: 10,),
+                                      SizedBox(height: 10,),
                                      Fri? buildDayDataTable('Vendredi', filteredItems ?? items!): Container(),
-                                      // SizedBox(height: 10,),
+                                      SizedBox(height: 10,),
                                       Sat?buildDayDataTable('Samedi', filteredItems ?? items!): Container(),
-                                      // SizedBox(height: 10,),
+                                      SizedBox(height: 10,),
                                       San?buildDayDataTable('Dimanch', filteredItems ?? items!): Container(),
                                     ],
                                   ),
@@ -993,7 +860,7 @@ int? selectedSem ;
           width: 60,
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(50)),
+            borderRadius: BorderRadius.all(Radius.circular(10)),
             boxShadow: [
               BoxShadow(
                 color: Colors.black12,
@@ -1018,16 +885,15 @@ int? selectedSem ;
 
 
 
-      ),
-      // bottomNavigationBar: BottomNav(),
+      );
 
-    );
   }
 
   ButtonStyle buildStyleFrom(bool bol) {
     return TextButton.styleFrom(
-        backgroundColor: bol ? Color(0xFF4281B8) : Colors.white,
-        foregroundColor: bol ? Colors.white : Colors.indigo,
+        // backgroundColor: bol ? Colors.blue.shade200 : Colors.white,
+        foregroundColor: bol ? Colors.blue : Colors.indigo,
+        textStyle: TextStyle(fontWeight: bol ? FontWeight.bold : FontWeight.w500, fontSize: bol ? 17:15),
         padding: EdgeInsets.only(top: 15, bottom: 15),minimumSize: Size.fromWidth(80),
         shape: RoundedRectangleBorder(borderRadius: BorderRadiusDirectional.only(topEnd: Radius.circular(18),bottomEnd: Radius.circular(18)))
         // shape: BeveledRectangleBorder(borderRadius: BorderRadiusDirectional.only(topEnd: Radius.circular(5),bottomEnd: Radius.circular(5)))
@@ -1042,13 +908,15 @@ int? selectedSem ;
     if (!items.any((emp) => days[emp.dayNumero] == day)) {
       dayRows.add(
         DataRow(
+          color: MaterialStateColor.resolveWith((states) => Colors.grey.shade100),
           cells: [
-            DataCell(Container(width: 40,child: Text('', style: TextStyle(color: Colors.black)))),
-            DataCell(Container(width: 40,child: Text('', style: TextStyle(color: Colors.black)))),
-            DataCell(Container(width: 40,child: Text('', style: TextStyle(color: Colors.black)))),
-            DataCell(Container(width: 40,child: Text('', style: TextStyle(color: Colors.black)))),
-            DataCell(Container(width: 40,child: Text('', style: TextStyle(color: Colors.black)))),
-            DataCell(Container(width: 40,child: Text('', style: TextStyle(color: Colors.black)))),          ],
+            DataCell(Text('IL n\' y a', style: TextStyle(color: Colors.black))),
+            DataCell(Text('pas des', style: TextStyle(color: Colors.black))),
+            DataCell(Text(' emplois', style: TextStyle(color: Colors.black))),
+            DataCell(Text(' dans ', style: TextStyle(color: Colors.black))),
+            DataCell(Text('ce', style: TextStyle(color: Colors.black))),
+            DataCell(Text('jour', style: TextStyle(color: Colors.black))),
+          ],
         ),
       );
     }
@@ -1062,11 +930,11 @@ int? selectedSem ;
               DataCell(Container(width: 35,child: Text(emp.startTime!, style: TextStyle(color: Colors.black)))),
               DataCell(Text(getProfesseurIdFromName(emp.professor!.toString()).capitalize!, style: TextStyle(color: Colors.black))),
 
-              DataCell(Text('${emp.mat.capitalize}'),
+              DataCell(Text('${getMatIdFromName(emp.element).nameMat!.capitalize}'),
                 onTap: () =>_showCourseDetails(context, emp),
               ),
               DataCell(Container(width: 30, child: Text(getFilIdFromName(emp.fil!).toUpperCase()))),
-              DataCell(Container(width: 25, child: Text('S${emp.SemNum!}'))),
+              DataCell(Container(width: 25, child: Text('S${getMatIdFromName(emp.element).SemNum!}'))),
               DataCell(
                 Container(
                   width: 35,
@@ -1088,14 +956,19 @@ int? selectedSem ;
 
     // Construisez le DataTable pour le jour donné
     return Container(
-      width: MediaQuery.of(context).size.width + 100,
+      width: MediaQuery.of(context).size.width - 10,
+      decoration: BoxDecoration(
+          color: Colors.blue,
+          borderRadius: BorderRadius.all(Radius.circular(30))
+      ),
       child: DataTable(
         // showCheckboxColumn: true,
         // showBottomBorder: true,
         headingRowHeight: 50,
         columnSpacing: 15,
         dataRowHeight: 60,
-        headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white12), // Couleur de la ligne d'en-tête
+        headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white70),
+        dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
         horizontalMargin: 10,
 
         headingTextStyle: TextStyle(
@@ -1197,7 +1070,7 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
 
   filliere? selectedFil;
   int? selectedSem;
-  Elem? selectedElem;
+  Eles? selectedElem;
   Matiere? selectedMat;
   Professeur? selectedProfesseur;
   List<Professeur> professeurs = [];
@@ -1208,17 +1081,10 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
 
 
 
-  Elem getEls(String id) {
-    // Assuming you have a list of professeurs named 'professeursList'
-    final element = elList.firstWhere((g) => '${g.id}' == id, orElse: () => Elem(id: '', filId: '', MatId: '', ));
-    print( "Els:${elList}");
-    return element!; // Return the ID if found, otherwise an empty string
-
-  }
 
   Future<void> updateProfesseurList() async {
     if (selectedElem != null) {
-      List<Professeur> fetchedProfesseurs = await fetchProfesseursByMatiere(selectedElem!.MatId);
+      List<Professeur> fetchedProfesseurs = await fetchProfesseursByMatiere(selectedElem!.id);
       setState(() {
         professeurs = fetchedProfesseurs;
         selectedProfesseur = null;
@@ -1233,9 +1099,9 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
   }
 
   List<Professeur> professeurList = [];
-  List<Elem> elList = [];
-  List<Elem> elList2 = [];
-  List<Elem> elList1 = [];
+  List<Eles> elList = [];
+  List<Eles> elList2 = [];
+  List<Eles> elList1 = [];
   List<Matiere> matiereList = [];
   List<filliere> filList = [];
   List<int> semestersList = [];
@@ -1271,22 +1137,6 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
   @override
   void initState() {
     super.initState();
-    fetchElems().then((data) {
-      setState(() {
-        elList = data; // Assigner la liste renvoyée par emploiesseur à items
-      });
-
-      fetchMatiere().then((data) {
-        setState(() {
-          matiereList = data; // Assigner la liste renvoyée par emploiesseur à items
-        });
-      }).catchError((error) {
-        print('Erreur: $error');
-      });
-
-    }).catchError((error) {
-      print('Erreur: $error');
-    });
 
 
     fetchProfs().then((data) {
@@ -1312,22 +1162,22 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
 
   Future<void> updateElemList() async {
     if (selectedProfesseur != null) {
-      List<Elem>? fetchedProfesseurs = await fetchElsByProf(selectedProfesseur!.id);
+      List<Eles>? fetchedProfesseurs = await fetchElsByProf(selectedProfesseur!.id);
       setState(() {
         elList = fetchedProfesseurs!;
         selectedElem = null;
       });
     } else {
-      List<Elem> fetchedProfesseurs = await fetchElems();
+      // List<Elem> fetchedProfesseurs = await fetchElems();
       setState(() {
-        elList = fetchedProfesseurs;
+        elList = [];
         selectedElem = null;
       });
     }
   }
 
 
-  List<Elem> filterItemsBySemestre(int? ele, List<Elem> allItems) {
+  List<Eles> filterItemsBySemestre(int? ele, List<Eles> allItems) {
     if (ele == 0) {
       return allItems;
     } else {
@@ -1336,12 +1186,12 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
     }
   }
 
-  List<int> extractUniqueSemesters(List<Elem> elems) {
+  List<int> extractUniqueSemesters(List<Eles> elems) {
     // List<Elem> Els = filterItemsByFil(fil,elems);
     Set<int> uniqueSemesters = elems.map((elem) => elem.SemNum!).toSet();
     return uniqueSemesters.toList();
   }
-  List<Elem> filterItemsByFil(filliere? fil, List<Elem> allItems) {
+  List<Eles> filterItemsByFil(filliere? fil, List<Eles> allItems) {
     if (fil == null) {
       return allItems;
     } else {
@@ -1489,12 +1339,12 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
                   ],
                 ),
                 SizedBox(height: 10),
-                DropdownButtonFormField<Elem>(
+                DropdownButtonFormField<Eles>(
                   value: selectedElem,
                   items: elList1.map((ele) {
-                    return DropdownMenuItem<Elem>(
+                    return DropdownMenuItem<Eles>(
                         value: ele,
-                        child: Text(ele.nameM ?? '')
+                        child: Text(ele.nameMat ?? '')
                     );
                   }).toList(),
                   onChanged: (value) async{
@@ -1752,7 +1602,8 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
         });
 
 
-      } else {
+      }
+      else {
        setState(() {
          showDialog(
              context: context,
@@ -1786,7 +1637,7 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
 
 }
 
-Future<List<Elem>?> fetchElsByProf(String ProfId,) async {
+Future<List<Eles>?> fetchElsByProf(String ProfId,) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String token = prefs.getString("token")!;
   print(token);
@@ -1794,8 +1645,9 @@ Future<List<Elem>?> fetchElsByProf(String ProfId,) async {
 
 
 
-  final response = await http.get(
-    Uri.parse('http://192.168.43.73:5000/professeur/$ProfId'),
+  final response = await http.post(
+    Uri.parse('http://192.168.43.73:5000/professeur/'+'$ProfId/elements'),
+    // Uri.parse('http://192.168.43.73:5000/professeur/$ProfId'),
     headers: {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',
@@ -1809,8 +1661,8 @@ Future<List<Elem>?> fetchElsByProf(String ProfId,) async {
     List<dynamic> empData = jsonResponse['elements'];
 
     print(empData);
-    List<Elem> els = empData.map((item) {
-      return Elem.fromJson(item);
+    List<Eles> els = empData.map((item) {
+      return Eles.fromJson(item);
     }).toList();
 
     print(els);
@@ -1836,6 +1688,71 @@ Future<List<Elem>?> fetchElsByProf(String ProfId,) async {
   // }
 }
 
+class Eles {
+  String id;
+  int? SemNum;
+  String filId;
+  String? filName;
+  List<dynamic>? ProCMId; // Le type exact des éléments peut être spécifié ici
+  List<dynamic>? ProTPId;
+  List<dynamic>? ProTDId;
+  List<String>? ProCM;
+  List<String>? ProTP;
+  List<String>? ProTD;
+  int? HCM;
+  int? HTP;
+  int? HTD;
+  String? code;
+  String? nameMat;
+  String? catId;
+  int? prix;
+  // String? ProfTD;
+
+  Eles({
+    required this.id,
+    required this.filId,
+    this.ProCMId,
+    this.ProTPId,
+    this.ProTDId,
+    // this.ProCM,
+    // this.ProTP,
+    // this.ProTD,
+    this.SemNum,
+    this.code,
+    this.nameMat,
+    // this.mat,
+    this.filName,
+    this.HCM,
+    this.HTP,
+    this.HTD,
+    this.catId,
+    this.prix,
+    // this.ProfTD,
+  });
+
+  factory Eles.fromJson(Map<String, dynamic> json) {
+    return Eles(
+      id: json['_id'],
+      nameMat: json['name'],
+      SemNum: json['semestre'],
+      HCM: json['heuresCM'],
+      HTP: json['heuresTP'],
+      HTD: json['heuresTD'],
+      code: json['code'],
+      filId: json['filiere_id'],
+      filName: json['filiere'],
+      catId: json['categorie_id'],
+      prix: json['prix'],
+      // ProCMId: json['professeurCM'] ?? [],
+      // ProTPId: json['professeurTP'] ?? [],
+      // ProTDId: json['professeurTD'] ?? [],
+      // ProCM: (json['info']['CM'] as List<dynamic>).map((e) => e.toString()).toList(),
+      // ProTP: (json['info']['TP'] as List<dynamic>).map((e) => e.toString()).toList(),
+      // ProTD: (json['info']['TD'] as List<dynamic>).map((e) => e.toString()).toList(),
+
+    );
+  }
+}
 
 class UpdateEmploiScreen extends StatefulWidget {
   final String empId;
@@ -1874,7 +1791,7 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
   bool showElem = false;
   bool showTime = false;
 
-  Elem? selectedElem;
+  Eles? selectedElem;
   Matiere? selectedMat;
   Professeur? selectedProfesseur;
   List<Professeur> professeurs = [];
@@ -1886,9 +1803,9 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
 
 
   List<Professeur> professeurList = [];
-  List<Elem> elList = [];
-  List<Elem> elList1 = [];
-  List<Elem> elList2 = [];
+  List<Eles> elList = [];
+  List<Eles> elList1 = [];
+  List<Eles> elList2 = [];
   List<Matiere> matiereList = [];
   List<filliere> filList = [];
   String getFilIdFromName(String id) {
@@ -1917,13 +1834,6 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
     }
   }
 
-  Elem getEls(String id) {
-    // Assuming you have a list of professeurs named 'professeursList'
-    final element = elList.firstWhere((g) => '${g.id}' == id, orElse: () => Elem(id: '', filId: '', MatId: '', ));
-    print( "Els:${element}");
-    return element!; // Return the ID if found, otherwise an empty string
-
-  }
 
 
   @override
@@ -1963,22 +1873,22 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
   int? selectedSem;
   Future<void> updateElemList() async {
     if (selectedProfesseur != null) {
-      List<Elem>? fetchedProfesseurs = await fetchElsByProf(selectedProfesseur!.id);
+      List<Eles>? fetchedProfesseurs = await fetchElsByProf(selectedProfesseur!.id);
       setState(() {
         elList = fetchedProfesseurs!;
         selectedElem = null;
       });
     } else {
-      List<Elem> fetchedProfesseurs = await fetchElems();
+      // List<Elem> fetchedProfesseurs = await fetchElems();
       setState(() {
-        elList = fetchedProfesseurs;
+        elList = [];
         selectedElem = null;
       });
     }
   }
 
 
-  List<Elem> filterItemsBySemestre(int? ele, List<Elem> allItems) {
+  List<Eles> filterItemsBySemestre(int? ele, List<Eles> allItems) {
     if (ele == 0) {
       return allItems;
     } else {
@@ -1987,12 +1897,12 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
     }
   }
 
-  List<int> extractUniqueSemesters(List<Elem> elems) {
+  List<int> extractUniqueSemesters(List<Eles> elems) {
     // List<Elem> Els = filterItemsByFil(fil,elems);
     Set<int> uniqueSemesters = elems.map((elem) => elem.SemNum!).toSet();
     return uniqueSemesters.toList();
   }
-  List<Elem> filterItemsByFil(filliere? fil, List<Elem> allItems) {
+  List<Eles> filterItemsByFil(filliere? fil, List<Eles> allItems) {
     if (fil == null) {
       return allItems;
     } else {
@@ -2141,13 +2051,13 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
                   ],
                 ),
                 SizedBox(height: 10),
-                DropdownButtonFormField<Elem>(
+                DropdownButtonFormField<Eles>(
                   value: selectedElem,
                   hint: Text('${widget.EM}'),
                   items: elList1.map((ele) {
-                    return DropdownMenuItem<Elem>(
+                    return DropdownMenuItem<Eles>(
                         value: ele,
-                        child: Text(ele.nameM ?? '')
+                        child: Text(ele.nameMat ?? '')
                     );
                   }).toList(),
                   onChanged: (value) async{
@@ -2155,6 +2065,7 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
                       selectedElem = value;
                       // selectedProfesseur = null; // Reset the selected matière
                       // updateProfesseurList();
+                      showElem = true;
 
                       // print("PL${professeurs}");
                     });
@@ -2188,7 +2099,7 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
                           setState(() {
                             selectedTypeName = value ?? 'CM';
                             showType = true;
-                            showElem = true;
+                            // showElem = true;
                           });
                         },
                         decoration: InputDecoration(
@@ -2315,9 +2226,9 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
                 SizedBox(height:20),
                 ElevatedButton(
                   onPressed: () {
-                    setState(() {
-                      Navigator.of(context).pop();
-                    });
+                    // setState(() {
+                    //   Navigator.of(context).pop();
+                    // });
                        // fetchemploi();
 
                     String type = showType ? selectedTypeName : widget.TN;
@@ -2332,7 +2243,8 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
                         type,
                         nbh,
                         time,day,
-                        elem
+                        elem,
+                      selectedProfesseur!.id,
                     );
 
                     setState(() {
@@ -2366,7 +2278,7 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
 
 
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Le Type est mis à jour avec succès.')),
+                      SnackBar(content: Text('L\'emploi est mis à jour avec succès.')),
                     );
                   },
                   child: Text("Modifier"),
@@ -2392,7 +2304,7 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
   }
 
 
-  Future<void> UpdatEmp (id,String TN,num TH,String date,int days,String ElemId) async {
+  Future<void> UpdatEmp (id,String TN,num TH,String date,int days,String ElemId,String ProfId) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token")!;
     final url = 'http://192.168.43.73:5000/emploi/'  + '/$id';
@@ -2406,7 +2318,7 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
       "nbh": TH,
       "startTime": date,
       "dayNumero": days,
-      // "professeur": ProfId,
+      "professeur": ProfId,
       "element": ElemId
     };
 
@@ -2434,6 +2346,7 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
 
       }
       else {
+
         // Course creation failed
         setState(() {
           showDialog(
@@ -2471,55 +2384,6 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
       print("Error: $error");
     }
   }
-  Future<List<Elem>?> fetchElsByProf(String ProfId,) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString("token")!;
-    print(token);
-
-
-
-
-    final response = await http.get(
-      Uri.parse('http://192.168.43.73:5000/professeur/$ProfId'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
-    // try {
-
-    print(response.statusCode);
-    if (response.statusCode == 200) {
-      Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-      List<dynamic> empData = jsonResponse['elements'];
-
-      print(empData);
-      List<Elem> els = empData.map((item) {
-        return Elem.fromJson(item);
-      }).toList();
-
-      print(els);
-
-      // await sendEmailNotification(profEmail, type, date, time); // Send email
-      // setState(() {
-      //   Navigator.pop(context);
-      // });
-
-      return els;
-
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Échec de l\'ajout de l\'emploi.')),
-      );
-    }
-
-    // }
-    // catch (error) {
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     SnackBar(content: Text('Erreur: $error')),
-    //   );
-    // }
-  }
 
 }
 
@@ -2527,14 +2391,14 @@ class emploi {
   final String id;
   final String? type;
   final num? nbh;
-  final num? SemNum;
+  // final num? SemNum;
   final String? startTime;
   final int dayNumero;
-  final String? classe;
+  // final String? classe;
   final String professor;
   final String element;
   final String? jour;
-  final String mat;
+  // final String mat;
   final String? fil;
   final String? finishTime;
   final String? enseignat;
@@ -2545,13 +2409,13 @@ class emploi {
     required this.nbh,
     required this.startTime,
     required this.dayNumero,
-    required this.mat,
+    // required this.mat,
     required this.element,
     required this.professor,
     this.jour,
     this.fil,
-    this.SemNum,
-    this.classe,
+    // this.SemNum,
+    // this.classe,
     this.enseignat,
     required this.finishTime,
   });
@@ -2566,12 +2430,12 @@ class emploi {
       professor: json['professeur'],
       element: json['element'],
       jour: json['jour'],
-    mat: json['matiere'],
+    // mat: json['matiere'],
       fil: json['filiere'],
       finishTime: json['finishTime'],
-      SemNum: json['semestre'],
-      enseignat: json['enseignat'],
-      classe: json['classe'],
+      // SemNum: json['semestre'],
+      enseignat: json['nomComplet'],
+      // classe: json['classe'],
     );
   }
 
@@ -2585,10 +2449,10 @@ class emploi {
       "professeur": professor,
       "element": element,
       "jour": jour,
-      "matiere": mat,
+      // "matiere": mat,
       "filiere": fil,
       "finishTime": finishTime,
-      "semestre": SemNum,
+      // "semestre": SemNum,
       "enseignat": enseignat
     };
   }
@@ -2613,7 +2477,7 @@ Future<List<emploi>> fetchemploi() async {
     Map<String, dynamic> jsonResponse = jsonDecode(response.body);
     List<dynamic> empData = jsonResponse['emplois'];
 
-    print(empData);
+    print("Emplois: ${empData}");
     List<emploi> emplois = empData.map((item) {
       return emploi.fromJson(item);
     }).toList();

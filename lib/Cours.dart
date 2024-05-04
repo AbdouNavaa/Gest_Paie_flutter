@@ -23,9 +23,10 @@ class CoursesPage extends StatefulWidget {
   // final num sommeTV;
   DateTime? dateDeb;
   DateTime? dateFin;
+  bool paid;
 // Calculate the sums for filtered courses
 
-  CoursesPage({required this.courses, required this.role, required this.coursNum}) {}
+  CoursesPage({required this.courses, required this.role, required this.coursNum,required this.paid}) {}
 
 
 
@@ -40,13 +41,34 @@ class _CoursesPageState extends State<CoursesPage> {
   int coursesNum = 0;
   List<Professeur> professeurList = [];
 
-  String getProfesseurIdFromName(String id) {
-    // Assuming you have a list of professeurs named 'professeursList'
-    final professeur = professeurList.firstWhere((prof) => '${prof.id}' == id, orElse: () => Professeur(id: '',user: '', matieres: [], ));
-    print(professeur.user);
-    return professeur.user!; // Return the ID if found, otherwise an empty string
+  bool signer = false;
+  void singeCours( id, isSigned) async {
 
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString("token")!;
+    print(token);
+    final response = await http.patch(
+      Uri.parse("http://192.168.43.73:5000/cours" + "/$id/signe"),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(<String, dynamic>{
+        'isSigned':isSigned? "effectué": "en attente"
+      }),
+    );
+    print(response.statusCode);
+    if (response.statusCode == 200) {
+
+      setState(() {
+        Navigator.pop(context);
+      });
+    } else {
+      return Future.error('Server Error');
+    }
   }
+
+
 
   void payeCours( id,String isPaid) async {
 
@@ -129,7 +151,7 @@ class _CoursesPageState extends State<CoursesPage> {
 
   Elem getEls(String id) {
     // Assuming you have a list of professeurs named 'professeursList'
-    final element = elLis.firstWhere((g) => '${g.id}' == id, orElse: () => Elem(id: '', filId: '', MatId: '', ));
+    final element = elLis.firstWhere((g) => '${g.id}' == id, orElse: () => Elem(id: '', filId: '',   ));
     print( "Els:${element}");
     return element!; // Return the ID if found, otherwise an empty string
 
@@ -219,6 +241,7 @@ bool showFloat = false;
     calculateTotalType();
     return Scaffold(
       // appBar: AppBar(title: Center(child: Text('${widget.coursNum} Courses',style: TextStyle(fontStyle: FontStyle.italic,fontWeight: FontWeight.w400),))),
+      drawer: MyDrawer(),
       body: Column(
         children: [
           SizedBox(height: 30,),
@@ -276,24 +299,38 @@ bool showFloat = false;
             ),
           ),
 
-
-
           Container(
-            width: 300,
+            width: MediaQuery.of(context).size.width,
             height: 50,
             // color: Colors.black38,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
 
-                Icon(Icons.panorama_fish_eye,),
-                Text('en attente'),
-                SizedBox(width: 8,),
-                Icon(Icons.remove_circle_outline,),
-                Text('En Cours'),
-                SizedBox(width: 8,),
-                Icon(Icons.task_alt,),
-                Text('Effectué')
+                Expanded(child: Row(children: [
+                  Icon(Icons.panorama_fish_eye,),
+                  Text('en attente'),
+                ],)),
+
+
+                Expanded(child: Row(children: [
+                  Icon(Icons.task_alt,),
+                  Text('Effectué')
+                ],)),
+                widget.paid? SizedBox():
+                Expanded(child: Row(children: [
+                  Icon(Icons.highlight_remove_sharp,),
+                  Text('Annulé')
+                ],)),
+
+                widget.paid?
+                Expanded(child: Row(children: [
+                  Icon(Icons.remove_circle_outline,),
+                  Text('En Cours')
+                ],))
+                    :SizedBox(),
+
+
               ],
             ),
           ),
@@ -327,285 +364,306 @@ bool showFloat = false;
                         scrollDirection: Axis.horizontal,
                         child: Column(
                           children: [
-                            DataTable(
-                              showCheckboxColumn: true,
-                              showBottomBorder: true,
-                              // sortColumnIndex: 1,
-                              // sortAscending: true,
-                              // headingRowColor: MaterialStateColor.resolveWith((states) => Colors.lightBlueAccent.shade100), // Couleur de la ligne d'en-tête
-                              headingRowHeight: 50,
-                              columnSpacing:  (!showPaid && !showSigned)?8: 25,
-                              horizontalMargin:  3,
-                              // border: TableBorder(verticalInside: BorderSide(width: 1.5)),
-                              dataRowHeight: 60,
-                              headingTextStyle: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black, // Set header text color
+                            Container(
+                              width: MediaQuery.of(context).size.width,
+                              decoration: BoxDecoration(
+                                  color: Colors.blue,
+                                  borderRadius: BorderRadius.all(Radius.circular(20))
                               ),
-                              // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xFF0C2FDA)), // Set row background color
-                              columns: [
-                                // if ( showSigned)
-                                if (!showPaid)
+                              child: DataTable(
+                                showCheckboxColumn: true,
+                                showBottomBorder: true,
+                                // sortColumnIndex: 1,
+                                // sortAscending: true,
+                                headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white70),
+                                dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
+                                headingRowHeight: 50,
+                                columnSpacing:  (!showPaid && !showSigned)?8: 25,
+                                horizontalMargin:  3,
+                                // border: TableBorder(verticalInside: BorderSide(width: 1.5)),
+                                dataRowHeight: 60,
+                                headingTextStyle: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black, // Set header text color
+                                ),
+                                // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xFF0C2FDA)), // Set row background color
+                                columns: [
+                                  // if ( showSigned)
+                                  if (!showPaid)
+                                    DataColumn(label: InkWell(
+                                        // onTap: (){
+                                        //   setState(() {
+                                        //     showSigned = !showSigned;
+                                        //   });
+                                        //
+                                        // },
+                                        child: Text('Signé'))),
+                                  // if (widget.role == "admin" && showPaid)
+                                  if (widget.role == "admin"&& !showSigned )
+                                    DataColumn(label: InkWell(
+                                        // onTap: (){
+                                        //   setState(() {
+                                        //     showPaid = !showPaid;
+                                        //   });
+                                        //
+                                        // },
+                                        child: Text('Paié'))),
                                   DataColumn(label: InkWell(
                                       // onTap: (){
                                       //   setState(() {
-                                      //     showSigned = !showSigned;
+                                      //     totalType =0;
+                                      //     sortByDateAscending = !sortByDateAscending;
+                                      //     // Reverse the sorting order when the button is tapped
+                                      //     widget.courses.sort((a, b) {
+                                      //       DateTime dateA = DateTime.parse(a['date'].toString());
+                                      //       DateTime dateB = DateTime.parse(b['date'].toString());
+                                      //
+                                      //       // Sort in ascending order if sortByDateAscending is true,
+                                      //       // otherwise sort in descending order
+                                      //       return sortByDateAscending ? dateA.compareTo(dateB) : dateB.compareTo(dateA);
+                                      //     });
                                       //   });
                                       //
-                                      // },
-                                      child: Text('Signé'))),
-                                // if (widget.role == "admin" && showPaid)
-                                if (widget.role == "admin"&& !showSigned )
-                                  DataColumn(label: InkWell(
-                                      // onTap: (){
-                                      //   setState(() {
-                                      //     showPaid = !showPaid;
-                                      //   });
                                       //
                                       // },
-                                      child: Text('Paié'))),
-                                DataColumn(label: InkWell(
-                                    // onTap: (){
-                                    //   setState(() {
-                                    //     totalType =0;
-                                    //     sortByDateAscending = !sortByDateAscending;
-                                    //     // Reverse the sorting order when the button is tapped
-                                    //     widget.courses.sort((a, b) {
-                                    //       DateTime dateA = DateTime.parse(a['date'].toString());
-                                    //       DateTime dateB = DateTime.parse(b['date'].toString());
-                                    //
-                                    //       // Sort in ascending order if sortByDateAscending is true,
-                                    //       // otherwise sort in descending order
-                                    //       return sortByDateAscending ? dateA.compareTo(dateB) : dateB.compareTo(dateA);
-                                    //     });
-                                    //   });
-                                    //
-                                    //
-                                    // },
-                                    child: Text('Date'))),
-                                DataColumn(label: Text('Prof')),
-                                DataColumn(label: Text('Matiere')),
-                                DataColumn(label: Text('Eq.CM')),
-                                // DataColumn(label: Text('Prix')),
-                                DataColumn(label: Text('Details')),
-                              ],
+                                      child: Text('Date'))),
+                                  DataColumn(label: Text('Prof')),
+                                  DataColumn(label: Text('Matiere')),
+                                  DataColumn(label: Text('Eq.CM')),
+                                  // DataColumn(label: Text('Prix')),
+                                  DataColumn(label: Text('Details')),
+                                ],
 
 
-                              rows: [
-                                for (var index = (currentPage - 1) * coursesPerPage;
-                                index < widget.courses.length && index < currentPage * coursesPerPage;
-                                index++)
-                                  if (courseFitsCriteria(widget.courses[index]))
-                                    if ((!showSigned || widget.courses[index]['isSigned'] == "effectué") &&
-                                        (!showPaid || widget.courses[index]['isPaid'] == "effectué" || widget.courses[index]['isPaid'] == 'préparé'))
-                                      DataRow(
-                                        onLongPress: () =>
-                                            _showCourseDetails(context, widget.courses[index]),
+                                rows: [
+                                  for (var index = (currentPage - 1) * coursesPerPage;
+                                  index < widget.courses.length && index < currentPage * coursesPerPage;
+                                  index++)
+                                    if (courseFitsCriteria(widget.courses[index]))
+                                      if ((!showSigned || widget.courses[index]['isSigned'] == "effectué") &&
+                                          (!showPaid || widget.courses[index]['isPaid'] == "effectué" || widget.courses[index]['isPaid'] == 'préparé'))
+                                        DataRow(
+                                          // mouseCursor: MaterialStateMouseCursor.clickable,
+                                          onLongPress: () =>
+                                              _showCourseDetails(context, widget.courses[index]),
 
-                                        cells: [
-                                          // DataCell(Text('${index + 1}',style: TextStyle(fontSize: 18),)), // Numbering cell
-                                          // if ( showSigned)
-                                          if (!showPaid)
-                                            DataCell(
-                                              Container(
-                                                margin: EdgeInsets.only(left: 5),
-                                                width: 20,color: Colors.white,
-                                                child: Icon( widget.courses[index]['isSigned'] =="effectué"?  Icons.task_alt:Icons.panorama_fish_eye,
-                                                  color: widget.courses[index]['isSigned'] =="effectué" ? Colors.green: Colors.black54,
+                                          cells: [
+                                            // DataCell(Text('${index + 1}',style: TextStyle(fontSize: 18),)), // Numbering cell
+                                            // if ( showSigned)
+                                            if (!showPaid)
+                                              DataCell(
+                                                Container(
+                                                  margin: EdgeInsets.only(left: 5),
+                                                  width: 20,color: Colors.white,
+                                                  child: Icon( widget.courses[index]['isSigned'] =="effectué"?  Icons.task_alt
+                                                      :widget.courses[index]['isSigned'] =="annulé"?  Icons.highlight_remove_sharp
+                                                      :Icons.panorama_fish_eye,
+                                                    color: widget.courses[index]['isSigned'] =="effectué" ? Colors.green: Colors.black54,
 
-                                                  size: 25,),
-                                              ),
-                                            ),
-                                          if (widget.role == "admin" && !showSigned)
-                                          // if (widget.role == "admin")
-                                            DataCell(
-                                              InkWell(
-                                                child:     Container(
-                                                  margin: EdgeInsets.only(right: 5),
-                                                  width: 20,
-                                                  color: Colors.white,
-                                                  child: Icon( widget.courses[index]['isPaid'] =="effectué" ?
-                                                  Icons.task_alt:widget.courses[index]['isPaid'] =="préparé"  ?
-                                                  Icons.remove_circle_outline:
-                                                  Icons.panorama_fish_eye,
-                                                    color: widget.courses[index]['isPaid'] =="effectué" ? Colors.green:widget.courses[index]['isPaid'] =="préparé"  ? Colors.lightBlue: Colors.black54,
                                                     size: 25,),
                                                 ),
                                               ),
-                                            ),
-                                          DataCell(
-                                            Container(width: 50,
-                                              child: Text(
-                                                '${DateFormat('dd MMM ').format(
-                                                  DateTime.parse(widget.courses[index]['date'].toString()).toLocal(),
-                                                )}',style: TextStyle(
-                                                color: Colors.black,
-                                              ),
-                                              ),
-                                            ),
-                                          ),
-                                          DataCell(Container(width: 50,child: Text('${widget.courses[index]['enseignant'].toString().capitalize}',style: TextStyle(
-                                            color: Colors.black,
-                                          ),)),
-                                              onTap: () => _showCourseDetails(context, widget.courses[index])
-                                          ),
-                                          DataCell(Container(width: 55,child: Text('${widget.courses[index]['matiere'].toString().capitalize}',style: TextStyle(
-                                            color: Colors.black,
-                                          ),)),
-                                            onTap: () => _showCourseDetails(context, widget.courses[index])
-                                          ),
-                                          DataCell(
-                                            Center(child: Container(width: 20, child: Text('${widget.courses[index]['th']}',style: TextStyle(
-                                              color: Colors.black,
-                                            ),))),
-                                          ),
-                                          // DataCell(
-                                          //   Text('${widget.courses[index]['somme']}',style: TextStyle(
-                                          //     color: Colors.black,
-                                          //   ),),
-                                          // ),
-                                          DataCell(
-                                            Row(
-                                              // mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Container(
-                                                  width: 25,
-                                                  child: TextButton(
-                                                    onPressed: () =>_showCourseDetails(context, widget.courses[index]),// Disable button functionality
-
-                                                    child: Icon(Icons.more_horiz, color: Colors.black54),
-                                                    style: TextButton.styleFrom(
-                                                      primary: Colors.white,
-                                                      elevation: 0,
-                                                      // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
-                                                    ),
+                                            if (widget.role == "admin" && !showSigned)
+                                            // if (widget.role == "admin")
+                                              DataCell(
+                                                InkWell(
+                                                  child:     Container(
+                                                    margin: EdgeInsets.only(right: 5),
+                                                    width: 20,
+                                                    color: Colors.white,
+                                                    child: Icon( widget.courses[index]['isPaid'] =="effectué" ?
+                                                    Icons.task_alt:widget.courses[index]['isPaid'] =="préparé"  ?
+                                                    Icons.remove_circle_outline:
+                                                    Icons.panorama_fish_eye,
+                                                      color: widget.courses[index]['isPaid'] =="effectué" ? Colors.green:widget.courses[index]['isPaid'] =="préparé"  ? Colors.lightBlue: Colors.black54,
+                                                      size: 25,),
                                                   ),
-
                                                 ),
-                                              ],
+                                              ),
+                                            DataCell(
+                                              Container(width: 50,
+                                                child: Text(
+                                                  '${DateFormat('dd MMM ').format(
+                                                    DateTime.parse(widget.courses[index]['date'].toString()).toLocal(),
+                                                  )}',style: TextStyle(
+                                                  color: Colors.black,
+                                                ),
+                                                ),
+                                              ),
                                             ),
-                                          ),
-                                        ],
-                                      ),
-                                // if (!showPaid && !showSigned)
-                                // DataRow(
-                                //   cells: [
-                                //     if (!showPaid)
-                                //       DataCell(
-                                //           Text('Totals:',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
-                                //       ),
-                                //     if (widget.role == "admin"&& !showSigned)
-                                //       DataCell(
-                                //           (widget.dateDeb != null && widget.dateFin != null)?
-                                //       Text('${coursesNum}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),):
-                                //       Text('${widget.coursNum}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
-                                //       ),
-                                //
-                                //
-                                //     DataCell(
-                                //       Text('Eq. CM: ',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
-                                //
-                                //     ),
-                                //     DataCell(
-                                //       Text('${totalType}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),),
-                                //
-                                //     ),
-                                //     DataCell(
-                                //       Text('MT:',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
-                                //
-                                //     ),
-                                //     DataCell(
-                                //         Text('${somme}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
-                                //     ),
-                                //    DataCell(
-                                //      Text('')
-                                //       ),
-                                //
-                                //   ],
-                                // ),
+                                            DataCell(Container(width: 50,child: Text('${widget.courses[index]['nom'].toString().capitalize} ${widget.courses[index]['prenom'].toString().capitalize}',style: TextStyle(
+                                              color: Colors.black,
+                                            ),)),
+                                                onTap: () => _showCourseDetails(context, widget.courses[index])
+                                            ),
+                                            DataCell(Container(width: 55,child: Text('${widget.courses[index]['matiere'].toString().capitalize}',style: TextStyle(
+                                              color: Colors.black,
+                                            ),)),
+                                              onTap: () => _showCourseDetails(context, widget.courses[index])
+                                            ),
+                                            DataCell(
+                                              Center(child: Container(width: 20, child: Text('${widget.courses[index]['th']}',style: TextStyle(
+                                                color: Colors.black,
+                                              ),))),
+                                            ),
+                                            // DataCell(
+                                            //   Text('${widget.courses[index]['somme']}',style: TextStyle(
+                                            //     color: Colors.black,
+                                            //   ),),
+                                            // ),
+                                            DataCell(
+                                              Row(
+                                                // mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Container(
+                                                    width: 25,
+                                                    child: TextButton(
+                                                      onPressed: () =>_showCourseDetails(context, widget.courses[index]),// Disable button functionality
+
+                                                      child: Icon(Icons.more_horiz, color: Colors.black54),
+                                                      style: TextButton.styleFrom(
+                                                        primary: Colors.white,
+                                                        elevation: 0,
+                                                        // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
+                                                      ),
+                                                    ),
+
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                  // if (!showPaid && !showSigned)
+                                  // DataRow(
+                                  //   cells: [
+                                  //     if (!showPaid)
+                                  //       DataCell(
+                                  //           Text('Totals:',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
+                                  //       ),
+                                  //     if (widget.role == "admin"&& !showSigned)
+                                  //       DataCell(
+                                  //           (widget.dateDeb != null && widget.dateFin != null)?
+                                  //       Text('${coursesNum}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),):
+                                  //       Text('${widget.coursNum}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
+                                  //       ),
+                                  //
+                                  //
+                                  //     DataCell(
+                                  //       Text('Eq. CM: ',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
+                                  //
+                                  //     ),
+                                  //     DataCell(
+                                  //       Text('${totalType}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),),
+                                  //
+                                  //     ),
+                                  //     DataCell(
+                                  //       Text('MT:',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
+                                  //
+                                  //     ),
+                                  //     DataCell(
+                                  //         Text('${somme}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
+                                  //     ),
+                                  //    DataCell(
+                                  //      Text('')
+                                  //       ),
+                                  //
+                                  //   ],
+                                  // ),
 
 
-                              ],
+                                ],
+                              ),
                             ),
-                            // Container(
-                            //   width: MediaQuery.of(context).size.width,
-                            //   margin: EdgeInsets.only(top: 20,left: 10),
-                            //   child: DataTable(
-                            //
-                            //     showCheckboxColumn: true,
-                            //     showBottomBorder: true,
-                            //     horizontalMargin: 1,
-                            //     headingRowHeight: 50,
-                            //     columnSpacing: 18,
-                            //     dataRowHeight: 50,
-                            //     headingTextStyle: TextStyle(
-                            //       fontWeight: FontWeight.bold,
-                            //       color: Colors.black, // Set header text color
-                            //     ),
-                            //     // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
-                            //     columns: [
-                            //       DataColumn(label: Text('Equivalant CM')),
-                            //       DataColumn(label: Text('Montant Total')),
-                            //       DataColumn(label: Text('Nombre de Cours')),
-                            //     ],
-                            //     rows: [
-                            //       DataRow(
-                            //         cells: [
-                            //
-                            //           DataCell((widget.dateDeb != null && widget.dateFin != null)?
-                            //           Text('${totalType} heures',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
-                            //               :Text('${totalType} heures',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),),
-                            //           ),
-                            //           DataCell((widget.dateDeb != null && widget.dateFin != null)?
-                            //           Text('${somme} MRU',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400))
-                            //               :Text('${somme} MRU',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
-                            //           ),
-                            //           DataCell((widget.dateDeb != null && widget.dateFin != null)?
-                            //           Center(child: Text('${coursesNum} Cours',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400)))
-                            //               :Text('${widget.courses.length} Cours',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
-                            //           ),
-                            //
-                            //         ],
-                            //       ),
-                            //     ],
-                            //   ),
-                            // ),
-
                             Container(
-                                width: MediaQuery.of(context).size.width-20,
-                                decoration: BoxDecoration(
-                                  color: Colors.white12,
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(20.0),
-                                  ),
+                              width: MediaQuery.of(context).size.width,
+                              margin: EdgeInsets.only(top: 10),
+                              decoration: BoxDecoration(
+                                  // color: Colors.black.withOpacity(.3),
+                                color: Colors.blue,
+                                  borderRadius: BorderRadius.all(Radius.circular(20))
+                              ),
+                              child: DataTable(
+                                headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white70),
+                                dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
+
+                                showCheckboxColumn: true,
+                                showBottomBorder: true,
+                                horizontalMargin: 1,
+                                headingRowHeight: 50,
+                                columnSpacing: 18,
+                                dataRowHeight: 50,
+                                headingTextStyle: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black, // Set header text color
                                 ),
-                                margin: EdgeInsets.only(left: 10,top: 20),
-                                child: Row(
-                                  children: [
-                                    Text('Totals', style: TextStyle(fontWeight: FontWeight.bold),),
+                                // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
+                                columns: [
+                                  DataColumn(label: Text('Equivalant CM')),
+                                  DataColumn(label: Text('Montant Total')),
+                                  DataColumn(label: Text('Nombre de Cours')),
+                                ],
+                                rows: [
+                                  DataRow(
+                                    cells: [
 
-                                    SizedBox(width: 40,),
-                                    (widget.dateDeb != null && widget.dateFin != null)?
-                                    Text('${coursesNum} Cours',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
-                                        :Text('${widget.courses.length} Cours',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),),
+                                      DataCell((widget.dateDeb != null && widget.dateFin != null)?
+                                      Text('${totalType} heures',style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),)
+                                          :Text('${totalType} heures',style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
+                                      ),
+                                      DataCell((widget.dateDeb != null && widget.dateFin != null)?
+                                      Text('${somme} MRU',style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold))
+                                          :Text('${somme} MRU',style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),)
+                                      ),
+                                      DataCell((widget.dateDeb != null && widget.dateFin != null)?
+                                      Center(child: Text('${coursesNum} Cours',style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold)))
+                                          :Text('${widget.courses.length} Cours',style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),)
+                                      ),
 
-
-                                    SizedBox(width: 30,),
-
-                                    (widget.dateDeb != null && widget.dateFin != null)?
-                                    Text('${somme} MRU',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400))
-                                        :Text('${somme} MRU',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),),
-
-                                    SizedBox(width: 20,),
-
-                                    (widget.dateDeb != null && widget.dateFin != null)?
-                                    Text('${totalType} H',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
-                                        :Text('${totalType} H',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),),
-
-
-                                  ],
-                                )
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
+
+                            // Container(
+                            //     width: MediaQuery.of(context).size.width,
+                            //     height: 50,
+                            //     decoration: BoxDecoration(
+                            //       color: Colors.blue.shade100,
+                            //       borderRadius: BorderRadius.only(
+                            //         bottomLeft: Radius.circular(20.0),
+                            //         bottomRight: Radius.circular(20.0),
+                            //       ),
+                            //     ),
+                            //     // margin: EdgeInsets.only(top: 20),
+                            //     child: Row(
+                            //       children: [
+                            //         SizedBox(width: 10,),
+                            //         Text('Totals', style: TextStyle(fontWeight: FontWeight.bold),),
+                            //
+                            //         SizedBox(width: 35,),
+                            //         (widget.dateDeb != null && widget.dateFin != null)?
+                            //         Text('${coursesNum} Cours',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
+                            //             :Text('${widget.courses.length} Cours',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),),
+                            //
+                            //
+                            //         SizedBox(width: 18,),
+                            //
+                            //         (widget.dateDeb != null && widget.dateFin != null)?
+                            //         Text('${somme} MRU',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400))
+                            //             :Text('${somme} MRU',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),),
+                            //
+                            //         SizedBox(width: 57,),
+                            //
+                            //         (widget.dateDeb != null && widget.dateFin != null)?
+                            //         Text('${totalType} H',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
+                            //             :Text('${totalType} H',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),),
+                            //
+                            //
+                            //       ],
+                            //     )
+                            // ),
 
                           ],
                         ),
@@ -722,7 +780,7 @@ bool showFloat = false;
 
       floatingActionButton: showFloat ?
       Container(
-          width: 320,
+          width: widget.paid?230:320,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.all(Radius.circular(50)),
@@ -733,14 +791,15 @@ bool showFloat = false;
             ),
           ],
         ),
+        // margin: EdgeInsets.only(left: widget.paid? 100:40,right: widget.paid? 20:5),
 
-          margin: EdgeInsets.only(left: 40,right: 5),
+          margin: EdgeInsets.only(left: 40,right: widget.paid?30:5),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // SizedBox(width: 18,),
-            TextButton(
+            widget.paid? SizedBox():   TextButton(
               child: Row(
                 children: [
                   Icon(Icons.add, color: Colors.black,),
@@ -788,7 +847,7 @@ bool showFloat = false;
         width: 60,
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.all(Radius.circular(50)),
+          borderRadius: BorderRadius.all(Radius.circular(10)),
           boxShadow: [
             BoxShadow(
               color: Colors.black12,
@@ -819,13 +878,17 @@ bool showFloat = false;
   Future<void> _showCourseDetails(BuildContext context, Map<String, dynamic> course) {
     return showModalBottomSheet(
         context: context,backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
-            topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
+        // shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(
+        //     topRight: Radius.circular(20), topLeft: Radius.circular(20)),),
         isScrollControlled: true, // Rendre le contenu déroulable
 
         builder: (BuildContext context){
           return Container(
             height: 650,
+            decoration: BoxDecoration(borderRadius: BorderRadius.only(
+                topRight: Radius.circular(20), topLeft: Radius.circular(20)),
+              color: Colors.white,
+            ),
             padding: const EdgeInsets.all(25.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -855,7 +918,7 @@ bool showFloat = false;
                         // color: Colors.lightBlue
                       ),),
                     SizedBox(width: 10,),
-                    Text(course['enseignant'].toString().capitalize!,
+                    Text(("${course['nom']} ${course['prenom']}").toString().capitalize!,
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w400,
@@ -1108,10 +1171,10 @@ bool showFloat = false;
                     ],
                   ),
                 SizedBox(height: 25,),
-                Row(
+               widget.paid!?SizedBox(): Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    TextButton(
+                    ElevatedButton(
                       onPressed: () {
 
                         setState(() {
@@ -1127,26 +1190,53 @@ bool showFloat = false;
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) => UpdateCoursScreen(empId: course['_id'], start: course['startTime'], date: DateFormat('dd/MM/yyyy ').format(
-                              DateTime.parse(course['date'].toString()).toLocal(),),Prof: course['enseignant'],
-                              EM:course['matiere'], EP:course['enseignant'], TN: course['type'], th: course['nbh'], GN: '', MId: course['element'], PId: course['professeur'],)),
+                              DateTime.parse(course['date'].toString()).toLocal(),),Prof: "${course['nom']} ${course['prenom']}",
+                              EM:course['matiere'], EP:"${course['nom']} ${course['prenom']}", TN: course['type'], th: course['nbh'], GN: '', MId: course['element'], PId: course['professeur'],)),
                           );
                         });
                       },// Disable button functionality
 
                       child: Text('Modifier'),
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.only(left: 20,right: 20),
-                        foregroundColor: Colors.lightGreen,
-                          backgroundColor: Color(0xfffff1),
-                          side: BorderSide(color: Colors.black12,),
-                          // side: BorderSide(color: Colors.black,),
-                          elevation: 3,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))
+                      style: ElevatedButton.styleFrom(
+                        surfaceTintColor: Colors.white,
+                        // side: BorderSide(color: Colors.black38),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        elevation: 5,
+                        padding: EdgeInsets.symmetric(horizontal: 25),
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.green,
+                        textStyle: TextStyle(fontWeight: FontWeight.bold),
+                        // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                      ),
+
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                       setState(() {
+                         signer = !signer;
+                         singeCours(course['_id'] ,signer);
+                       });
+                       Navigator.of(context).pop();
+
+
+                         },// Disable button functionality
+
+                      child: Text('Signer'),
+                      style: ElevatedButton.styleFrom(
+                        surfaceTintColor: Colors.white,
+                        // side: BorderSide(color: Colors.black38),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        elevation: 5,
+                        padding: EdgeInsets.symmetric(horizontal: 25),
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.blue,
+                        textStyle: TextStyle(fontWeight: FontWeight.bold),
+                        // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                       ),
 
                     ),
 
-                    TextButton(
+                    ElevatedButton(
                       onPressed: () {
                         showDialog(
                           context: context,
@@ -1187,14 +1277,16 @@ bool showFloat = false;
                       }, // Disable button functionality
 
                       child: Text('Supprimer'),
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.only(left: 20,right: 20),
+                      style: ElevatedButton.styleFrom(
+                        surfaceTintColor: Colors.white,
+                        // side: BorderSide(color: Colors.black38),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        elevation: 5,
+                        padding: EdgeInsets.symmetric(horizontal: 25),
+                        backgroundColor: Colors.white,
                         foregroundColor: Colors.redAccent,
-                          backgroundColor: Color(0xfffff1),
-                          side: BorderSide(color: Colors.black12,),
-                          // side: BorderSide(color: Colors.black,),
-                          elevation: 3,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))
+                        textStyle: TextStyle(fontWeight: FontWeight.bold),
+                        // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                       ),
 
                     ),
@@ -1227,7 +1319,7 @@ bool showFloat = false;
         builder: (context) {
           return Container(
             child: AlertDialog(
-                insetPadding: EdgeInsets.only(top: 250,),
+                insetPadding: EdgeInsets.only(top: widget.paid?350:250,),
 
 
                         surfaceTintColor: Color(0xB0AFAFA3),
@@ -1246,6 +1338,7 @@ bool showFloat = false;
                   child: SingleChildScrollView(
                     child: Column(
                       children: [
+                        SizedBox(height: 30,),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -1333,6 +1426,7 @@ bool showFloat = false;
                         ),
 
                         SizedBox(height: 50,),
+                        widget.paid?SizedBox():
                         Row(
                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -1340,6 +1434,7 @@ bool showFloat = false;
                           ],
                         ),
                         SizedBox(height: 10,),
+                        widget.paid?SizedBox():
                         Row(
 
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -1584,6 +1679,7 @@ class AddCoursScreen extends StatefulWidget {
 
 class _AddCoursScreenState extends State<AddCoursScreen> {
   // Déclarez vos variables ici
+
   String _selectedType = 'CM';
   num _selectedNbh = 1.5;
   // ... Ajoutez d'autres variables nécessaires pour l'ajout
@@ -1595,38 +1691,23 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
 
   filliere? selectedFil;
   int? selectedSem;
-  Elem? selectedElem;
+  Eles? selectedElem;
   Matiere? selectedMat;
   Professeur? selectedProfesseur;
   List<Professeur> professeurs = [];
   DateTime? selectedDateTime;
 
-  // Future<void> updateProfesseurList() async {
-  //   if (selectedElem != null) {
-  //     List<Professeur> fetchedProfesseurs = await fetchProfesseursByMatiere(selectedElem!.MatId);
-  //     setState(() {
-  //       professeurs = fetchedProfesseurs;
-  //       selectedElem = null;
-  //     });
-  //   } else {
-  //     List<Professeur> fetchedProfesseurs = await fetchProfs();
-  //     setState(() {
-  //       professeurs = fetchedProfesseurs;
-  //       selectedElem = null;
-  //     });
-  //   }
-  // }
   Future<void> updateElemList() async {
     if (selectedProfesseur != null) {
-      List<Elem>? fetchedProfesseurs = await fetchElsByProf(selectedProfesseur!.id);
+      List<Eles>? fetchedProfesseurs = await fetchElsByProf(selectedProfesseur!.id);
       setState(() {
         elList = fetchedProfesseurs!;
         selectedElem = null;
       });
     } else {
-      List<Elem> fetchedProfesseurs = await fetchElems();
+      // List<Elem> fetchedProfesseurs = [];
       setState(() {
-        elList = fetchedProfesseurs;
+        elList = [];
         selectedElem = null;
       });
     }
@@ -1634,15 +1715,15 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
 
   List<Professeur> professeurList = [];
 
-  List<Elem> elList = [];
-  List<Elem> elList2 = [];
-  List<Elem> elList1 = [];
+  List<Eles> elList = [];
+  List<Eles> elList2 = [];
+  List<Eles> elList1 = [];
   List<Matiere> matiereList = [];
   List<filliere> filList = [];
   List<int> semestersList = [];
 
 
-  List<Elem> filterElsbySem(String FilId, int sem,List<Elem> allItems) {
+  List<Eles> filterElsbySem(String FilId, int sem,List<Eles> allItems) {
     if (FilId == null) {
       return [];
     } else {
@@ -1672,13 +1753,6 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
   }
   bool isChanged =false;
 
-  Elem getEls(String id) {
-    // Assuming you have a list of professeurs named 'professeursList'
-    final element = elList.firstWhere((g) => '${g.id}' == id, orElse: () => Elem(id: '', filId: '', MatId: '', ));
-    print( "Els:${element}");
-    return element!; // Return the ID if found, otherwise an empty string
-
-  }
 
 
   String getFilIdFromName(String id) {
@@ -1720,13 +1794,13 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
   @override
   void initState() {
     super.initState();
-    fetchElems().then((data) {
-      setState(() {
-        elList = data; // Assigner la liste renvoyée par emploiesseur à items
-      });
-    }).catchError((error) {
-      print('Erreur: $error');
-    });
+    // fetchElems().then((data) {
+    //   setState(() {
+    //     elList = data; // Assigner la liste renvoyée par emploiesseur à items
+    //   });
+    // }).catchError((error) {
+    //   print('Erreur: $error');
+    // });
 
 
     fetchfilliere().then((data) {
@@ -1758,16 +1832,9 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
 
   }
 
-  Elem getElem(String id) {
-    // Assuming you have a list of professeurs named 'professeursList'
-    final elem = elList.firstWhere((f) => '${f.id}' == id, orElse: () =>Elem(id: '', filId: '', MatId: '', ));
-    print(elem.id);
-    return elem; // Return the ID if found, otherwise an empty string
-
-  }
 
 
-  List<Elem> filterItemsBySemestre(int? ele, List<Elem> allItems) {
+  List<Eles> filterItemsBySemestre(int? ele, List<Eles> allItems) {
     if (ele == 0) {
       return allItems;
     } else {
@@ -1776,17 +1843,51 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
     }
   }
 
-  List<int> extractUniqueSemesters(List<Elem> elems) {
+  List<int> extractUniqueSemesters(List<Eles> elems) {
     Set<int> uniqueSemesters = elems.map((elem) => elem.SemNum!).toSet();
     return uniqueSemesters.toList();
   }
-  List<Elem> filterItemsByFil(filliere? fil, List<Elem> allItems) {
+  List<Eles> filterItemsByFil(filliere? fil, List<Eles> allItems) {
     if (fil == null) {
       return allItems;
     } else {
       return allItems.where((ele) => ele!.filId == fil.id).toList();
     }
   }
+
+  // Créez une fonction pour filtrer les types de cours en fonction des professeurs associés à l'élément sélectionné
+  List<String> filterCoursTypes(List<Professeur> professeurs, Elem element) {
+    List<String> types = [];
+
+    // Vérifiez si le professeur est associé à l'élément comme CM
+    for (var prof in element.ProCMId!) {
+      if (professeurs.any((p) => p.id == prof['_id'])) {
+        types.add('CM');
+        break;
+      }
+    }
+
+    // Vérifiez si le professeur est associé à l'élément comme TP
+    for (var prof in element.ProTPId!) {
+      if (professeurs.any((p) => p.id == prof['_id'])) {
+        types.add('TP');
+        break;
+      }
+    }
+
+    // Vérifiez si le professeur est associé à l'élément comme TD
+    for (var prof in element.ProTDId!) {
+      if (professeurs.any((p) => p.id == prof['_id'])) {
+        types.add('TD');
+        break;
+      }
+    }
+
+    return types;
+  }
+
+// Dans votre classe State, initialisez une liste de types de cours disponibles
+  List<String> coursTypes = [];
 
   @override
   Widget build(BuildContext context) {
@@ -1825,6 +1926,10 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
               children: [
                 // _buildTypesInput(),
                 SizedBox(height: 30),
+                // buildTextFormField(_start,"Heure",selectTime(_start)),
+                // SizedBox(height: 10),
+                // buildTextFormField(_date,"Date",selectDate(_date)),
+
                 TextFormField(
                   controller: _start,
                   decoration: InputDecoration(
@@ -1837,7 +1942,6 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
                   // readOnly: true,
                   onTap: () => selectTime(_start),
                 ),
-
                 SizedBox(height: 10),
                 TextFormField(
                   controller: _date,
@@ -1881,72 +1985,76 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
                 SizedBox(height: 10),
                 Row(
                   children: [
-                    Container(
-                      width: MediaQuery.of(context).size.width / 2.2,
-                      child: DropdownButtonFormField<filliere>(
-                        value: selectedFil,
-                        items: filList.map((fil) {
-                          return DropdownMenuItem<filliere>(
-                            value: fil,
-                            child: Text(fil.name.toUpperCase() ),
-                          );
-                        }).toList(),
-                        onChanged: (value) async{
-                          setState(() {
-                            selectedFil = value;
-                            selectedSem = null; // Reset the selected matière
-                            // selectedGroup = null; // Reset the selected matière
-                            selectedElem = null; // Reset the selected matière
-                            elList2 = filterItemsByFil(selectedFil, elList!);
-                            semestersList = extractUniqueSemesters(elList2);
+                    Expanded(flex: 1,
+                      child: Container(
+                        width: MediaQuery.of(context).size.width / 2.2,
+                        child: DropdownButtonFormField<filliere>(
+                          value: selectedFil,
+                          items: filList.map((fil) {
+                            return DropdownMenuItem<filliere>(
+                              value: fil,
+                              child: Text(fil.name.toUpperCase() ),
+                            );
+                          }).toList(),
+                          onChanged: (value) async{
+                            setState(() {
+                              selectedFil = value;
+                              selectedSem = null; // Reset the selected matière
+                              // selectedGroup = null; // Reset the selected matière
+                              selectedElem = null; // Reset the selected matière
+                              elList2 = filterItemsByFil(selectedFil, elList!);
+                              semestersList = extractUniqueSemesters(elList2);
 
-                            print("Sems1${elList2}");
+                              print("Sems1${elList2}");
 
-                          });
-                        },
-                        decoration: InputDecoration(
-                          filled: true,
-                          // fillColor: Color(0xA3B0AF1),
-                          fillColor: Colors.white,
-                          hintText: "selection d'un flliere",
+                            });
+                          },
+                          decoration: InputDecoration(
+                            filled: true,
+                            // fillColor: Color(0xA3B0AF1),
+                            fillColor: Colors.white,
+                            hintText: "selection d'un flliere",
 
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide.none,gapPadding: 1,
-                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide.none,gapPadding: 1,
+                              borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                            ),
                           ),
                         ),
                       ),
                     ),
                     SizedBox(width: 10),
-                    Container(
-                      width: MediaQuery.of(context).size.width /2.7,
-                      child: DropdownButtonFormField<int>(
-                        value: selectedSem,
-                        hint: Text('Semestre'),
-                        items: semestersList.map((sem) {
-                          return DropdownMenuItem<int>(
-                            value: sem,
-                            child: Text("S$sem"),
-                          );
-                        }).toList(),
-                        onChanged: (value) async {
-                          setState(() {
-                            selectedSem = value;
-                            // filteredItems = filterItemsBySemestre(selectedSem, items!);
-                            // semestersList = extractUniqueSemesters(elList1);
-                            // elList1 = filterItemsByFil(selectedFil, elList!);
-                            elList1 = filterItemsBySemestre(selectedSem, elList2!);
-                            // print("EL1${elList1} et ${elList}");
-                          });
-                        },
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          hintText: "Sélecte Semestre",
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                            gapPadding: 1,
-                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    Expanded(flex: 1,
+                      child: Container(
+                        width: MediaQuery.of(context).size.width /2.7,
+                        child: DropdownButtonFormField<int>(
+                          value: selectedSem,
+                          hint: Text('Semestre'),
+                          items: semestersList.map((sem) {
+                            return DropdownMenuItem<int>(
+                              value: sem,
+                              child: Text("S$sem"),
+                            );
+                          }).toList(),
+                          onChanged: (value) async {
+                            setState(() {
+                              selectedSem = value;
+                              // filteredItems = filterItemsBySemestre(selectedSem, items!);
+                              // semestersList = extractUniqueSemesters(elList1);
+                              // elList1 = filterItemsByFil(selectedFil, elList!);
+                              elList1 = filterItemsBySemestre(selectedSem, elList2!);
+                              // print("EL1${elList1} et ${elList}");
+                            });
+                          },
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            hintText: "Sélecte Semestre",
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide.none,
+                              gapPadding: 1,
+                              borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                            ),
                           ),
                         ),
                       ),
@@ -1955,21 +2063,24 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
                   ],
                 ),
                 SizedBox(height: 10),
-                DropdownButtonFormField<Elem>(
+                DropdownButtonFormField<Eles>(
                   value: selectedElem,
                   items: elList1.map((ele) {
-                    return DropdownMenuItem<Elem>(
+                    return DropdownMenuItem<Eles>(
                         value: ele,
-                        child: Text(ele.nameM ?? '')
+                        child: Text(ele.nameMat ?? '')
                     );
                   }).toList(),
                   onChanged: (value) async{
                     setState(() {
                       selectedElem = value;
-                      // selectedProfesseur = null; // Reset the selected matière
-                      // updateProfesseurList();
-
-                      // print("PL${professeurs}");
+                      // coursTypes = filterCoursTypes(professeurList, value!);
+                      // _selectedType = 'CM';
+                      // Réinitialiser les types de cours en fonction du professeur sélectionné
+                      // List<String> filteredCourseTypes = filterCourseTypes(selectedElem!, selectedProfesseur!);
+                      // Mettre à jour la liste des types de cours disponibles
+                      // availableTypes = filteredCourseTypes;
+                    //
                     });
                   },
                   decoration: InputDecoration(
@@ -1988,75 +2099,95 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
                 SizedBox(height: 10),
                 Row(
                   children: [
-                    Container(
-                      width: 147.5,
-                      child: DropdownButtonFormField<String>(
-                        value: _selectedType,
-                        items: [
-                          DropdownMenuItem<String>(
-                            child: Text('CM'),
-                            value: 'CM',
-                          ),
-                          DropdownMenuItem<String>(
-                            child: Text('TP'),
-                            value: 'TP',
-                          ),
-                          DropdownMenuItem<String>(
-                            child: Text('TD'),
-                            value: 'TD',
-                          ),
-                        ],
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedType = value!;
-                          });
-                        },
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide.none,gapPadding: 1,
-                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+
+                    Expanded(flex: 1,
+                    child: Container(
+                        width: 147.5,
+                        child: DropdownButtonFormField<String>(
+                          value: _selectedType,
+                          items: [
+                            DropdownMenuItem<String>(
+                              child: Text('CM'),
+                              value: 'CM',
+                            ),
+                            DropdownMenuItem<String>(
+                              child: Text('TP'),
+                              value: 'TP',
+                            ),
+                            DropdownMenuItem<String>(
+                              child: Text('TD'),
+                              value: 'TD',
+                            ),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedType = value!;
+                            });
+                          },
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide.none,gapPadding: 1,
+                              borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                            ),
                           ),
                         ),
-                      ),
 
+                      ),
                     ),
                     SizedBox(width: 10),
-                    Container(
-                      width: 147.5,
-                      child: DropdownButtonFormField<num>(
-                        value: _selectedNbh,
-                        items: [
-                          DropdownMenuItem<num>(
-                            child: Text('1.5'),
-                            value: 1.5,
-                          ),
-                          DropdownMenuItem<num>(
-                            child: Text('2'),
-                            value: 2,
-                          ),
-                        ],
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedNbh = value!;
-                          });
-                        },
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          hintText: "taux",
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide.none,gapPadding: 1,
-                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    Expanded(flex: 1,
+                      child: Container(
+                        width: 147.5,
+                        child: DropdownButtonFormField<num>(
+                          value: _selectedNbh,
+                          items: [
+                            DropdownMenuItem<num>(
+                              child: Text('1.5'),
+                              value: 1.5,
+                            ),
+                            DropdownMenuItem<num>(
+                              child: Text('2'),
+                              value: 2,
+                            ),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedNbh = value!;
+                            });
+                          },
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            hintText: "taux",
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide.none,gapPadding: 1,
+                              borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                            ),
                           ),
                         ),
-                      ),
 
+                      ),
                     ),
                   ],
                 ),
 
+                // DropdownButtonFormField<String>(
+                //   value: _selectedType,
+                //   items: coursTypes.map((type) {
+                //     return DropdownMenuItem<String>(
+                //       value: type,
+                //       child: Text(type),
+                //     );
+                //   }).toList(),
+                //   onChanged: (value) {
+                //     setState(() {
+                //       _selectedType = value!;
+                //     });
+                //   },
+                //   // Autres propriétés de décoration, etc.
+                // ),
 
 
                 SizedBox(height:20),
@@ -2090,6 +2221,21 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
         )
     );
 
+  }
+
+  TextFormField buildTextFormField(controller,hintT,onTap) {
+    return TextFormField(
+                controller: controller,
+                decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    hintText: hintT,
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide.none,gapPadding: 1,
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                // readOnly: true,
+                onTap: () => onTap,
+              );
   }
 
   Future<void> addCours(String type, num nbh,DateTime date,String time, String ElemId,String ProfId,) async {
@@ -2188,55 +2334,6 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
 
         });
 
-      }
-
-    // }
-    // catch (error) {
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     SnackBar(content: Text('Erreur: $error')),
-    //   );
-    // }
-  }
-  Future<List<Elem>?> fetchElsByProf(String ProfId,) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString("token")!;
-    print(token);
-
-
-
-
-    final response = await http.get(
-      Uri.parse('http://192.168.43.73:5000/professeur/$ProfId'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
-    // try {
-
-      print(response.statusCode);
-      if (response.statusCode == 200) {
-        Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-        List<dynamic> empData = jsonResponse['elements'];
-
-        print(empData);
-        List<Elem> els = empData.map((item) {
-          return Elem.fromJson(item);
-        }).toList();
-
-        print(els);
-
-        // await sendEmailNotification(profEmail, type, date, time); // Send email
-        // setState(() {
-        //   Navigator.pop(context);
-        // });
-
-        return els;
-
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Échec de l\'ajout de l\'emploi.')),
-        );
       }
 
     // }
@@ -2542,16 +2639,14 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
   bool showProf = false;
   bool showElem = false;
 
-  Elem? selectedElem;
+  Eles? selectedElem;
   String? selectedMat;
   Professeur? selectedProfesseur;
-  List<Professeur> professeurs = [];
-  List<Matiere> matieres = [];
   DateTime? selectedDateTime;
 
-  List<Elem> elList = [];
-  List<Elem> elList2 = [];
-  List<Elem> elList1 = [];
+  List<Eles> elList = [];
+  List<Eles> elList2 = [];
+  List<Eles> elList1 = [];
   bool isChanged =false;
 
 
@@ -2589,22 +2684,22 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
 
   Future<void> updateElemList() async {
     if (selectedProfesseur != null) {
-      List<Elem>? fetchedProfesseurs = await fetchElsByProf(selectedProfesseur!.id);
+      List<Eles>? fetchedProfesseurs = await fetchElsByProf(selectedProfesseur!.id);
       setState(() {
         elList = fetchedProfesseurs!;
         selectedElem = null;
       });
     } else {
-      List<Elem> fetchedProfesseurs = await fetchElems();
+      // List<Elem> fetchedProfesseurs = await fetchElems();
       setState(() {
-        elList = fetchedProfesseurs;
+        elList = [];
         selectedElem = null;
       });
     }
   }
 
 
-  List<Elem> filterItemsBySemestre(int? ele, List<Elem> allItems) {
+  List<Eles> filterItemsBySemestre(int? ele, List<Eles> allItems) {
     if (ele == 0) {
       return allItems;
     } else {
@@ -2613,12 +2708,12 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
     }
   }
 
-  List<int> extractUniqueSemesters(List<Elem> elems) {
+  List<int> extractUniqueSemesters(List<Eles> elems) {
     // List<Elem> Els = filterItemsByFil(fil,elems);
     Set<int> uniqueSemesters = elems.map((elem) => elem.SemNum!).toSet();
     return uniqueSemesters.toList();
   }
-  List<Elem> filterItemsByFil(filliere? fil, List<Elem> allItems) {
+  List<Eles> filterItemsByFil(filliere? fil, List<Eles> allItems) {
     if (fil == null) {
       return allItems;
     } else {
@@ -2626,13 +2721,13 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
     }
   }
 
-  Elem getEls(String id) {
-    // Assuming you have a list of professeurs named 'professeursList'
-    final element = elList.firstWhere((g) => '${g.id}' == id, orElse: () => Elem(id: '', filId: '', MatId: '', ));
-    print( "Els:${element}");
-    return element!; // Return the ID if found, otherwise an empty string
-
-  }
+  // Elem getEls(String id) {
+  //   // Assuming you have a list of professeurs named 'professeursList'
+  //   final element = elList.firstWhere((g) => '${g.id}' == id, orElse: () => Elem(id: '', filId: '',   ));
+  //   print( "Els:${element}");
+  //   return element!; // Return the ID if found, otherwise an empty string
+  //
+  // }
 
   filliere? selectedFil;
   int? selectedSem;
@@ -2648,13 +2743,6 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
         print('Hello');
       });
 
-      fetchMatiere().then((data) {
-        setState(() {
-          matiereList = data; // Assigner la liste renvoyée par emploiesseur à items
-        });
-      }).catchError((error) {
-        print('Erreur: $error');
-      });
     }).catchError((error) {
       print('Erreur: $error');
     });
@@ -2665,13 +2753,13 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
     }).catchError((error) {
       print('Erreur: $error');
     });
-    fetchElems().then((data) {
-      setState(() {
-        elList = data; // Assigner la liste renvoyée par emploiesseur à items
-      });
-    }).catchError((error) {
-      print('Erreur: $error');
-    });
+    // fetchElems().then((data) {
+    //   setState(() {
+    //     elList = data; // Assigner la liste renvoyée par emploiesseur à items
+    //   });
+    // }).catchError((error) {
+    //   print('Erreur: $error');
+    // });
     _date.text = widget.date.toString();
     selectedNbhValue = widget.th;
     selectedTypeName = widget.TN;
@@ -2818,19 +2906,20 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
                   ],
                 ),
                 SizedBox(height: 10),
-                DropdownButtonFormField<Elem>(
+                DropdownButtonFormField<Eles>(
                   value: selectedElem,
                   hint: Text('${widget.EM}'),
                   items: elList1.map((ele) {
-                    return DropdownMenuItem<Elem>(
+                    return DropdownMenuItem<Eles>(
                         value: ele,
-                        child: Text(ele.nameM ?? '')
+                        child: Text(ele.nameMat ?? '')
                     );
                   }).toList(),
                   onChanged: (value) async{
                     setState(() {
                       selectedElem = value;
                       // selectedProfesseur = null; // Reset the selected matière
+                      showElem = true;
                       // updateProfesseurList();
 
                       // print("PL${professeurs}");
@@ -2865,7 +2954,7 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
                           setState(() {
                             selectedTypeName = value ?? 'CM';
                             showType = true;
-                            showElem = true;
+                            // showElem = true;
                           });
                         },
                         decoration: InputDecoration(
@@ -2966,35 +3055,35 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
 
                 SizedBox(height: 10),
 
-                DropdownButtonFormField<String>(
-                  value: signe,
-                  items: [
-                    DropdownMenuItem<String>(
-                      child: Text('True'),
-                      value: "effectué",
-                    ),
-                    DropdownMenuItem<String>(
-                      child: Text('False'),
-                      value: "en attente",
-                    ),
-                  ],
-                  onChanged: (value) {
-                    setState(() {
-                      signe = value!;
-                    });
-                  },
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    hintText: "Est Signe",
-
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,gapPadding: 1,
-                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    ),
-                  ),
-
-                ),
+                // DropdownButtonFormField<String>(
+                //   value: signe,
+                //   items: [
+                //     DropdownMenuItem<String>(
+                //       child: Text('True'),
+                //       value: "effectué",
+                //     ),
+                //     DropdownMenuItem<String>(
+                //       child: Text('False'),
+                //       value: "en attente",
+                //     ),
+                //   ],
+                //   onChanged: (value) {
+                //     setState(() {
+                //       signe = value!;
+                //     });
+                //   },
+                //   decoration: InputDecoration(
+                //     filled: true,
+                //     fillColor: Colors.white,
+                //     hintText: "Est Signe",
+                //
+                //     border: OutlineInputBorder(
+                //       borderSide: BorderSide.none,gapPadding: 1,
+                //       borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                //     ),
+                //   ),
+                //
+                // ),
 
                 SizedBox(height:20),
                 ElevatedButton(
@@ -3009,7 +3098,7 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
                     // _date.text = DateFormat('dd/MM/yyyy').format(DateTime.parse(widget.date.toString()));
                     String time = showTime ? _time.text:widget.start;
 
-                    print("MatId${showElem? selectedElem!.MatId: widget.MId}");
+                    print("MatId${showElem? selectedElem!.id: widget.MId}");
                     // String Prof = showElem?(selectedTypeName == "CM" ? selectedElem!.ProCMId:( selectedTypeName == "TP" ? selectedElem!.ProTPId: selectedElem!.ProTDId))
                     // :widget.PId;
                     // print("ProfId${Prof}");
@@ -3027,34 +3116,6 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
                       signe
                     );
 
-                    setState(() {
-                      Navigator.of(context).pop();
-                      showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              surfaceTintColor: Color(0xB0AFAFA3),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
-                              title: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  Text("Alerte de succès"),
-                                  Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
-                                ],
-                              ),
-                              content: Text(
-                                  "Le cours a été modifier avec succès"),
-                              actions: [
-                                TextButton(
-                                  child: Text("Ok"),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                ),
-
-                              ],
-                            );});
-                    });
 
 
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -3106,34 +3167,86 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
     if (date != null) {
       body['date'] = date.toIso8601String();
     }
+try {
+  final response = await http.patch(
+    Uri.parse(url),
+    headers: headers,
+    body: json.encode(body),
+  );
 
-    try {
-      final response = await http.patch(
-        Uri.parse(url),
-        headers: headers,
-        body: json.encode(body),
-      );
+  print('Status:${response.statusCode}');
+  if (response.statusCode == 201) {
+    // Course creation was successful
+    print("Emploi Updated successfully!");
+    final responseData = json.decode(response.body);
+    // print("Course ID: ${responseData['cours']['_id']}");
+    // You can handle the response data as needed
+    setState(() {
+      Navigator.of(context).pop();
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              surfaceTintColor: Color(0xB0AFAFA3),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),),
+              elevation: 1,
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Text("Alerte de succès"),
+                  Icon(Icons.fact_check_outlined, color: Colors.lightGreen,)
+                ],
+              ),
+              content: Text(
+                  "Le cours a été modifier avec succès"),
+              actions: [
+                TextButton(
+                  child: Text("Ok"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
 
-      print('Status:${response.statusCode}');
-      if (response.statusCode == 201) {
-        // Course creation was successful
-        print("Emploi Updated successfully!");
-        final responseData = json.decode(response.body);
-        // print("Course ID: ${responseData['cours']['_id']}");
-        // You can handle the response data as needed
-        setState(() {
-          Navigator.pop(context);
-        });
+              ],
+            );
+          });
+    });
+  }
+  else {
+    setState(() {
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              surfaceTintColor: Color(0xB0AFAFA3),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),),
+              elevation: 1,
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Text("Alerte d\'erreur"),
+                  Icon(Icons.wrong_location_outlined, color: Colors.redAccent,)
+                ],
+              ),
+              content: Text(jsonDecode(response.body)["message"]),
+              actions: [
+                TextButton(
+                  child: Text("Réessayez?"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
 
-
-      } else {
-        // Course creation failed
-        print("Failed to update. Status code: ${response.statusCode}");
-        print("Error Message: ${response.body}");
-      }
-    } catch (error) {
-      print("Error: $error");
-    }
+              ],
+            );
+          });
+    });
+  }
+}catch (error) {
+  print("Error: $error");
+}
   }
 
 }
@@ -3159,17 +3272,17 @@ Widget child ;
   }
 }
 
-Future<List<Matiere>> fetchMatieresByCategory(String categoryId) async {
+Future<List<Elem>> fetchMatieresByCategory(String categoryId) async {
   String apiUrl = 'http://192.168.43.73:5000/categorie/$categoryId/matieres';
 
   try {
     final response = await http.get(Uri.parse(apiUrl));
     if (response.statusCode == 200) {
       final Map<String, dynamic> responseData = json.decode(response.body);
-      final List<dynamic> matieresData = responseData['matieres'];
+      final List<dynamic> matieresData = responseData['elements'];
       print(categoryId);
       print(matieresData);
-      List<Matiere> matieres = matieresData.map((data) => Matiere.fromJson(data)).toList();
+      List<Elem> matieres = matieresData.map((data) => Elem.fromJson(data)).toList();
       print(matieres);
       return matieres;
     } else {
