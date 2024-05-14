@@ -83,7 +83,7 @@ class _PaieState extends State<Paie> {
     }
 
   }
-  void Refuse(id) async {
+  void Refuse(id,message) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token")!;
 
@@ -95,10 +95,11 @@ class _PaieState extends State<Paie> {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json', // Ajoutez le type de contenu
       },
-      body: jsonEncode({"refuse": ""}), // Encodez votre corps en JSON
+      body: jsonEncode(<String, String>{"refuse": "","message": message}), // Encodez votre corps en JSON
     );
 
 
+    print('Dadi: ${reponse.statusCode}');
 
     if (reponse.statusCode == 200) {
       // Map<String, dynamic> jsonResponse = jsonDecode(responseInitialise.body);
@@ -113,6 +114,7 @@ class _PaieState extends State<Paie> {
 
   }
 
+  TextEditingController _message = TextEditingController();
 
 
   @override
@@ -234,8 +236,13 @@ class _PaieState extends State<Paie> {
                                                           child: Text(
                                                               "Êtes-vous sûr de vouloir refuser ce paiement ?"),
                                                         ),
-                                                        TextFormField(maxLines: 5,decoration: InputDecoration(border: OutlineInputBorder(borderSide: BorderSide(color: Colors.red.shade100))),
-                                                          initialValue: 'Message de Refusion',)
+                                                        TextFormField(
+                                                          controller: _message,
+                                                          maxLines: 5,
+                                                          decoration: InputDecoration(border: OutlineInputBorder(borderSide: BorderSide(color: Colors.red.shade100))),
+                                                          // initialValue: 'Message de Refusion',
+                                                        )
+
                                                       ],
                                                     ),
                                                   ),
@@ -256,7 +263,8 @@ class _PaieState extends State<Paie> {
                                                         Navigator.of(context).pop();
 
                                                         // fetchCategory();
-                                                        Refuse(widget.paies![index]["_id"]);
+                                                        print('Hello${widget.paies![index]["_id"]},${_message.text}');
+                                                        Refuse(widget.paies![index]["_id"],_message.text);
                                                         setState(() {
                                                           Navigator.of(context).pop();
                                                           showDialog(

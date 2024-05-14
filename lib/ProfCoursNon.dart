@@ -148,6 +148,7 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
   String searchQuery = '';
   bool sortByDateAscending = true;
   bool isSignedd = false;
+  bool showSearch = false;
 
   bool courseFitsCriteria(Map<String, dynamic> course) {
     // Apply your filtering criteria here
@@ -190,12 +191,26 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
                     Navigator.pop(context);
                   }, child: Icon(Icons.arrow_back_ios,color: Colors.black,size: 20,)),
                 // SizedBox(width: 50,),
-                Text("Cours à Signé",style: TextStyle(fontSize: 20),)
+                Text("Cours à Signé",style: TextStyle(fontSize: 20),),
+                SizedBox(width: 120,),
+                Container(
+                  width: 50,
+                  height: 50,
+                  // color: Colors.black26,
+                  child: IconButton(icon:Icon(Icons.search, size: 30,color: Colors.black),
+                    onPressed: () {
+                      setState(() {
+                        showSearch = !showSearch;
+                      });
+                    },
+                  ),
+                ),
               ],
             ),
           ),
           Divider(),
 
+          showSearch?
           Container(
             margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
@@ -223,7 +238,8 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
                 contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               ),
             ),
-          ),
+          ):
+          SizedBox(height: 10,),
 
 
 
@@ -234,111 +250,117 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
 
               children: [
-                TextButton(
-                  onPressed: () async {
-                    DateTime? selectedDateDeb = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime.now(),
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime(2030),
-                        builder: (context, child){
-                        return CalenderStyle(child: child!,);
-                        }
-                        );
+                Expanded(flex: 3,
+                  child: TextButton(
+                    onPressed: () async {
+                      DateTime? selectedDateDeb = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2030),
+                          builder: (context, child){
+                          return CalenderStyle(child: child!,);
+                          }
+                          );
 
-                    if (selectedDateDeb != null) {
-                      setState(() {
-                        widget.dateDeb = selectedDateDeb.toUtc();
-                        // totalType = 0; // Reset the totalId
-                      });
-                    }
-                  },
-                  // child: Text(widget.dateDeb != null ? DateFormat('yyyy/MM/dd').format(widget.dateDeb!) : 'Date Deb'),
-                  child:widget.dateDeb == null ?
-                  Row(
-                    children: [
-                      Text( 'Date Deb' ),
-                      SizedBox(width: 20,),
-                      Icon(Icons.date_range)
-                    ],
-                  )
-                      : Text(DateFormat('yyyy/MM/dd').format(widget.dateDeb!)),
-                  style: TextButton.styleFrom(
-                    // backgroundColor: Colors.blue,
-                    // surfaceTintColor: Color(0xB0AFAFA3),
+                      if (selectedDateDeb != null) {
+                        setState(() {
+                          widget.dateDeb = selectedDateDeb.toUtc();
+                          // totalType = 0; // Reset the totalId
+                        });
+                      }
+                    },
+                    // child: Text(widget.dateDeb != null ? DateFormat('yyyy/MM/dd').format(widget.dateDeb!) : 'Date Deb'),
+                    child:widget.dateDeb == null ?
+                    Row(
+                      children: [
+                        Text( 'Date Deb' ),
+                        SizedBox(width: 20,),
+                        Icon(Icons.date_range)
+                      ],
+                    )
+                        : Text(DateFormat('yyyy/MM/dd').format(widget.dateDeb!)),
+                    style: TextButton.styleFrom(
+                      // backgroundColor: Colors.blue,
+                      // surfaceTintColor: Color(0xB0AFAFA3),
 
-                    // side: BorderSide(color: Colors.black26),
-                    foregroundColor: Colors.black, textStyle: TextStyle(fontWeight: FontWeight.bold),
-                    padding:EdgeInsets.only(left: 20,right: 20),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  ),
+                      // side: BorderSide(color: Colors.black26),
+                      foregroundColor: Colors.black, textStyle: TextStyle(fontWeight: FontWeight.bold),
+                      padding:EdgeInsets.only(left: 20,right: 20),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
 
-                ),
-
-                TextButton(
-                  onPressed: () async {
-                    DateTime? selectedDateFin = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime.now(),
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime(2030),
-                        builder: (context, child){
-                                                              return CalenderStyle(child: child!,);
-                        }
-                        );
-
-                    if (selectedDateFin != null) {
-                      setState(() {
-                        widget.dateFin = selectedDateFin.toUtc();
-                        // totalType = 0; // Reset the totalId
-                      });
-                    }
-                  },
-                  child:widget.dateFin == null ?
-                  Row(
-                    children: [
-                      Text( 'Date Fin' ),
-                      SizedBox(width: 20,),
-                      Icon(Icons.date_range)
-                    ],
-                  )
-                      : Text(DateFormat('yyyy/MM/dd').format(widget.dateFin!)),
-                  style: TextButton.styleFrom(
-                    // backgroundColor: Colors.blue,
-                    // surfaceTintColor: Color(0xB0AFAFA3),
-
-                    // side: BorderSide(color: Colors.black26),
-                    foregroundColor: Colors.black, textStyle: TextStyle(fontWeight: FontWeight.bold),
-                    padding:EdgeInsets.only(left: 20,right: 20),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
                 ),
 
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      totalType =0;
-                      sortByDateAscending = !sortByDateAscending;
-                      // Reverse the sorting order when the button is tapped
-                      widget.courses.sort((a, b) {
-                        DateTime dateA = DateTime.parse(a['date'].toString());
-                        DateTime dateB = DateTime.parse(b['date'].toString());
+                Expanded(flex: 3,
+                  child: TextButton(
+                    onPressed: () async {
+                      DateTime? selectedDateFin = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2030),
+                          builder: (context, child){
+                                                                return CalenderStyle(child: child!,);
+                          }
+                          );
 
-                        // Sort in ascending order if sortByDateAscending is true,
-                        // otherwise sort in descending order
-                        return sortByDateAscending ? dateA.compareTo(dateB) : dateB.compareTo(dateA);
+                      if (selectedDateFin != null) {
+                        setState(() {
+                          widget.dateFin = selectedDateFin.toUtc();
+                          // totalType = 0; // Reset the totalId
+                        });
+                      }
+                    },
+                    child:widget.dateFin == null ?
+                    Row(
+                      children: [
+                        Text( 'Date Fin' ),
+                        SizedBox(width: 20,),
+                        Icon(Icons.date_range)
+                      ],
+                    )
+                        : Text(DateFormat('yyyy/MM/dd').format(widget.dateFin!)),
+                    style: TextButton.styleFrom(
+                      // backgroundColor: Colors.blue,
+                      // surfaceTintColor: Color(0xB0AFAFA3),
+
+                      // side: BorderSide(color: Colors.black26),
+                      foregroundColor: Colors.black, textStyle: TextStyle(fontWeight: FontWeight.bold),
+                      padding:EdgeInsets.only(left: 20,right: 20),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                  ),
+                ),
+
+                Expanded(flex: 1,
+                  child: TextButton(
+                    onPressed: () {
+                      setState(() {
+                        totalType =0;
+                        sortByDateAscending = !sortByDateAscending;
+                        // Reverse the sorting order when the button is tapped
+                        widget.courses.sort((a, b) {
+                          DateTime dateA = DateTime.parse(a['date'].toString());
+                          DateTime dateB = DateTime.parse(b['date'].toString());
+
+                          // Sort in ascending order if sortByDateAscending is true,
+                          // otherwise sort in descending order
+                          return sortByDateAscending ? dateA.compareTo(dateB) : dateB.compareTo(dateA);
+                        });
                       });
-                    });
-                  },
-                  child: Icon(sortByDateAscending ? Icons.arrow_upward : Icons.arrow_downward,),
-                  style: TextButton.styleFrom(
-                    // backgroundColor: Colors.blue,
-                    // surfaceTintColor: Color(0xB0AFAFA3),
+                    },
+                    child: Icon(sortByDateAscending ? Icons.arrow_upward : Icons.arrow_downward,),
+                    style: TextButton.styleFrom(
+                      // backgroundColor: Colors.blue,
+                      // surfaceTintColor: Color(0xB0AFAFA3),
 
-                    // side: BorderSide(color: Colors.black26),
-                    foregroundColor: Colors.black, textStyle: TextStyle(fontWeight: FontWeight.bold),
-                    padding: EdgeInsets.only(left: 5,right: 5),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      // side: BorderSide(color: Colors.black26),
+                      foregroundColor: Colors.black, textStyle: TextStyle(fontWeight: FontWeight.bold),
+                      padding: EdgeInsets.only(left: 5,right: 5),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
                   ),
                 ),
 
@@ -548,81 +570,90 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Container(
-                // margin: EdgeInsets.only(right: 220),
-                child: ElevatedButton(
+              Expanded(flex: 1,
+                child: TextButton(
                   onPressed: () {
                     setState(() {
                       // Sélectionnez tous les cours
                       selectedCourses = widget.courses.map((course) => course['_id']).toList();
                     });
                   },
-                  child: Text('Sélectionner tous'),
-                  style: ElevatedButton.styleFrom(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Text('Sélectionner tous', style: TextStyle(fontSize: 13),),
+                      Icon(Icons.check_box_outline_blank_outlined),
+                    ],
+                  ),
+                  style: TextButton.styleFrom(
                     surfaceTintColor: Colors.white,
                     foregroundColor: Colors.black,
                     // side: BorderSide(color: Colors.black38),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     elevation: 5,
-                    // padding: EdgeInsets.only(left: 20,right: 20),
+                    padding: EdgeInsets.symmetric(horizontal: 15),
                     backgroundColor: Colors.white,
                     //   foregroundColor: Colors.black,
                     textStyle: TextStyle(fontWeight: FontWeight.bold),
                     // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                   ),
 
-
                 ),
               ),
-              Container(
-                // margin: EdgeInsets.only(right: 200,top: 1),
-                child: ElevatedButton(
+              Expanded(flex: 1,
+                child: TextButton(
                   onPressed: () {
                     if (selectedCourses.length == 0){
                       buildShowNullDialog(context);
                     }
                     else{
                       singeCoursMultiple(selectedCourses);
-                    // Remettre la liste de sélection à zéro
-                    setState(() {
-                      selectedCourses = [];
-                      Navigator.of(context).pop();
-                      showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              surfaceTintColor: Color(0xB0AFAFA3),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
-                              title: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  Text("Alerte de succès"),
-                                  Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
-                                ],
-                              ),
-                              content: Text(
-                                  "l\'operation est effectuée avec succès"),
-                              actions: [
-                                TextButton(
-                                  child: Text("Ok"),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
+                      // Remettre la liste de sélection à zéro
+                      setState(() {
+                        selectedCourses = [];
+                        Navigator.of(context).pop();
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                surfaceTintColor: Color(0xB0AFAFA3),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                                title: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Text("Alerte de succès"),
+                                    Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
+                                  ],
                                 ),
+                                content: Text(
+                                    "l\'operation est effectuée avec succès"),
+                                actions: [
+                                  TextButton(
+                                    child: Text("Ok"),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
 
-                              ],
-                            );});
-                    });}
+                                ],
+                              );});
+                      });}
 
                   },
-                  child: Text('Confirmer la sélection'),
-                  style: ElevatedButton.styleFrom(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Text('Ajouter', style: TextStyle(fontSize: 13),),
+                      Icon(Icons.add_road_sharp),
+                    ],
+                  ),
+                  style: TextButton.styleFrom(
                     surfaceTintColor: Colors.white,
                     foregroundColor: Colors.black,
                     // side: BorderSide(color: Colors.black38),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     elevation: 5,
-                    // padding: EdgeInsets.only(left: 20,right: 20),
+                    padding: EdgeInsets.symmetric(horizontal: 15),
                     backgroundColor: Colors.white,
                     //   foregroundColor: Colors.black,
                     textStyle: TextStyle(fontWeight: FontWeight.bold),

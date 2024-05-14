@@ -33,7 +33,6 @@ class _ElementsState extends State<Elements> {
 
 
 
-  List<Matiere> matiereList = [];
   Matiere? selectedMat; // initialiser le type sélectionné à null
   Category? selectedCateg; // initialiser le type sélectionné à null
 
@@ -135,14 +134,6 @@ class _ElementsState extends State<Elements> {
       setState(() {
         filList = data; // Assigner la liste renvoyée par Groupesseur à items
       print("fils:${filList}");
-        fetchMatiere().then((data) {
-          setState(() {
-            matiereList = data; // Assigner la liste renvoyée par Groupesseur à items
-            print("Mats${matiereList}");
-          });
-        }).catchError((error) {
-          print('Erreur: $error');
-        });
       });
 
 
@@ -176,6 +167,8 @@ class _ElementsState extends State<Elements> {
   }
   TextEditingController _searchController = TextEditingController();
 
+  bool showSearch  = false;
+
   int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
   // int _rowsPerPage = 5;
 
@@ -198,11 +191,26 @@ class _ElementsState extends State<Elements> {
                     Navigator.pop(context);
                   }, child: Icon(Icons.arrow_back_ios,color: Colors.black,size: 20,)),
                   // SizedBox(width: 50,),
-                  Text("Liste des Elements",style: TextStyle(fontSize: 20),)
+                  Text("Liste des Elements",style: TextStyle(fontSize: 20),),
+                  SizedBox(width: 80,),
+                  Container(
+                    width: 50,
+                    height: 50,
+                    // color: Colors.black26,
+                    child: IconButton(icon:Icon(Icons.search, size: 30,color: Colors.black),
+                      onPressed: () {
+                        setState(() {
+                          showSearch = !showSearch;
+                        });
+                      },
+                    ),
+                  ),
                 ],
               ),
             ),
             Divider(),
+
+            showSearch?
             Container(
               margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               decoration: BoxDecoration(
@@ -229,11 +237,11 @@ class _ElementsState extends State<Elements> {
                     // Implémentez la logique de filtrage ici
                     // Par exemple, filtrez les emploiesseurs dont le name ou le préname contient la valeur saisie
                     filteredItems = Els.where((ele) =>
-                        (ele.nameMat)!.toLowerCase().contains(value.toLowerCase()) ||
-                      (ele.filName!).toLowerCase().contains(value.toLowerCase()) ||
-                      // (ele.ProfTP!).toLowerCase().contains(value.toLowerCase()) ||
-                      // (ele.ProfTD!).toLowerCase().contains(value.toLowerCase())
-                      ("S${ele.SemNum!}").toLowerCase().contains(value.toLowerCase())
+                    (ele.nameMat)!.toLowerCase().contains(value.toLowerCase()) ||
+                        (ele.filName!).toLowerCase().contains(value.toLowerCase()) ||
+                        // (ele.ProfTP!).toLowerCase().contains(value.toLowerCase()) ||
+                        // (ele.ProfTD!).toLowerCase().contains(value.toLowerCase())
+                        ("S${ele.SemNum!}").toLowerCase().contains(value.toLowerCase())
                     ).toList();
                   });
 
@@ -247,7 +255,7 @@ class _ElementsState extends State<Elements> {
 
               )
               ,
-            ),
+            ): SizedBox(height: 10,),
 
 
             Expanded(
@@ -333,7 +341,7 @@ class _ElementsState extends State<Elements> {
         ),
         floatingActionButton: FloatingActionButton.extended(
           // heroTag: 'uniqueTag',
-          tooltip: 'Ajouter une categorie',
+          tooltip: 'Ajouter une element',
           backgroundColor: Colors.white,
           label: Row(
             children: [Icon(Icons.add,color: Colors.black,)],
@@ -501,148 +509,17 @@ class _ElementsState extends State<Elements> {
                     ),
                   ),
                   SizedBox(height: 15),
-                  Container(width: MediaQuery.of(context).size.width,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Professeur(e/s) de CM:',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w400,
-                            fontStyle: FontStyle.italic,
-                            // color: Colors.lightBlue
-                          ),),
-
-                        for (var prof in ele.ProCMId!)
-
-                          Text(
-                            '-${getProfIdFromName(prof['_id']).capitalize }',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
+                  ElemProfs(context,'Professeur(e/s) de CM:' ,ele.ProCMId!),
                   SizedBox(height: 15),
-                  Container(width: MediaQuery.of(context).size.width,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Professeur(e/s) de TP:',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w400,
-                            fontStyle: FontStyle.italic,
-                            // color: Colors.lightBlue
-                          ),),
-                        for (var prof in ele.ProTPId!)
-                          Text(
-                            '-${getProfIdFromName(prof['_id']).capitalize }',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
+                  ElemProfs(context,'Professeur(e/s) de TP:' ,ele.ProTPId!),
                   SizedBox(height: 15),
-                  Container(width: MediaQuery.of(context).size.width,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Professeur(e/s) de TD:',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w400,
-                            fontStyle: FontStyle.italic,
-                            // color: Colors.lightBlue
-                          ),),
-                        for (var prof in ele.ProTDId!)
-                          Text(
-                            '-${getProfIdFromName(prof['_id']).capitalize }',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w400,
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
+                  ElemProfs(context,'Professeur(e/s) de TD:' ,ele.ProTDId!),
                   SizedBox(height: 15,),
-                  Row(
-                    children: [
-                      Text('NBH du CM:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                      SizedBox(width: 10,),
-                      Text(
-                        '${ele.HCM }',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-
-                    ],
-                  ),
+                  NbH('NBH du CM:',ele.HCM),
                   SizedBox(height: 15,),
-                  Row(
-                    children: [
-                      Text('NBH du TP:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                      SizedBox(width: 10,),
-                      Text(
-                        '${ele.HTP }',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-
-                    ],
-                  ),
+                  NbH('NBH du TP:',ele.HTP),
                   SizedBox(height: 15,),
-                  Row(
-                    children: [
-                      Text('NBH du TD:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-
-                      SizedBox(width: 10,),
-                      Text(
-                        '${ele.HTD }',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-
-                    ],
-                  ),
+                  NbH('NBH du TD:',ele.HTD),
                   SizedBox(height: 20,),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -651,8 +528,10 @@ class _ElementsState extends State<Elements> {
                         onPressed: () {
                           // _selectedNum = emp.dayNumero;
                           // _date.text = ele.fil!;
+                          Navigator.pop(context);
                           print(ele.id);
                           setState(() {
+
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(builder: (context) =>
@@ -662,10 +541,8 @@ class _ElementsState extends State<Elements> {
                                       filId: ele.filId, fil: ele.filName!,
                                       ProfCMId: ele.ProCMId, ProfTPId: ele.ProTPId,ProfTDId: ele.ProTDId,
                                     )));
+
                           });
-                          // selectedMat = emp.mat!;
-
-
                         },// Disable button functionality
 
                         child: Text('Modifier'),
@@ -746,7 +623,7 @@ class _ElementsState extends State<Elements> {
                                               ),
                                             ),
                                           ),
-                                          SizedBox(height: 10),
+                                          SizedBox(height: 20),
                                           DropdownButtonFormField<Professeur>(
                                             value: selectedProfesseurTP,
                                             items: professeurs.map((professeur) {
@@ -771,7 +648,7 @@ class _ElementsState extends State<Elements> {
                                               ),
                                             ),
                                           ),
-                                          SizedBox(height: 10),
+                                          SizedBox(height: 20),
                                           DropdownButtonFormField<Professeur>(
                                             value: selectedProfesseurTD,
                                             items: professeurs.map((professeur) {
@@ -817,7 +694,7 @@ class _ElementsState extends State<Elements> {
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor: Color(0xff0fb2ea),
                                               foregroundColor: Colors.white,
-                                              elevation: 10,
+                                              // elevation: 2,
                                               minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
                                               // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
                                               //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
@@ -921,6 +798,57 @@ class _ElementsState extends State<Elements> {
 
 
     );
+  }
+
+  Row NbH(lab,val) {
+    return Row(
+                  children: [
+                    Text(lab,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                        // color: Colors.lightBlue
+                      ),),
+
+                    SizedBox(width: 10,),
+                    Text(
+                      '${val }',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+
+                  ],
+                );
+  }
+
+  Container ElemProfs(BuildContext context,label,  ele) {
+    return Container(width: MediaQuery.of(context).size.width,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(label,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                          // color: Colors.lightBlue
+                        ),),
+                      for (var prof in ele)
+                        Text(
+                          '-${getProfIdFromName(prof['_id']).capitalize }',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w400,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                    ],
+                  ),
+                );
   }
   void showFetchedDataModal(BuildContext context, Map<String, dynamic> data,String filId ) {
     showModalBottomSheet(
@@ -1269,9 +1197,9 @@ class Elem {
   List<String>? ProCM;
   List<String>? ProTP;
   List<String>? ProTD;
-  int? HCM;
-  int? HTP;
-  int? HTD;
+  num? HCM;
+  num? HTP;
+  num? HTD;
   String? code;
   String? nameMat;
   // String? ProfCM;
@@ -1933,9 +1861,9 @@ class UpdateElemScreen extends StatefulWidget {
   List<dynamic>? ProfCMId; // Le type exact des éléments peut être spécifié ici
   List<dynamic>? ProfTPId;
   List<dynamic>? ProfTDId;
-  final int CredCM;
-  final int CredTP;
-  final int CredTD;
+  final num CredCM;
+  final num CredTP;
+  final num CredTD;
   UpdateElemScreen({Key? key, required this.eleId, required this.CredTD, required this.Sem, required this.Mat,required this.fil,
     // required this.ProCM, required this.ProTP, required this.ProTD,
     required this.CredCM, required this.CredTP, required this.filId,
@@ -1951,17 +1879,17 @@ class _UpdateElemScreenState extends State<UpdateElemScreen> {
 
 
   String selectedTypeName = 'CM'; // Nom de type sélectionné par défaut
-  int HCM = 0;
-  int HTP = 0;
-  int HTD = 0;
-  List<int> nbhValues = [0,10, 20];
+  num HCM = 0;
+  num HTP = 0;
+  num HTD = 0;
+  List<num> nbhValues = [0,12, 22,32];
 
-  Matiere? selectedMat;
+  Elem? selectedMat;
   Professeur? selectedProfesseurCM;
   Professeur? selectedProfesseurTP;
   Professeur? selectedProfesseurTD;
   List<Professeur> professeurs = [];
-  List<Matiere> matieres = [];
+  List<Elem> matieres = [];
   DateTime? selectedDateTime;
 
   bool isChanged =false;
@@ -2010,7 +1938,7 @@ class _UpdateElemScreenState extends State<UpdateElemScreen> {
   }
 
   Future<void> UpdateElem (String id,String filId,List<dynamic> PCM,
-      List<dynamic> PTP,List<dynamic> PTD,int sem,int? HCM,int? HTP,int? HTD) async {
+      List<dynamic> PTP,List<dynamic> PTD,int sem,num? HCM,num? HTP,num? HTD) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token")!;
 
@@ -2128,7 +2056,7 @@ class _UpdateElemScreenState extends State<UpdateElemScreen> {
   Widget build(BuildContext context) {
     return AlertDialog(
                 surfaceTintColor: Color(0xB0AFAFA3),
-        insetPadding: EdgeInsets.only(top: 80,),
+        insetPadding: EdgeInsets.only(top: 180,),
 // backgroundColor: Color(0xB0AFAFA3),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
@@ -2243,7 +2171,7 @@ class _UpdateElemScreenState extends State<UpdateElemScreen> {
                 ],
               ),
               SizedBox(height: 20),
-              DropdownButtonFormField<Matiere>(
+              DropdownButtonFormField<Elem>(
                 decoration: InputDecoration(
                   filled: true,
                   // fillColor: Color(0xA3B0AF1),
@@ -2256,8 +2184,8 @@ class _UpdateElemScreenState extends State<UpdateElemScreen> {
                 ),
                 value: selectedMat,
                 items: matieres.map((mat) {
-                  return DropdownMenuItem<Matiere>(
-                    child: Text(mat.name),
+                  return DropdownMenuItem<Elem>(
+                    child: Text(mat.nameMat!),
                     value: mat,
                   );
                 }).toList(),
@@ -2273,9 +2201,8 @@ class _UpdateElemScreenState extends State<UpdateElemScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    width: 90,
-                    child: DropdownButtonFormField<int>(
+                  Expanded(flex: 1,
+                    child: DropdownButtonFormField<num>(
                       decoration: InputDecoration(
                         filled: true,
                         // fillColor: Color(0xA3B0AF1),
@@ -2289,7 +2216,7 @@ class _UpdateElemScreenState extends State<UpdateElemScreen> {
                       value: HCM,
                       hint: Text(widget.CredCM.toString()),
                       items: nbhValues.map((nbhValue) {
-                        return DropdownMenuItem<int>(
+                        return DropdownMenuItem<num>(
                           child: Text(nbhValue.toString()),
                           value: nbhValue,
                         );
@@ -2302,9 +2229,8 @@ class _UpdateElemScreenState extends State<UpdateElemScreen> {
                     ),
                   ),
                   SizedBox(width: 10),
-                  Container(
-                    width: 90,
-                    child: DropdownButtonFormField<int>(
+                  Expanded(flex: 1,
+                    child: DropdownButtonFormField<num>(
                       decoration: InputDecoration(
                         filled: true,
                         // fillColor: Color(0xA3B0AF1),
@@ -2318,7 +2244,7 @@ class _UpdateElemScreenState extends State<UpdateElemScreen> {
                       value: HTP,
                       hint: Text(widget.CredTP.toString()),
                       items: nbhValues.map((nbhValue) {
-                        return DropdownMenuItem<int>(
+                        return DropdownMenuItem<num>(
                           child: Text(nbhValue.toString()),
                           value: nbhValue,
                         );
@@ -2331,9 +2257,8 @@ class _UpdateElemScreenState extends State<UpdateElemScreen> {
                     ),
                   ),
                   SizedBox(width: 10),
-                  Container(
-                    width: 90,
-                    child: DropdownButtonFormField<int>(
+                  Expanded(flex: 1,
+                    child: DropdownButtonFormField<num>(
                       decoration: InputDecoration(
                         filled: true,
                         hintText: 'HTD',
@@ -2347,7 +2272,7 @@ class _UpdateElemScreenState extends State<UpdateElemScreen> {
                       value: HTD,
                       hint: Text(widget.CredTD.toString()),
                       items: nbhValues.map((nbhValue) {
-                        return DropdownMenuItem<int>(
+                        return DropdownMenuItem<num>(
                           child: Text(nbhValue.toString()),
                           value: nbhValue,
                         );
@@ -2366,19 +2291,11 @@ class _UpdateElemScreenState extends State<UpdateElemScreen> {
               ElevatedButton(
                 onPressed: (){
                   Navigator.pop(context);
-                  String PrCM = selectedProfesseurCM != null ? selectedProfesseurCM!.id: '';
-                  int CCM = showPCM? (selectedProfesseurCM != null ? HCM :0): HCM;
+                  num CCM = showPCM? (selectedProfesseurCM != null ? HCM :0): HCM;
 
-                  String PrTP = selectedProfesseurTP != null ? selectedProfesseurTP!.id: '';
+                  num CTP = showPTP? (selectedProfesseurTP != null ? HTP :0): HTP;
+                  num CTD = showPTP? (selectedProfesseurTD != null ? HTD :0): HTD;
 
-                  // int CTP = selectedProfesseurTP != null ? HTP: 0;
-                  int CTP = showPTP? (selectedProfesseurTP != null ? HTP :0): HTP;
-                  String PrTD = selectedProfesseurTD != null ? selectedProfesseurTD!.id: '';
-                  // int CTD = selectedProfesseurTD != null ? HTD: 0;
-                  int CTD = showPTP? (selectedProfesseurTD != null ? HTD :0): HTD;
-                  // print("CategId:${selectedCategory!.id!}");
-
-                  // String mat = showmat ? selectedMat!.id! : widget.MatId;
                   int sem = showSem ? semNum! : widget.Sem!;
                   String fil = showFil ? selectedFil!.id! : widget.filId!;
 
@@ -2387,7 +2304,8 @@ class _UpdateElemScreenState extends State<UpdateElemScreen> {
                     SnackBar(content: Text('L\'element a été ajouter avec succès.')),
                   );
                   setState(() {
-                    fetchElems();
+                    Navigator.pop(context);
+                    // fetchElems();
                   });
                 },
                 child: Text("Ajouter"),
@@ -2395,7 +2313,7 @@ class _UpdateElemScreenState extends State<UpdateElemScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xff0fb2ea),
                   foregroundColor: Colors.white,
-                  elevation: 10,
+                  elevation: 2,
                   minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
                   // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
                   //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
@@ -2408,6 +2326,8 @@ class _UpdateElemScreenState extends State<UpdateElemScreen> {
     );
 
   }
+
+
 
 
 }

@@ -4,6 +4,7 @@ import 'package:gestion_payements/auth/users.dart';
 import 'package:gestion_payements/element.dart';
 import 'package:gestion_payements/filliere.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -84,7 +85,7 @@ class _EmploiState extends State<Emploi> {
       return allItems;
     } else {
       print("ElID:${ele}");
-      return allItems.where((emp) => getMatIdFromName(emp.element).SemNum! == ele && emp.fil == filiere!.id).toList();
+      return allItems.where((emp) => emp.SemNum! == ele && emp.fil == filiere!.name).toList();
     }
   }
 
@@ -118,6 +119,7 @@ class _EmploiState extends State<Emploi> {
 int? selectedSem ;
 
   bool showFloat  = false;
+  bool showSearch  = false;
   void DeleteEmploi(id) async{
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token")!;
@@ -451,11 +453,25 @@ int? selectedSem ;
                     Navigator.pop(context);
                   }, child: Icon(Icons.arrow_back_ios,color: Colors.black,size: 20,)),
                   // SizedBox(width: 50,),
-                  Text("Liste des emplois",style: TextStyle(fontSize: 20),)
+                  Text("Liste des emplois",style: TextStyle(fontSize: 20),),
+                  SizedBox(width: 90,),
+                  Container(
+                    width: 50,
+                    height: 50,
+                    // color: Colors.black26,
+                    child: IconButton(icon:Icon(Icons.search, size: 30,color: Colors.black),
+                      onPressed: () {
+                        setState(() {
+                          showSearch = !showSearch;
+                        });
+                      },
+                    ),
+                  ),
                 ],
               ),
             ),
             Divider(),
+            showSearch?
             Container(
               margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               decoration: BoxDecoration(
@@ -482,11 +498,11 @@ int? selectedSem ;
                     // Par exemple, filtrez les emploiesseurs dont le name ou le préname contient la valeur saisie
                     filteredItems = Emplois.where((emploi) =>
                     getProfesseurIdFromName(emploi.professor).toLowerCase().contains(value.toLowerCase()) ||
-                    getFilIdFromName(emploi.fil!).toLowerCase().contains(value.toLowerCase()) ||
-                    // getEls(emploi.element)!.ProfTP!.toLowerCase().contains(value.toLowerCase()) ||
-                    // getEls(emploi.element)!.ProfTP!.toLowerCase().contains(value.toLowerCase()) ||
-                    getEls(emploi.element)!.nameMat!.toLowerCase().contains(value.toLowerCase()) ||
-                    (days[emploi.dayNumero]).toLowerCase().contains(value.toLowerCase()) ||
+                        getFilIdFromName(emploi.fil!).toLowerCase().contains(value.toLowerCase()) ||
+                        // getEls(emploi.element)!.ProfTP!.toLowerCase().contains(value.toLowerCase()) ||
+                        // getEls(emploi.element)!.ProfTP!.toLowerCase().contains(value.toLowerCase()) ||
+                        getEls(emploi.element)!.nameMat!.toLowerCase().contains(value.toLowerCase()) ||
+                        (days[emploi.dayNumero]).toLowerCase().contains(value.toLowerCase()) ||
                         (emploi.startTime!).toLowerCase().contains(value.toLowerCase()) ||
                         ("S${getMatIdFromName(emploi.element).SemNum!}").toLowerCase().contains(value.toLowerCase())
                     ).toList();
@@ -501,7 +517,7 @@ int? selectedSem ;
 
               )
               ,
-            ),
+            ): SizedBox(height: 10,),
 
             Expanded(
               child: Container(
@@ -533,7 +549,7 @@ int? selectedSem ;
                             } else {
                               // Sort by code within the same semestre
                               // return getEls(a.element)!.mat!.compareTo(getEls(b.element)!.mat!);
-                              return getMatIdFromName(a.element).SemNum!.compareTo(getMatIdFromName(b.element).SemNum!);
+                              return a.SemNum!.compareTo(b.SemNum!);
                             }
                           });
 
@@ -553,74 +569,81 @@ int? selectedSem ;
                               child:
                               SingleChildScrollView(
                                   child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
                                       Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Container(
-                                    width: MediaQuery.of(context).size.width /3,
-                                    height: 60,
-                                    // color: Colors.black12,
-                                    child: DropdownButtonFormField<filliere>(
-                                      dropdownColor: Colors.white,
-                                      value: selectedFil,hint: Text("Fillieres"),
-                                      items: filList.map((fil) {
-                                        return DropdownMenuItem<filliere>(
-                                          value: fil,
-                                          child: Text(fil.name.toUpperCase()),
-                                        );
-                                      }).toList(),
-                                      onChanged: (value)  {
+                                  Expanded(flex: 1,
+                                    child: Container(
+                                      // width: MediaQuery.of(context).size.width /3,
+                                      height: 60,
+                                      // color: Colors.black12,
+                                      child: DropdownButtonFormField<filliere>(
+                                        dropdownColor: Colors.white,
+                                        value: selectedFil,hint: Text("Fillieres"),
+                                        items: filList.map((fil) {
+                                          return DropdownMenuItem<filliere>(
+                                            value: fil,
+                                            child: Text(fil.name.toUpperCase()),
+                                          );
+                                        }).toList(),
+                                        onChanged: (value)  {
 
-                                        setState(() {
-                                          selectedFil = value;
-                                          // elList1 = filterItemsByFil(selectedFil, elLis!);
-                                           semestersList = extractUniqueSemesters(elLis);
-                                          // selectedELem = null;
-                                          // selectedGroup = null;
-                                        });
+                                          setState(() {
+                                            selectedFil = value;
+                                            elList1 = filterItemsByFil(selectedFil, elLis!);
+                                             semestersList = extractUniqueSemesters(elList1);
+                                            // selectedELem = null;
+                                            // selectedGroup = null;
+                                          });
 
 
-                                        print("SemListe${semestersList}");
-                                      },
-                                      decoration: InputDecoration(
-                                        filled: true,
-                                        fillColor: Colors.white,
-                                        // hintText: "Sélecte Filliere",
-                                        border: OutlineInputBorder(
-                                          borderSide: BorderSide.none,
-                                          gapPadding: 1,
-                                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                                          print("ElemListe${elLis}");
+                                          print("SemListe${semestersList}");
+                                        },
+                                        decoration: InputDecoration(
+                                          filled: true,
+                                          fillColor: Colors.white,
+                                          // hintText: "Sélecte Filliere",
+                                          border: OutlineInputBorder(
+                                            borderSide: BorderSide.none,
+                                            gapPadding: 1,
+                                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
-                                  Container(
-                                    height: 60,
-                                    width: MediaQuery.of(context).size.width / 3,
-                                    child: DropdownButtonFormField<int>(
-                                      value: selectedSem,
-                                      hint: Text('Semestres'),
-                                      items: semestersList.map((sem) {
-                                        return DropdownMenuItem<int>(
-                                          value: sem,
-                                          child: Text("S$sem"),
-                                        );
-                                      }).toList(),
-                                      onChanged: (value) async {
-                                        setState(() {
-                                          selectedSem = value;
-                                          filteredItems = filterItemsBySem(selectedSem,selectedFil, items!);
-                                          print("Emps:${filteredItems}, ${items}, ${selectedSem} $selectedFil");
-                                        });
-                                      },
-                                      decoration: InputDecoration(
-                                        filled: true,
-                                        fillColor: Colors.white,
-                                        hintText: "Sélecte Semestre",
-                                        border: OutlineInputBorder(
-                                          borderSide: BorderSide.none,
-                                          gapPadding: 1,
-                                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                                  Expanded(flex: 1,
+                                    child: Container(
+                                      height: 60,
+                                      // width: MediaQuery.of(context).size.width / 3,
+                                      child: DropdownButtonFormField<int>(
+                                        value: selectedSem,
+                                        hint: Text('Semestres'),
+                                        items: semestersList.map((sem) {
+                                          return DropdownMenuItem<int>(
+                                            value: sem,
+                                            child: Text("S$sem"),
+                                          );
+                                        }).toList(),
+                                        onChanged: (value) async {
+                                          setState(() {
+                                            selectedSem = value;
+                                            filteredItems = filterItemsBySem(selectedSem,selectedFil, items!);
+                                            print("Emps:${filteredItems}, ${items}, ${selectedSem} ${selectedFil!.name}");
+                                          });
+                                        },
+                                        decoration: InputDecoration(
+                                          filled: true,
+                                          fillColor: Colors.white,
+                                          hintText: "Sélecte Semestre",
+                                          border: OutlineInputBorder(
+                                            borderSide: BorderSide.none,
+                                            gapPadding: 1,
+                                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -635,7 +658,8 @@ int? selectedSem ;
                                           // width: MediaQuery.of(context).size.width - 10,
                                           height: 50,
                                           decoration: BoxDecoration(
-                                          color: Colors.white,border: Border.all(color: Colors.black12,width: 2),
+                                          color: Colors.white,
+                                              // border: Border.all(color: Colors.black12,width: 2),
                                             borderRadius: BorderRadius.all(Radius.circular(10))
                                           ),
 
@@ -652,6 +676,8 @@ int? selectedSem ;
                                                 // style: TextButton.styleFrom(backgroundColor: Mon? Colors.white:Colors.black12,padding: EdgeInsets.only(top: 15,bottom: 15),
                                                 // ),
                                               ),
+
+                                              SizedBox(child: Container(color: Colors.black38,width: 1,),height: 21,),
                                               TextButton(onPressed: (){
                                                 setState(() {
                                                   Tue = true;
@@ -659,6 +685,8 @@ int? selectedSem ;
                                               }, child: Text('Mar'),
                                                 style: buildStyleFrom(Tue),
                                               ),
+
+                                              SizedBox(child: Container(color: Colors.black38,width: 1,),height: 21,),
                                               TextButton(onPressed: (){
                                                 setState(() {
                                                   Wed = true;
@@ -667,6 +695,8 @@ int? selectedSem ;
                                               }, child: Text('Mer'),
                                                 style: buildStyleFrom(Wed),
                                               ),
+
+                                              SizedBox(child: Container(color: Colors.black38,width: 1,),height: 21,),
                                               TextButton(
                                                   onPressed: (){
                                                 setState(() {
@@ -677,6 +707,8 @@ int? selectedSem ;
                                                   child: Text('Jeu'),
                                                 style: buildStyleFrom(Thu),
                                               ),
+
+                                              SizedBox(child: Container(color: Colors.black38,width: 1,),height: 21,),
                                               TextButton(
                                                   onPressed: (){
                                                 setState(() {
@@ -687,6 +719,8 @@ int? selectedSem ;
                                                   child: Text('Ven'),
                                                 style: buildStyleFrom(Fri),
                                               ),
+
+                                              SizedBox(child: Container(color: Colors.black38,width: 1,),height: 21,),
                                               TextButton(
                                                   onPressed: (){
                                                 setState(() {
@@ -697,6 +731,8 @@ int? selectedSem ;
                                                   child: Text('Sam'),
                                                 style: buildStyleFrom(Sat),
                                               ),
+
+                                              SizedBox(child: Container(color: Colors.black38,width: 1,),height: 21,),
                                               TextButton(
                                                   onPressed: (){
                                                 setState(() {
@@ -717,17 +753,17 @@ int? selectedSem ;
                                       //   padding: const EdgeInsets.only(top: 20.0),
                                       //   child: Container(child: Text('Cliquez sur l\'un des bouton',style: TextStyle(fontSize: 30),),),
                                       // ),
-                                      SizedBox(height: 10,),
+                                      // SizedBox(height: 10,),
                                       Tue?buildDayDataTable('Mardi', filteredItems ?? items!): Container(),
-                                      SizedBox(height: 10,),
+                                      // SizedBox(height: 10,),
                                       Wed?buildDayDataTable('Mercredi', filteredItems ?? items!): Container(),             // buildDayDataTable('Mercredi', filteredItems ?? items!),
-                                      SizedBox(height: 10,),
+                                      // SizedBox(height: 10,),
                                       Thu?buildDayDataTable('Jeudi', filteredItems ?? items!): Container(),
-                                      SizedBox(height: 10,),
+                                      // SizedBox(height: 10,),
                                      Fri? buildDayDataTable('Vendredi', filteredItems ?? items!): Container(),
-                                      SizedBox(height: 10,),
+                                      // SizedBox(height: 10,),
                                       Sat?buildDayDataTable('Samedi', filteredItems ?? items!): Container(),
-                                      SizedBox(height: 10,),
+                                      // SizedBox(height: 10,),
                                       San?buildDayDataTable('Dimanch', filteredItems ?? items!): Container(),
                                     ],
                                   ),
@@ -892,7 +928,7 @@ int? selectedSem ;
   ButtonStyle buildStyleFrom(bool bol) {
     return TextButton.styleFrom(
         // backgroundColor: bol ? Colors.blue.shade200 : Colors.white,
-        foregroundColor: bol ? Colors.blue : Colors.indigo,
+        foregroundColor: bol ? Colors.blueGrey : Colors.indigo,
         textStyle: TextStyle(fontWeight: bol ? FontWeight.bold : FontWeight.w500, fontSize: bol ? 17:15),
         padding: EdgeInsets.only(top: 15, bottom: 15),minimumSize: Size.fromWidth(80),
         shape: RoundedRectangleBorder(borderRadius: BorderRadiusDirectional.only(topEnd: Radius.circular(18),bottomEnd: Radius.circular(18)))
@@ -908,7 +944,7 @@ int? selectedSem ;
     if (!items.any((emp) => days[emp.dayNumero] == day)) {
       dayRows.add(
         DataRow(
-          color: MaterialStateColor.resolveWith((states) => Colors.grey.shade100),
+          // color: MaterialStateColor.resolveWith((states) => Colors..shade100),
           cells: [
             DataCell(Text('IL n\' y a', style: TextStyle(color: Colors.black))),
             DataCell(Text('pas des', style: TextStyle(color: Colors.black))),
@@ -930,11 +966,11 @@ int? selectedSem ;
               DataCell(Container(width: 35,child: Text(emp.startTime!, style: TextStyle(color: Colors.black)))),
               DataCell(Text(getProfesseurIdFromName(emp.professor!.toString()).capitalize!, style: TextStyle(color: Colors.black))),
 
-              DataCell(Text('${getMatIdFromName(emp.element).nameMat!.capitalize}'),
+              DataCell(Text('${emp.mat!.capitalize}'),
                 onTap: () =>_showCourseDetails(context, emp),
               ),
               DataCell(Container(width: 30, child: Text(getFilIdFromName(emp.fil!).toUpperCase()))),
-              DataCell(Container(width: 25, child: Text('S${getMatIdFromName(emp.element).SemNum!}'))),
+              DataCell(Container(width: 25, child: Text('S${emp.SemNum!}'))),
               DataCell(
                 Container(
                   width: 35,
@@ -1059,50 +1095,15 @@ class AddEmploiScreen extends StatefulWidget {
 }
 
 class _AddEmploiScreenState extends State<AddEmploiScreen> {
-  // Déclarez vos variables ici
-  String _selectedType = 'CM';
-  num _selectedNbh = 1.5;
-  // ... Ajoutez d'autres variables nécessaires pour l'ajout
   List<emploi>? filteredItems;
 
-  TextEditingController _date = TextEditingController();
-  int _selectedNum = 1;
-
-  filliere? selectedFil;
-  int? selectedSem;
-  Eles? selectedElem;
-  Matiere? selectedMat;
-  Professeur? selectedProfesseur;
-  List<Professeur> professeurs = [];
-  DateTime? selectedDateTime;
 
   bool isChanged =false;
-
-
-
-
-
-  Future<void> updateProfesseurList() async {
-    if (selectedElem != null) {
-      List<Professeur> fetchedProfesseurs = await fetchProfesseursByMatiere(selectedElem!.id);
-      setState(() {
-        professeurs = fetchedProfesseurs;
-        selectedProfesseur = null;
-      });
-    } else {
-      List<Professeur> fetchedProfesseurs = await fetchProfs();
-      setState(() {
-        professeurs = fetchedProfesseurs;
-        selectedProfesseur = null;
-      });
-    }
-  }
 
   List<Professeur> professeurList = [];
   List<Eles> elList = [];
   List<Eles> elList2 = [];
   List<Eles> elList1 = [];
-  List<Matiere> matiereList = [];
   List<filliere> filList = [];
   List<int> semestersList = [];
 
@@ -1160,7 +1161,7 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
 
   }
 
-  Future<void> updateElemList() async {
+  Future<void> updateElemList(selectedProfesseur,selectedElem) async {
     if (selectedProfesseur != null) {
       List<Eles>? fetchedProfesseurs = await fetchElsByProf(selectedProfesseur!.id);
       setState(() {
@@ -1199,6 +1200,17 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
     }
   }
 
+
+  List<FormModel> formDataList = [];
+  void addFormData() {
+   setState(() {
+     formDataList.add(FormModel());
+     elList = [];
+     elList1 = [];
+     elList2 = [];
+   });
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -1232,312 +1244,366 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
           // color: Color(0xA3B0AF1),
           child: SingleChildScrollView(
             child: Column(
-              // mainAxisSize: MainAxisSize.min,
               children: [
-                // _buildTypesInput(),
-                SizedBox(height: 30),
-                DropdownButtonFormField<Professeur>(
-                  value: selectedProfesseur,
-                  items: professeurList.map((prof) {
-                    return DropdownMenuItem<Professeur>(
-                      value: prof,
-                      child: Text(prof.nom! ),
-                    );
-                  }).toList(),
-                  onChanged: (value) async{
-                    setState(() {
-                      selectedProfesseur = value;
-                      selectedElem = null;
-                      updateElemList();
-                    });
-                  },
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    hintText: "selection d'une Professeur",
+                // Afficher les formulaires existants
+                for (int i = 0; i < formDataList.length; i++)
+                  buildForm(formDataList[i],i),
 
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,gapPadding: 1,
-                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 10),
+                // Button pour ajouter un nouveau formulaire
+                SizedBox(height: 15),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                      width: MediaQuery.of(context).size.width / 2.2,
-                      child: DropdownButtonFormField<filliere>(
-                        value: selectedFil,
-                        items: filList.map((fil) {
-                          return DropdownMenuItem<filliere>(
-                            value: fil,
-                            child: Text(fil.name.toUpperCase() ),
-                          );
-                        }).toList(),
-                        onChanged: (value) async{
-                          setState(() {
-                            selectedFil = value;
-                            selectedSem = null; // Reset the selected matière
-                            // selectedGroup = null; // Reset the selected matière
-                            selectedElem = null; // Reset the selected matière
-                            elList2 = filterItemsByFil(selectedFil, elList!);
-                            semestersList = extractUniqueSemesters(elList2);
-
-                            print("Sems1${elList2}");
-
-                          });
-                        },
-                        decoration: InputDecoration(
-                          filled: true,
-                          // fillColor: Color(0xA3B0AF1),
-                          fillColor: Colors.white,
-                          hintText: "selection d'un flliere",
-
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide.none,gapPadding: 1,
-                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 10),
-                    Container(
-                      width: MediaQuery.of(context).size.width /2.7,
-                      child: DropdownButtonFormField<int>(
-                        value: selectedSem,
-                        hint: Text('Semestre'),
-                        items: semestersList.map((sem) {
-                          return DropdownMenuItem<int>(
-                            value: sem,
-                            child: Text("S$sem"),
-                          );
-                        }).toList(),
-                        onChanged: (value) async {
-                          setState(() {
-                            selectedSem = value;
-                            // filteredItems = filterItemsBySemestre(selectedSem, items!);
-                            // semestersList = extractUniqueSemesters(elList1);
-                            // elList1 = filterItemsByFil(selectedFil, elList!);
-                            elList1 = filterItemsBySemestre(selectedSem, elList2!);
-                            // print("EL1${elList1} et ${elList}");
-                          });
-                        },
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          hintText: "Sélecte Semestre",
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide.none,
-                            gapPadding: 1,
-                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                          ),
-                        ),
-                      ),
-                    ),
-
-                  ],
-                ),
-                SizedBox(height: 10),
-                DropdownButtonFormField<Eles>(
-                  value: selectedElem,
-                  items: elList1.map((ele) {
-                    return DropdownMenuItem<Eles>(
-                        value: ele,
-                        child: Text(ele.nameMat ?? '')
-                    );
-                  }).toList(),
-                  onChanged: (value) async{
-                    setState(() {
-                      selectedElem = value;
-                      // selectedProfesseur = null; // Reset the selected matière
-                      // updateProfesseurList();
-
-                      // print("PL${professeurs}");
-                    });
-                  },
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    hintText: "selection d'un Element",
-
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,gapPadding: 1,
-                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    ),
-                  ),
-                ),
-
-
-
-                SizedBox(height: 10),
-                Row(
-                  children: [
-                    Container(
-                      width: 147.5,
-                      child: DropdownButtonFormField<String>(
-                        value: _selectedType,
-                        items: [
-                          DropdownMenuItem<String>(
-                            child: Text('CM'),
-                            value: 'CM',
-                          ),
-                          DropdownMenuItem<String>(
-                            child: Text('TP'),
-                            value: 'TP',
-                          ),
-                          DropdownMenuItem<String>(
-                            child: Text('TD'),
-                            value: 'TD',
-                          ),
-                        ],
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedType = value!;
-                          });
-                        },
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                            border: OutlineInputBorder(
-                            borderSide: BorderSide.none,gapPadding: 1,
-                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                          ),
-                        ),
+                    ElevatedButton(
+                      onPressed: addFormData,
+                      child: Text("Ajouter un formulaire"),
+                      style: ElevatedButton.styleFrom(
+                        surfaceTintColor: Colors.white,
+                        // side: BorderSide(color: Colors.black38),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        elevation: 5,
+                        // padding: EdgeInsets.symmetric(horizontal: 25),
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.green,
+                        textStyle: TextStyle(fontWeight: FontWeight.bold),
+                        // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                       ),
 
                     ),
-                    SizedBox(width: 10),
-                    Container(
-                      width: 147.5,
-                      child: DropdownButtonFormField<num>(
-                        value: _selectedNbh,
-                        items: [
-                          DropdownMenuItem<num>(
-                            child: Text('1.5'),
-                            value: 1.5,
-                          ),
-                          DropdownMenuItem<num>(
-                            child: Text('2'),
-                            value: 2,
-                          ),
-                        ],
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedNbh = value!;
-                          });
-                        },
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          hintText: "taux",
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide.none,gapPadding: 1,
-                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                          ),
-                        ),
+                    ElevatedButton(
+                      onPressed: submitForms,
+                      child: Text("Ajouter tous"),
+                      style: ElevatedButton.styleFrom(
+                        surfaceTintColor: Colors.white,
+                        // side: BorderSide(color: Colors.black38),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        elevation: 5,
+                        // padding: EdgeInsets.symmetric(horizontal: 25),
+                        foregroundColor: Colors.white,
+                        backgroundColor: Colors.blue,
+                        textStyle: TextStyle(fontWeight: FontWeight.bold),
+                        // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                       ),
-
                     ),
                   ],
                 ),
-                SizedBox(height: 10),
-                TextFormField(
-                  controller: _date,
-                  decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.white,
-                      hintText: "Heure",
-                      border: OutlineInputBorder(
-                          borderSide: BorderSide.none,gapPadding: 1,
-                          borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                  // readOnly: true,
-                  onTap: () => selectTime(_date),
-                ),
 
-
-                SizedBox(height: 10),
-                DropdownButtonFormField<int>(
-                  value: _selectedNum,
-                  items: [
-                    DropdownMenuItem<int>(
-                      child: Text('Dimanch'),
-                      value: 0,
-                    ),
-                    DropdownMenuItem<int>(
-                      child: Text('Lundi'),
-                      value: 1,
-                    ),
-                    DropdownMenuItem<int>(
-                      child: Text('Mardi'),
-                      value: 2,
-                    ),
-                    DropdownMenuItem<int>(
-                      child: Text('Mercredi'),
-                      value: 3,
-                    ),
-                    DropdownMenuItem<int>(
-                      child: Text('Jeudi'),
-                      value: 4,
-                    ),
-                    DropdownMenuItem<int>(
-                      child: Text('Vendredi'),
-                      value: 5,
-                    ),
-                    DropdownMenuItem<int>(
-                      child: Text('Samedi'),
-                      value: 6,
-                    ),
-                  ],
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedNum = value!;
-                    });
-                  },
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,gapPadding: 1,
-                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    ),
-                  ),
-                ),
-
-
-                SizedBox(height:20),
-                ElevatedButton(
-                  onPressed: (){
-
-                    Navigator.pop(context);
-                    addEmp(_selectedType,_selectedNbh,_date.text,_selectedNum,selectedFil!.id,selectedElem!.id,selectedProfesseur!.id);
-                    // Addemploi(_name.text, _desc.text);
-
-
-
-
-
-                  },
-                  child: Text("Ajouter"),
-
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xff0fb2ea),
-                    foregroundColor: Colors.white,
-                    elevation: 10,
-                    minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
-                    // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
-                    //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                  ),
-                )
+                // Button pour soumettre tous les formulaires
               ],
-            ),
+            )
+
           ),
         )
     );
 
+    //Abdou
   }
 
+  Widget buildForm(FormModel formData,FormNum) {
+    return Column(
+      // mainAxisSize: MainAxisSize.min,
+      children: [
+
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text("Form ${FormNum+1}",
+              style: GoogleFonts.abhayaLibre(
+            color: Colors.black,
+            fontSize: 25.0,
+            fontStyle: FontStyle.italic,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 2.0,
+          )
+              ,),
+        ),
+        SizedBox(height: 10),
+        DropdownButtonFormField<Professeur>(
+          value: formData.selectedProfesseur,
+          items: professeurList.map((prof) {
+            return DropdownMenuItem<Professeur>(
+              value: prof,
+              child: Text(prof.nom! ),
+            );
+          }).toList(),
+          onChanged: (value) async{
+            setState(() {
+              formData.selectedProfesseur = value;
+              // formData.selectedElem = null;
+              updateElemList(formData.selectedProfesseur,formData.selectedElem);
+            });
+          },
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.white,
+            hintText: "selection d'une Professeur",
+
+            border: OutlineInputBorder(
+              borderSide: BorderSide.none,gapPadding: 1,
+              borderRadius: BorderRadius.all(Radius.circular(10.0)),
+            ),
+          ),
+        ),
+        SizedBox(height: 10),
+        Row(
+          children: [
+            Container(
+              width: MediaQuery.of(context).size.width / 2.2,
+              child: DropdownButtonFormField<filliere>(
+                value: formData.selectedFil,
+                items: filList.map((fil) {
+                  return DropdownMenuItem<filliere>(
+                    value: fil,
+                    child: Text(fil.name.toUpperCase() ),
+                  );
+                }).toList(),
+                onChanged: (value) async{
+                  setState(() {
+                    formData.selectedFil = value;
+                    formData.selectedSem = null; // Reset the selected matière
+                    // selectedGroup = null; // Reset the selected matière
+                    formData.selectedElem = null; // Reset the selected matière
+                    formData.elList2 = filterItemsByFil(formData.selectedFil, elList!);
+                    semestersList = extractUniqueSemesters(formData.elList2);
+
+                    // print("Sems1${formData.selectedFil!.id!}");
+                    print("Sems${elList}");
+                    print("Sems1${formData.elList1}");
+                    print("Sems2${formData.elList2}");
+
+                  });
+                },
+                decoration: InputDecoration(
+                  filled: true,
+                  // fillColor: Color(0xA3B0AF1),
+                  fillColor: Colors.white,
+                  hintText: "selection d'un flliere",
+
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide.none,gapPadding: 1,
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(width: 10),
+            Container(
+              width: MediaQuery.of(context).size.width /2.7,
+              child: DropdownButtonFormField<int>(
+                value: formData.selectedSem,
+                hint: Text('Semestre'),
+                items: semestersList.map((sem) {
+                  return DropdownMenuItem<int>(
+                    value: sem,
+                    child: Text("S$sem"),
+                  );
+                }).toList(),
+                onChanged: (value) async {
+                  setState(() {
+                    formData.selectedSem = value;
+                    // filteredItems = filterItemsBySemestre(selectedSem, items!);
+                    // semestersList = extractUniqueSemesters(elList1);
+                    // elList1 = filterItemsByFil(selectedFil, elList!);
+                    formData.elList1 = filterItemsBySemestre(formData.selectedSem, formData.elList2!);
+                    // print("EL1${elList1} et ${elList}");
+                  });
+                },
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  hintText: "Sélecte Semestre",
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide.none,
+                    gapPadding: 1,
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                  ),
+                ),
+              ),
+            ),
+
+          ],
+        ),
+        SizedBox(height: 10),
+        DropdownButtonFormField<Eles>(
+          value: formData.selectedElem,
+          items: formData.elList1.map((ele) {
+            return DropdownMenuItem<Eles>(
+                value: ele,
+                child: Text(ele.nameMat ?? '')
+            );
+          }).toList(),
+          onChanged: (value) async{
+            setState(() {
+              formData.selectedElem = value;
+              // selectedProfesseur = null; // Reset the selected matière
+              // updateProfesseurList();
+
+              // print("PL${professeurs}");
+            });
+          },
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.white,
+            hintText: "selection d'un Element",
+
+            border: OutlineInputBorder(
+              borderSide: BorderSide.none,gapPadding: 1,
+              borderRadius: BorderRadius.all(Radius.circular(10.0)),
+            ),
+          ),
+        ),
+
+
+
+        SizedBox(height: 10),
+        Row(
+          children: [
+            Container(
+              width: 147.5,
+              child: DropdownButtonFormField<String>(
+                value: formData._selectedType,
+                items: [
+                  DropdownMenuItem<String>(
+                    child: Text('CM'),
+                    value: 'CM',
+                  ),
+                  DropdownMenuItem<String>(
+                    child: Text('TP'),
+                    value: 'TP',
+                  ),
+                  DropdownMenuItem<String>(
+                    child: Text('TD'),
+                    value: 'TD',
+                  ),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    formData._selectedType = value!;
+                  });
+                },
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide.none,gapPadding: 1,
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                  ),
+                ),
+              ),
+
+            ),
+            SizedBox(width: 10),
+            Container(
+              width: 147.5,
+              child: DropdownButtonFormField<num>(
+                value: formData._selectedNbh,
+                items: [
+                  DropdownMenuItem<num>(
+                    child: Text('1.5'),
+                    value: 1.5,
+                  ),
+                  DropdownMenuItem<num>(
+                    child: Text('2'),
+                    value: 2,
+                  ),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    formData._selectedNbh = value!;
+                  });
+                },
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  hintText: "taux",
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide.none,gapPadding: 1,
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                  ),
+                ),
+              ),
+
+            ),
+          ],
+        ),
+        SizedBox(height: 10),
+        TextFormField(
+          controller: formData._date,
+          decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.white,
+              hintText: "Heure",
+              border: OutlineInputBorder(
+                  borderSide: BorderSide.none,gapPadding: 1,
+                  borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+          // readOnly: true,
+          onTap: () => selectTime(formData._date),
+        ),
+
+
+        SizedBox(height: 10),
+        DropdownButtonFormField<int>(
+          value: formData._selectedNum,
+          items: [
+            DropdownMenuItem<int>(
+              child: Text('Dimanch'),
+              value: 0,
+            ),
+            DropdownMenuItem<int>(
+              child: Text('Lundi'),
+              value: 1,
+            ),
+            DropdownMenuItem<int>(
+              child: Text('Mardi'),
+              value: 2,
+            ),
+            DropdownMenuItem<int>(
+              child: Text('Mercredi'),
+              value: 3,
+            ),
+            DropdownMenuItem<int>(
+              child: Text('Jeudi'),
+              value: 4,
+            ),
+            DropdownMenuItem<int>(
+              child: Text('Vendredi'),
+              value: 5,
+            ),
+            DropdownMenuItem<int>(
+              child: Text('Samedi'),
+              value: 6,
+            ),
+          ],
+          onChanged: (value) {
+            setState(() {
+              formData._selectedNum = value!;
+            });
+          },
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.white,
+            border: OutlineInputBorder(
+              borderSide: BorderSide.none,gapPadding: 1,
+              borderRadius: BorderRadius.all(Radius.circular(10.0)),
+            ),
+          ),
+        ),
+
+
+      ],
+    );
+  }
+  void submitForms() {
+    for (int i = 0; i < formDataList.length; i++) {
+      // Traitez chaque formulaire ici, par exemple, envoyez-le à votre API
+      FormModel formData = formDataList[i];
+      Navigator.pop(context);
+      addEmp(formData._selectedType,formData._selectedNbh,formData._date.text,formData._selectedNum,
+          formData.selectedFil!.id,formData.selectedElem!.id,formData.selectedProfesseur!.id);
+      // Ajoutez votre logique pour traiter les données du formulaire
+      // formData.name, formData.description, etc.
+      // Envoyez les données à votre API, sauvegardez-les dans la base de données, etc.
+    }
+  }
 
   Future<void> addEmp(String type, num nbh,String date, int days, String filId, String ElemId,String ProfId) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -1558,74 +1624,74 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
     };
 
     // try {
-      final response = await http.post(
-        uri,
-        body: jsonEncode(emploiData),
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
+    final response = await http.post(
+      uri,
+      body: jsonEncode(emploiData),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
 
-      print(response.statusCode);
-      if (response.statusCode == 201) {
+    print(response.statusCode);
+    if (response.statusCode == 201) {
 
-        setState(() {
-          Navigator.of(context).pop();
-          showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  surfaceTintColor: Color(0xB0AFAFA3),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
-                  title: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Text("Alerte de succès"),
-                      Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
-                    ],
-                  ),
-                  content: Text(
-                      "L\'emploi est ajouté avec succès"),
-
-                  actions: [
-                    TextButton(
-                      child: Text("Ok"),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
-
+      setState(() {
+        Navigator.of(context).pop();
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                surfaceTintColor: Color(0xB0AFAFA3),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Text("Alerte de succès"),
+                    Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
                   ],
+                ),
+                content: Text(
+                    "L\'emploi est ajouté avec succès"),
 
-                );});
-        });
+                actions: [
+                  TextButton(
+                    child: Text("Ok"),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+
+                ],
+
+              );});
+      });
 
 
-      }
-      else {
-       setState(() {
-         showDialog(
-             context: context,
-             builder: (BuildContext context) {
-               return AlertDialog(
-                 surfaceTintColor: Color(0xB0AFAFA3),
-                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
-                 title: Row(
-                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                   children: [
-                     Text("Alert d\'erreur"),
-                     Icon(Icons.wrong_location_outlined,color: Colors.redAccent,)
-                   ],
-                 ),
-                 content: Text(jsonDecode(response.body)["message"]),
-               );});
+    }
+    else {
+      setState(() {
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                surfaceTintColor: Color(0xB0AFAFA3),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Text("Alert d\'erreur"),
+                    Icon(Icons.wrong_location_outlined,color: Colors.redAccent,)
+                  ],
+                ),
+                content: Text(jsonDecode(response.body)["message"]),
+              );});
 
-       });
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   SnackBar(content: Text('Échec de l\'ajout de l\'emploi.')),
-        // );
-      }
+      });
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text('Échec de l\'ajout de l\'emploi.')),
+      // );
+    }
 
     // }
     // catch (error) {
@@ -1636,6 +1702,24 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
   }
 
 }
+
+class FormModel {
+  TextEditingController controller = TextEditingController();
+  String _selectedType = 'CM';
+  num _selectedNbh = 1.5;
+
+  Professeur? selectedProfesseur;
+  filliere? selectedFil;
+  int? selectedSem;
+  Eles? selectedElem;
+
+  List<Eles> elList2 = [];
+  List<Eles> elList1 = [];
+  TextEditingController _date = TextEditingController();
+  int _selectedNum = 1;
+// Ajoutez d'autres champs selon vos besoins
+}
+
 
 Future<List<Eles>?> fetchElsByProf(String ProfId,) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -2394,11 +2478,11 @@ class emploi {
   // final num? SemNum;
   final String? startTime;
   final int dayNumero;
-  // final String? classe;
+  final String? mat;
   final String professor;
   final String element;
   final String? jour;
-  // final String mat;
+  final int? SemNum;
   final String? fil;
   final String? finishTime;
   final String? enseignat;
@@ -2409,12 +2493,12 @@ class emploi {
     required this.nbh,
     required this.startTime,
     required this.dayNumero,
-    // required this.mat,
+    required this.mat,
+    required this.SemNum,
     required this.element,
     required this.professor,
     this.jour,
     this.fil,
-    // this.SemNum,
     // this.classe,
     this.enseignat,
     required this.finishTime,
@@ -2428,13 +2512,14 @@ class emploi {
       nbh: json['nbh'],
       dayNumero: json['dayNumero'],
       professor: json['professeur'],
+      SemNum: json['semestre'],
       element: json['element'],
       jour: json['jour'],
-    // mat: json['matiere'],
-      fil: json['filiere'],
+    mat: json['element_name'],
+      fil: json['filiere_name'],
       finishTime: json['finishTime'],
       // SemNum: json['semestre'],
-      enseignat: json['nomComplet'],
+      enseignat: json['nom'],
       // classe: json['classe'],
     );
   }

@@ -38,6 +38,7 @@ class _FilliereState extends State<Filliere> {
   List<Elem> matiereList = [];
 
   bool showFloat = false;
+  bool showSearch = false;
 
 
   void DeleteFilliere(id) async{
@@ -132,12 +133,25 @@ class _FilliereState extends State<Filliere> {
                     Navigator.pop(context);
                   }, child: Icon(Icons.arrow_back_ios,color: Colors.black,size: 20,)),
                   // SizedBox(width: 3,),
-                  Text("Liste des Filières",style: TextStyle(fontSize: 20),)
+                  Text("Liste des Filières",style: TextStyle(fontSize: 20),),
+                  SizedBox(width: 100,),
+                  Container(
+                    width: 50,
+                    height: 50,
+                    // color: Colors.black26,
+                    child: IconButton(icon:Icon(Icons.search, size: 30,color: Colors.black),
+                      onPressed: () {
+                        setState(() {
+                          showSearch = !showSearch;
+                        });
+                      },
+                    ),
+                  ),
                 ],
               ),
             ),
             Divider(),
-            Container(
+            showSearch? Container(
               margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
@@ -175,7 +189,7 @@ class _FilliereState extends State<Filliere> {
 
               )
               ,
-            ),
+            ) : SizedBox(height: 10,),
 
             Expanded(
               child: Container(
@@ -689,6 +703,7 @@ class _FilliereState extends State<Filliere> {
                                 String? filePath = await pickExcelFile();
                                 if (filePath != null) {
                                   uploadFileToBackend(filePath, fil.id);
+                                  Navigator.pop(context);
                                 }
                               },
                               icon: Icon(Icons.cloud_upload_outlined))
@@ -1256,7 +1271,7 @@ class _FilEmploiPageState extends State<FilEmploiPage> {
         emplois = data['emplois'];
         // Sort emplois by semester and day
         emplois.sort((a, b) {
-          int semesterComparison = a['semestre'].compareTo(b['semestre']);
+          int semesterComparison = a['element']['semestre'].compareTo(b['element']['semestre']);
           if (semesterComparison == 0) {
             return a['dayNumero'].compareTo(b['dayNumero']);
           }
@@ -1305,7 +1320,7 @@ class _FilEmploiPageState extends State<FilEmploiPage> {
 
     for (var emploi in emplois) {
       String jour = emploi['jour'];
-      int semestre = getMatIdFromName(emploi['element']).SemNum ?? 0;
+      int semestre = emploi['element']['semestre'] ?? 0;
 
       if (!groupedEmplois.containsKey(jour)) {
         groupedEmplois[jour] = {};
@@ -1408,7 +1423,7 @@ class _FilEmploiPageState extends State<FilEmploiPage> {
     return DataRow(
       cells: [
         DataCell(Text(getProfIdFromName(emploi['professeur']['_id'],professeurs))),
-        DataCell(Text(getMatIdFromName(emploi['element']).nameMat.toString().capitalize!)),
+        DataCell(Text(emploi['element']['name'].toString().capitalize!)),
         DataCell(Text(emploi['type'])),
         DataCell(Text(emploi['startTime'])),
         // DataCell(Text(emploi['finishTime'])),

@@ -224,6 +224,7 @@ class _ProfesseuresState extends State<Professeures> {
   TextEditingController _email = TextEditingController();
   TextEditingController _mobile = TextEditingController();
 
+  bool showSearch = false;
 
   @override
   Widget build(BuildContext context) {
@@ -241,11 +242,25 @@ class _ProfesseuresState extends State<Professeures> {
                     Navigator.pop(context);
                   }, child: Icon(Icons.arrow_back_ios,color: Colors.black,size: 20,)),
                 // SizedBox(width: 50,),
-                Text("Liste des Professeurs",style: TextStyle(fontSize: 20),)
-              ],
+                Text("Liste des Professeurs",style: TextStyle(fontSize: 20),),
+                SizedBox(width: 60,),
+                Container(
+                  width: 50,
+                  height: 50,
+                  // color: Colors.black26,
+                  child: IconButton(icon:Icon(Icons.search, size: 30,color: Colors.black),
+                    onPressed: () {
+                      setState(() {
+                        showSearch = !showSearch;
+                      });
+                    },
+                  ),
+                ),    ],
             ),
           ),
           Divider(),
+
+          showSearch?
           Container(
             margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             decoration: BoxDecoration(
@@ -269,9 +284,9 @@ class _ProfesseuresState extends State<Professeures> {
                   // Implémentez la logique de filtrage ici
                   // Par exemple, filtrez les Professeurs dont le name ou le préname contient la valeur saisie
                   filteredItems = Profs!.where((professeur) =>
-                  professeur.nom!.toLowerCase().contains(value.toLowerCase())
-                      // ||
-                      // professeur.prenom!.toLowerCase().contains(value.toLowerCase())
+                      professeur.nom!.toLowerCase().contains(value.toLowerCase())
+                    // ||
+                    // professeur.prenom!.toLowerCase().contains(value.toLowerCase())
                   ).toList();
                 });
               },
@@ -284,7 +299,7 @@ class _ProfesseuresState extends State<Professeures> {
 
             )
             ,
-          ),
+          ): SizedBox(height: 1,),
 
           Expanded(
             child: Container(
@@ -389,6 +404,7 @@ class _ProfesseuresState extends State<Professeures> {
           String? filePath = await pickExcelFile();
           if (filePath != null) {
             uploadFileToBackend(filePath);
+            Navigator.pop(context);
           }
         },
 

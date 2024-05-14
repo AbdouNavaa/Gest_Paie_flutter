@@ -34,6 +34,7 @@ class _UsersState extends State<Users> {
   int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
 
   bool showFloat = false;
+  bool showSearch  = false;
   void DeleteUser(id) async{
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token")!;
@@ -105,11 +106,25 @@ class _UsersState extends State<Users> {
                     Navigator.pop(context);
                   }, child: Icon(Icons.arrow_back_ios,color: Colors.black,size: 20,)),
                   // SizedBox(width: 50,),
-                  Text("Liste des utilisateurs",style: TextStyle(fontSize: 20),)
+                  Text("Liste des utilisateurs",style: TextStyle(fontSize: 20),),
+                  SizedBox(width: 70,),
+                  Container(
+                    width: 50,
+                    height: 50,
+                    // color: Colors.black26,
+                    child: IconButton(icon:Icon(Icons.search, size: 30,color: Colors.black),
+                      onPressed: () {
+                        setState(() {
+                          showSearch = !showSearch;
+                        });
+                      },
+                    ),
+                  ),
                 ],
               ),
             ),
             Divider(),
+            showSearch?
             Container(
               margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               decoration: BoxDecoration(
@@ -146,7 +161,7 @@ class _UsersState extends State<Users> {
 
               )
               ,
-            ),
+            ): SizedBox(height: 10,),
 
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

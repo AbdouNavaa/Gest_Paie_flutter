@@ -42,6 +42,7 @@ class _CoursesPageState extends State<CoursesPage> {
   List<Professeur> professeurList = [];
 
   bool signer = false;
+  bool showInfo = false;
   void singeCours( id, isSigned) async {
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -255,19 +256,26 @@ bool showFloat = false;
                 // SizedBox(width: 40,),
                 Text("Liste des Cours",style: TextStyle(fontSize: 20),),
 
-                SizedBox(width: 100,),
+                SizedBox(width: 115,),
                 Container(
                   width: 50,
                   height: 50,
                 // color: Colors.black26,
-                child: IconButton(icon:Icon(Icons.cached, size: 30,color: Colors.black), onPressed: () => auto(),),
-                )
+                child: IconButton(icon:Icon(Icons.search, size: 30,color: Colors.black),
+                  onPressed: () {
+                  setState(() {
+                    showFloat = !showFloat;
+                  });
+                },
+                ),
+                ),
+
 
               ],
             ),
           ),
           Divider(),
-          Container(
+          showFloat? Container(
             width: MediaQuery.of(context).size.width/1.075,
             margin: EdgeInsets.only(left: 8,top: 5,bottom: 5),
             decoration: BoxDecoration(
@@ -297,44 +305,127 @@ bool showFloat = false;
                 contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               ),
             ),
-          ),
+          ) :SizedBox(height: 5,),
 
           Container(
             width: MediaQuery.of(context).size.width,
-            height: 50,
+            height: 40,
             // color: Colors.black38,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                Expanded(
+                  child: TextButton(
+                    child: Row(
+                      children: [
+                        Icon(Icons.tune, color: Colors.black,),
+                        Text('Filtrer',style: TextStyle(color: Colors.black),),
+                      ],
+                    ),
+                    onPressed: () => _filtrer(context),
 
-                Expanded(child: Row(children: [
-                  Icon(Icons.panorama_fish_eye,),
-                  Text('en attente'),
-                ],)),
+
+                  ),
+                ),
+                SizedBox(child: Container(color: Colors.black38,width: 1,),height: 30,),
+                Expanded(
+                  child: TextButton(
+                    child: Row(
+                      children: [
+                        Icon(Icons.auto_mode_sharp, color: Colors.black,),
+                        Text('auto-Create',style: TextStyle(color: Colors.black),),
+                      ],
+                    ),
+                    onPressed: () => auto(),
+                  
+                  ),
+                ),
+                SizedBox(child: Container(color: Colors.black38,width: 1,),height: 30,),
+                Expanded(
+                  child: TextButton(
+                    child: Row(
+                      children: [
+                        Icon(Icons.info_outline, color: Colors.black,),
+                        Text('Infos',style: TextStyle(color: Colors.black),),
+                      ],
+                    ),
+                    onPressed: (){
+                      setState(() {
+                        showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                surfaceTintColor: Color(0xB0AFAFA3),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                                title: Center(child: Text("Alerte")),
+                                content: Container(height: 100,
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        // mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          SizedBox(width: 15,),
+                                          Expanded(child: Row(children: [
+                                            Icon(Icons.panorama_fish_eye,),
+                                            Text('En attente'),
+                                          ],)),
+
+                                          Expanded(child: Row(children: [
+                                            Icon(Icons.task_alt,),
+                                            Text('Effectué')
+                                          ],)),
+                                        ],
+                                      ),
+
+                                      SizedBox(height: 20,),
+                                      Row(
+                                        // mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          SizedBox(width: 15,),
+                                             widget.paid? SizedBox():
+                                          Expanded(child: Row(children: [
+                                            Icon(Icons.highlight_remove_sharp,),
+                                            Text('Annulé')
+                                          ],)),
+
+                                          widget.paid?
+                                          Expanded(child: Row(children: [
+                                            Icon(Icons.remove_circle_outline,),
+                                            Text('En Cours')
+                                            // Text('préparé')
+                                          ],))
+                                              :SizedBox(),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    child: Text("Ok"),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+
+                                ],
+                              );});
+                      });
 
 
-                Expanded(child: Row(children: [
-                  Icon(Icons.task_alt,),
-                  Text('Effectué')
-                ],)),
-                widget.paid? SizedBox():
-                Expanded(child: Row(children: [
-                  Icon(Icons.highlight_remove_sharp,),
-                  Text('Annulé')
-                ],)),
+                    },
 
-                widget.paid?
-                Expanded(child: Row(children: [
-                  Icon(Icons.remove_circle_outline,),
-                  Text('En Cours')
-                ],))
-                    :SizedBox(),
+                  ),
+                ),
 
 
               ],
             ),
           ),
 
+
+
+          SizedBox(height: 10,),
           Expanded(
             child: SingleChildScrollView(scrollDirection: Axis.vertical,
               child: Container(
@@ -778,72 +869,56 @@ bool showFloat = false;
         ],
       ),
 
-      floatingActionButton: showFloat ?
+      floatingActionButton:
+      // showFloat ?
+      // Container(
+      //     width: widget.paid?230:320,
+      //   decoration: BoxDecoration(
+      //     color: Colors.white,
+      //     borderRadius: BorderRadius.all(Radius.circular(50)),
+      //     boxShadow: [
+      //       BoxShadow(
+      //         color: Colors.black12,
+      //         blurRadius: 5,
+      //       ),
+      //     ],
+      //   ),
+      //   // margin: EdgeInsets.only(left: widget.paid? 100:40,right: widget.paid? 20:5),
+      //
+      //     margin: EdgeInsets.only(left: 40,right: widget.paid?30:30),
+      //   child: Row(
+      //     mainAxisAlignment: MainAxisAlignment.start,
+      //     crossAxisAlignment: CrossAxisAlignment.start,
+      //     children: [
+      //       // SizedBox(width: 18,),
+      //       widget.paid? SizedBox():
+      //
+      //       // SizedBox(width: 210,),
+      //       // TextButton(
+      //       //   child: Row(
+      //       //     children: [
+      //       //       Icon(Icons.sort, color: Colors.black,),
+      //       //       Text('Trier',style: TextStyle(color: Colors.black),),
+      //       //     ],
+      //       //   ),
+      //       //   onPressed: () => _trier(context),
+      //       //
+      //       // ),
+      //       TextButton(
+      //         child: Icon(Icons.close_outlined, color: Colors.black,),
+      //         onPressed: () {
+      //           setState(() {
+      //             showFloat = false;
+      //           });
+      //         },
+      //
+      //       ),
+      //     ],
+      //   ),
+      // )
+          // :
+      // widget.paid? SizedBox():
       Container(
-          width: widget.paid?230:320,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.all(Radius.circular(50)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 5,
-            ),
-          ],
-        ),
-        // margin: EdgeInsets.only(left: widget.paid? 100:40,right: widget.paid? 20:5),
-
-          margin: EdgeInsets.only(left: 40,right: widget.paid?30:5),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // SizedBox(width: 18,),
-            widget.paid? SizedBox():   TextButton(
-              child: Row(
-                children: [
-                  Icon(Icons.add, color: Colors.black,),
-                  Text('Ajouter',style: TextStyle(color: Colors.black),),
-                ],
-              ),
-              onPressed: () => _displayTextInputDialog(context),
-
-            ),
-            TextButton(
-              child: Row(
-                children: [
-                  Icon(Icons.filter_list_alt, color: Colors.black,),
-                  Text('Filtrer',style: TextStyle(color: Colors.black),),
-                ],
-              ),
-              onPressed: () => _filtrer(context),
-
-            ),
-
-            // SizedBox(width: 210,),
-            TextButton(
-              child: Row(
-                children: [
-                  Icon(Icons.sort, color: Colors.black,),
-                  Text('Trier',style: TextStyle(color: Colors.black),),
-                ],
-              ),
-              onPressed: () => _trier(context),
-
-            ),
-            TextButton(
-              child: Icon(Icons.close_outlined, color: Colors.black,),
-              onPressed: () {
-                setState(() {
-                  showFloat = false;
-                });
-              },
-
-            ),
-          ],
-        ),
-      )
-          :Container(
         width: 60,
         decoration: BoxDecoration(
           color: Colors.white,
@@ -857,14 +932,9 @@ bool showFloat = false;
         ),
 
         // margin: EdgeInsets.only(left: 90,right: 60),
-        child:
-        TextButton(
+        child: TextButton(
           child: Icon(Icons.add, color: Colors.black,),
-          onPressed: () {
-            setState(() {
-              showFloat = true;
-            });
-          },
+          onPressed: () => _displayTextInputDialog(context),
 
         ),
 
@@ -1174,7 +1244,8 @@ bool showFloat = false;
                widget.paid!?SizedBox(): Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    ElevatedButton(
+
+                    course['isSigned'] == "effectué"?SizedBox(): ElevatedButton(
                       onPressed: () {
 
                         setState(() {
@@ -1319,7 +1390,7 @@ bool showFloat = false;
         builder: (context) {
           return Container(
             child: AlertDialog(
-                insetPadding: EdgeInsets.only(top: widget.paid?350:250,),
+                insetPadding: EdgeInsets.only(top: widget.paid?300:230,),
 
 
                         surfaceTintColor: Color(0xB0AFAFA3),
@@ -1327,14 +1398,14 @@ bool showFloat = false;
                   borderRadius: BorderRadius.only(
                     topRight: Radius.circular(20),
                     topLeft: Radius.circular(20),
-                    bottomRight: Radius.circular(20),
-                    bottomLeft: Radius.circular(20),
+                    // bottomRight: Radius.circular(20),
+                    // bottomLeft: Radius.circular(20),
                   ),
                 ),
                 title: Text('Ajouter un Filter'),
                 content: Container(
                   width: MediaQuery.of(context).size.width,
-                  height: 390,
+                  height: 420,
                   child: SingleChildScrollView(
                     child: Column(
                       children: [
@@ -1496,6 +1567,66 @@ bool showFloat = false;
                             )
                           ],
                         ),
+
+                        SizedBox(height: 10,),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            SizedBox(width: 15,),
+                            Text('Date: Ancienne à Récente', style: TextStyle(fontWeight: FontWeight.w400,fontSize: 15 ),),
+                            SizedBox(width: 80,),
+                            Radio(
+                              value: '',
+                              groupValue: sortByDateAscending,
+                              onChanged: (value) {
+                                setState(() {
+                                  totalType =0;
+                                  sortByDateAscending = !sortByDateAscending;
+                                  // Reverse the sorting order when the button is tapped
+                                  widget.courses.sort((a, b) {
+                                    DateTime dateA = DateTime.parse(a['date'].toString());
+                                    DateTime dateB = DateTime.parse(b['date'].toString());
+
+                                    // Sort in ascending order if sortByDateAscending is true,
+                                    // otherwise sort in descending order
+
+                                    return dateA.compareTo(dateB) ;
+                                  });
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                        Divider(color: Colors.black38,),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            SizedBox(width: 15,),
+                            Text('Date: Récente à Ancienne', style: TextStyle(fontWeight: FontWeight.w400,fontSize: 15 ),),
+                            SizedBox(width: 80,),
+                            Radio(
+                              value: '',hoverColor: Colors.black,activeColor: Colors.green,
+                              groupValue: sortByDateAscending,
+                              onChanged: (value) {
+                                setState(() {
+                                  // sortByDateAscending = !sortByDateAscending;
+                                  // Reverse the sorting order when the button is tapped
+                                  widget.courses.sort((a, b) {
+                                    DateTime dateA = DateTime.parse(a['date'].toString());
+                                    DateTime dateB = DateTime.parse(b['date'].toString());
+
+                                    // Sort in ascending order if sortByDateAscending is true,
+                                    // otherwise sort in descending order
+
+                                    return dateB.compareTo(dateA);
+                                  });
+                                });
+                              },
+
+                            ),
+                          ],
+                        ),
+
                       ],
                     ),
                   ),
@@ -2769,7 +2900,7 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
   Widget build(BuildContext context) {
     return AlertDialog(
                 surfaceTintColor: Color(0xB0AFAFA3),
-        insetPadding: EdgeInsets.only(top: 60,),
+        insetPadding: EdgeInsets.only(top: 120,),
         
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.only(

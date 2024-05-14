@@ -384,7 +384,7 @@ class _LoginSectionState extends State<LoginSection>
         decoration: InputDecoration(prefixIcon: IconButton(
           icon: Icon(
           icon,
-          color: Colors.black12.withOpacity(.7),
+          color: Colors.black12.withOpacity(.3),
           ),
           onPressed:onPress,
           ),
@@ -395,10 +395,10 @@ class _LoginSectionState extends State<LoginSection>
             fontSize: 14,
             color: Colors.black12.withOpacity(.5),
           ),
-          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15),borderSide: BorderSide(color: Colors.black12,),),
-            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15),borderSide: BorderSide(color: Colors.black12)),
-            errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15),borderSide: BorderSide(color: Colors.redAccent.shade100)),
-            focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15),borderSide: BorderSide(color: Colors.black12)),
+          enabledBorder: UnderlineInputBorder(borderRadius: BorderRadius.circular(15),borderSide: BorderSide(color: Colors.black,),),
+            focusedBorder: UnderlineInputBorder(borderRadius: BorderRadius.circular(15),borderSide: BorderSide(color: Colors.black,),),
+            errorBorder: UnderlineInputBorder(borderRadius: BorderRadius.circular(15),borderSide: BorderSide(color: Colors.redAccent,),),
+            focusedErrorBorder: UnderlineInputBorder(borderRadius: BorderRadius.circular(15),borderSide: BorderSide(color: Colors.redAccent,),),
             contentPadding: EdgeInsets.symmetric(vertical: 18)
         ),
       ),
@@ -460,7 +460,7 @@ class _LoginSectionState extends State<LoginSection>
       var parse = jsonDecode(response.body);
       errorMessage = parse["message"];
       // Mettez à jour l'état de l'interface utilisateur
-      if(parse['message'] == "Votre compte est inaccessible, veuillez visiter la page d'inscrition pour completer votre information par la numero de compte !")
+      if(parse['error']['statusCode'] == 406)
       setState(() {
         showDialog(
             context: context,

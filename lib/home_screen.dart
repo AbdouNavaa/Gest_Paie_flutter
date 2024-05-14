@@ -126,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   end: Alignment.bottomLeft,
                   // colors: [ Colors.white,Colors.white],
                   // stops: [0.0, 2],
-                  colors: [Colors.blueAccent, Colors.white],
+                  colors: [Colors.blue, Colors.blueAccent],
                   // colors: [Color(0xB0AFAFA3), Colors.white],
                 ),
               ),
@@ -1372,49 +1372,49 @@ class _MyDrawerState extends State<MyDrawer> {
                       }
                     },
                   ),
-                  ListTile(
-                    leading: Icon(Icons.bookmark_added_outlined, size: _drawerIconSize,color: Colors.black,),
-                    title: Text('Cours  paye',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
-                    onTap: ()async{
-                      SharedPreferences prefs = await SharedPreferences.getInstance();
-                      String token = prefs.getString("token")!;
-                      String role = prefs.getString("role")!;
-                      var response = await http.get(
-                        Uri.parse('http://192.168.43.73:5000/cours?isPaid=effectué'),
-                        headers: {
-                          'Content-Type': 'application/json',
-                          'Authorization': 'Bearer $token'
-                        },
-                      );
-                      // print(response.body);
-
-                      if (response.statusCode == 200) {
-                        List<dynamic> courses = json.decode(
-                            response.body)['cours'];
-                        // this.coursNum = json.decode(response.body)['data']['countLL'];
-                        // num heuresTV = json.decode(response.body)['data']['heuresTV'];
-                        // num sommeTV = json.decode(response.body)['data']['sommeTV'];
-                        // setState(() {
-                        this.coursNum = json.decode(response.body)['cours'].length;
-                        //
-                        // });
-                        print('Mes Cours :${json.decode(response.body)['cours']}');
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) =>
-                              CoursesPage(courses: courses,
-                                coursNum: coursNum,paid: true,
-                                // heuresTV: heuresTV,
-                                // sommeTV: sommeTV,
-                                role: role,)),
-                        );
-                      } else {
-                        // Handle error
-                        print('Failed to fetch prof courses. Status Code: ${response
-                            .statusCode}');
-                      }
-                    },
-                  ),
+                  // ListTile(
+                  //   leading: Icon(Icons.bookmark_added_outlined, size: _drawerIconSize,color: Colors.black,),
+                  //   title: Text('Cours  paye',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
+                  //   onTap: ()async{
+                  //     SharedPreferences prefs = await SharedPreferences.getInstance();
+                  //     String token = prefs.getString("token")!;
+                  //     String role = prefs.getString("role")!;
+                  //     var response = await http.get(
+                  //       Uri.parse('http://192.168.43.73:5000/cours?isPaid=effectué'),
+                  //       headers: {
+                  //         'Content-Type': 'application/json',
+                  //         'Authorization': 'Bearer $token'
+                  //       },
+                  //     );
+                  //     // print(response.body);
+                  //
+                  //     if (response.statusCode == 200) {
+                  //       List<dynamic> courses = json.decode(
+                  //           response.body)['cours'];
+                  //       // this.coursNum = json.decode(response.body)['data']['countLL'];
+                  //       // num heuresTV = json.decode(response.body)['data']['heuresTV'];
+                  //       // num sommeTV = json.decode(response.body)['data']['sommeTV'];
+                  //       // setState(() {
+                  //       this.coursNum = json.decode(response.body)['cours'].length;
+                  //       //
+                  //       // });
+                  //       print('Mes Cours :${json.decode(response.body)['cours']}');
+                  //       Navigator.push(
+                  //         context,
+                  //         MaterialPageRoute(builder: (context) =>
+                  //             CoursesPage(courses: courses,
+                  //               coursNum: coursNum,paid: true,
+                  //               // heuresTV: heuresTV,
+                  //               // sommeTV: sommeTV,
+                  //               role: role,)),
+                  //       );
+                  //     } else {
+                  //       // Handle error
+                  //       print('Failed to fetch prof courses. Status Code: ${response
+                  //           .statusCode}');
+                  //     }
+                  //   },
+                  // ),
                   // Divider(color: Colors.black38, height: 1,),
                   ListTile(
                       leading: Icon(Icons.payment_outlined, size: _drawerIconSize,color: Colors.black,),

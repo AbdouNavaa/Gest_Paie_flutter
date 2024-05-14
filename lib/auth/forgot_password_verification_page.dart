@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:gestion_payements/auth/login.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -166,8 +167,9 @@ class _ForgotPasswordVerificationPageState extends State<ForgotPasswordVerificat
 
                                 _pinSuccess?  Navigator.of(context).pushAndRemoveUntil(
                                       MaterialPageRoute(
-                                          builder: (context) => LoginSection()
+                                          builder: (context) => KeyboardVisibilityProvider(child: LoginSection())
                                       ),
+
                                           (Route<dynamic> route) => false
                                   )
                                     : ScaffoldMessenger.of(context).showSnackBar(

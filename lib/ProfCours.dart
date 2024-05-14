@@ -142,7 +142,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
   int coursesPerPage = 5;
   String searchQuery = '';
   bool sortByDateAscending = true;
-  bool isSignedd = false;
+  bool showSearch = false;
 
   bool courseFitsCriteria(Map<String, dynamic> course) {
     // Apply your filtering criteria here
@@ -185,12 +185,26 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                     Navigator.pop(context);
                   }, child: Icon(Icons.arrow_back_ios,color: Colors.black,size: 20,)),
                 // SizedBox(width: 50,),
-                Text("Mes Cours",style: TextStyle(fontSize: 20),)
+                Text("Mes Cours",style: TextStyle(fontSize: 20),),
+                SizedBox(width: 150,),
+                Container(
+                  width: 50,
+                  height: 50,
+                  // color: Colors.black26,
+                  child: IconButton(icon:Icon(Icons.search, size: 30,color: Colors.black),
+                    onPressed: () {
+                      setState(() {
+                        showSearch = !showSearch;
+                      });
+                    },
+                  ),
+                ),
               ],
             ),
           ),
           Divider(),
 
+          showSearch?
           Container(
             margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
@@ -218,7 +232,8 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                 contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               ),
             ),
-          ),
+          ):
+          SizedBox(height: 10,),
 
 
 

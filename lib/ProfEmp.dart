@@ -27,7 +27,7 @@ class _EmploiPageState extends State<EmploiPage> {
   Future<void> fetchEmplois() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token")!;
-    String apiUrl = 'http://192.168.43.73:5000/emploi/${widget.profId}/professeur';
+    String apiUrl = 'http://192.168.43.73:5000/professeur/${widget.profId}/emplois';
     final response = await http.get(Uri.parse(apiUrl),
       headers: {
         'Content-Type': 'application/json',
@@ -35,20 +35,27 @@ class _EmploiPageState extends State<EmploiPage> {
       },
     );
 
+    print('blabla ${response.statusCode}');
     if (response.statusCode == 200) {
       Map<String, dynamic> data = jsonDecode(response.body);
+      Map<String, dynamic> emploisData = data['emplois'];
 
-      // Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-      List<dynamic> filData = data['emplois'];
+      List<ProfEmploi> allEmplois = [];
+
+      emploisData.forEach((jour, emploisJour) {
+        List<dynamic> emploisJourList = emploisJour;
+        List<ProfEmploi> emploisJourParsed = emploisJourList.map((emp) => ProfEmploi.fromJson(emp)).toList();
+        allEmplois.addAll(emploisJourParsed);
+      });
 
       setState(() {
-        emplois = List<ProfEmploi>.from(data['emplois'].map((emp) => ProfEmploi.fromJson(emp)));
+        emplois = allEmplois;
       });
-      print("My Data${filData}");
     } else {
       throw Exception('Failed to load emplois');
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -122,7 +129,7 @@ class _EmploiPageState extends State<EmploiPage> {
                                   )),
                                   DataCell(Container(
                                     width: 70,
-                                    child: Text('${emplois?[index].classe.capitalize}',style: TextStyle(
+                                    child: Text('${emplois?[index].fil.toUpperCase()}',style: TextStyle(
                                       color: Colors.black,
                                     ),),
                                   )),
@@ -164,9 +171,9 @@ class ProfEmploi {
   final int dayNumero;
   final String type;
   final double nbh;
-  final String classe;
+  // final String classe;
   final String matiere;
-  // final Mats matiere;
+  final String fil;
 
   ProfEmploi({
     required this.id,
@@ -176,8 +183,9 @@ class ProfEmploi {
     required this.dayNumero,
     required this.type,
     required this.nbh,
-    required this.classe,
+    // required this.classe,
     required this.matiere,
+    required this.fil,
   });
 
   factory ProfEmploi.fromJson(Map<String, dynamic> json) {
@@ -189,41 +197,45 @@ class ProfEmploi {
       dayNumero: json['dayNumero'],
       type: json['type'],
       nbh: json['nbh'],
-      matiere: json['matiere'],
-      classe: json['classe'],
+      matiere: json['element'],
+      // classe: json['classe'],
+      fil: json['filiere'],
       // matiere: Mats.fromJson(json['matiere']),
     );
   }
 }
+class ProfEmplois {
+  final dynamic Lun;
+  final dynamic Mar;
+  final dynamic Mer;
+  final dynamic Jeu;
+  final dynamic Ven;
+  final dynamic Sam;
+  final dynamic Dim;
 
-class Mats {
-  final String id;
-  final String name;
-  final String categorie;
-  final int numero;
-  final int prix;
-  final String code;
-
-  Mats({
-    required this.id,
-    required this.name,
-    required this.categorie,
-    required this.numero,
-    required this.prix,
-    required this.code,
+  ProfEmplois( {
+    required this.Lun,
+    this.Mar,
+    this.Mer,
+    this.Jeu,
+    this.Ven,
+    this.Sam,
+    this.Dim,
   });
 
-  factory Mats.fromJson(Map<String, dynamic> json) {
-    return Mats(
-      id: json['_id'],
-      name: json['name'],
-      categorie: json['categorie'],
-      numero: json['numero'],
-      prix: json['prix'],
-      code: json['code'],
+  factory ProfEmplois.fromJson(Map<String, dynamic> json) {
+    return ProfEmplois(
+      Lun: json['lundi'],
+      Mar: json['mardi'],
+      Mer: json['mercredi'],
+      Jeu: json['jeudi'],
+      Ven: json['vendredi'],
+      Sam: json['samedi'],
+      Dim: json['dimanche'],
     );
   }
 }
+
 
 
 
