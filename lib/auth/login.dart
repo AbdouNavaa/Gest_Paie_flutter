@@ -153,7 +153,7 @@ class _LoginSectionState extends State<LoginSection>
                     children: [
                       SizedBox(),
                       Text(
-                        'SIGN IN',
+                        'CONNECTER',
                         style: TextStyle(
                           fontSize: 25,
                           fontWeight: FontWeight.w600,
@@ -232,126 +232,107 @@ class _LoginSectionState extends State<LoginSection>
                   child: Stack(
                     children: [
                       Center(
-                        child: Container(
-                          margin: EdgeInsets.only(bottom: _width * .07),
-                          height: _width * .7,
-                          width: _width * .7,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: LinearGradient(
-                              colors: [
-                                Colors.transparent,
-                                Colors.transparent,
-                                // Colors.blueAccent,
-                                // Colors.blueAccent,
-                                // Colors.blueAccent,
-                                Colors.blueAccent,
-                              ],
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                            ),
-                          ),
-                        ),
-                      ),
-                      Center(
-                        child: Transform.scale(
-                          scale: _animation.value,
-                          child: InkWell(
-                            splashColor: Colors.transparent,
-                            highlightColor: Colors.transparent,
-                            onTap: ()  async {
-                              if (_formKey.currentState!.validate()){
-                                setState(() {
-                                  isLoginFailed = false; // Réinitialisation de la variable d'erreur
-                                });
-                                // if (isEmailValid && isPasswordValid) {
-                                await login(_emailController.text, _passwordController.text);
-                                SharedPreferences prefs = await SharedPreferences
-                                    .getInstance();
-                                String token = prefs.getString("token")!;
-                                String role = prefs.getString("role")!;
-                                String email1 = prefs.getString("email")!;
-                                String id = prefs.getString("id")!;
-                                String name = prefs.getString("nom")!;
-                                // String lastname = prefs.getString("prenom")!;
-                                print(name);
-                                print(email1);
+                        child: InkWell(
+                          // splashColor: Colors.transparent,
+                          // highlightColor: Colors.transparent,
+                          onTap: ()  async {
+                            if (_formKey.currentState!.validate()){
+                              setState(() {
+                                isLoginFailed = false; // Réinitialisation de la variable d'erreur
+                              });
+                              // if (isEmailValid && isPasswordValid) {
+                              await login(_emailController.text, _passwordController.text);
+                              SharedPreferences prefs = await SharedPreferences
+                                  .getInstance();
+                              String token = prefs.getString("token")!;
+                              String role = prefs.getString("role")!;
+                              String email1 = prefs.getString("email")!;
+                              String id = prefs.getString("id")!;
+                              String name = prefs.getString("nom")!;
+                              String photo = prefs.getString("photo")!;
+                              // String lastname = prefs.getString("prenom")!;
+                              print(name);
+                              print("Photo: ${photo}");
 
-                                if (!isLoginFailed) { // Vérifiez si l'authentification a réussi
-                                  if (token != null && role == "professeur") {
-                                    String? profId = await getProfId(token, id)!;
+                              if (!isLoginFailed) { // Vérifiez si l'authentification a réussi
+                                if (token != null && role == "professeur") {
+                                  String? profId = await getProfId(token, id)!;
 
-                                    int? notif = await fetchPaiements(profId,token);
-                                    int? CNS = await CoursNS(profId,token);
+                                  int? notif = await fetchPaiements(profId,token);
+                                  int? CNS = await CoursNS(profId,token);
 
-                                    print("AbdouId: ${notif}");
-                                    if (profId != null) {
-                                      Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => HomeScreen(
-                                            role: role,
-                                            name: name,
-                                            email: email1,
-                                            profId: profId, // Passer l'ID du professeur à la page HomeScreen
-                                            notif: notif, // Passer l'ID du professeur à la page HomeScreen
-                                            CNS: CNS, // Passer l'ID du professeur à la page HomeScreen
-                                          ),
+                                  print("AbdouId: ${notif}");
+                                  if (profId != null) {
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => HomeScreen(
+                                          role: role,
+                                          name: name,
+                                          email: email1,
+                                          // photo: photo,
+                                          profId: profId,
+                                          notif: notif,
+                                          CNS: CNS,
                                         ),
-                                      );
-                                    } else {
-                                      // Gérer le cas où l'ID du prof n'est pas disponible
-                                      // Peut-être afficher un message d'erreur ou rediriger vers une autre page
-                                    }
-                                  }
-                                  else if (token != null && role == "responsable") {
-                                    // Navigator.push(
-                                    //     context, MaterialPageRoute(
-                                    //     builder: (context) => Categories()));
-
-                                    Navigator.push(context, MaterialPageRoute(
-                                        builder: (context) =>
-                                        // ProfesseurInfoPage(
-                                        //     id: id, email: email, role: role),
-                                        // builder: (context) => LandingScreen(role: role,name: nom,), // Passer le rôle ici
-                                        HomeScreen(role: role,name: name,email: email1,)),);
-
-                                  }
-                                  else if (token != null && role == "admin") {
-                                    // Navigator.push(
-                                    //     context, MaterialPageRoute(
-                                    //     builder: (context) => Users()));
-                                    Navigator.pushReplacement(context, MaterialPageRoute(
-                                        builder: (context) =>
-                                        // ProfesseurInfoPage(
-                                        //     id: id, email: email, role: role),
-                                        // builder: (context) => LandingScreen(role: role,name: nom,), // Passer le rôle ici
-                                        HomeScreen(role: role,name: name,email: email1,)),);
+                                      ),
+                                    );
+                                  } else {
+                                    // Gérer le cas où l'ID du prof n'est pas disponible
+                                    // Peut-être afficher un message d'erreur ou rediriger vers une autre page
                                   }
                                 }
-                                else{
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text(errorMessage != null ? errorMessage : 'Email ou mot de passe incorrect')),
-                                  );
+                                else if (token != null && role == "responsable") {
+                                  // Navigator.push(
+                                  //     context, MaterialPageRoute(
+                                  //     builder: (context) => Categories()));
+
+                                  Navigator.push(context, MaterialPageRoute(
+                                      builder: (context) =>
+                                      // ProfesseurInfoPage(
+                                      //     id: id, email: email, role: role),
+                                      // builder: (context) => LandingScreen(role: role,name: nom,), // Passer le rôle ici
+                                      HomeScreen(role: role,name: name,email: email1,)),);
+
+                                }
+                                else if (token != null && role == "admin") {
+                                  // Navigator.push(
+                                  //     context, MaterialPageRoute(
+                                  //     builder: (context) => Users()));
+                                  Navigator.pushReplacement(context, MaterialPageRoute(
+                                      builder: (context) =>
+                                      // ProfesseurInfoPage(
+                                      //     id: id, email: email, role: role),
+                                      // builder: (context) => LandingScreen(role: role,name: nom,), // Passer le rôle ici
+                                      HomeScreen(role: role,name: name,email: email1,)),);
                                 }
                               }
-                            },
-                            child: Container(
-                              height: _width * .2,
-                              width: _width * .2,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: Colors.white,gradient: LinearGradient(
-                                  colors: [Colors.white12, Colors.white],),
-                                boxShadow: [BoxShadow(color: Colors.blueAccent)],
-                                shape: BoxShape.circle,
-                              ),
-                              child: Text(
-                                'SIGN-IN',
-                                style: TextStyle(
-                                  color: Colors.indigo,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                              else{
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(errorMessage != null ? errorMessage : 'Email ou mot de passe incorrect')),
+                                );
+                              }
+                            }
+                          },
+                          child: Container(
+                            height: _width * .5,
+                            width: _width -260,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: Colors.indigoAccent,
+                              gradient: LinearGradient(
+                                // stops: [.65,.33],
+                                tileMode: TileMode.repeated,  begin: const FractionalOffset(0.0, 0.0),
+                                end: const FractionalOffset(1.0, 0.0),
+                                colors: [Colors.indigo, Colors.indigoAccent],),
+                              boxShadow: [BoxShadow(color: Colors.white10)],
+                              shape: BoxShape.circle,
+                            ),
+                            child: Text(
+                              'SIGN-IN',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
@@ -447,11 +428,13 @@ class _LoginSectionState extends State<LoginSection>
       var role = parse["data"]["user"]["role"];
       var id = parse["data"]["user"]["_id"];
       var email1 = parse["data"]["user"]["email"];
+      var photo = parse["data"]["user"]["photo"];
       await prefs.setString('token', parse["token"]);
       await prefs.setString('role', role);
       await prefs.setString('id', id);
       await prefs.setString('email', email1);
       await prefs.setString('nom', nom);
+      await prefs.setString('photo', photo);
       print('Welcom $email1');
     }
     else {

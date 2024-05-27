@@ -24,6 +24,13 @@ class _EmploiPageState extends State<EmploiPage> {
 
   }
 
+  String getMatCode(String elements) {
+    List<dynamic> ids = elements.split('-'); // Sépare la chaîne en une liste d'IDs
+    print(ids);
+    print(ids[1]);
+    return ids[1];
+  }
+
   Future<void> fetchEmplois() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token")!;
@@ -87,16 +94,17 @@ class _EmploiPageState extends State<EmploiPage> {
                     Container(
                       width: MediaQuery.of(context).size.width ,
                       decoration: BoxDecoration(
-                          color: Colors.blue,
+                          // color: Colors.indigo.shade500,
+                          color: Colors.black87,
                           borderRadius: BorderRadius.all(Radius.circular(30))
                       ),
                       child: DataTable(
                         showCheckboxColumn: true,
                         showBottomBorder: true,
-                        headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white70), // Couleur de la ligne d'en-tête
+                        headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white12), // Couleur de la ligne d'en-tête
                         dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white), // Couleur de la ligne d'en-tête
                         headingRowHeight: 50,horizontalMargin: 10,
-                        headingTextStyle: TextStyle(fontWeight: FontWeight.bold),
+                        headingTextStyle: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),
                         columnSpacing: 10,
                         dataRowHeight: 70,
                         columns: [
@@ -123,7 +131,7 @@ class _EmploiPageState extends State<EmploiPage> {
                                   // ),)),
                                   DataCell(Container(
                                     width: 80,
-                                    child: Text('${emplois?[index].matiere.capitalize}',style: TextStyle(
+                                    child: Text('${getMatCode(emplois![index].code).toUpperCase()}',style: TextStyle(
                                       color: Colors.black,
                                     ),),
                                   )),
@@ -173,6 +181,7 @@ class ProfEmploi {
   final double nbh;
   // final String classe;
   final String matiere;
+  final String code;
   final String fil;
 
   ProfEmploi({
@@ -185,6 +194,7 @@ class ProfEmploi {
     required this.nbh,
     // required this.classe,
     required this.matiere,
+    required this.code,
     required this.fil,
   });
 
@@ -199,6 +209,7 @@ class ProfEmploi {
       nbh: json['nbh'],
       matiere: json['element'],
       // classe: json['classe'],
+      code: json['code'],
       fil: json['filiere'],
       // matiere: Mats.fromJson(json['matiere']),
     );

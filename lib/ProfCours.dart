@@ -356,14 +356,6 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
 
               ],          ),
           ),
-          // Display the calculated sums
-          Divider(color: Colors.black26,),
-
-
-
-// Define the pagination variables
-
-// Determine the total number of pages
 
           Expanded(
             child: Padding(
@@ -375,12 +367,13 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                     Container(
                       width: MediaQuery.of(context).size.width + 50,
                       decoration: BoxDecoration(
-                          color: Colors.blue,
-                          borderRadius: BorderRadius.all(Radius.circular(30))
+                          color: Colors.black87,
+                          // color: Colors.black,
+                          borderRadius: BorderRadius.all(Radius.circular(15))
                       ),
                       child: DataTable(
 
-                        headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white70),
+                        headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white10),
                         dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
                         showCheckboxColumn: true,
                         showBottomBorder: true,
@@ -391,7 +384,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                         dataRowHeight: 60,
                         headingTextStyle: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: Colors.black, // Set header text color
+                          color: Colors.white, // Set header text color
                         ),
                         // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
                         columns: [
@@ -474,28 +467,28 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                                   ),
                                 ],
                               ),
-                          DataRow(
-                              // color:MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)),
-                              cells: [
-                            DataCell(Text('Total', style: TextStyle(fontWeight: FontWeight.bold),)),
-                            DataCell(Text('')),
-                            DataCell((widget.dateDeb != null && widget.dateFin != null)?
-                            Center(child: Text('${coursesNum} Cours',style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold)))
-                                :Text('${widget.courses.length} Cours',style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),)
-                            ),
-                            DataCell(Text('')),
-                            DataCell((widget.dateDeb != null && widget.dateFin != null)?
-                            Text('${totalType}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),)
-                                :Text('${totalType}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
-                            ),
-
-                            DataCell((widget.dateDeb != null && widget.dateFin != null)?
-                            Text('${somme}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold))
-                                :Text('${somme}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),)
-                            ),
-
-                            DataCell(Text('')),
-                          ])
+                          // DataRow(
+                          //     // color:MaterialStateColor.resolveWith((states) => Colors.white),
+                          //
+                          //     cells: [
+                          //   DataCell(Text('Total', style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),)),
+                          //   DataCell(Text('')),
+                          //   DataCell((widget.dateDeb != null && widget.dateFin != null)?
+                          //   Center(child: Text('${coursesNum} Cours',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold)))
+                          //       :Text('${widget.courses.length} Cours',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),)
+                          //   ),
+                          //   DataCell(Text('')),
+                          //   DataCell(
+                          //   Text('${totalType}',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),)
+                          //   ),
+                          //
+                          //
+                          //   DataCell(
+                          //   Text('${somme}',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold))
+                          //   ),
+                          //
+                          //   DataCell(Text('')),
+                          // ])
                         ],
                       ),
                     ),
@@ -562,19 +555,6 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
         ],
       ),
 
-      // floatingActionButton: FloatingActionButton.extended(
-      //   // heroTag: 'uniqueTag',
-      //   tooltip: 'Ajouter une Cours',backgroundColor: Colors.white,
-      //   label: Row(
-      //     children: [Icon(Icons.add,color: Colors.black,)],
-      //   ),
-      //   onPressed: () => _displayTextInputDialog(context),
-      //
-      // ),
-
-
-      // bottomNavigationBar: BottomNav(),
-
     );
 
   }
@@ -597,10 +577,10 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
               children: [
                 Row(
                   children: [
-                    Text('Cours Infos',style: TextStyle(fontSize: 25),),
+                    Text('Cours Infos',style: TextStyle(fontSize: 25,color: Colors.blueGrey),),
                     Spacer(),
                     InkWell(
-                      child: Icon(Icons.close),
+                      child: Icon(Icons.close,color: Colors.blueGrey),
                       onTap: (){
                         Navigator.pop(context);
                       },

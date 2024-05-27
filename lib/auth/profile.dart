@@ -1,3 +1,8 @@
+import 'package:path/path.dart'; // for basename
+import 'dart:convert';
+import 'dart:io';
+import 'package:http/http.dart' as http;
+
 import 'package:animated_theme_switcher/animated_theme_switcher.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
@@ -5,6 +10,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gestion_payements/auth/profile_list_item.dart';
 import 'package:gestion_payements/auth/settings.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -30,6 +36,65 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   bool isDark = false;
+
+  @override
+  void initState() {
+    _loadPhotoUrl();
+    // TODO: implement initState
+    super.initState();
+  }
+  File? _image;
+  final ImagePicker _picker = ImagePicker();
+  String? _photoUrl;
+  _loadPhotoUrl() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _photoUrl = prefs.getString("photo") ?? 'assets/user1.png';
+    });
+  }
+
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path); // Assign pickedFile.path to _image
+      });
+      await _uploadImage(_image!);
+    }
+  }
+
+
+  Future<void> _uploadImage(File image) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString("token");
+    String? userId = prefs.getString("id");
+
+    var request = http.MultipartRequest('PATCH', Uri.parse("http://192.168.43.73:5000/user" + "/$userId"));
+    request.headers['Authorization'] = 'Bearer $token';
+    print(image.path.split('/').last);
+    request.files.add(await http.MultipartFile.fromPath('photo', image.path, filename: basename(image.path),));
+
+    var response = await request.send();
+
+    print("SC:${response.statusCode}");
+    if (response.statusCode == 201) {
+      var responseData = await http.Response.fromStream(response);
+      var responseJson = jsonDecode(responseData.body);
+
+      setState(() {
+        _photoUrl = responseJson['user']['photo'];
+        print("PH:${_photoUrl}");
+
+      });
+
+      await prefs.setString('photo', _photoUrl!);
+    } else {
+      // Handle error
+      print('Failed to upload image: ${response.statusCode}');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // ScreenUtil.init(context, height: 896, width: 414, allowFontScaling: true);
@@ -45,9 +110,14 @@ class _ProfilePageState extends State<ProfilePage> {
             child: Stack(
               children: <Widget>[
                 CircleAvatar(
-                  radius: 10 * 5,backgroundColor: Colors.white,
-                  // child: Image.asset("assets/user1.png",width: 90),
-                  backgroundImage: AssetImage('assets/user1.png'),
+                  radius: 50,
+                  backgroundColor: Colors.white,
+                  backgroundImage:
+                  _image != null
+                      ? FileImage(_image!)
+                      : (_photoUrl != null? NetworkImage("http://192.168.43.73:5000/uploads/images/Design12.webp.webp") :
+                  AssetImage('assets/user1.png'))
+                  as ImageProvider,
                 ),
                 Align(
                   alignment: Alignment.bottomRight,

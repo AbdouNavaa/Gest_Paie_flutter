@@ -213,7 +213,7 @@ class _PaieState extends State<ProfPaies> {
                   Container(
                     width: MediaQuery.of(context).size.width ,
                     decoration: BoxDecoration(
-                      color: Colors.blue,
+                      color: Colors.black87,
                       borderRadius: BorderRadius.all(
                         Radius.circular(20.0),
                       ),
@@ -224,9 +224,9 @@ class _PaieState extends State<ProfPaies> {
                       showBottomBorder: true,
                       headingRowHeight: 50,
 
-                      headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white70),
+                      headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white10),
                       dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
-                      columnSpacing: 8,headingTextStyle: TextStyle(fontWeight: FontWeight.bold),
+                      columnSpacing: 8,headingTextStyle: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),
                       dataRowHeight: 50,
                       columns: [
                         DataColumn(label: Text('Du')),

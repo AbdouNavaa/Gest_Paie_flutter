@@ -1,8 +1,13 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:gestion_payements/filliere.dart';
 import 'package:gestion_payements/professeures.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:multi_dropdown/multiselect_dropdown.dart';
+import 'package:multi_select_flutter/chip_display/multi_select_chip_display.dart';
+import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
+import 'package:multi_select_flutter/util/multi_select_item.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
@@ -45,11 +50,18 @@ class _ElementsState extends State<Elements> {
   Professeur? selectedProfesseur;
   List<Professeur> professeurs = [];
 
-  Professeur? selectedProfesseurCM;
-  Professeur? selectedProfesseurTP;
-  Professeur? selectedProfesseurTD;
+  List<Professeur> selectedProfesseursCM = [];
+  List<Professeur> selectedProfesseursTP = [];
+  List<Professeur> selectedProfesseursTD = [];
+  List<String> Itemvalues = [];
+  List<String> CMvalues = [];
+  List<String> TPvalues = [];
+  List<String> TDvalues = [];
 
 
+  MultiSelectController _controller = MultiSelectController();
+
+  bool showFloat = false;
   void DeleteElems(id) async{
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token")!;
@@ -90,6 +102,13 @@ class _ElementsState extends State<Elements> {
     print(id);
     return fil.name; // Return the ID if found, otherwise an empty string
 
+  }
+
+  String getProfId(String elements) {
+    List<dynamic> ids = elements.split('-'); // Sépare la chaîne en une liste d'IDs
+    print(ids);
+    print(ids[0]);
+    return ids[0];
   }
   String getMatNameFromId(String id) {
     // Assuming you have a list of professeurs named 'professeursList'
@@ -191,8 +210,57 @@ class _ElementsState extends State<Elements> {
                     Navigator.pop(context);
                   }, child: Icon(Icons.arrow_back_ios,color: Colors.black,size: 20,)),
                   // SizedBox(width: 50,),
+                  showSearch?
+                  Container(width: MediaQuery.of(context).size.width/3*2,
+                      margin: EdgeInsets.symmetric(horizontal: 0, vertical: 4),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.white.withOpacity(.85),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.3),
+                            spreadRadius: 2,
+                            blurRadius: 5,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child:TextField(
+                        controller: _searchController,
+                        onChanged: (value) async {
+                          List<Elem>? Els = await fetchElems();
+
+                          // print("Els List: ${Els.length}");
+                          setState(() {
+                            // Implémentez la logique de filtrage ici
+                            // Par exemple, filtrez les emploiesseurs dont le name ou le préname contient la valeur saisie
+                            filteredItems = Els.where((ele) =>
+                            (ele.nameMat)!.toLowerCase().contains(value.toLowerCase()) ||
+                                (ele.code!).toLowerCase().contains(value.toLowerCase()) ||
+                                (ele.filName!).toLowerCase().contains(value.toLowerCase()) ||
+                                // (var prof in ele) ?
+                                // (ele.ProfTP!).toLowerCase().contains(value.toLowerCase()) ||
+                                // (ele.ProfTD!).toLowerCase().contains(value.toLowerCase())
+                                ("S${ele.SemNum!}").toLowerCase().contains(value.toLowerCase())
+                            ).toList();
+                          });
+
+                        },
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.search, color: Colors.grey),
+                          suffixIcon: IconButton(
+                            icon: Icon(Icons.tune_sharp, color: Colors.grey),
+                            onPressed: () {
+                              // _showFilterOptionsDialog(context,_searchController.text);
+                            },
+                          ),
+                          hintText: 'Rechercher',
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        ),
+                      )):
                   Text("Liste des Elements",style: TextStyle(fontSize: 20),),
-                  SizedBox(width: 80,),
+                  showSearch?SizedBox():SizedBox(width: 80,),
                   Container(
                     width: 50,
                     height: 50,
@@ -210,52 +278,6 @@ class _ElementsState extends State<Elements> {
             ),
             Divider(),
 
-            showSearch?
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.3),
-                    spreadRadius: 2,
-                    blurRadius: 5,
-                    offset: Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: TextField(style: TextStyle(
-                color: Colors.black,
-              ),
-                controller: _searchController,
-                onChanged: (value) async {
-                  List<Elem>? Els = await fetchElems();
-
-                  // print("Els List: ${Els.length}");
-                  setState(() {
-                    // Implémentez la logique de filtrage ici
-                    // Par exemple, filtrez les emploiesseurs dont le name ou le préname contient la valeur saisie
-                    filteredItems = Els.where((ele) =>
-                    (ele.nameMat)!.toLowerCase().contains(value.toLowerCase()) ||
-                        (ele.filName!).toLowerCase().contains(value.toLowerCase()) ||
-                        // (ele.ProfTP!).toLowerCase().contains(value.toLowerCase()) ||
-                        // (ele.ProfTD!).toLowerCase().contains(value.toLowerCase())
-                        ("S${ele.SemNum!}").toLowerCase().contains(value.toLowerCase())
-                    ).toList();
-                  });
-
-                },
-                decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.search, color: Colors.grey),
-                  hintText: 'Rechercher  ',
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                ),
-
-              )
-              ,
-            ): SizedBox(height: 10,),
 
 
             Expanded(
@@ -291,7 +313,7 @@ class _ElementsState extends State<Elements> {
                                   // Modifiez les couleurs de DataTable ici
                                   dataTableTheme: DataTableThemeData(
                                     dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white), // Couleur des lignes de données
-                                    headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white70), // Couleur de la ligne d'en-tête
+                                    headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white), // Couleur de la ligne d'en-tête
 
 
                                   ),
@@ -308,6 +330,7 @@ class _ElementsState extends State<Elements> {
                                   },
                                   columns: [
                                     DataColumn(label: Text('Sem')),
+                                    DataColumn(label: Text('Code')),
                                     DataColumn(label: Text('Matiere')),
                                     DataColumn(label: Text('Fillliere')),
                                     DataColumn(label: Text('H.CM')),
@@ -339,20 +362,136 @@ class _ElementsState extends State<Elements> {
 
           ],
         ),
-        floatingActionButton: FloatingActionButton.extended(
-          // heroTag: 'uniqueTag',
-          tooltip: 'Ajouter une element',
-          backgroundColor: Colors.white,
-          label: Row(
-            children: [Icon(Icons.add,color: Colors.black,)],
+        floatingActionButton: showFloat?
+        Container(
+          width: 300,
+
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(50)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 5,
+              ),
+            ],
           ),
-          onPressed: () => _displayTextInputDialog(context),
+
+          margin: EdgeInsets.only(left: 80,right: 25),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // SizedBox(width: 18,),
+              TextButton(
+                child: Row(
+                  children: [
+                    Icon(Icons.add, color: Colors.black,),
+                    Text('Ajouter',style: TextStyle(color: Colors.black),),
+                  ],
+                ),
+                onPressed: () => _displayTextInputDialog(context),
+
+              ),
+              TextButton(
+                child: Row(
+                  children: [
+                    Icon(Icons.cloud_download_outlined, color: Colors.black,),
+                    Text('Importer',style: TextStyle(color: Colors.black),),
+                  ],
+                ),
+                onPressed: () async {
+                  String? filePath = await pickExcelFile();
+                  if (filePath != null) {
+                    uploadFileToBackend(filePath);
+                    Navigator.pop(context);
+                  }
+                },
+
+              ),
+              TextButton(
+                child: Icon(Icons.close_outlined, color: Colors.black,),
+                onPressed: () {
+                  setState(() {
+                    showFloat = false;
+                  });
+                },
+
+              ),
+
+
+            ],
+          ),
+        )
+            :Container(
+          width: 60,
+          decoration: BoxDecoration(
+            color: Colors.lightGreen,
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 5,
+              ),
+            ],
+            // border: Border.all(color: Colors.black38,width: 2)
+          ),
+
+          // margin: EdgeInsets.only(left: 90,right: 60),
+          child:
+          TextButton(
+            child: Icon(Icons.add, color: Colors.white,),
+            onPressed: () {
+              setState(() {
+                showFloat = true;
+              });
+            },
+
+          ),
 
         ),
 
 
+
       );
 
+  }
+  Future<String?> pickExcelFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['xlsx'],
+    );
+
+    if (result != null) {
+      return result.files.single.path;
+    } else {
+      return null;
+    }
+  }
+
+  Future<void> uploadFileToBackend(String? filePath) async {
+    if (filePath != null) {
+      try {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        String token = prefs.getString("token")!;
+        Uri url = Uri.parse('http://192.168.43.73:5000/element/upload/all');
+        var request = http.MultipartRequest('POST', url,);
+        request.headers['Authorization'] = 'Bearer $token';
+        request.files.add(await http.MultipartFile.fromPath('file', filePath));
+
+        var response = await request.send();
+        if (response.statusCode == 200) {
+          var jsonResponse = await response.stream.bytesToString();
+          print('Réponse du serveur: $jsonResponse');
+        } else {
+          print('Échec de la requête: ${response.statusCode}');
+        }
+      } catch (e) {
+        print('Erreur lors de la requête: $e');
+      }
+    } else {
+      print('Aucun fichier sélectionné');
+    }
   }
 
   Future<void> _displayTextInputDialog(BuildContext context) async {
@@ -509,7 +648,55 @@ class _ElementsState extends State<Elements> {
                     ),
                   ),
                   SizedBox(height: 15),
-                  ElemProfs(context,'Professeur(e/s) de CM:' ,ele.ProCMId!),
+                  Container(width: MediaQuery.of(context).size.width,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Groupes CM :',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w400,
+                            fontStyle: FontStyle.italic,
+                            // color: Colors.lightBlue
+                          ),),
+                        for (var prof in ele.groupeCM!)
+                          Text(
+                            'G${prof.toString().split('-')[2]}-${getProfIdFromName(prof.toString().split('-')[0]).capitalize }',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  // ElemProfs(context,'Professeur(e/s) de CM:' ,ele.ProCMId!),
+
+                  SizedBox(height: 15),
+                  // Container(width: MediaQuery.of(context).size.width,
+                  //   child: Column(
+                  //     crossAxisAlignment: CrossAxisAlignment.start,
+                  //     children: [
+                  //       Text("groupeCM",
+                  //         style: TextStyle(
+                  //           fontSize: 20,
+                  //           fontWeight: FontWeight.w400,
+                  //           fontStyle: FontStyle.italic,
+                  //           // color: Colors.lightBlue
+                  //         ),),
+                  //       for (var prof in ele.groupeCM!)
+                  //         Text(
+                  //           '-${getProfIdFromName(getProfId(prof)).capitalize }',
+                  //           style: TextStyle(
+                  //             fontSize: 20,
+                  //             fontWeight: FontWeight.w400,
+                  //             fontStyle: FontStyle.italic,
+                  //           ),
+                  //         ),
+                  //     ],
+                  //   ),
+                  // ),
                   SizedBox(height: 15),
                   ElemProfs(context,'Professeur(e/s) de TP:' ,ele.ProTPId!),
                   SizedBox(height: 15),
@@ -552,8 +739,8 @@ class _ElementsState extends State<Elements> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                           elevation: 5,
                           padding: EdgeInsets.symmetric(horizontal: 20),
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.green,
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
                           textStyle: TextStyle(fontWeight: FontWeight.bold),
                           // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                         ),
@@ -599,78 +786,102 @@ class _ElementsState extends State<Elements> {
                                         // mainAxisSize: MainAxisSize.min,
                                         children: [
                                           SizedBox(height: 30),
-                                          DropdownButtonFormField<Professeur>(
-                                            value: selectedProfesseurCM,
+                                                // MultiSelectDropDown(
+                                          //   // showClearIcon: true,
+                                          //   controller: _controller,
+                                          //   onOptionSelected: (options) {
+                                          //     debugPrint(options.toString());
+                                          //   },
+                                          //   options: const <ValueItem>[
+                                          //     ValueItem(label: 'Option 1', value: '1'),
+                                          //     ValueItem(label: 'Option 2', value: '2'),
+                                          //     ValueItem(label: 'Option 3', value: '3'),
+                                          //     ValueItem(label: 'Option 4', value: '4'),
+                                          //     ValueItem(label: 'Option 5', value: '5'),
+                                          //     ValueItem(label: 'Option 6', value: '6'),
+                                          //   ],
+                                          //   maxItems: 2,
+                                          //   disabledOptions: const [ValueItem(label: 'Option 1', value: '1')],
+                                          //   selectionType: SelectionType.multi,
+                                          //   chipConfig: const ChipConfig(wrapType: WrapType.wrap),
+                                          //   dropdownHeight: 300,
+                                          //   optionTextStyle: const TextStyle(fontSize: 16),
+                                          //   selectedOptionIcon: const Icon(Icons.check_circle),
+                                          // ),
+                                          // SizedBox(height: 20),
+
+                                    MultiSelectDialogField<Professeur>(
+                                    initialValue: selectedProfesseursCM,
+                                      selectedColor: Colors.green,
+                                      backgroundColor: MaterialStateColor.resolveWith((states) => Colors.white), // Couleur des lignes de données
+                                        barrierColor: MaterialStateColor.resolveWith((states) => Colors.black38), // Couleur des lignes de données
+                                      items: professeurs.map((professeur) {
+                                        // Itemvalues.add(professeur.id);
+                                        return MultiSelectItem<Professeur>(professeur, '${professeur.nom!} ${ professeur.prenom!}');
+                                      }).toList(),
+                                      onConfirm: (values) {
+                                        setState(() {
+                                          selectedProfesseursCM = values;
+                                          CMvalues.clear(); // Effacer les anciennes valeurs
+                                          CMvalues.addAll(values.map((professeur) => professeur.id).toList()); // Ajouter les nouvelles valeurs sélectionnées
+                                          print('ItemVal${CMvalues}');
+                                        });
+                                      },
+                                      chipDisplay: MultiSelectChipDisplay<Professeur>(),
+                                      searchHint: 'Sélectionnez un ou plusieurs professeurs de CM',
+                                      decoration: BoxDecoration(
+                                        border: Border.all(color: Colors.white!),color: Colors.white,
+                                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                                      ),
+                                    ),
+                                    SizedBox(height: 20),
+                                            MultiSelectDialogField<Professeur>(
+                                            initialValue: selectedProfesseursTP,
+                                            selectedColor: Colors.green,
+                                            backgroundColor: MaterialStateColor.resolveWith((states) => Colors.white), // Couleur des lignes de données
+                                            barrierColor: MaterialStateColor.resolveWith((states) => Colors.black38), // Couleur des lignes de données
                                             items: professeurs.map((professeur) {
-                                              return DropdownMenuItem<Professeur>(
-                                                value: professeur,
-                                                child: Text(professeur.nom! ),
-                                              );
+                                              // Itemvalues.add(professeur.id);
+                                              return MultiSelectItem<Professeur>(professeur, professeur.nom!);
                                             }).toList(),
-                                            onChanged: (value) {
+                                            onConfirm: (values) {
                                               setState(() {
-                                                selectedProfesseurCM = value;
+                                                selectedProfesseursTP = values;
+                                                TPvalues.clear(); // Effacer les anciennes valeurs
+                                                TPvalues.addAll(values.map((professeur) => professeur.id).toList()); // Ajouter les nouvelles valeurs sélectionnées
+                                                print('ItemVal${TPvalues}');
                                               });
                                             },
-                                            decoration: InputDecoration(
-                                              filled: true,
-                                              // fillColor: Color(0xA3B0AF1),
-                                              fillColor: Colors.white,
-                                              hintText: "selection d'un  Professeur de CM", // Update the hintText
-                                              border: OutlineInputBorder(
-                                                borderSide: BorderSide.none,gapPadding: 1,
-                                                borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                                              ),
+                                            chipDisplay: MultiSelectChipDisplay<Professeur>(),
+                                            searchHint: 'Sélectionnez un ou plusieurs professeurs de CM',
+                                            decoration: BoxDecoration(
+                                              border: Border.all(color: Colors.white!),color: Colors.white,
+                                              borderRadius: BorderRadius.all(Radius.circular(10.0)),
                                             ),
                                           ),
                                           SizedBox(height: 20),
-                                          DropdownButtonFormField<Professeur>(
-                                            value: selectedProfesseurTP,
+                                         MultiSelectDialogField<Professeur>(
+                                            initialValue: selectedProfesseursTD,
+                                            selectedColor: Colors.green,
+                                            backgroundColor: MaterialStateColor.resolveWith((states) => Colors.white), // Couleur des lignes de données
+                                            barrierColor: MaterialStateColor.resolveWith((states) => Colors.black38), // Couleur des lignes de données
                                             items: professeurs.map((professeur) {
-                                              return DropdownMenuItem<Professeur>(
-                                                value: professeur,
-                                                child: Text(professeur.nom! ),
-                                              );
+                                              // Itemvalues.add(professeur.id);
+                                              return MultiSelectItem<Professeur>(professeur, professeur.nom!);
                                             }).toList(),
-                                            onChanged: (value) {
+                                            onConfirm: (values) {
                                               setState(() {
-                                                selectedProfesseurTP = value;
+                                                selectedProfesseursTD = values;
+                                                TDvalues.clear(); // Effacer les anciennes valeurs
+                                                TDvalues.addAll(values.map((professeur) => professeur.id).toList()); // Ajouter les nouvelles valeurs sélectionnées
+                                                print('ItemVal${TDvalues}');
                                               });
                                             },
-                                            decoration: InputDecoration(
-                                              filled: true,
-                                              // fillColor: Color(0xA3B0AF1),
-                                              fillColor: Colors.white,
-                                              hintText: "selection d'un  Professeur de TP", // Update the hintText
-                                              border: OutlineInputBorder(
-                                                borderSide: BorderSide.none,gapPadding: 1,
-                                                borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(height: 20),
-                                          DropdownButtonFormField<Professeur>(
-                                            value: selectedProfesseurTD,
-                                            items: professeurs.map((professeur) {
-                                              return DropdownMenuItem<Professeur>(
-                                                value: professeur,
-                                                child: Text(professeur.nom! ),
-                                              );
-                                            }).toList(),
-                                            onChanged: (value) {
-                                              setState(() {
-                                                selectedProfesseurTD = value;
-                                              });
-                                            },
-                                            decoration: InputDecoration(
-                                              filled: true,
-                                              // fillColor: Color(0xA3B0AF1),
-                                              fillColor: Colors.white,
-                                              hintText: "selection d'un  Professeur de TD", // Update the hintText
-                                              border: OutlineInputBorder(
-                                                borderSide: BorderSide.none,gapPadding: 1,
-                                                borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                                              ),
+                                            chipDisplay: MultiSelectChipDisplay<Professeur>(),
+                                            searchHint: 'Sélectionnez un ou plusieurs professeurs de CM',
+                                            decoration: BoxDecoration(
+                                              border: Border.all(color: Colors.white!),color: Colors.white,
+                                              borderRadius: BorderRadius.all(Radius.circular(10.0)),
                                             ),
                                           ),
                                           SizedBox(height: 30),
@@ -682,7 +893,7 @@ class _ElementsState extends State<Elements> {
 
 
 
-                                               addProfToElem(ele.id,selectedProfesseurCM?.id!,selectedProfesseurTP?.id!,selectedProfesseurTD?.id!,);
+                                               addProfToElem(ele.id,CMvalues!,TPvalues,TDvalues);
 
                                               setState(() {
                                                 Navigator.pop(context);
@@ -719,8 +930,8 @@ class _ElementsState extends State<Elements> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                           elevation: 5,
                           padding: EdgeInsets.symmetric(horizontal: 15),
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.blue,
+                          backgroundColor: Colors.blue,
+                          foregroundColor: Colors.white,
                           textStyle: TextStyle(fontWeight: FontWeight.bold),
                           // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                         ),
@@ -733,7 +944,7 @@ class _ElementsState extends State<Elements> {
                             context: context,
                             builder: (BuildContext context) {
                               return AlertDialog(
-                                        surfaceTintColor: Color(0xB0AFAFA3),
+                                        surfaceTintColor: Colors.white,backgroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
                                 title: Text("Confirmer la suppression"),
                                 content: Text(
@@ -779,8 +990,8 @@ class _ElementsState extends State<Elements> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                           elevation: 5,
                           padding: EdgeInsets.symmetric(horizontal: 20),
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.redAccent,
+                          backgroundColor: Colors.redAccent,
+                          foregroundColor: Colors.white,
                           textStyle: TextStyle(fontWeight: FontWeight.bold),
                           // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                         ),
@@ -1016,7 +1227,7 @@ class _ElementsState extends State<Elements> {
   }
 
 
-  Future<void> addProfToElem( id,String? ProfCM,String? ProfTP,String? ProfTD) async {
+  Future<void> addProfToElem( id, ProfCM, ProfTP, ProfTD) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token")!;
 
@@ -1155,6 +1366,8 @@ class YourDataSource extends DataTableSource {
     return DataRow(cells: [
       DataCell(Container(width: 20, child: Text("S${item.SemNum!}"))),
       DataCell(Container(width: 80,
+          child: Text(item.code!.split('-')[1].toUpperCase()!))),
+      DataCell(Container(width: 80,
           child: Text(item.nameMat!.capitalize!))),
 
       DataCell(Container(width: 30, child: Text(item.filName!.toUpperCase()))),
@@ -1185,6 +1398,24 @@ class YourDataSource extends DataTableSource {
   int get selectedRowCount => 0;
 }
 
+class MultiSelct extends StatefulWidget {
+  final List<String> items;
+  const MultiSelct({super.key, required this.items});
+
+  @override
+  State<MultiSelct> createState() => _MultiSelctState();
+}
+
+class _MultiSelctState extends State<MultiSelct> {
+  final List<String> _selectedItems = [];
+
+  void _temChange(String ){}
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
+  }
+}
+
 
 class Elem {
   String id;
@@ -1194,6 +1425,9 @@ class Elem {
   List<dynamic>? ProCMId; // Le type exact des éléments peut être spécifié ici
   List<dynamic>? ProTPId;
   List<dynamic>? ProTDId;
+  final List<dynamic>? groupeCM;
+  final List<dynamic>? groupeTP;
+  final List<dynamic>? groupeTD;
   List<String>? ProCM;
   List<String>? ProTP;
   List<String>? ProTD;
@@ -1212,9 +1446,9 @@ class Elem {
     this.ProCMId,
     this.ProTPId,
     this.ProTDId,
-    // this.ProCM,
-    // this.ProTP,
-    // this.ProTD,
+    this.groupeCM,
+    this.groupeTP,
+    this.groupeTD,
     this.SemNum,
     this.code,
     this.nameMat,
@@ -1243,6 +1477,10 @@ class Elem {
       ProCMId: json['professeurCM'] ?? [],
       ProTPId: json['professeurTP'] ?? [],
       ProTDId: json['professeurTD'] ?? [],
+
+      groupeCM: json['groupeCM'] ?? [],
+      groupeTP: json['groupeTP'] ?? [],
+      groupeTD: json['groupeTD'] ?? [],
       // ProCM: (json['info']['CM'] as List<dynamic>).map((e) => e.toString()).toList(),
       // ProTP: (json['info']['TP'] as List<dynamic>).map((e) => e.toString()).toList(),
       // ProTD: (json['info']['TD'] as List<dynamic>).map((e) => e.toString()).toList(),
@@ -1303,8 +1541,15 @@ class _AddElemScreenState extends State<AddElemScreen> {
 
   Elem? selectedMat;
   Professeur? selectedProfesseurCM;
-  Professeur? selectedProfesseurTP;
-  Professeur? selectedProfesseurTD;
+
+  List<Professeur> selectedProfesseursCM = [];
+  List<Professeur> selectedProfesseursTP = [];
+  List<Professeur> selectedProfesseursTD = [];
+  List<String> Itemvalues = [];
+  List<String> CMvalues = [];
+  List<String> TPvalues = [];
+  List<String> TDvalues = [];
+
   List<Professeur> professeurs = [];
   DateTime? selectedDateTime;
 
@@ -1356,7 +1601,7 @@ class _AddElemScreenState extends State<AddElemScreen> {
 
     fetchCategories();
   }
-  void AddElem (String catId,String matId,int? sem,String filId,String? PCM,String? PTP,String? PTD,int? HCM,int? HTP,int? HTD,) async {
+  void AddElem (String catId,String matId,int? sem,String filId, PCM, PTP, PTD,int? HCM,int? HTP,int? HTD,) async {
 
     // Check if the prix parameter is provided, otherwise use the default value of 100
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -1499,7 +1744,7 @@ class _AddElemScreenState extends State<AddElemScreen> {
         ),
         content: Container(
           width: MediaQuery.of(context).size.width,
-          // height: 600,
+          height: 600,
           // color: Color(0xA3B0AF1),
           child: SingleChildScrollView(scrollDirection: Axis.vertical,
             child: Column(
@@ -1633,80 +1878,81 @@ class _AddElemScreenState extends State<AddElemScreen> {
                           borderRadius: BorderRadius.all(Radius.circular(10.0)))),
                 ),
                 SizedBox(height: 10),
-                DropdownButtonFormField<Professeur>(
-                  value: selectedProfesseurCM,
+                MultiSelectDialogField<Professeur>(
+                  initialValue: selectedProfesseursCM,
+                  selectedColor: Colors.green,
+                  backgroundColor: MaterialStateColor.resolveWith((states) => Colors.white), // Couleur des lignes de données
+                  barrierColor: MaterialStateColor.resolveWith((states) => Colors.black38), // Couleur des lignes de données
                   items: professeurs.map((professeur) {
-                    return DropdownMenuItem<Professeur>(
-                      value: professeur,
-                      child: Text(professeur.nom! ),
-                    );
+                    // Itemvalues.add(professeur.id);
+                    return MultiSelectItem<Professeur>(professeur, professeur.nom!);
                   }).toList(),
-                  onChanged: (value) {
+                  onConfirm: (values) {
                     setState(() {
-                      selectedProfesseurCM = value;
+                      selectedProfesseursCM = values;
+                      CMvalues.clear(); // Effacer les anciennes valeurs
+                      CMvalues.addAll(values.map((professeur) => professeur.id).toList()); // Ajouter les nouvelles valeurs sélectionnées
+                      print('ItemVal${CMvalues}');
                     });
                   },
-                  decoration: InputDecoration(
-                    filled: true,
-                    // fillColor: Color(0xA3B0AF1),
-                    fillColor: Colors.white,
-                    hintText: "selection d'un  Professeur de CM", // Update the hintText
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,gapPadding: 1,
-                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    ),
+                  chipDisplay: MultiSelectChipDisplay<Professeur>(),
+                  searchHint: 'Sélectionnez un ou plusieurs professeurs de CM',
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.white!),color: Colors.white,
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
                   ),
                 ),
                 SizedBox(height: 10),
-                DropdownButtonFormField<Professeur>(
-                  value: selectedProfesseurTP,
+                MultiSelectDialogField<Professeur>(
+                  initialValue: selectedProfesseursTP,
+                  selectedColor: Colors.green,
+                  backgroundColor: MaterialStateColor.resolveWith((states) => Colors.white), // Couleur des lignes de données
+                  barrierColor: MaterialStateColor.resolveWith((states) => Colors.black38), // Couleur des lignes de données
                   items: professeurs.map((professeur) {
-                    return DropdownMenuItem<Professeur>(
-                      value: professeur,
-                      child: Text(professeur.nom! ),
-                    );
+                    // Itemvalues.add(professeur.id);
+                    return MultiSelectItem<Professeur>(professeur, professeur.nom!);
                   }).toList(),
-                  onChanged: (value) {
+                  onConfirm: (values) {
                     setState(() {
-                      selectedProfesseurTP = value;
+                      selectedProfesseursTP = values;
+                      TPvalues.clear(); // Effacer les anciennes valeurs
+                      TPvalues.addAll(values.map((professeur) => professeur.id).toList()); // Ajouter les nouvelles valeurs sélectionnées
+                      print('ItemVal${TPvalues}');
                     });
                   },
-                  decoration: InputDecoration(
-                    filled: true,
-                    // fillColor: Color(0xA3B0AF1),
-                    fillColor: Colors.white,
-                    hintText: "selection d'un  Professeur de TP", // Update the hintText
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,gapPadding: 1,
-                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    ),
+                  chipDisplay: MultiSelectChipDisplay<Professeur>(),
+                  searchHint: 'Sélectionnez un ou plusieurs professeurs de CM',
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.white!),color: Colors.white,
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
                   ),
                 ),
                 SizedBox(height: 10),
-                DropdownButtonFormField<Professeur>(
-                  value: selectedProfesseurTD,
+                MultiSelectDialogField<Professeur>(
+                  initialValue: selectedProfesseursTD,
+                  selectedColor: Colors.green,
+                  backgroundColor: MaterialStateColor.resolveWith((states) => Colors.white), // Couleur des lignes de données
+                  barrierColor: MaterialStateColor.resolveWith((states) => Colors.black38), // Couleur des lignes de données
                   items: professeurs.map((professeur) {
-                    return DropdownMenuItem<Professeur>(
-                      value: professeur,
-                      child: Text(professeur.nom! ),
-                    );
+                    // Itemvalues.add(professeur.id);
+                    return MultiSelectItem<Professeur>(professeur, professeur.nom!);
                   }).toList(),
-                  onChanged: (value) {
+                  onConfirm: (values) {
                     setState(() {
-                      selectedProfesseurTD = value;
+                      selectedProfesseursTD = values;
+                      TDvalues.clear(); // Effacer les anciennes valeurs
+                      TDvalues.addAll(values.map((professeur) => professeur.id).toList()); // Ajouter les nouvelles valeurs sélectionnées
+                      print('ItemVal${TDvalues}');
                     });
                   },
-                  decoration: InputDecoration(
-                    filled: true,
-                    // fillColor: Color(0xA3B0AF1),
-                    fillColor: Colors.white,
-                    hintText: "selection d'un  Professeur de TD", // Update the hintText
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,gapPadding: 1,
-                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    ),
+                  chipDisplay: MultiSelectChipDisplay<Professeur>(),
+                  searchHint: 'Sélectionnez un ou plusieurs professeurs de CM',
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.white!),color: Colors.white,
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
                   ),
                 ),
+
                 SizedBox(height: 10),
 
                 Row(
@@ -1803,24 +2049,23 @@ class _AddElemScreenState extends State<AddElemScreen> {
                 SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: (){
-                    Navigator.of(context).pop();
-                    fetchElems();
-                    // Pass the selected types to addCoursToProfesseur method
-                    String PrCM = selectedProfesseurCM != null ? selectedProfesseurCM!.id: '';
-                    int CCM = selectedProfesseurCM != null ? HCM: 0;
-                    String PrTP = selectedProfesseurTP != null ? selectedProfesseurTP!.id: '';
-                    int CTP = selectedProfesseurTP != null ? HTP: 0;
-                    String PrTD = selectedProfesseurTD != null ? selectedProfesseurTD!.id: '';
-                    int CTD = selectedProfesseurTD != null ? HTD: 0;
-                    AddElem(selectedCategory!.id,_name.text,semNum,selectedFil!.id, PrCM,PrTP,PrTD,CCM,CTP,CTD);
-                    // AddElem(int.parse(_numero.text),date, selectedFil!.id!);
 
-                    // Addfilliere(_name.text, _desc.text);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Le filliere a été ajouter avec succès.')),
-                    );
+
+                    // Pass the selected types to addCoursToProfesseur method
+                    int CCM = selectedProfesseursCM.length != 0 ? HCM: 0;
+                    int CTP = selectedProfesseursTP.length != 0 ? HTP: 0;
+                    int CTD = selectedProfesseursTD.length != 0 ? HTD: 0;
+                    AddElem(selectedCategory!.id,_name.text,semNum,selectedFil!.id,CMvalues!,TPvalues,TDvalues,CCM,CTP,CTD);
+
                     setState(() {
                       Navigator.pop(context);
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('L\'element a été ajouter avec succès.')),
+                    );
+                    setState(() {
+                      Navigator.of(context).pop();
+                      fetchElems();
                     });
                   },
                   child: Text("Ajouter"),
@@ -1882,7 +2127,7 @@ class _UpdateElemScreenState extends State<UpdateElemScreen> {
   num HCM = 0;
   num HTP = 0;
   num HTD = 0;
-  List<num> nbhValues = [0,12, 22,32];
+  List<num> nbhValues = [0];
 
   Elem? selectedMat;
   Professeur? selectedProfesseurCM;
@@ -1930,6 +2175,9 @@ class _UpdateElemScreenState extends State<UpdateElemScreen> {
       print('Erreur: $error');
     });
 
+    nbhValues.contains(widget.CredCM)? HCM = widget.CredCM: nbhValues.add(widget.CredCM);
+    nbhValues.contains(widget.CredTP)? HTP = widget.CredTP: nbhValues.add(widget.CredTP);
+    nbhValues.contains(widget.CredTD)? HTD = widget.CredTD: nbhValues.add(widget.CredTD);
     HCM = widget.CredCM;
     HTP = widget.CredTP;
     HTD = widget.CredTD;

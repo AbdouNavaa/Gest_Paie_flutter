@@ -1,14 +1,18 @@
+// import 'dart:html';
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'package:path/path.dart'; // for basename
+import 'dart:convert'; // for jsonDecode
+
 import 'package:animated_theme_switcher/animated_theme_switcher.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
 import 'package:gestion_payements/matieres.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
-import 'dart:convert';
-
-import 'package:shared_preferences/shared_preferences.dart';
 
    
 import 'Cours.dart';
@@ -36,7 +40,9 @@ class _ProfesseurDetailsScreenState extends State<ProfesseurDetailsScreen> {
   // Map<String, dynamic>? professeurData;
   Map<String, dynamic>? userData;
   // List<dynamic>? matieres;
-
+  File? _image;
+  final ImagePicker _picker = ImagePicker();
+  String? _photoUrl;
   @override
   void initState() {
     super.initState();
@@ -50,8 +56,12 @@ class _ProfesseurDetailsScreenState extends State<ProfesseurDetailsScreen> {
     });
     fetchProfesseurDetail(widget.profId);
 
+    _loadPhotoUrl();
   }
 
+  TextEditingController _nom = TextEditingController();
+  TextEditingController _prenom = TextEditingController();
+  TextEditingController _email = TextEditingController();
   TextEditingController _mobile = TextEditingController();
   TextEditingController _compte = TextEditingController();
   String _banque = 'BMCI';
@@ -95,6 +105,62 @@ class _ProfesseurDetailsScreenState extends State<ProfesseurDetailsScreen> {
     }
   }
 
+  _loadPhotoUrl() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _photoUrl = prefs.getString("photo") ?? 'assets/user1.png';
+    });
+  }
+
+
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path); // Assign pickedFile.path to _image
+      });
+      await _uploadImage(_image!);
+    }
+  }
+  Future<void> _pickImage1() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+    }
+  }
+
+  Future<void> _uploadImage(File image) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString("token");
+    String? userId = prefs.getString("id");
+
+    var request = http.MultipartRequest('PATCH', Uri.parse("http://192.168.43.73:5000/user" + "/$userId"));
+    request.headers['Authorization'] = 'Bearer $token';
+    print(image.path.split('/').last);
+    request.files.add(await http.MultipartFile.fromPath('photo', image.path, filename: basename(image.path),));
+
+    var response = await request.send();
+
+    print("SC:${response.statusCode}");
+    if (response.statusCode == 201) {
+      var responseData = await http.Response.fromStream(response);
+      var responseJson = jsonDecode(responseData.body);
+
+      setState(() {
+        _photoUrl = responseJson['user']['photo'];
+        print("PH:${_photoUrl}");
+
+      });
+
+      await prefs.setString('photo', _photoUrl!);
+    } else {
+      // Handle error
+      print('Failed to upload image: ${response.statusCode}');
+    }
+  }
 
 
   bool isDark = false;
@@ -112,10 +178,18 @@ class _ProfesseurDetailsScreenState extends State<ProfesseurDetailsScreen> {
             margin: EdgeInsets.only(top: 10 * 3),
             child: Stack(
               children: <Widget>[
-                CircleAvatar(
-                  radius: 10 * 5,backgroundColor: Colors.white,
-                  // child: Image.asset("assets/user1.png",width: 90),
-                  backgroundImage: AssetImage('assets/user1.png'),
+                InkWell(
+                  onTap: _pickImage,
+                  child: CircleAvatar(
+                    radius: 50,
+                    backgroundColor: Colors.white,
+                    backgroundImage:
+                    _image != null
+                        ? FileImage(_image!)
+                        : (_photoUrl != null? NetworkImage(_photoUrl!.toString()) :
+                    AssetImage('assets/user1.png'))
+                  as ImageProvider,
+                  ),
                 ),
                 Align(
                   alignment: Alignment.bottomRight,
@@ -140,7 +214,7 @@ class _ProfesseurDetailsScreenState extends State<ProfesseurDetailsScreen> {
                               context: context,
                               builder: (context) {
                                 return AlertDialog(
-                                  insetPadding: EdgeInsets.only(top: 190,),
+                                  insetPadding: EdgeInsets.only(top: 290,),
                                   surfaceTintColor: Color(0xB0AFAFA3),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.only(
@@ -153,10 +227,10 @@ class _ProfesseurDetailsScreenState extends State<ProfesseurDetailsScreen> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     // mainAxisAlignment: MainAxisAlignment.start,
                                     children: [
-                                      Text("Modifier Profile", style: TextStyle(fontSize: 25),),
+                                      Text("Professeur Infos", style: TextStyle(fontSize: 25,color: Colors.blueGrey),),
                                       Spacer(),
                                       InkWell(
-                                        child: Icon(Icons.close),
+                                        child: Icon(Icons.close,color: Colors.blueGrey,),
                                         onTap: (){
                                           Navigator.pop(context);
                                         },
@@ -165,7 +239,7 @@ class _ProfesseurDetailsScreenState extends State<ProfesseurDetailsScreen> {
                                   ),
 
                                   content: Container(
-                                    height: 450,
+                                    height: 350,
                                     width: MediaQuery.of(context).size.width,
                                     // padding: const EdgeInsets.all(25.0),
                                     child: SingleChildScrollView(
@@ -174,10 +248,10 @@ class _ProfesseurDetailsScreenState extends State<ProfesseurDetailsScreen> {
                                         children: [
                                           //hmmm
                                           SizedBox(height: 40),
-                                          buildTextFormField(_mobile,TextInputType.number,'Mobile'),
+                                          // buildTextFormField(_mobile,TextInputType.number,'Mobile'),
 
-                                          SizedBox(height: 30),
-                                          buildTextFormField(_compte,TextInputType.text,'Compte'),
+                                          // SizedBox(height: 30),
+                                          buildTextFormField(_compte,professeurData!['professeur']['accountNumero'].toString()!,TextInputType.text,'Compte'),
                                           SizedBox(height: 30),
                                           DropdownButtonFormField<String>(
                                             value: _banque,
@@ -333,9 +407,130 @@ class _ProfesseurDetailsScreenState extends State<ProfesseurDetailsScreen> {
             child: ListView(
               children: <Widget>[
                 SizedBox(child: Container(
-                  child: Text("Mes Informations", style: TextStyle(fontStyle: FontStyle.italic, fontWeight: FontWeight.bold ,
-                    color: isDark? Colors.white:Colors.black38,
-                    fontSize: 20,),),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Mes Informations", style: TextStyle(fontStyle: FontStyle.italic, fontWeight: FontWeight.bold ,
+                        color: isDark? Colors.white:Colors.black38,
+                        fontSize: 20,),),
+
+                      IconButton(onPressed: (){
+                        showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                insetPadding: EdgeInsets.only(top: 130,),
+                                surfaceTintColor: Color(0xB0AFAFA3),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.only(
+                                    topRight: Radius.circular(20),
+                                    topLeft: Radius.circular(20),
+                                  ),
+                                ),
+                                title:
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  // mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Text("Utilisateur Infos", style: TextStyle(fontSize: 25,color: Colors.blueGrey),),
+                                    Spacer(),
+                                    InkWell(
+                                      child: Icon(Icons.close,color: Colors.blueGrey,),
+                                      onTap: (){
+                                        Navigator.pop(context);
+                                      },
+                                    )
+                                  ],
+                                ),
+
+                                content: Container(
+                                  height: 500,
+                                  width: MediaQuery.of(context).size.width,
+                                  // padding: const EdgeInsets.all(25.0),
+                                  child: SingleChildScrollView(
+                                    child: Column(
+                                      // mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        //hmmm
+                                        SizedBox(height: 40),
+                                        buildTextFormField(_nom,professeurData?['professeur']['user']['nom'].toString()!,TextInputType.text,'Nom'),
+
+                                        SizedBox(height: 30),
+                                        buildTextFormField(_prenom,professeurData?['professeur']['user']['prenom'].toString()!,TextInputType.text,'Prenom'),
+                                        SizedBox(height: 30),
+                                        buildTextFormField(_mobile,professeurData?['professeur']['user']['mobile']!.toString()!,TextInputType.number,'Mobile'),
+                                        SizedBox(height: 30),
+                                        buildTextFormField(_email,professeurData?['professeur']['user']['email'].toString()!,TextInputType.emailAddress,'Email'),
+                                        SizedBox(height: 30),
+
+                                        ElevatedButton(
+                                          onPressed: _pickImage1,
+                                          child: Text("Choisir une image"),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Color(0xff0fb2ea),
+                                            foregroundColor: Colors.white,
+                                            elevation: 10,
+                                            minimumSize: Size(MediaQuery.of(context).size.width, MediaQuery.of(context).size.width / 7),
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                          ),
+                                        ),
+                                        // SizedBox(height: 30),
+                                        SizedBox(height: 30),
+                                        ElevatedButton(
+                                          onPressed: () async{
+                                            Navigator.of(context).pop();
+
+
+                                            String userId =professeurData?['professeur']['user']['_id']; // Remplacez par l'ID de votre professeur
+                                            Map<String, dynamic> updatedData = {
+
+                                              'mobile': _mobile.text, // Remplacez par la nouvelle valeur
+                                              'nom': _nom.text, // Remplacez par la nouvelle valeur
+                                              'prenom': _prenom.text, // Remplacez par la nouvelle valeur
+                                              'email': _email.text, // Remplacez par la nouvelle valeur
+
+                                            };
+
+                                            await updateUserInfos(userId, updatedData, _image);
+                                            // updateUserInfo(professeurId, updatedData);
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(content: Text('Le Type est mis à jour avec succès.')),
+                                            );
+
+                                            setState(() {
+                                              Navigator.pop(context);
+                                              _nom.text = '';
+                                              _prenom.text = '';
+                                              _mobile.text = '';
+                                              _email.text = '';
+                                            });
+                                          },
+                                          child: Text("Modifier"),
+
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Color(0xff0fb2ea),
+                                            foregroundColor: Colors.white,
+                                            elevation: 10,
+                                            minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
+                                            // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
+                                            //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+
+
+                                  ),
+                                ),
+
+                              );
+                            });
+                      }             , icon: Icon(Icons.mode_edit_outlined),
+                      // style: TextButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(0)))),
+                      )
+                    ],
+                  ),
                   // color: Colors.blue,
                   decoration: BoxDecoration(
                     color: isDark? Colors.black:Colors.white,
@@ -355,12 +550,12 @@ class _ProfesseurDetailsScreenState extends State<ProfesseurDetailsScreen> {
                   icon: Icons.email_outlined,
                   text:"${ widget.mail!}",
                 ),
-                // ProfileListItem(
-                //   MyColor: isDark? Colors.white:Colors.black54,
-                //   MySecColor: isDark? Colors.black38:Colors.white,
-                //   icon: Icons.phone,
-                //   text:"Mobile : ${ professeurData?['info']['mobile']!.capitalize!}",
-                // ),
+                ProfileListItem(
+                  MyColor: isDark? Colors.white:Colors.black54,
+                  MySecColor: isDark? Colors.black38:Colors.white,
+                  icon: Icons.phone,
+                  text:"Mobile : ${ professeurData?['professeur']['user']['mobile']!}",
+                ),
                 ProfileListItem(
                   MyColor: myColor(),
                   MySecColor: mySecColor(),
@@ -537,11 +732,14 @@ class _ProfesseurDetailsScreenState extends State<ProfesseurDetailsScreen> {
     );
   }
 
-  TextFormField buildTextFormField(cont, keyBT,hintT) {
+  TextFormField buildTextFormField(cont,Val, keyBT,hintT) {
     return TextFormField(
-                                          controller: cont,
-                                          // initialValue: professeurData!['info']['mobile'].toString()!,
+                                          // controller: cont,
+                                          initialValue: Val,
                                           keyboardType: keyBT,
+                                          onChanged: (value){
+                                            cont = value;
+                                          },
                                           // maxLines: 3,
                                           decoration: InputDecoration(
                                               filled: true,
@@ -594,6 +792,56 @@ Future<void> updateProfesseurInfo(String id, Map<String, dynamic> data) async {
   } else {
     print('Échec de la mise à jour - StatusCode: ${response.statusCode}');
     // Gérez l'échec de la mise à jour ici, si nécessaire.
+  }
+}
+Future<void> updateUserInfo(String id, Map<String, dynamic> data) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String token = prefs.getString("token")!;
+
+  final String apiUrl = "http://192.168.43.73:5000/user" + "/$id"; // Mettez à jour l'URL de votre API
+
+  final http.Response response = await http.patch(
+    Uri.parse(apiUrl),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+      'Authorization': 'Bearer $token',
+      // Ajoutez d'autres en-têtes au besoin, par exemple, le jeton d'authentification.
+    },
+    body: jsonEncode(data),
+  );
+
+  print("Satate: ${response.statusCode}");
+  if (response.statusCode == 201) {
+    print('Mise à jour réussie');
+    // Gérez la réponse réussie ici, si nécessaire.
+
+  } else {
+    print('Échec de la mise à jour - StatusCode: ${response.statusCode}');
+    // Gérez l'échec de la mise à jour ici, si nécessaire.
+  }
+}
+Future<void> updateUserInfos(String userId, Map<String, dynamic> updatedData, File? imageFile) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String token = prefs.getString("token")!;
+
+  var request = http.MultipartRequest('PATCH', Uri.parse('http://192.168.43.73:5000/user/$userId',));
+
+  request.headers['Authorization'] = 'Bearer $token';
+  updatedData.forEach((key, value) {
+    request.fields[key] = value;
+  });
+
+  // if (imageFile != null) {
+  //   request.files.add(await http.MultipartFile.fromPath('photo', imageFile.path));
+  // }
+
+  var response = await request.send();
+
+  print("Satate: ${response.statusCode}");
+  if (response.statusCode == 201) {
+    print('User info updated successfully');
+  } else {
+    print('Failed to update user info');
   }
 }
 

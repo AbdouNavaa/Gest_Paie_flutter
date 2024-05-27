@@ -170,11 +170,11 @@ class _SplashScreenState extends State<SplashScreen> {
     final minutes = twoDigits(duration1.inMinutes.remainder(60));
     final seconds = twoDigits(duration1.inSeconds.remainder(60));
     return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-      buildTimeCard(time: hours, header: 'HEURES'),
-      SizedBox(
-        width: 8,
-      ),
-      buildTimeCard(time: minutes, header: 'MINUTES'),
+      // buildTimeCard(time: hours, header: 'HEURES'),
+      // SizedBox(
+      //   width: 8,
+      // ),
+      // buildTimeCard(time: minutes, header: 'MINUTES'),
       SizedBox(
         width: 8,
       ),
@@ -187,9 +187,9 @@ class _SplashScreenState extends State<SplashScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            padding: EdgeInsets.all(8),
+            padding: EdgeInsets.all(5),
             decoration: BoxDecoration(
-                color: Colors.white, borderRadius: BorderRadius.circular(20),border: Border.all(color: Colors.black12)),
+                color: Colors.white, borderRadius: BorderRadius.circular(50),border: Border.all(color: Colors.black12)),
             child: Text(
               time,
               style: TextStyle(

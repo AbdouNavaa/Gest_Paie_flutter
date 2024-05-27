@@ -480,7 +480,7 @@ class _MatieresState extends State<Matieres> {
             :Container(
           width: 60,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Colors.lightGreen,
             borderRadius: BorderRadius.all(Radius.circular(50)),
             boxShadow: [
               BoxShadow(

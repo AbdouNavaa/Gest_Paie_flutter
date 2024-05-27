@@ -158,7 +158,7 @@ class _PaieState extends State<Paie> {
                   Container(
                     width: MediaQuery.of(context).size.width ,
                     decoration: BoxDecoration(
-                      color: Colors.blue,
+                      color: Colors.black87,
                       borderRadius: BorderRadius.all(
                         Radius.circular(20.0),
                       ),
@@ -168,10 +168,10 @@ class _PaieState extends State<Paie> {
                       showCheckboxColumn: true,
                       showBottomBorder: true,
 
-                      headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white70),
+                      headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white10),
                       dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
                       headingRowHeight: 50,
-                      columnSpacing: 8,headingTextStyle: TextStyle(fontWeight: FontWeight.bold),
+                      columnSpacing: 8,headingTextStyle: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),
                       dataRowHeight: 50,
                       columns: [
                         DataColumn(label: Text('Du')),

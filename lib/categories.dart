@@ -150,17 +150,17 @@ class _CategoriesState extends State<Categories> {
 
                       width: MediaQuery.of(context).size.width ,
                       decoration: BoxDecoration(
-                        color: Colors.blue,
+                        color: Colors.black,
                         borderRadius: BorderRadius.all(Radius.circular(30)),
                       ),       // margin: EdgeInsets.only(left: 10),
                       child: DataTable(
                         showCheckboxColumn: true,
                         showBottomBorder: true,
                         headingRowHeight: 50,
-                        headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white70),
+                        headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white10),
                         dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
                         columnSpacing: 8,
-                        dataRowHeight: 50,
+                        dataRowHeight: 50,headingTextStyle: TextStyle(color: CupertinoDynamicColor.withBrightness(color: Colors.white, darkColor: Colors.indigo)),
                         columns: [
                           DataColumn(label: Text('Code')),
                           DataColumn(label: Text('Nom')),
@@ -408,16 +408,16 @@ class _CategoriesState extends State<Categories> {
 
           ],
         ),
-        floatingActionButton: FloatingActionButton.extended(
-          // heroTag: 'uniqueTag',
-          tooltip: 'Ajouter une categorie',
-          backgroundColor: Colors.white,
-          label: Row(
-            children: [Icon(Icons.add,color: Colors.black,)],
-          ),
-          onPressed: () => _importData(context),
-
-        ),
+        // floatingActionButton: FloatingActionButton.extended(
+        //   // heroTag: 'uniqueTag',
+        //   tooltip: 'Ajouter une categorie',
+        //   backgroundColor: Colors.white,
+        //   label: Row(
+        //     children: [Icon(Icons.add,color: Colors.black,)],
+        //   ),
+        //   onPressed: () => _importData(context),
+        //
+        // ),
 
 
       );

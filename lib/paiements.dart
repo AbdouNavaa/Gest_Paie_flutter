@@ -213,326 +213,6 @@ class _PaiementsState extends State<Paiements> {
   bool showRef = false;
   bool showConf = false;
 
-  pw.Widget _contentTable(pw.Context context) {
-    const tableHeaders = [
-      'Professeur',
-      'Banque',
-      'Numero compte',
-      'Volume horaire',
-      'Montant (MRU)',
-    ];
-
-    return pw.Table(
-      border: pw.TableBorder.all(color: PdfColors.white),
-      columnWidths: {
-        0: pw.IntrinsicColumnWidth(),
-        1: pw.IntrinsicColumnWidth(),
-        2: pw.IntrinsicColumnWidth(),
-        3: pw.IntrinsicColumnWidth(),
-        4: pw.IntrinsicColumnWidth(),
-      },
-      children: [
-        pw.TableRow(decoration: pw.BoxDecoration(color: PdfColors.black),
-          children: tableHeaders
-              .map(
-                (header) => pw.Container(
-              padding: const pw.EdgeInsets.all(5),
-              alignment: pw.Alignment.centerLeft,
-              child: pw.Text(
-                header,
-                style: pw.TextStyle(
-                  color: PdfColors.white,
-                  fontSize: 10,
-                  // background: pw.BoxDecoration(color: PdfColors.green),
-                  fontWeight: pw.FontWeight.bold,
-                ),
-              ),
-            ),
-          )
-              .toList(),
-        ),
-        for (var entry in professeurData.entries)
-          pw.TableRow(
-            children: [
-              pw.Container(
-                padding: const pw.EdgeInsets.all(5),
-                alignment: pw.Alignment.centerLeft,
-                child: pw.Text(
-                  entry.value['professeur'].toString(),
-                  style: pw.TextStyle(
-                    color: PdfColors.black,
-                    fontSize: 10,
-                  ),
-                ),
-              ),
-              pw.Container(
-                padding: const pw.EdgeInsets.all(5),
-                alignment: pw.Alignment.centerLeft,
-                child: pw.Text(
-                  getProfesseurIdFromName(entry.key).banque.toString(),
-                  style: pw.TextStyle(
-                    color: PdfColors.black,
-                    fontSize: 10,
-                  ),
-                ),
-              ),
-              pw.Container(
-                padding: const pw.EdgeInsets.all(5),
-                alignment: pw.Alignment.centerLeft,
-                child: pw.Text(
-                  getProfesseurIdFromName(entry.key).compte.toString(),
-                  style: pw.TextStyle(
-                    color: PdfColors.black,
-                    fontSize: 10,
-                  ),
-                ),
-              ),
-              pw.Container(
-                padding: const pw.EdgeInsets.all(5),
-                alignment: pw.Alignment.center,
-                child: pw.Text(
-                  entry.value['th_total'].toString(),
-                  style: pw.TextStyle(
-                    color: PdfColors.black,
-                    fontSize: 10,
-                  ),
-                ),
-              ),
-              pw.Container(
-                padding: const pw.EdgeInsets.all(5),
-                alignment: pw.Alignment.center,
-                child: pw.Text(
-                  entry.value['somme_total'].toString(),
-                  style: pw.TextStyle(
-                    color: PdfColors.black,
-                    fontSize: 10,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        pw.TableRow(
-            children: [
-              pw.Container(
-                padding: const pw.EdgeInsets.all(5),
-                alignment: pw.Alignment.centerLeft,
-                child: pw.Text(
-                  'Montant Total ',
-                  style: pw.TextStyle(
-                    color: PdfColors.black,
-                    fontSize: 10,
-                  ),
-                ),
-              ),
-
-              pw.Container(
-                padding: const pw.EdgeInsets.all(5),
-                alignment: pw.Alignment.center,
-                child: pw.Text(
-                  '',
-                  style: pw.TextStyle(
-                    color: PdfColors.black,
-                    fontSize: 10,
-                  ),
-                ),
-              ),
-              pw.Container(
-                padding: const pw.EdgeInsets.all(5),
-                alignment: pw.Alignment.center,
-                child: pw.Text(
-                  '',
-                  style: pw.TextStyle(
-                    color: PdfColors.black,
-                    fontSize: 10,
-                  ),
-                ),
-              ),
-              pw.Container(
-                padding: const pw.EdgeInsets.all(5),
-                alignment: pw.Alignment.center,
-                child: pw.Text(
-                  totalType.toString(),
-                  style: pw.TextStyle(
-                    color: PdfColors.black,
-                    fontSize: 10,
-                  ),
-                ),
-              ),
-              pw.Container(
-                padding: const pw.EdgeInsets.all(5),
-                alignment: pw.Alignment.center,
-                child: pw.Text(
-                 somme.toString(),
-                  style: pw.TextStyle(
-                    color: PdfColors.black,
-                    fontSize: 10,
-                  ),
-                ),
-              ),
-            ],
-          ),
-      ],
-    );
-  }
-
-  Future<Uint8List> generatePdf() async {
-    final pdf = pw.Document();
-
-    // Ajoutez une page de garde
-    pdf.addPage(
-      pw.Page(
-        build: (context) {
-          return pw.Container(
-            child: pw.Column(
-              mainAxisAlignment: pw.MainAxisAlignment.start,
-              children: [
-                // En-tête
-                pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                  children: [
-                    pw.Column(
-                      crossAxisAlignment: pw.CrossAxisAlignment.center,
-                      children: [
-                        pw.Text('République Islamique de Mauritanie'),
-                        pw.Text('Ministère de l\'Enseignement Supérieur \n et de la Recherche Scientifique'),
-                        pw.Text('Institut Supérieur du Numérique'),
-                      ],
-                    ),
-                    // pw.Image(pw.MemoryImage("assets/categ2.png")), // Remplacez yourImageData par les données de votre image
-                    pw.SizedBox(width: 10),
-                    pw.Column(
-                      crossAxisAlignment: pw.CrossAxisAlignment.center,
-                      children: [
-                        pw.Text(DartArabic.normalizeLetters('الجمهورية الاسلامية الموريتانية',), textDirection: pw.TextDirection.ltr,),
-                        // style: GoogleFonts.notoNaskhArabic(
-                        //   color: Colors.black,
-                        // )
-                        pw.Text('وزارة التعليم العالي \n و البحث العلمي', textDirection: pw.TextDirection.rtl),
-                        pw.Text('المعهد العالي للعلوم الرقمية', textDirection: pw.TextDirection.ltr),
-                      ],
-                    ),
-                  ],
-                ),
-
-                pw.SizedBox(height: 20),
-                // Titre
-                pw.Text(
-                  'Les état de paiement du ${_selectedDateDeb == null ? DateFormat('yyyy/MM/dd').format(widget.dateDeb!): DateFormat('yyyy/MM/dd').format(_selectedDateDeb!)} '
-                      'au ${ _selectedDateFin == null ?DateFormat('yyyy/MM/dd').format(widget.dateFin!):DateFormat('yyyy/MM/dd').format(_selectedDateFin!)}',
-                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                ),
-                pw.SizedBox(height: 30),
-                // Tableau
-
-                _contentTable(context),
-                // _footTable(context),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-
-    // Retournez le contenu du fichier PDF sous forme de Uint8List
-    return await pdf.save();
-  }
-
-  Future<void> savePdf() async {
-    // Appelez la fonction generatePdf pour obtenir le contenu du PDF
-    final Uint8List generatedPdf = await generatePdf();
-
-    // Obtenez le répertoire de documents pour enregistrer le fichier PDF
-    final dir = await getApplicationDocumentsDirectory();
-    final file = File('${dir.path}/paiements.pdf');
-
-    // Écrivez le fichier PDF sur le système de fichiers
-    await file.writeAsBytes(generatedPdf);
-
-    // Ouvrez le fichier PDF
-    OpenFile.open(file.path);
-  }
-
-
-
-
-  Future<Uint8List> generateExcel() async {
-    final excel.Excel excelDoc = excel.Excel.createExcel();
-    final excel.Sheet sheetObject = excelDoc['Sheet1'];
-
-    // Ajoutez les en-têtes
-    sheetObject.appendRow([ 'Les état de paiement du ${_selectedDateDeb == null ? DateFormat('yyyy/MM/dd').format(widget.dateDeb!): DateFormat('yyyy/MM/dd').format(_selectedDateDeb!)} '
-        'au ${ _selectedDateFin == null ?DateFormat('yyyy/MM/dd').format(widget.dateFin!):DateFormat('yyyy/MM/dd').format(_selectedDateFin!)}',
-    ]);
-    sheetObject.appendRow(['Professeur', 'Banque', 'Numero compte', 'Volume horaire', 'Montant (MRU)'],);
-
-    // Ajoutez les données
-    for (var entry in professeurData.entries) {
-      sheetObject.appendRow([
-        entry.value['professeur'].toString(),
-        getProfesseurIdFromName(entry.key).banque.toString(),
-        getProfesseurIdFromName(entry.key).compte.toString(),
-        entry.value['th_total'].toString(),
-        entry.value['somme_total'].toString(),
-      ]);
-    }
-
-    // Ajoutez la ligne pour le total
-    sheetObject.appendRow(['Montant Total', '', '', totalType.toString(), somme.toString()]);
-
-    // Convertissez le fichier Excel en données binaires
-    final List<int>? excelBytes = excelDoc.save();
-
-    return Uint8List.fromList(excelBytes!);
-  }
-
-  Future<void> saveExcel() async {
-    // Appelez la fonction generateExcel pour obtenir le contenu du fichier Excel
-    final Uint8List generatedExcel = await generateExcel();
-
-    // Obtenez le répertoire de documents pour enregistrer le fichier Excel
-    final dir = await getApplicationDocumentsDirectory();
-    final file = File('${dir.path}/paiements.xlsx');
-
-    // Écrivez le fichier Excel sur le système de fichiers
-    await file.writeAsBytes(generatedExcel);
-
-    // Ouvrez le fichier Excel
-    OpenFile.open(file.path);
-  }
-
-
-  Future<List<List<String>>> readExcelData(String path) async {
-    // Ouvrez le fichier Excel.
-    var bytes = await File(path).readAsBytes();
-    var exc = excel.Excel.decodeBytes(bytes);
-
-    // Accédez à la première feuille de calcul.
-    var firstSheet = exc.tables.keys.first;
-    var table = exc.tables[firstSheet]!;
-
-    // Créez une liste pour stocker les données.
-    List<List<String>> data = [];
-
-    // Parcourir les tableaux.
-    for (var row in table.rows) {
-      // Ignorer les premières lignes jusqu'à la ligne "Heure:"
-      if (row == table.rows.first) continue;
-
-      // Créer une nouvelle liste pour stocker les données du tableau.
-      List<String> rowData = [];
-
-      // Ajouter les données du tableau à la liste.
-      for (var cell in row) {
-        rowData.add(cell?.value?.toString() ?? '');
-      }
-
-      // Ajouter la liste de données à la liste principale.
-      data.add(rowData);
-    }
-
-    // Retourner la liste de données.
-    return data;
-  }
 
 
 
@@ -660,7 +340,8 @@ class _PaiementsState extends State<Paiements> {
                   Container(
                     width: MediaQuery.of(context).size.width,
                     decoration: BoxDecoration(
-                      color: Colors.blue,
+                      // color: Colors.indigo.shade500,
+                      color: Colors.black87,
                       borderRadius: BorderRadius.only(
                         topRight: Radius.circular(20.0),
                         topLeft: Radius.circular(20.0),
@@ -671,14 +352,14 @@ class _PaiementsState extends State<Paiements> {
                       showCheckboxColumn: true,
                       showBottomBorder: true,
                       horizontalMargin: 1,
-                      headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white70),
+                      headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white10),
                       dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
                       headingRowHeight: 50,
                       columnSpacing: 10,
                       dataRowHeight: 50,
                       headingTextStyle: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: Colors.black, // Set header text color
+                        color: Colors.white, // Set header text color
                       ),
                       // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
                       columns: [
@@ -833,12 +514,12 @@ class _PaiementsState extends State<Paiements> {
                 child: Text('Sélectionner tous'),
                 style: TextButton.styleFrom(
                   surfaceTintColor: Colors.white,shadowColor: Colors.black,
-                  foregroundColor: Colors.black,
+                  foregroundColor: Colors.white,
                   // side: BorderSide(color: Colors.black38),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   elevation: 5,
                   // padding: EdgeInsets.only(left: 20,right: 20),
-                  backgroundColor: Colors.white,
+                  backgroundColor: Colors.green,
                   //   foregroundColor: Colors.black,
                   textStyle: TextStyle(fontWeight: FontWeight.bold),
                   // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
@@ -900,14 +581,13 @@ class _PaiementsState extends State<Paiements> {
                 },
                 child: Text('Confirmer la sélection'),
                 style: TextButton.styleFrom(
-                  // surfaceTintColor: Colors.white,
-                  foregroundColor: Colors.black,
                   surfaceTintColor: Colors.white,shadowColor: Colors.black,
+                  foregroundColor: Colors.white,
                   // side: BorderSide(color: Colors.black38),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   elevation: 5,
-                  padding: EdgeInsets.symmetric(horizontal: 15),
-                  backgroundColor: Colors.white,
+                  // padding: EdgeInsets.only(left: 20,right: 20),
+                  backgroundColor: Colors.blueAccent,
                   //   foregroundColor: Colors.black,
                   textStyle: TextStyle(fontWeight: FontWeight.bold),
                   // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
@@ -917,94 +597,29 @@ class _PaiementsState extends State<Paiements> {
             ],
           ),
 
-          // TextButton(
-          //   onPressed: () {
-          //     // Confirmer et ajouter les paiements sélectionnés
-          //     print('Deb${widget.dateDeb}');
-          //     _selectedDateDeb == null || _selectedDateFin == null ?
-          //     //         AddPaie(profId, widget.dateDeb, widget.dateFin)
-          //     //         :AddPaie(profId, _selectedDateDeb, _selectedDateFin);
-          //     //
-          //     AddPaieMultiple(selectedPayments, widget.dateDeb!, widget.dateFin!):
-          //     AddPaieMultiple(selectedPayments, _selectedDateDeb!, _selectedDateFin!);
-          //     // Remettre la liste de sélection à zéro
-          //     setState(() {
-          //       selectedPayments = [];
-          //       Navigator.of(context).pop();
-          //     });
-          //   },
-          //   child: Text('Confirmer la sélection'),
-          //   style: TextButton.styleFrom(
-          //     side: BorderSide(color: Colors.black26),
-          //     // padding: EdgeInsets.only(left: 50,right: 50),
-          //     foregroundColor: Colors.black, textStyle: TextStyle(fontWeight: FontWeight.bold),
-          //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          //   ),
-          // ),
+          Padding(padding: EdgeInsets.all(10)),
+          ElevatedButton(
+            onPressed: ()  {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => EtatPaiemens(courses: widget.courses)));
 
-          Padding(padding: EdgeInsets.all(50)),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                onPressed: ()  {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => EtatPaiemens(courses: widget.courses)));
+            },
+            child: Text('Les Etats'),
+            style: ElevatedButton.styleFrom(
+              surfaceTintColor: Colors.white,
+              foregroundColor: Colors.black,
+              side: BorderSide(color: Colors.black38),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              elevation: 5,
+              padding: EdgeInsets.symmetric(horizontal: 35),
+              backgroundColor: Colors.white,
+              //   foregroundColor: Colors.black,
+              textStyle: TextStyle(fontWeight: FontWeight.bold),
+              // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+            ),
 
-                },
-                child: Text('Les Etats'),
-                style: ElevatedButton.styleFrom(
-                  surfaceTintColor: Colors.white,
-                  foregroundColor: Colors.black,
-                  // side: BorderSide(color: Colors.black38),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  elevation: 5,
-                  padding: EdgeInsets.symmetric(horizontal: 35),
-                  backgroundColor: Colors.white,
-                  //   foregroundColor: Colors.black,
-                  textStyle: TextStyle(fontWeight: FontWeight.bold),
-                  // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                ),
-
-              ),
-              IconButton(onPressed: (){
-              setState(() {
-                showDownLoad = !showDownLoad;
-              });
-              }, icon: Icon(Icons.file_download_sharp))
-            ],
           ),
 
-          showDownLoad?
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TextButton(
-                onPressed: () async {
-                  await savePdf();
-                },
-                child: Text('Télécharger PDF'),
-                style: TextButton.styleFrom(
-                  side: BorderSide(color: Colors.black26),
-                  padding: EdgeInsets.only(left: 20,right: 20),
-                  foregroundColor: Colors.black, textStyle: TextStyle(fontWeight: FontWeight.bold),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-              ),
-              SizedBox(width: 20,),
-              TextButton(
-                onPressed: () async {
-                  await saveExcel();
-                },
-                child: Text('Télécharger Excel'),
-                style: TextButton.styleFrom(
-                  side: BorderSide(color: Colors.black26),
-                  padding: EdgeInsets.only(left: 20,right: 20),
-                  foregroundColor: Colors.black, textStyle: TextStyle(fontWeight: FontWeight.bold),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-              ),
-            ],
-          ):Container(),
+
           // Padding(padding: EdgeInsets.all(60)),
         ],
       ),
@@ -1057,8 +672,8 @@ class EtatPaiemens extends StatefulWidget {
 class _EtatPaiemensState extends State<EtatPaiemens> {
   double totalType = 0;
   double somme = 0;
-  DateTime defaultDateDeb = DateTime(2023, 10, 1);
-  DateTime defaultDateFin = DateTime(2024, 4, 1);
+  DateTime defaultDateDeb = DateTime(2024, 10, 1);
+  DateTime defaultDateFin = DateTime(2025, 4, 1);
   @override
   void initState() {
     // TODO: implement initState
@@ -1326,9 +941,9 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                children: [
                  SingleChildScrollView(scrollDirection: Axis.horizontal,
                    child: Container(
-                     width: MediaQuery.of(context).size.width ,
+                     // width: MediaQuery.of(context).size.width ,
                      decoration: BoxDecoration(
-                       color: Colors.blue,
+                       color: Colors.black,
                        borderRadius: BorderRadius.all(
                          Radius.circular(20.0),
                        ),
@@ -1337,18 +952,20 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                      child: DataTable(
                        showCheckboxColumn: true,
                        showBottomBorder: true,
-                       headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white70),
+                       headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white10),
                        dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
                        headingRowHeight: 50,
                        columnSpacing: 8,
-                       headingTextStyle: TextStyle(fontWeight: FontWeight.bold),
+                       headingTextStyle: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),
                        dataRowHeight: 50,
                        columns: [
                          DataColumn(label: Text('De')),
                          DataColumn(label: Text('Au')),
                          DataColumn(label: Text('Prof')),
+                         DataColumn(label: Text('Banq')),
                          DataColumn(label: Text('NBC')),
                          DataColumn(label: Text('NBH')),
+                         DataColumn(label: Text('MT')),
                          DataColumn(label: Text('Confirm')),
                          DataColumn(label: Text('Action')),
                        ],
@@ -1359,29 +976,7 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                  ),
              
                  //abdou
-                 Container(
-                   margin: EdgeInsets.only(top: 10),
-                   width: MediaQuery.of(context).size.width /2,
-                   child: ElevatedButton(
-                     child: Row(
-                       children: [
-                         Icon(Icons.cached, color: Colors.black,),
-                         Text('auto-Confirme',style: TextStyle(color: Colors.black),),
-                       ],
-                     ),
-                     onPressed: () => autoConf(),
-                     style: ElevatedButton.styleFrom(
-                       surfaceTintColor: Colors.white,
-                       foregroundColor: Colors.lightGreen,
-                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                       elevation: 5,
-                       padding: EdgeInsets.symmetric(horizontal: 15),
-                       backgroundColor: Colors.white,
-                       textStyle: TextStyle(fontWeight: FontWeight.bold),
-                       // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                     ),
-                   ),
-                 ),
+
                  
                ],
              ),
@@ -1392,9 +987,9 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                children: [
                  SingleChildScrollView(scrollDirection: Axis.horizontal,
                    child: Container(
-                     width: MediaQuery.of(context).size.width ,
+                     // width: MediaQuery.of(context).size.width ,
                      decoration: BoxDecoration(
-                       color: Colors.blue,
+                       color: Colors.black,
                        borderRadius: BorderRadius.all(
                          Radius.circular(20.0),
                        ),
@@ -1403,10 +998,10 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                      child: DataTable(
                        showCheckboxColumn: true,
                        showBottomBorder: true,
-                       headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white70),
+                       headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white10),
                        dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
                        headingRowHeight: 50,
-                       headingTextStyle: TextStyle(fontWeight: FontWeight.bold),
+                       headingTextStyle: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),
                        columnSpacing: 8,
                        dataRowHeight: 50,
                        columns: [
@@ -1414,6 +1009,8 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                          DataColumn(label: Text('Au')),
                          DataColumn(label: Text('Prof')),
                          DataColumn(label: Text('Banq')),
+                         DataColumn(label: Text('NBC')),
+                         DataColumn(label: Text('NBH')),
                          DataColumn(label: Text('MT')),
                          DataColumn(label: Text('Confirm')),
                          DataColumn(label: Text('Action')),
@@ -1433,9 +1030,9 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                children: [
                  SingleChildScrollView(scrollDirection: Axis.horizontal,
                    child: Container(
-                     width: MediaQuery.of(context).size.width ,
+                     // width: MediaQuery.of(context).size.width ,
                      decoration: BoxDecoration(
-                       color: Colors.blue,
+                       color: Colors.black,
                        borderRadius: BorderRadius.all(
                          Radius.circular(20.0),
                        ),
@@ -1444,10 +1041,10 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                      child: DataTable(
                        showCheckboxColumn: true,
                        showBottomBorder: true,
-                       headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white70),
+                       headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white10),
                        dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
                        headingRowHeight: 50,
-                       headingTextStyle: TextStyle(fontWeight: FontWeight.bold),
+                       headingTextStyle: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),
                        columnSpacing: 8,
                        dataRowHeight: 50,
                        columns: [
@@ -1455,6 +1052,8 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                          DataColumn(label: Text('Au')),
                          DataColumn(label: Text('Prof')),
                          DataColumn(label: Text('Banq')),
+                         DataColumn(label: Text('NBC')),
+                         DataColumn(label: Text('NBH')),
                          DataColumn(label: Text('MT')),
                          DataColumn(label: Text('Confirm')),
                          DataColumn(label: Text('Action')),
@@ -1505,10 +1104,386 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
 
 //      bottomNavigationBar: BottomNav(),
 
+    floatingActionButton:
+    showPaid?
+    Container(
+      margin: EdgeInsets.only(top: 10,right: 60),
+      width: MediaQuery.of(context).size.width /2 + 30,
+      child: ElevatedButton(
+        child: Row(
+          children: [
+            Icon(Icons.cached, color: Colors.white,),
+            Text('Confirmation automatique',style: TextStyle(color: Colors.white),),
+          ],
+        ),
+        onPressed: () => autoConf(),
+        style: ElevatedButton.styleFrom(
+          surfaceTintColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          elevation: 5,
+          padding: EdgeInsets.symmetric(horizontal: 10),
+          backgroundColor: Colors.black,
+          textStyle: TextStyle(fontWeight: FontWeight.bold),
+          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+        ),
+      ),
+    ):
+    showConf?
+    Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        TextButton(
+          onPressed: () async {
+            await savePdf();
+          },
+          child: Text('Télécharger PDF'),
+          style: TextButton.styleFrom(
+            side: BorderSide(color: Colors.black26),
+            padding: EdgeInsets.only(left: 20,right: 20),
+            foregroundColor: Colors.black, textStyle: TextStyle(fontWeight: FontWeight.bold),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        ),
+        SizedBox(width: 20,),
+        TextButton(
+          onPressed: () async {
+            await saveExcel();
+          },
+          child: Text('Télécharger Excel'),
+          style: TextButton.styleFrom(
+            side: BorderSide(color: Colors.black26),
+            padding: EdgeInsets.only(left: 20,right: 20),
+            foregroundColor: Colors.black, textStyle: TextStyle(fontWeight: FontWeight.bold),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+        ),
+      ],
+    ):Container(),
+
     );
 
   }
 
+  pw.Widget _contentTable(pw.Context context) {
+    const tableHeaders = [
+      'Professeur',
+      'Banque',
+      'Numero compte',
+      'Nombre de Cours',
+      'Volume horaire',
+      'Montant (MRU)',
+    ];
+
+    return pw.Table(
+      border: pw.TableBorder.all(color: PdfColors.white),
+      columnWidths: {
+        0: pw.IntrinsicColumnWidth(flex: 2),
+        1: pw.IntrinsicColumnWidth(flex: 1),
+        2: pw.IntrinsicColumnWidth(flex: 2),
+        3: pw.IntrinsicColumnWidth(),
+        4: pw.IntrinsicColumnWidth(),
+        5: pw.IntrinsicColumnWidth(),
+      },
+      children: [
+        pw.TableRow(decoration: pw.BoxDecoration(color: PdfColors.black),
+          children: tableHeaders
+              .map(
+                (header) => pw.Container(
+              padding: const pw.EdgeInsets.all(5),
+              alignment: pw.Alignment.centerLeft,
+              child: pw.Text(
+                header,
+                style: pw.TextStyle(
+                  color: PdfColors.white,
+                  fontSize: 10,
+                  // background: pw.BoxDecoration(color: PdfColors.green),
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+            ),
+          )
+              .toList(),
+        ),
+        for (var index = 0; index < (filteredItems?.length ?? 0); index++)
+        // for (var entry in professeurData.entries)
+          pw.TableRow(
+            children: [
+              pw.Container(
+                padding: const pw.EdgeInsets.all(5),
+                alignment: pw.Alignment.centerLeft,
+                child: pw.Text(
+                  filteredItems![index].nomComp.toString(),
+                  style: pw.TextStyle(
+                    color: PdfColors.black,
+                    fontSize: 10,
+                  ),
+                ),
+              ),
+              pw.Container(
+                padding: const pw.EdgeInsets.all(5),
+                alignment: pw.Alignment.centerLeft,
+                child: pw.Text(
+                  filteredItems![index].banq.toString(),
+                  // getProfesseurIdFromName(entry.key).banque.toString(),
+                  style: pw.TextStyle(
+                    color: PdfColors.black,
+                    fontSize: 10,
+                  ),
+                ),
+              ),
+              pw.Container(
+                padding: const pw.EdgeInsets.all(5),
+                alignment: pw.Alignment.centerLeft,
+                child: pw.Text(
+                  filteredItems![index].comp.toString(),
+                  // getProfesseurIdFromName(entry.key).compte.toString(),
+                  style: pw.TextStyle(
+                    color: PdfColors.black,
+                    fontSize: 10,
+                  ),
+                ),
+              ),
+              pw.Container(
+                padding: const pw.EdgeInsets.all(5),
+                alignment: pw.Alignment.center,
+                child: pw.Text(
+                  filteredItems![index].nbc.toString(),
+                  style: pw.TextStyle(
+                    color: PdfColors.black,
+                    fontSize: 10,
+                  ),
+                ),
+              ),
+              pw.Container(
+                padding: const pw.EdgeInsets.all(5),
+                alignment: pw.Alignment.center,
+                child: pw.Text(
+                  filteredItems![index].nbh.toString(),
+                  style: pw.TextStyle(
+                    color: PdfColors.black,
+                    fontSize: 10,
+                  ),
+                ),
+              ),
+              pw.Container(
+                padding: const pw.EdgeInsets.all(5),
+                alignment: pw.Alignment.center,
+                child: pw.Text(
+                  filteredItems![index].totalMontant.toString(),
+                  style: pw.TextStyle(
+                    color: PdfColors.black,
+                    fontSize: 10,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        pw.TableRow(
+          children: [
+            pw.Container(
+              padding: const pw.EdgeInsets.all(5),
+              alignment: pw.Alignment.centerLeft,
+              child: pw.Text(
+                'Montant Total ',
+                style: pw.TextStyle(
+                  color: PdfColors.black,
+                  fontSize: 10,
+                ),
+              ),
+            ),
+
+            pw.Container(
+              padding: const pw.EdgeInsets.all(5),
+              alignment: pw.Alignment.center,
+              child: pw.Text(
+                '',
+                style: pw.TextStyle(
+                  color: PdfColors.black,
+                  fontSize: 10,
+                ),
+              ),
+            ),
+            pw.Container(
+              padding: const pw.EdgeInsets.all(5),
+              alignment: pw.Alignment.center,
+              child: pw.Text(
+                '',
+                style: pw.TextStyle(
+                  color: PdfColors.black,
+                  fontSize: 10,
+                ),
+              ),
+            ),
+            pw.Container(
+              padding: const pw.EdgeInsets.all(5),
+              alignment: pw.Alignment.center,
+              child: pw.Text(
+                totalType.toString(),
+                style: pw.TextStyle(
+                  color: PdfColors.black,
+                  fontSize: 10,
+                ),
+              ),
+            ),
+            pw.Container(
+              padding: const pw.EdgeInsets.all(5),
+              alignment: pw.Alignment.center,
+              child: pw.Text(
+                somme.toString(),
+                style: pw.TextStyle(
+                  color: PdfColors.black,
+                  fontSize: 10,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+
+  Future<Uint8List> generatePdf() async {
+    final pdf = pw.Document();
+
+    // Ajoutez une page de garde
+    pdf.addPage(
+      pw.Page(
+        build: (context) {
+          return pw.Container(
+            child: pw.Column(
+              mainAxisAlignment: pw.MainAxisAlignment.start,
+              children: [
+                // En-tête
+                pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.center,
+                  children: [
+                    pw.Text('République Islamique de Mauritanie'),
+                    pw.Text('Ministère de l\'Enseignement Supérieur \n et de la Recherche Scientifique'),
+                    pw.Text('Institut Supérieur du Numérique'),
+                  ],
+                ),
+
+                pw.SizedBox(height: 20),
+                // Titre
+                pw.Text(
+                  'Les état de paiement du ${ DateFormat('yyyy/MM/dd').format(defaultDateDeb!)} '
+                      'au ${DateFormat('yyyy/MM/dd').format(defaultDateFin)}',
+                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                ),
+                pw.SizedBox(height: 30),
+                // Tableau
+
+                _contentTable(context),
+                // _footTable(context),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+
+    // Retournez le contenu du fichier PDF sous forme de Uint8List
+    return await pdf.save();
+  }
+
+  Future<void> savePdf() async {
+    // Appelez la fonction generatePdf pour obtenir le contenu du PDF
+    final Uint8List generatedPdf = await generatePdf();
+
+    // Obtenez le répertoire de documents pour enregistrer le fichier PDF
+    final dir = await getApplicationDocumentsDirectory();
+    final file = File('${dir.path}/paiements.pdf');
+
+    // Écrivez le fichier PDF sur le système de fichiers
+    await file.writeAsBytes(generatedPdf);
+
+    // Ouvrez le fichier PDF
+    OpenFile.open(file.path);
+  }
+
+
+
+
+  Future<Uint8List> generateExcel() async {
+    final excel.Excel excelDoc = excel.Excel.createExcel();
+    final excel.Sheet sheetObject = excelDoc['Sheet1'];
+
+    // Ajoutez les en-têtes
+    sheetObject.appendRow([ 'Les état de paiement du ${_selectedDateDeb == null ? DateFormat('yyyy/MM/dd').format(defaultDateDeb): DateFormat('yyyy/MM/dd').format(_selectedDateDeb!)} '
+        'au ${ _selectedDateFin == null ?DateFormat('yyyy/MM/dd').format(defaultDateFin):DateFormat('yyyy/MM/dd').format(_selectedDateFin!)}',
+    ]);
+    sheetObject.appendRow(['Professeur', 'Banque', 'Numero compte', 'Nombre de Cours', 'Volume horaire', 'Montant (MRU)'],);
+
+    // Ajoutez les données
+    for (var index = 0; index < (filteredItems?.length ?? 0); index++){
+      sheetObject.appendRow([
+        filteredItems![index].nomComp.toString().capitalize,
+        filteredItems![index].banq.toString(),
+        filteredItems![index].comp.toString(),
+        filteredItems![index].nbc.toString(),
+        filteredItems![index].nbh.toString(),
+        filteredItems![index].totalMontant.toString(),
+      ]);
+    }
+
+    // Ajoutez la ligne pour le total
+    sheetObject.appendRow(['Montant Total', '', '', totalType.toString(), somme.toString()]);
+
+    // Convertissez le fichier Excel en données binaires
+    final List<int>? excelBytes = excelDoc.save();
+
+    return Uint8List.fromList(excelBytes!);
+  }
+
+  Future<void> saveExcel() async {
+    // Appelez la fonction generateExcel pour obtenir le contenu du fichier Excel
+    final Uint8List generatedExcel = await generateExcel();
+
+    // Obtenez le répertoire de documents pour enregistrer le fichier Excel
+    final dir = await getApplicationDocumentsDirectory();
+    final file = File('${dir.path}/paiements.xlsx');
+
+    // Écrivez le fichier Excel sur le système de fichiers
+    await file.writeAsBytes(generatedExcel);
+
+    // Ouvrez le fichier Excel
+    OpenFile.open(file.path);
+  }
+
+
+  Future<List<List<String>>> readExcelData(String path) async {
+    // Ouvrez le fichier Excel.
+    var bytes = await File(path).readAsBytes();
+    var exc = excel.Excel.decodeBytes(bytes);
+
+    // Accédez à la première feuille de calcul.
+    var firstSheet = exc.tables.keys.first;
+    var table = exc.tables[firstSheet]!;
+
+    // Créez une liste pour stocker les données.
+    List<List<String>> data = [];
+
+    // Parcourir les tableaux.
+    for (var row in table.rows) {
+      // Ignorer les premières lignes jusqu'à la ligne "Heure:"
+      if (row == table.rows.first) continue;
+
+      // Créer une nouvelle liste pour stocker les données du tableau.
+      List<String> rowData = [];
+
+      // Ajouter les données du tableau à la liste.
+      for (var cell in row) {
+        rowData.add(cell?.value?.toString() ?? '');
+      }
+
+      // Ajouter la liste de données à la liste principale.
+      data.add(rowData);
+    }
+
+    // Retourner la liste de données.
+    return data;
+  }
   List<DataRow> rowsTable(BuildContext context,conf,show,myColor) {
     return [
                        for (var index = 0; index < (filteredItems?.length ?? 0); index++)
@@ -1526,6 +1501,10 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                                  ,style: TextStyle(
                                  color: Colors.black,
                                ),)),
+                               DataCell(Text('${filteredItems![index].banq.toString().toUpperCase()} '
+                                 ,style: TextStyle(
+                                 color: Colors.black,
+                               ),)),
                                DataCell(Center(
                                  child: Text('${filteredItems![index].nbc}',style: TextStyle(
                                    color: Colors.black,
@@ -1533,6 +1512,11 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                                )),
                                DataCell(Center(
                                  child: Text('${filteredItems![index].nbh}',style: TextStyle(
+                                   color: Colors.black,
+                                 ),),
+                               )),
+                               DataCell(Center(
+                                 child: Text('${filteredItems![index].totalMontant}',style: TextStyle(
                                    color: Colors.black,
                                  ),),
                                )),
@@ -1762,25 +1746,27 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
 
                   SizedBox(height: 25),
                   paie.conf == 'refusé' ?
-                  Row(
-                    children: [
-                      Text('Message:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
-                      SizedBox(width: 10,),
-                      Text("${paie.message}",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                          // color: Colors.lightBlue
-                        ),),
+                  SingleChildScrollView(scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        Text('Message:',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w400,
+                            fontStyle: FontStyle.italic,
+                            // color: Colors.lightBlue
+                          ),),
+                        SizedBox(width: 10,),
+                        Text("${paie.message}",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w400,
+                            fontStyle: FontStyle.italic,
+                            // color: Colors.lightBlue
+                          ),),
 
-                    ],
+                      ],
+                    ),
                   ):SizedBox(),
 
                   SizedBox(height: 25),
@@ -1834,8 +1820,8 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       elevation: 5,
                       padding: EdgeInsets.symmetric(horizontal: 30),
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.redAccent,
+                      backgroundColor: Colors.redAccent,
+                      foregroundColor: Colors.white,
                       textStyle: TextStyle(fontWeight: FontWeight.bold),
                       // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                     ),

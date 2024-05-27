@@ -43,6 +43,7 @@ class _CoursesPageState extends State<CoursesPage> {
 
   bool signer = false;
   bool showInfo = false;
+  bool sort = false;
   void singeCours( id, isSigned) async {
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -214,7 +215,9 @@ class _CoursesPageState extends State<CoursesPage> {
     // Apply your filtering criteria here
     DateTime courseDate = DateTime.parse(course['date'].toString());
     bool isMatch = (
-        course['matiere'].toLowerCase().contains(searchQuery.toLowerCase()) || course['enseignant'].toLowerCase().contains(searchQuery.toLowerCase())
+        course['matiere'].toLowerCase().contains(searchQuery.toLowerCase()) || course['nom'].toLowerCase().contains(searchQuery.toLowerCase())
+        ||
+        course['prenom'].toLowerCase().contains(searchQuery.toLowerCase()) || course['code'].toLowerCase().contains(searchQuery.toLowerCase())
             || course['isSigned'].toString().contains(searchQuery.toLowerCase())
     );
     // || course['isPaid'].toString().contains(searchQuery.toLowerCase()));
@@ -254,8 +257,45 @@ bool showFloat = false;
                     Navigator.pop(context);
                   }, child: Icon(Icons.arrow_back_ios,color: Colors.black,size: 20,)),
                 // SizedBox(width: 40,),
+                showFloat?
+                Container(width: MediaQuery.of(context).size.width/3*2,
+                    margin: EdgeInsets.symmetric(horizontal: 0, vertical: 4),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.white.withOpacity(.85),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.3),
+                          spreadRadius: 2,
+                          blurRadius: 5,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child:TextField(
+                      onChanged: (value) {
+                        setState(() {
+                          searchQuery = value;
+                        });
+                      },
+                      // controller: searchQuery,
+                      decoration: InputDecoration(
+                        prefixIcon: Icon(Icons.search, color: Colors.grey),
+                        suffixIcon: IconButton(
+                          icon: Icon(Icons.tune_sharp, color: Colors.grey),
+                          onPressed: () {
+                            // _showFilterOptionsDialog(context,_searchController.text);
+                          },
+                        ),
+                        hintText: 'Rechercher',
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      ),
+                    )):
                 Text("Liste des Cours",style: TextStyle(fontSize: 20),),
 
+                showFloat?
+                SizedBox():
                 SizedBox(width: 115,),
                 Container(
                   width: 50,
@@ -275,37 +315,6 @@ bool showFloat = false;
             ),
           ),
           Divider(),
-          showFloat? Container(
-            width: MediaQuery.of(context).size.width/1.075,
-            margin: EdgeInsets.only(left: 8,top: 5,bottom: 5),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.3),
-                  spreadRadius: 2,
-                  blurRadius: 5,
-                  offset: Offset(0, 3),
-                ),
-              ],
-            ),
-            child: TextField(style: TextStyle(
-              color: Colors.black,
-            ),
-              onChanged: (value) {
-                setState(() {
-                  searchQuery = value;
-                });
-              },
-              decoration: InputDecoration(
-                prefixIcon: Icon(Icons.search, color: Colors.grey),
-                hintText: 'Recherche ',
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              ),
-            ),
-          ) :SizedBox(height: 5,),
 
           Container(
             width: MediaQuery.of(context).size.width,
@@ -456,9 +465,10 @@ bool showFloat = false;
                         child: Column(
                           children: [
                             Container(
-                              width: MediaQuery.of(context).size.width,
+                              width: MediaQuery.of(context).size.width +50,
                               decoration: BoxDecoration(
-                                  color: Colors.blue,
+                                  // color: widget.courses.length > 0 ? Colors.white10:Colors.white,
+                                  color: Colors.black87,
                                   borderRadius: BorderRadius.all(Radius.circular(20))
                               ),
                               child: DataTable(
@@ -466,18 +476,17 @@ bool showFloat = false;
                                 showBottomBorder: true,
                                 // sortColumnIndex: 1,
                                 // sortAscending: true,
-                                headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white70),
+                                headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white10),
                                 dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
                                 headingRowHeight: 50,
                                 columnSpacing:  (!showPaid && !showSigned)?8: 25,
                                 horizontalMargin:  3,
-                                // border: TableBorder(verticalInside: BorderSide(width: 1.5)),
+                                // border: TableBorder.symmetric(outside: BorderSide(color: Colors.black),inside: BorderSide(color: Colors.black12)),
                                 dataRowHeight: 60,
                                 headingTextStyle: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.black, // Set header text color
+                                  color: widget.courses.length > 0 ?Colors.white:Colors.black, // Set header text color
                                 ),
-                                // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xFF0C2FDA)), // Set row background color
                                 columns: [
                                   // if ( showSigned)
                                   if (!showPaid)
@@ -492,33 +501,10 @@ bool showFloat = false;
                                   // if (widget.role == "admin" && showPaid)
                                   if (widget.role == "admin"&& !showSigned )
                                     DataColumn(label: InkWell(
-                                        // onTap: (){
-                                        //   setState(() {
-                                        //     showPaid = !showPaid;
-                                        //   });
-                                        //
-                                        // },
                                         child: Text('Paié'))),
                                   DataColumn(label: InkWell(
-                                      // onTap: (){
-                                      //   setState(() {
-                                      //     totalType =0;
-                                      //     sortByDateAscending = !sortByDateAscending;
-                                      //     // Reverse the sorting order when the button is tapped
-                                      //     widget.courses.sort((a, b) {
-                                      //       DateTime dateA = DateTime.parse(a['date'].toString());
-                                      //       DateTime dateB = DateTime.parse(b['date'].toString());
-                                      //
-                                      //       // Sort in ascending order if sortByDateAscending is true,
-                                      //       // otherwise sort in descending order
-                                      //       return sortByDateAscending ? dateA.compareTo(dateB) : dateB.compareTo(dateA);
-                                      //     });
-                                      //   });
-                                      //
-                                      //
-                                      // },
                                       child: Text('Date'))),
-                                  DataColumn(label: Text('Prof')),
+                                  DataColumn(label: Text('Professeur')),
                                   DataColumn(label: Text('Matiere')),
                                   DataColumn(label: Text('Eq.CM')),
                                   // DataColumn(label: Text('Prix')),
@@ -572,36 +558,29 @@ bool showFloat = false;
                                                 ),
                                               ),
                                             DataCell(
-                                              Container(width: 50,
-                                                child: Text(
-                                                  '${DateFormat('dd MMM ').format(
-                                                    DateTime.parse(widget.courses[index]['date'].toString()).toLocal(),
-                                                  )}',style: TextStyle(
-                                                  color: Colors.black,
-                                                ),
-                                                ),
+                                              Text(
+                                                '${DateFormat('dd MMM ').format(
+                                                  DateTime.parse(widget.courses[index]['date'].toString()).toLocal(),
+                                                )}',style: TextStyle(
+                                                color: Colors.black,
+                                              ),
                                               ),
                                             ),
-                                            DataCell(Container(width: 50,child: Text('${widget.courses[index]['nom'].toString().capitalize} ${widget.courses[index]['prenom'].toString().capitalize}',style: TextStyle(
+                                            DataCell(Text('${widget.courses[index]['nom'].toString().capitalize} ${widget.courses[index]['prenom'].toString().capitalize}',style: TextStyle(
                                               color: Colors.black,
-                                            ),)),
+                                            ),),
                                                 onTap: () => _showCourseDetails(context, widget.courses[index])
                                             ),
-                                            DataCell(Container(width: 55,child: Text('${widget.courses[index]['matiere'].toString().capitalize}',style: TextStyle(
+                                            DataCell(Text('${widget.courses[index]['code'].toString().toUpperCase()}',style: TextStyle(
                                               color: Colors.black,
-                                            ),)),
+                                            ),),
                                               onTap: () => _showCourseDetails(context, widget.courses[index])
                                             ),
                                             DataCell(
-                                              Center(child: Container(width: 20, child: Text('${widget.courses[index]['th']}',style: TextStyle(
+                                              Center(child: Text('${widget.courses[index]['th']}',style: TextStyle(
                                                 color: Colors.black,
-                                              ),))),
+                                              ),)),
                                             ),
-                                            // DataCell(
-                                            //   Text('${widget.courses[index]['somme']}',style: TextStyle(
-                                            //     color: Colors.black,
-                                            //   ),),
-                                            // ),
                                             DataCell(
                                               Row(
                                                 // mainAxisSize: MainAxisSize.min,
@@ -625,136 +604,35 @@ bool showFloat = false;
                                             ),
                                           ],
                                         ),
-                                  // if (!showPaid && !showSigned)
+
                                   // DataRow(
-                                  //   cells: [
-                                  //     if (!showPaid)
+                                  //     color:MaterialStateColor.resolveWith((states) => Colors.white),
+                                  //
+                                  //     cells: [
+                                  //       DataCell(Text('Total', style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),)),
+                                  //       DataCell(Text('')),
+                                  //       DataCell((widget.dateDeb != null && widget.dateFin != null)?
+                                  //       Center(child: Text('${coursesNum} Cours',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold)))
+                                  //           :Text('${widget.courses.length} Cours',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),)
+                                  //       ),
+                                  //       DataCell(Text('')),
                                   //       DataCell(
-                                  //           Text('Totals:',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
+                                  //           Text('${totalType}',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),)
                                   //       ),
-                                  //     if (widget.role == "admin"&& !showSigned)
+                                  //
+                                  //
                                   //       DataCell(
-                                  //           (widget.dateDeb != null && widget.dateFin != null)?
-                                  //       Text('${coursesNum}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),):
-                                  //       Text('${widget.coursNum}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
+                                  //           Text('${somme}',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold))
                                   //       ),
                                   //
-                                  //
-                                  //     DataCell(
-                                  //       Text('Eq. CM: ',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
-                                  //
-                                  //     ),
-                                  //     DataCell(
-                                  //       Text('${totalType}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),),
-                                  //
-                                  //     ),
-                                  //     DataCell(
-                                  //       Text('MT:',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
-                                  //
-                                  //     ),
-                                  //     DataCell(
-                                  //         Text('${somme}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
-                                  //     ),
-                                  //    DataCell(
-                                  //      Text('')
-                                  //       ),
-                                  //
-                                  //   ],
-                                  // ),
-
+                                  //       DataCell(Text('')),
+                                  //     ])
 
                                 ],
                               ),
                             ),
-                            Container(
-                              width: MediaQuery.of(context).size.width,
-                              margin: EdgeInsets.only(top: 10),
-                              decoration: BoxDecoration(
-                                  // color: Colors.black.withOpacity(.3),
-                                color: Colors.blue,
-                                  borderRadius: BorderRadius.all(Radius.circular(20))
-                              ),
-                              child: DataTable(
-                                headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white70),
-                                dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
 
-                                showCheckboxColumn: true,
-                                showBottomBorder: true,
-                                horizontalMargin: 1,
-                                headingRowHeight: 50,
-                                columnSpacing: 18,
-                                dataRowHeight: 50,
-                                headingTextStyle: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black, // Set header text color
-                                ),
-                                // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
-                                columns: [
-                                  DataColumn(label: Text('Equivalant CM')),
-                                  DataColumn(label: Text('Montant Total')),
-                                  DataColumn(label: Text('Nombre de Cours')),
-                                ],
-                                rows: [
-                                  DataRow(
-                                    cells: [
 
-                                      DataCell((widget.dateDeb != null && widget.dateFin != null)?
-                                      Text('${totalType} heures',style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),)
-                                          :Text('${totalType} heures',style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
-                                      ),
-                                      DataCell((widget.dateDeb != null && widget.dateFin != null)?
-                                      Text('${somme} MRU',style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold))
-                                          :Text('${somme} MRU',style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),)
-                                      ),
-                                      DataCell((widget.dateDeb != null && widget.dateFin != null)?
-                                      Center(child: Text('${coursesNum} Cours',style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold)))
-                                          :Text('${widget.courses.length} Cours',style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),)
-                                      ),
-
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            // Container(
-                            //     width: MediaQuery.of(context).size.width,
-                            //     height: 50,
-                            //     decoration: BoxDecoration(
-                            //       color: Colors.blue.shade100,
-                            //       borderRadius: BorderRadius.only(
-                            //         bottomLeft: Radius.circular(20.0),
-                            //         bottomRight: Radius.circular(20.0),
-                            //       ),
-                            //     ),
-                            //     // margin: EdgeInsets.only(top: 20),
-                            //     child: Row(
-                            //       children: [
-                            //         SizedBox(width: 10,),
-                            //         Text('Totals', style: TextStyle(fontWeight: FontWeight.bold),),
-                            //
-                            //         SizedBox(width: 35,),
-                            //         (widget.dateDeb != null && widget.dateFin != null)?
-                            //         Text('${coursesNum} Cours',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
-                            //             :Text('${widget.courses.length} Cours',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),),
-                            //
-                            //
-                            //         SizedBox(width: 18,),
-                            //
-                            //         (widget.dateDeb != null && widget.dateFin != null)?
-                            //         Text('${somme} MRU',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400))
-                            //             :Text('${somme} MRU',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),),
-                            //
-                            //         SizedBox(width: 57,),
-                            //
-                            //         (widget.dateDeb != null && widget.dateFin != null)?
-                            //         Text('${totalType} H',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
-                            //             :Text('${totalType} H',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),),
-                            //
-                            //
-                            //       ],
-                            //     )
-                            // ),
 
                           ],
                         ),
@@ -870,58 +748,10 @@ bool showFloat = false;
       ),
 
       floatingActionButton:
-      // showFloat ?
-      // Container(
-      //     width: widget.paid?230:320,
-      //   decoration: BoxDecoration(
-      //     color: Colors.white,
-      //     borderRadius: BorderRadius.all(Radius.circular(50)),
-      //     boxShadow: [
-      //       BoxShadow(
-      //         color: Colors.black12,
-      //         blurRadius: 5,
-      //       ),
-      //     ],
-      //   ),
-      //   // margin: EdgeInsets.only(left: widget.paid? 100:40,right: widget.paid? 20:5),
-      //
-      //     margin: EdgeInsets.only(left: 40,right: widget.paid?30:30),
-      //   child: Row(
-      //     mainAxisAlignment: MainAxisAlignment.start,
-      //     crossAxisAlignment: CrossAxisAlignment.start,
-      //     children: [
-      //       // SizedBox(width: 18,),
-      //       widget.paid? SizedBox():
-      //
-      //       // SizedBox(width: 210,),
-      //       // TextButton(
-      //       //   child: Row(
-      //       //     children: [
-      //       //       Icon(Icons.sort, color: Colors.black,),
-      //       //       Text('Trier',style: TextStyle(color: Colors.black),),
-      //       //     ],
-      //       //   ),
-      //       //   onPressed: () => _trier(context),
-      //       //
-      //       // ),
-      //       TextButton(
-      //         child: Icon(Icons.close_outlined, color: Colors.black,),
-      //         onPressed: () {
-      //           setState(() {
-      //             showFloat = false;
-      //           });
-      //         },
-      //
-      //       ),
-      //     ],
-      //   ),
-      // )
-          // :
-      // widget.paid? SizedBox():
       Container(
         width: 60,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Colors.indigo,
           borderRadius: BorderRadius.all(Radius.circular(10)),
           boxShadow: [
             BoxShadow(
@@ -933,7 +763,7 @@ bool showFloat = false;
 
         // margin: EdgeInsets.only(left: 90,right: 60),
         child: TextButton(
-          child: Icon(Icons.add, color: Colors.black,),
+          child: Icon(Icons.add, color: Colors.white,),
           onPressed: () => _displayTextInputDialog(context),
 
         ),
@@ -944,6 +774,8 @@ bool showFloat = false;
     );
 
   }
+
+  Text bottomContainer(lab) => Text(lab,style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),);
 
   Future<void> _showCourseDetails(BuildContext context, Map<String, dynamic> course) {
     return showModalBottomSheet(
@@ -967,10 +799,10 @@ bool showFloat = false;
               children: [
                 Row(
                   children: [
-                    Text('Cours Infos',style: TextStyle(fontSize: 25),),
+                    Text('Cours Infos',style: TextStyle(fontSize: 25,color: Colors.blueGrey),),
                     Spacer(),
                     InkWell(
-                      child: Icon(Icons.close),
+                      child: Icon(Icons.close,color: Colors.blueGrey),
                       onTap: (){
                         Navigator.pop(context);
                       },
@@ -1274,8 +1106,8 @@ bool showFloat = false;
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         elevation: 5,
                         padding: EdgeInsets.symmetric(horizontal: 25),
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.green,
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
                         textStyle: TextStyle(fontWeight: FontWeight.bold),
                         // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                       ),
@@ -1299,8 +1131,8 @@ bool showFloat = false;
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         elevation: 5,
                         padding: EdgeInsets.symmetric(horizontal: 25),
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.blue,
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
                         textStyle: TextStyle(fontWeight: FontWeight.bold),
                         // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                       ),
@@ -1349,13 +1181,13 @@ bool showFloat = false;
 
                       child: Text('Supprimer'),
                       style: ElevatedButton.styleFrom(
-                        surfaceTintColor: Colors.white,
+                        // surfaceTintColor: Colors.white,
                         // side: BorderSide(color: Colors.black38),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         elevation: 5,
                         padding: EdgeInsets.symmetric(horizontal: 25),
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.redAccent,
+                        backgroundColor: Colors.redAccent,
+                        foregroundColor: Colors.white,
                         textStyle: TextStyle(fontWeight: FontWeight.bold),
                         // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                       ),
@@ -1448,12 +1280,15 @@ bool showFloat = false;
                                 ],
                               ),
                               style: ElevatedButton.styleFrom(
-                                surfaceTintColor: Colors.white,
-                                          // surfaceTintColor: Color(0xB0AFAFA3),
-                                  foregroundColor: Colors.black,
-                                  // side: BorderSide(color: Colors.black38),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                // surfaceTintColor: Colors.white,
+                                // side: BorderSide(color: Colors.black38),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                 elevation: 5,
+                                padding: EdgeInsets.symmetric(horizontal: 20),
+                                backgroundColor: Colors.indigo,
+                                foregroundColor: Colors.white,
+                                textStyle: TextStyle(fontWeight: FontWeight.bold),
+                                // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                               ),
                             ),
                             // Container(width: 50,
@@ -1486,11 +1321,15 @@ bool showFloat = false;
                                 ],
                               ),
                               style: ElevatedButton.styleFrom(
-                                          surfaceTintColor: Colors.white,
-                                  foregroundColor: Colors.black,
-                                  // side: BorderSide(color: Colors.black38),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                // surfaceTintColor: Colors.white,
+                                // side: BorderSide(color: Colors.black38),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                 elevation: 5,
+                                padding: EdgeInsets.symmetric(horizontal: 20),
+                                backgroundColor: Colors.indigo,
+                                foregroundColor: Colors.white,
+                                textStyle: TextStyle(fontWeight: FontWeight.bold),
+                                // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
                               ),
                             ),
                           ],
@@ -1528,11 +1367,8 @@ bool showFloat = false;
                               ],
                             ),
                               style: ElevatedButton.styleFrom(
-                                // backgroundColor: Color(0xff0fb2ea),
-                                //         surfaceTintColor: Color(0xB0AFAFA3),
-                                surfaceTintColor: showSigned?  Colors.lightGreenAccent: Colors.white,
-                                foregroundColor: Colors.black,
-                                // side: BorderSide(color: Colors.black38),
+                                foregroundColor: showSigned?  Colors.lightGreenAccent: Colors.white,
+                                backgroundColor: Colors.green.shade700,
                                 elevation: 5,
                                 padding: EdgeInsets.only(left: 30, right: 30),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -1556,14 +1392,13 @@ bool showFloat = false;
                                 Text("Payé"),
                               ],
                             ),
-                              style: ElevatedButton.styleFrom(
-                                surfaceTintColor: showPaid?  Colors.lightGreenAccent: Colors.white,
-                                foregroundColor: Colors.black,
-                                // side: BorderSide(color: Colors.black38),
-                                elevation: 5,
-                                padding: EdgeInsets.only(left: 30, right: 30),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                              ),
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: showSigned?  Colors.lightGreenAccent: Colors.white,
+                              backgroundColor: Colors.green.shade700,
+                              elevation: 5,
+                              padding: EdgeInsets.only(left: 30, right: 30),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            ),
                             )
                           ],
                         ),
@@ -1576,12 +1411,13 @@ bool showFloat = false;
                             Text('Date: Ancienne à Récente', style: TextStyle(fontWeight: FontWeight.w400,fontSize: 15 ),),
                             SizedBox(width: 80,),
                             Radio(
-                              value: '',
+                              value: true,
                               groupValue: sortByDateAscending,
                               onChanged: (value) {
                                 setState(() {
-                                  totalType =0;
-                                  sortByDateAscending = !sortByDateAscending;
+                                  // totalType =0;
+                                  sort = !sort;
+                                  sortByDateAscending = sortByDateAscending!;
                                   // Reverse the sorting order when the button is tapped
                                   widget.courses.sort((a, b) {
                                     DateTime dateA = DateTime.parse(a['date'].toString());
@@ -1591,8 +1427,10 @@ bool showFloat = false;
                                     // otherwise sort in descending order
 
                                     return dateA.compareTo(dateB) ;
+
                                   });
                                 });
+                                Navigator.pop(context);
                               },
                             ),
                           ],
@@ -1602,15 +1440,15 @@ bool showFloat = false;
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             SizedBox(width: 15,),
-                            Text('Date: Récente à Ancienne', style: TextStyle(fontWeight: FontWeight.w400,fontSize: 15 ),),
+                            Text('Date: Récente à Ancienne', style: TextStyle(fontWeight: FontWeight.w400,fontSize: 15,),),
                             SizedBox(width: 80,),
                             Radio(
-                              value: '',hoverColor: Colors.black,activeColor: Colors.green,
+                              value: false,
                               groupValue: sortByDateAscending,
                               onChanged: (value) {
                                 setState(() {
-                                  // sortByDateAscending = !sortByDateAscending;
-                                  // Reverse the sorting order when the button is tapped
+                                  sort = !sort;
+                                  sortByDateAscending = !sortByDateAscending;
                                   widget.courses.sort((a, b) {
                                     DateTime dateA = DateTime.parse(a['date'].toString());
                                     DateTime dateB = DateTime.parse(b['date'].toString());
@@ -1621,6 +1459,7 @@ bool showFloat = false;
                                     return dateB.compareTo(dateA);
                                   });
                                 });
+                                  Navigator.pop(context);
                               },
 
                             ),
@@ -1636,91 +1475,6 @@ bool showFloat = false;
         });
   }
 
-  Future<void> _trier(BuildContext context) async {
-    return showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-                      surfaceTintColor: Color(0xB0AFAFA3),
-              insetPadding: EdgeInsets.only(top: 300,),
-// backgroundColor: Color(0xB0AFAFA3),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(20),
-                  topLeft: Radius.circular(20),
-                ),
-              ),
-              title: Text('Trier les Cours'),
-              content: Container(
-                width: MediaQuery.of(context).size.width,
-                height: 330,
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      SizedBox(height: 30,),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Text('Date: Ancienne à Récente', style: TextStyle(fontWeight: FontWeight.w400,fontSize: 15 ),),
-                          SizedBox(width: 100,),
-                          Radio(
-                            value: '',
-                            groupValue: sortByDateAscending,
-                            onChanged: (value) {
-                              setState(() {
-                                totalType =0;
-                                sortByDateAscending = !sortByDateAscending;
-                                // Reverse the sorting order when the button is tapped
-                                widget.courses.sort((a, b) {
-                                  DateTime dateA = DateTime.parse(a['date'].toString());
-                                  DateTime dateB = DateTime.parse(b['date'].toString());
-
-                                  // Sort in ascending order if sortByDateAscending is true,
-                                  // otherwise sort in descending order
-
-                                  return dateA.compareTo(dateB) ;
-                                });
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                      Divider(color: Colors.black38,),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Text('Date: Récente à Ancienne', style: TextStyle(fontWeight: FontWeight.w400,fontSize: 15 ),),
-                          SizedBox(width: 100,),
-                          Radio(
-                            value: '',hoverColor: Colors.black,activeColor: Colors.green,
-                            groupValue: sortByDateAscending,
-                            onChanged: (value) {
-                              setState(() {
-                                // sortByDateAscending = !sortByDateAscending;
-                                // Reverse the sorting order when the button is tapped
-                                widget.courses.sort((a, b) {
-                                  DateTime dateA = DateTime.parse(a['date'].toString());
-                                  DateTime dateB = DateTime.parse(b['date'].toString());
-
-                                  // Sort in ascending order if sortByDateAscending is true,
-                                  // otherwise sort in descending order
-
-                                  return dateB.compareTo(dateA);
-                                });
-                              });
-                            },
-
-                          ),
-                        ],
-                      ),
-
-                    ],
-                  ),
-                ),
-              )
-          );
-        });
-  }
 
 
   Future<void> auto() async {
@@ -2105,7 +1859,7 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.white,
-                    hintText: "selection d'une Professeur",
+                    hintText: "selection d'un Professeur",
 
                     border: OutlineInputBorder(
                       borderSide: BorderSide.none,gapPadding: 1,
@@ -2944,6 +2698,7 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
                   onChanged: (value) async{
                     setState(() {
                       selectedProfesseur = value;
+                      showProf = true;
                       selectedElem = null;
                       updateElemList();
                     });
@@ -2951,7 +2706,7 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.white,
-                    hintText: "selection d'une Professeur",
+                    hintText: "selection d'un Professeur",
 
                     border: OutlineInputBorder(
                       borderSide: BorderSide.none,gapPadding: 1,
@@ -3244,10 +2999,12 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
                         nbh,date,
                         time
                         ,elem,prof,
-                      signe
                     );
 
 
+                    setState(() {
+                      Navigator.pop(context);
+                    });
 
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('Le Type est mis à jour avec succès.')),
@@ -3276,7 +3033,7 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
   }
 
 
-  Future<void> UpdatCours (id,String TN,num th,DateTime date,String time, String ElemId,String ProfId,String isSigned) async {
+  Future<void> UpdatCours (id,String TN,num th,DateTime date,String time, String ElemId,String ProfId) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token")!;
     final url = 'http://192.168.43.73:5000/cours/'  + '/$id';
@@ -3292,13 +3049,13 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
       "startTime": time,
       "element": ElemId,
       "professeur": ProfId,
-      "isSigned": isSigned,
+      // "isSigned": isSigned,
     };
 
     if (date != null) {
       body['date'] = date.toIso8601String();
     }
-try {
+// try {
   final response = await http.patch(
     Uri.parse(url),
     headers: headers,
@@ -3306,7 +3063,7 @@ try {
   );
 
   print('Status:${response.statusCode}');
-  if (response.statusCode == 201) {
+  if (response.statusCode == 200) {
     // Course creation was successful
     print("Emploi Updated successfully!");
     final responseData = json.decode(response.body);
@@ -3375,9 +3132,9 @@ try {
           });
     });
   }
-}catch (error) {
-  print("Error: $error");
-}
+// }catch (error) {
+//   print("Error: $error");
+// }
   }
 
 }

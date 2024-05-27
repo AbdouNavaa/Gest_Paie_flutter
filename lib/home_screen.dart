@@ -8,6 +8,7 @@ import 'package:gestion_payements/paie.dart';
 import 'package:gestion_payements/paiements.dart';
 import 'package:gestion_payements/professeures.dart';
 import 'package:gestion_payements/settings.dart';
+import 'package:gestion_payements/test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 
@@ -86,29 +87,43 @@ class _HomeScreenState extends State<HomeScreen> {
       print('Erreur: $error');
     });
 
-
+    _loadPhotoUrl();
   }
 
-  Color _primaryColor =Colors.lightBlueAccent;
+  String? photoUrl;
+  _loadPhotoUrl() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      photoUrl = prefs.getString("photo");
+      if (photoUrl != null && photoUrl!.contains("localhost")) {
+        photoUrl = photoUrl!.replaceFirst("localhost", "192.168.43.73"); // Use your server's IP address here
+      }
+    });
+  }
 
-  Color _accentColor =Colors.white;
+
   late int index;
-  late List<Widget> _screens;
-  final double _drawerIconSize = 24;
-  final double _drawerFontSize = 17;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: widget.role == "professeur"
-      //     ? AppBar(
-      //   backgroundColor:Color(0xff40deef),
-      //   // colors: [ Color(0xff0fb2ea)],
-      //   // ,
-      //   actions: [
-      //
-      //   ],
-      // )
-      //     : null,
+      appBar: AppBar(title: Text('Gestion de Paiement',
+        style: GoogleFonts.abhayaLibre(
+          color: Colors.white,
+          fontSize: 25.0,
+          fontStyle: FontStyle.italic,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.0,
+        ),
+      ),
+        // leading: IconButton(onPressed: ()=> MyDrawer(), icon: Icon(Icons.sort_outlined)),
+        backgroundColor:Colors.indigoAccent.shade700,iconTheme: IconThemeData(color: Colors.white,),
+        // colors: [ Color(0xff0fb2ea)],
+        // ,
+        actions: [
+
+        ],
+      )
+          ,
 
       drawer: MyDrawer(),
       body: Stack(
@@ -126,7 +141,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   end: Alignment.bottomLeft,
                   // colors: [ Colors.white,Colors.white],
                   // stops: [0.0, 2],
-                  colors: [Colors.blue, Colors.blueAccent],
+                  colors: [Colors.indigoAccent.shade700, Colors.indigo.shade700],
                   // colors: [Color(0xB0AFAFA3), Colors.white],
                 ),
               ),
@@ -135,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           Positioned(
             left: 20,
-            top: widget.role == "professeur"? 40:100,
+            top: widget.role == "professeur"? 40:40,
             right: 20,
             child: Column(
               children:[
@@ -175,7 +190,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(100),
 
-                                child: Image.asset("assets/user1.png",width: 100),
+                                child:
+                                     // photoUrl != null
+                                    // ? Image.network(photoUrl!, width: 100, height: 100, fit: BoxFit.cover)
+                                    Image.asset("assets/user1.png", width: 100, height: 100),
                               ),
                             ),
 
@@ -917,13 +935,13 @@ class _MyDrawerState extends State<MyDrawer> {
 
               decoration: BoxDecoration(
                 color: Theme.of(context).primaryColor,
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  stops: [0.0, 2],
-                  colors: [ Colors.blue,Colors.white],
-
-                ),
+                // gradient: LinearGradient(
+                //   begin: Alignment.topLeft,
+                //   end: Alignment.bottomRight,
+                //   stops: [0.0, 2],
+                //   colors: [ Colors.blue,Colors.white],
+                //
+                // ),
               ),
               child: Container(
                 alignment: Alignment.topLeft,
@@ -1230,10 +1248,10 @@ class _MyDrawerState extends State<MyDrawer> {
                     },
                   ),
                   //Divider(color: Theme.of(context).primaryColor, height: 1,),
-                  ListTile(
-                    leading: Icon(Icons.logout_rounded, size: _drawerIconSize,color: Colors.black,),
-                    title: Text('Logout',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
-                    onTap: () async{
+                  SizedBox(height: 280,),
+                  ElevatedButton(
+                    child: Text('Logout',style: TextStyle(fontSize: _drawerFontSize,color: Colors.white),),
+                    onPressed: () async{
                       SharedPreferences prefs = await SharedPreferences.getInstance();
                       await prefs.setString('token', '');
                       Navigator.push(context,
@@ -1241,12 +1259,27 @@ class _MyDrawerState extends State<MyDrawer> {
                       // MaterialPageRoute(builder: (context) => LoginSection()));
 
                     },
+                    style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor,padding: EdgeInsets.symmetric(horizontal: 90,vertical: 10)),
                   ),
+
                 ],
               ),
             if (role == "admin")
               Column(
                 children: [
+                  ListTile(
+                    leading: Icon(Icons.home, size: _drawerIconSize, color: Colors.black,),
+                    // leading: Icon(Icons.dashboard_customize_outlined, size: _drawerIconSize, color: Colors.black,),
+                    title: Text('Acceuil', style: TextStyle(fontSize: 17, color: Colors.black),),
+                    onTap: (){
+                      Navigator.push(context, MaterialPageRoute(
+                          builder: (context) =>
+                          // ProfesseurInfoPage(
+                          //     id: id, email: email, role: role),
+                          // builder: (context) => LandingScreen(role: role,name: nom,), // Passer le rôle ici
+                          MyCustomWidget()),);
+                    },
+                  ),
                   ListTile(
                     leading: Icon(Icons.home, size: _drawerIconSize, color: Colors.black,),
                     // leading: Icon(Icons.dashboard_customize_outlined, size: _drawerIconSize, color: Colors.black,),
@@ -1472,10 +1505,9 @@ class _MyDrawerState extends State<MyDrawer> {
                           userRole: role!, userEmail: email!)));
                     },
                   ),
-                  ListTile(
-                    leading: Icon(Icons.logout_rounded, size: _drawerIconSize,color: Colors.black,),
-                    title: Text('Logout',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
-                    onTap: () async{
+                  ElevatedButton(
+                    child: Text('Logout',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
+                    onPressed: () async{
                       SharedPreferences prefs = await SharedPreferences.getInstance();
                       await prefs.setString('token', '');
                       Navigator.push(context,
@@ -1483,6 +1515,7 @@ class _MyDrawerState extends State<MyDrawer> {
                       // MaterialPageRoute(builder: (context) => LoginSection()));
 
                     },
+                    style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor,padding: EdgeInsets.symmetric(horizontal: 90,vertical: 10)),
                   ),
                 ],)
           ],   ),   ),  ); }}

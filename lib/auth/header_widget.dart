@@ -16,9 +16,9 @@ class HeaderWidget extends StatefulWidget {
 
 class _HeaderWidgetState extends State<HeaderWidget> {
   // Color _primaryColor = HexColor('#FFFFFF');
-  Color _primaryColor =Colors.blueAccent;
+  Color _primaryColor =Colors.indigo;
 
-  Color _accentColor =Colors.white;
+  Color _accentColor =Colors.indigoAccent;
   double _height;
   bool _showIcon;
   String image;
