@@ -609,7 +609,9 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
                 child: TextButton(
                   onPressed: () {
                     if (selectedCourses.length == 0){
-                      buildShowNullDialog(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Il n y a pas de Cours selectionner'),action: SnackBarAction(label: 'Ok', onPressed: (){})),
+                      );
                     }
                     else{
                       singeCoursMultiple(selectedCourses);
@@ -878,30 +880,6 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
       // Utilisez courseId comme nécessaire
     }
   }
-
-  Future<dynamic> buildShowNullDialog(BuildContext context) {
-    return showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          surfaceTintColor: Color(0xB0AFAFA3),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
-          title: Text("Alert d\'erreur",style: TextStyle(color: Colors.red.shade900),),
-          content: Text(
-              "Il faut sélectioner quelques elements"),
-          actions: <Widget>[
-            TextButton(
-              child: Text("Réessayez"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
 
 
 }

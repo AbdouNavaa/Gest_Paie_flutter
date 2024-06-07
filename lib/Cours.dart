@@ -235,9 +235,6 @@ class _CoursesPageState extends State<CoursesPage> {
   }
 
 
-
-
-
 bool showFloat = false;
   @override
   Widget build(BuildContext context) {
@@ -485,7 +482,7 @@ bool showFloat = false;
                                 dataRowHeight: 60,
                                 headingTextStyle: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: widget.courses.length > 0 ?Colors.white:Colors.black, // Set header text color
+                                  color: Colors.white, // Set header text color
                                 ),
                                 columns: [
                                   // if ( showSigned)
@@ -1225,7 +1222,8 @@ bool showFloat = false;
                 insetPadding: EdgeInsets.only(top: widget.paid?300:230,),
 
 
-                        surfaceTintColor: Color(0xB0AFAFA3),
+                        surfaceTintColor: Colors.white,
+                backgroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.only(
                     topRight: Radius.circular(20),
@@ -1573,6 +1571,7 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
   TextEditingController _date = TextEditingController();
   TextEditingController _start = TextEditingController();
   int _selectedNum = 1;
+  String? selectedGroup;
 
   filliere? selectedFil;
   int? selectedSem;
@@ -1581,6 +1580,7 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
   Professeur? selectedProfesseur;
   List<Professeur> professeurs = [];
   DateTime? selectedDateTime;
+  List<dynamic> filteredGroups = [];
 
   Future<void> updateElemList() async {
     if (selectedProfesseur != null) {
@@ -1595,6 +1595,33 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
         elList = [];
         selectedElem = null;
       });
+    }
+  }
+  List<dynamic>? updateFilteredGroups(selectedType,selectedProfesseur,selectedElem) {
+    if (selectedType != null && selectedElem != null) {
+      List<dynamic> groups;
+      List<dynamic> professors;
+      if (selectedType == 'CM') {
+        groups = selectedElem!.groupeCM ?? [];
+        professors = selectedElem?.professeurCM ?? [];
+      } else if (selectedType == 'TP') {
+        groups = selectedElem?.groupeTP ?? [];
+        professors = selectedElem?.professeurTP ?? [];
+      } else {
+        groups = selectedElem?.groupeTD ?? [];
+        professors = selectedElem?.professeurTD ?? [];
+      }
+
+      // Filter groups by professor ID
+      String profId = selectedProfesseur?.id ?? '';
+      print('ProfID:${profId}');
+      filteredGroups = groups.where((group) {
+        return professors.any((prof) => prof == profId && group.contains(prof));
+      }).toList();
+      print("Groups:${filteredGroups}");
+      return filteredGroups;
+    } else {
+      filteredGroups = [];
     }
   }
 
@@ -1986,78 +2013,103 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
                   children: [
 
                     Expanded(flex: 1,
-                    child: Container(
-                        width: 147.5,
-                        child: DropdownButtonFormField<String>(
-                          value: _selectedType,
-                          items: [
-                            DropdownMenuItem<String>(
-                              child: Text('CM'),
-                              value: 'CM',
-                            ),
-                            DropdownMenuItem<String>(
-                              child: Text('TP'),
-                              value: 'TP',
-                            ),
-                            DropdownMenuItem<String>(
-                              child: Text('TD'),
-                              value: 'TD',
-                            ),
-                          ],
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedType = value!;
-                            });
-                          },
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.white,
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide.none,gapPadding: 1,
-                              borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                            ),
-                          ),
+                    child: DropdownButtonFormField<String>(
+                      value: _selectedType,
+                      items: [
+                        DropdownMenuItem<String>(
+                          child: Text('CM'),
+                          value: 'CM',
                         ),
-
+                        DropdownMenuItem<String>(
+                          child: Text('TP'),
+                          value: 'TP',
+                        ),
+                        DropdownMenuItem<String>(
+                          child: Text('TD'),
+                          value: 'TD',
+                        ),
+                      ],
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedType = value!;
+                          selectedGroup = null;
+                          groupName = _selectedType == "CM"?'G':_selectedType == "TP"?'TP':'TD';
+                          updateFilteredGroups(  _selectedType,selectedProfesseur,selectedElem,);
+                        });
+                      },
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide.none,gapPadding: 1,
+                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                        ),
                       ),
+                    ),
                     ),
                     SizedBox(width: 10),
                     Expanded(flex: 1,
-                      child: Container(
-                        width: 147.5,
-                        child: DropdownButtonFormField<num>(
-                          value: _selectedNbh,
-                          items: [
-                            DropdownMenuItem<num>(
-                              child: Text('1.5'),
-                              value: 1.5,
-                            ),
-                            DropdownMenuItem<num>(
-                              child: Text('2'),
-                              value: 2,
-                            ),
-                          ],
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedNbh = value!;
-                            });
-                          },
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.white,
-                            hintText: "taux",
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide.none,gapPadding: 1,
-                              borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                            ),
+                      child: DropdownButtonFormField<num>(
+                        value: _selectedNbh,
+                        items: [
+                          DropdownMenuItem<num>(
+                            child: Text('1.5'),
+                            value: 1.5,
+                          ),
+                          DropdownMenuItem<num>(
+                            child: Text('2'),
+                            value: 2,
+                          ),
+                        ],
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedNbh = value!;
+                          });
+                        },
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          hintText: "taux",
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide.none,gapPadding: 1,
+                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
                           ),
                         ),
-
                       ),
+                    ),
+                    // if (_selectedType != null)
+                  SizedBox(width: 10),
+                    Expanded(flex: 1,
+                      child: DropdownButtonFormField<String>(
+                        value: selectedGroup,disabledHint: Text('Groupe'),
+                        items: filteredGroups.map((group) {
+                          return DropdownMenuItem<String>(
+                            value: group,//abdou
+                            child: Text('${groupName}${group.split('-')[2]}'),
+                            // child: Text('${getProfesseurIdFromName(group.split('-')[0])} ${groupName}${group.split('-')[2]}'),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            selectedGroup = value;
+                          });
+                        },
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          hintText: "Sélectionner un groupe",
+                          labelText: 'Groupe',labelStyle: TextStyle(color: Colors.blueGrey,fontWeight: FontWeight.w600),
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                          ),
+                        ),
+                      ),
+
                     ),
                   ],
                 ),
-
+                SizedBox(height: 15),
                 // DropdownButtonFormField<String>(
                 //   value: _selectedType,
                 //   items: coursTypes.map((type) {
@@ -2080,7 +2132,7 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
                   onPressed: (){
 
                     DateTime date =DateFormat('yyyy/MM/dd').parse(_date.text).toUtc();
-                    addCours(_selectedType,_selectedNbh,date,_start.text,selectedElem!.id,selectedProfesseur!.id);
+                    addCours(_selectedType,_selectedNbh,date,_start.text,selectedElem!.id,selectedProfesseur!.id,selectedGroup!);
                     // Addemploi(_name.text, _desc.text);
 
 
@@ -2123,7 +2175,7 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
               );
   }
 
-  Future<void> addCours(String type, num nbh,DateTime date,String time, String ElemId,String ProfId,) async {
+  Future<void> addCours(String type, num nbh,DateTime date,String time, String ElemId,String ProfId,String groupe,) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token")!;
     print(token);
@@ -2136,7 +2188,7 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
       "nbh": nbh,
       "date": date!.toIso8601String(),
       "startTime": time,
-      // "dayNumero": days,
+      "groupe": groupe,
       "element": ElemId,
       "professeur": ProfId
     };
@@ -2255,6 +2307,18 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
       // Handle email sending errors gracefully, e.g., display a user-friendly message
     }
   }
+
+  String getProfesseurIdFromName(String id) {
+    // Assuming you have a list of professeurs named 'professeursList'
+    // awai
+    final professeur = professeurList.firstWhere((prof) => '${prof.id}' == id, orElse: () =>
+        Professeur(id: '', nom:'',user: '',  ));
+    print("Nom: ${professeurList}");
+    return "${professeur.nom!} ${ professeur.prenom!}"; // Return the ID if found, otherwise an empty string
+
+  }
+  String groupName = 'G';
+
 }
 
 class Filtrer extends StatefulWidget {

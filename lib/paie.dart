@@ -224,7 +224,7 @@ class _PaieState extends State<Paie> {
                                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
                                                   title: Row(
                                                     children: [
-                                                      Text("Refusion"),
+                                                      Text("Refusé"),
                                                       SizedBox(width: 90,),
                                                       Icon(Icons.thumb_down_off_alt_outlined, color: Colors.redAccent.shade200,)
                                                     ],

@@ -315,7 +315,7 @@ class _LoginSectionState extends State<LoginSection>
                             }
                           },
                           child: Container(
-                            height: _width * .5,
+                            height: _width * .4,
                             width: _width -260,
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
@@ -325,7 +325,7 @@ class _LoginSectionState extends State<LoginSection>
                                 tileMode: TileMode.repeated,  begin: const FractionalOffset(0.0, 0.0),
                                 end: const FractionalOffset(1.0, 0.0),
                                 colors: [Colors.indigo, Colors.indigoAccent],),
-                              boxShadow: [BoxShadow(color: Colors.white10)],
+                              boxShadow: [BoxShadow(color: Colors.white)],
                               shape: BoxShape.circle,
                             ),
                             child: Text(

@@ -34,7 +34,7 @@ class ProfileListItem extends StatelessWidget {
         horizontal: 10 * 2,
       ),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10 * 2),
+        borderRadius: BorderRadius.circular(5 * 2),
         // color: Theme.of(context).backgroundColor,
         // color: MyColor,
         color: Colors.white,

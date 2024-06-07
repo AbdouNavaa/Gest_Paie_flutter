@@ -87,78 +87,22 @@ class _EmploiPageState extends State<EmploiPage> {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(1.0),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
+              child: SingleChildScrollView(scrollDirection: Axis.vertical,
                 child: Column(
                   children: [
-                    Container(
-                      width: MediaQuery.of(context).size.width ,
-                      decoration: BoxDecoration(
-                          // color: Colors.indigo.shade500,
-                          color: Colors.black87,
-                          borderRadius: BorderRadius.all(Radius.circular(30))
-                      ),
-                      child: DataTable(
-                        showCheckboxColumn: true,
-                        showBottomBorder: true,
-                        headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white12), // Couleur de la ligne d'en-tête
-                        dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white), // Couleur de la ligne d'en-tête
-                        headingRowHeight: 50,horizontalMargin: 10,
-                        headingTextStyle: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),
-                        columnSpacing: 10,
-                        dataRowHeight: 70,
-                        columns: [
-                          DataColumn(label: Text('Jours')),
-                          DataColumn(label: Text('Matière')),
-                          DataColumn(label: Text('Filière')),
-                          DataColumn(label: Text('Type')),
-                          DataColumn(label: Text('Deb')),
-                          // DataColumn(label: Text('Fin')),
-                          // DataColumn(label: Text('Action')),
-                        ],
-                        rows: [
-                          for (var index = 0; index < (emplois?.length ?? 0); index++)
-                          // for (var categ in emplois!)
-                            DataRow(
-                                cells: [
-                                  DataCell(Container(width: 60,
-                                    child: Text('${emplois?[index].day.capitalizeFirst}',style: TextStyle(
-                                      color: Colors.black,
-                                    ),),
-                                  )),
-                                  // DataCell(Text('${emplois?[index].filliere.toUpperCase()}${emplois[index].semestre}',style: TextStyle(
-                                  //   color: Colors.black,
-                                  // ),)),
-                                  DataCell(Container(
-                                    width: 80,
-                                    child: Text('${getMatCode(emplois![index].code).toUpperCase()}',style: TextStyle(
-                                      color: Colors.black,
-                                    ),),
-                                  )),
-                                  DataCell(Container(
-                                    width: 70,
-                                    child: Text('${emplois?[index].fil.toUpperCase()}',style: TextStyle(
-                                      color: Colors.black,
-                                    ),),
-                                  )),
-                                  DataCell(Text('${emplois?[index].type}',style: TextStyle(
-                                    color: Colors.black,
-                                  ),)),
-                                  DataCell(Container(width: 40,
-                                    child: Text('${emplois?[index].startTime}',style: TextStyle(
-                                      color: Colors.black,
-                                    ),),
-                                  )),
-                                  // DataCell(Text('${emplois?[index].finishTime}',style: TextStyle(
-                                  //   color: Colors.black,
-                                  // ),)),
-
-
-                                ]),
-                        ],
-                      ),
-
-                    ),
+                    buildDataTable(emplois,'lundi'),
+                    // SizedBox(height: 20,),
+                    buildDataTable(emplois,'mardi'),
+                    // SizedBox(height: 20,),
+                    buildDataTable(emplois,'mercredi'),
+                    // SizedBox(height: 20,),
+                    buildDataTable(emplois,'jeudi'),
+                    // SizedBox(height: 20,),
+                    buildDataTable(emplois,'vendredi'),
+                    // SizedBox(height: 20,),
+                    buildDataTable(emplois,'samedi'),
+                    // SizedBox(height: 20,),
+                    buildDataTable(emplois,'dimanche'),
                   ],
                 ),
               ),
@@ -168,6 +112,110 @@ class _EmploiPageState extends State<EmploiPage> {
       )
 
     );
+  }
+
+  Container buildDataTable(List<ProfEmploi> emp, day) {
+                List<DataRow> dayRows = [];
+                for (var emp in emp!) {
+                  if (emp?.day == day) {
+                    // dayRows.add(
+                    //   DataRow(
+                    //     cells: [
+                    //
+                    //       DataCell(Container()
+                    //       ),
+                    //       DataCell(Container()
+                    //       ),
+                    //       DataCell(Container()
+                    //       ),
+                    //     ],
+                    //   ),
+                    // );
+                    dayRows.add(
+                      DataRow(
+                        color: MaterialStateColor.resolveWith((states) => Colors.black87),
+
+                        cells: [
+                          DataCell(Container(child:
+                          Text(emp.startTime!, style: TextStyle(color: Colors.white)),)
+                          ),
+                          DataCell(Text('à',style: TextStyle(color: Colors.white),)
+                          ),
+                          DataCell(Container(child:
+                          Text(emp.finishTime!, style: TextStyle(color: Colors.white)),)
+                          ),
+
+
+                        ],
+                      ),
+                    );
+                    dayRows.add(
+                      DataRow(
+                        cells: [
+
+                          DataCell(Text('${emp.code!.split('-')[1].toUpperCase()}'),//abdou
+                          ),
+
+                          DataCell(Text('${emp.fil!.toUpperCase()}')),
+                          DataCell(Text('${emp.type!.toUpperCase()}')),
+                        ],
+                      ),
+                    );
+                    dayRows.add(
+                      DataRow(
+                        cells: [
+                          DataCell(Text(emp.matiere!.toString().capitalize!, style: TextStyle(color: Colors.black))),
+                          DataCell(Container()),
+                          DataCell(Container()),
+
+
+                        ],
+                      ),
+                    );
+
+
+
+
+                  }
+                }
+
+                bool vide =emp.any((em) => em.day == day);
+                // Construisez le DataTable pour le jour donné
+                return  vide? Container(
+                  margin: EdgeInsets.only(bottom: 10),
+                  width: MediaQuery.of(context).size.width -10,
+                  decoration: BoxDecoration(
+                    // color: Colors.indigo.shade500,
+                    // color: Colors.black87,
+                      borderRadius: BorderRadius.all(Radius.circular(30))
+                  ),
+                  child: DataTable(
+                    // showCheckboxColumn: true,
+                    // showBottomBorder: true,
+                    headingRowHeight: 50,
+                    columnSpacing: 15,
+                    dataRowHeight: 60,
+                    headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white10),
+                    dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
+                    horizontalMargin: 10,
+
+                    headingTextStyle: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                    columns: [
+                      DataColumn(label: Container(width: 80,
+                        child: Text(day.toString().capitalize! ,
+                          style: TextStyle(color: Colors.black87,fontSize: 20,fontWeight: FontWeight.w500),
+                        ),
+                      ),),
+                      DataColumn(label: Text('')),
+                      DataColumn(label: Text('')),
+                    ],
+                    rows: dayRows,
+
+                  ),
+                ): Container();
   }
 }
 

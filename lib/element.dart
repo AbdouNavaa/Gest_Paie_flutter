@@ -16,6 +16,7 @@ import 'dart:convert';
 
 import '../matieres.dart';
 import 'Cours.dart';
+import 'auth/emploi.dart';
 import 'categories.dart';
 import 'home_screen.dart';
 
@@ -144,7 +145,8 @@ class _ElementsState extends State<Elements> {
     fetchElems().then((data) {
       setState(() {
         filteredItems = data; // Assigner la liste renvoyée par Groupesseur à items
-        print("ElList${filteredItems}");
+        elLis = data; // Assigner la liste renvoyée par Groupesseur à items
+        print("ElList${elLis}");
       });
     }).catchError((error) {
       print('Erreur: $error');
@@ -191,7 +193,15 @@ class _ElementsState extends State<Elements> {
   int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
   // int _rowsPerPage = 5;
 
-
+  // filliere? selectedFil;
+  Elem? selectedELem;
+  List<int> semestersList = [];
+  int? selectedSem ;
+  List<Elem> elList1 = [];
+  // List<Semestre> SemList = [];
+  // List<Semestre> SemList1 = [];
+  List<Elem> elLis = [];
+  // List<filliere> filList = [];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -259,7 +269,7 @@ class _ElementsState extends State<Elements> {
                           contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                         ),
                       )):
-                  Text("Liste des Elements",style: TextStyle(fontSize: 20),),
+                  Text("Liste des Matieres",style: TextStyle(fontSize: 20),),
                   showSearch?SizedBox():SizedBox(width: 80,),
                   Container(
                     width: 50,
@@ -278,6 +288,87 @@ class _ElementsState extends State<Elements> {
             ),
             Divider(),
 
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Flexible(
+                  child: Container(
+                    // width: MediaQuery.of(context).size.width /3,
+                    height: 60,
+                    // color: Colors.black12,
+                    child: DropdownButtonFormField<filliere>(
+                      dropdownColor: Colors.white,
+                      value: selectedFil,hint: Text("Fillieres"),
+                      items: filList.map((fil) {
+                        return DropdownMenuItem<filliere>(
+                          value: fil,
+                          child: Text(fil.name.toUpperCase()),
+                        );
+                      }).toList(),
+                      onChanged: (value)  {
+
+                        setState(() {
+                          selectedFil = value;
+                          selectedSem = null;
+                          elList1 = filterItemsByFil(selectedFil, elLis!);
+                          semestersList = extractUniqueSemesters(elList1);
+                          // selectedELem = null;
+                          // selectedGroup = null;
+                        });
+
+
+                        print("ElemListe ${elList1}");
+                        print("SemListe${semestersList}");
+                      },
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        // hintText: "Sélecte Filliere",
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide.none,
+                          gapPadding: 1,
+                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Flexible(
+                  child: Container(
+                    height: 60,
+                    // width: MediaQuery.of(context).size.width / 3,
+                    child: DropdownButtonFormField<int>(
+                      value: selectedSem,
+                      hint: Text('Semestres'),
+                      items: semestersList.map((sem) {
+                        return DropdownMenuItem<int>(
+                          value: sem,
+                          child: Text("S$sem"),
+                        );
+                      }).toList(),
+                      onChanged: (value) async {
+                        setState(() {
+                          selectedSem = value;
+                          filteredItems = filterItemsBySem(selectedSem,selectedFil, elLis!);
+                          print("Emps:${filteredItems}, ${filteredItems}, ${selectedSem} ${selectedFil!.name}");
+                        });
+                      },
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        hintText: "Sélecte Semestre",
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide.none,
+                          gapPadding: 1,
+                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+              ],
+            ),
 
 
             Expanded(
@@ -313,7 +404,7 @@ class _ElementsState extends State<Elements> {
                                   // Modifiez les couleurs de DataTable ici
                                   dataTableTheme: DataTableThemeData(
                                     dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white), // Couleur des lignes de données
-                                    headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white), // Couleur de la ligne d'en-tête
+                                    headingRowColor: MaterialStateColor.resolveWith((states) => Colors.black87), // Couleur de la ligne d'en-tête
 
 
                                   ),
@@ -323,20 +414,22 @@ class _ElementsState extends State<Elements> {
                                   rowsPerPage: _rowsPerPage,
                                   showFirstLastButtons: _rowsPerPage >= 10 ? true: false,
                                   availableRowsPerPage: [5, 7,9,10, 20],
+                                  // header: Text('hekko'),
+
                                   onRowsPerPageChanged: (value) {
                                     setState(() {
                                       _rowsPerPage = value ?? _rowsPerPage;
                                     });
                                   },
                                   columns: [
-                                    DataColumn(label: Text('Sem')),
-                                    DataColumn(label: Text('Code')),
-                                    DataColumn(label: Text('Matiere')),
-                                    DataColumn(label: Text('Fillliere')),
-                                    DataColumn(label: Text('H.CM')),
-                                    DataColumn(label: Text('H.TP')),
-                                    DataColumn(label: Text('H.TD')),
-                                    DataColumn(label: Text('Action')),
+                                    buildDataColumn('Sem'),
+                                    buildDataColumn('Code'),
+                                    buildDataColumn('Matiere'),
+                                    buildDataColumn('Fillliere'),
+                                    buildDataColumn('H.CM'),
+                                    buildDataColumn('H.TP'),
+                                    buildDataColumn('H.TD'),
+                                    buildDataColumn('Action'),
                                   ],
                                   source: YourDataSource(filteredItems ?? items!,
                                     onTapCallback: (index) {
@@ -426,7 +519,7 @@ class _ElementsState extends State<Elements> {
             :Container(
           width: 60,
           decoration: BoxDecoration(
-            color: Colors.lightGreen,
+            color: Colors.indigo,
             borderRadius: BorderRadius.all(Radius.circular(10)),
             boxShadow: [
               BoxShadow(
@@ -456,6 +549,11 @@ class _ElementsState extends State<Elements> {
       );
 
   }
+
+  DataColumn buildDataColumn(val) => DataColumn(label: Text(val,style: TextStyle(
+    fontWeight: FontWeight.bold,
+    color: Colors.white, // Set header text color
+  ),));
   Future<String?> pickExcelFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
@@ -711,292 +809,328 @@ class _ElementsState extends State<Elements> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          // _selectedNum = emp.dayNumero;
-                          // _date.text = ele.fil!;
-                          Navigator.pop(context);
-                          print(ele.id);
-                          setState(() {
+                      Expanded(flex: 1,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            // _selectedNum = emp.dayNumero;
+                            // _date.text = ele.fil!;
+                            Navigator.pop(context);
+                            print(ele.id);
+                            setState(() {
 
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) =>
-                                    UpdateElemScreen(eleId: ele.id,  Sem:ele.SemNum, Mat: ele.nameMat!,
-                                      // ProCM: ele.ProfCM!, ProTP: ele.ProfTP!, ProTD: ele.ProfTD!,
-                                      CredCM: ele.HCM!, CredTP: ele.HTP!,CredTD: ele.HTD!,
-                                      filId: ele.filId, fil: ele.filName!,
-                                      ProfCMId: ele.ProCMId, ProfTPId: ele.ProTPId,ProfTDId: ele.ProTDId,
-                                    )));
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) =>
+                                      UpdateElemScreen(eleId: ele.id,  Sem:ele.SemNum, Mat: ele.nameMat!,
+                                        // ProCM: ele.ProfCM!, ProTP: ele.ProfTP!, ProTD: ele.ProfTD!,
+                                        CredCM: ele.HCM!, CredTP: ele.HTP!,CredTD: ele.HTD!,
+                                        filId: ele.filId, fil: ele.filName!,
+                                        ProfCMId: ele.ProCMId, ProfTPId: ele.ProTPId,ProfTDId: ele.ProTDId,
+                                      )));
 
-                          });
-                        },// Disable button functionality
+                            });
+                          },// Disable button functionality
 
-                        child: Text('Modifier'),
-                        style: ElevatedButton.styleFrom(
-                          surfaceTintColor: Colors.white,
-                          // side: BorderSide(color: Colors.black38),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          elevation: 5,
-                          padding: EdgeInsets.symmetric(horizontal: 20),
-                          backgroundColor: Colors.green,
-                          foregroundColor: Colors.white,
-                          textStyle: TextStyle(fontWeight: FontWeight.bold),
-                          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                          child: Text('Modifier'),
+                          style: ElevatedButton.styleFrom(
+                            surfaceTintColor: Colors.white,
+                            // side: BorderSide(color: Colors.black38),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            elevation: 5,
+                            padding: EdgeInsets.symmetric(horizontal: 20),
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                            textStyle: TextStyle(fontWeight: FontWeight.bold),
+                            // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                          ),
+
                         ),
-
                       ),
-                      ElevatedButton(
-                          // print(ele.id);
-                        onPressed: (){
-                          showDialog(
-                              context: context,
-                              builder: (context) {
-                                return AlertDialog(
-                                  insetPadding: EdgeInsets.only(top: 190,),
-                                  surfaceTintColor: Color(0xB0AFAFA3),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.only(
-                                      topRight: Radius.circular(20),
-                                      topLeft: Radius.circular(20),
+                      Expanded(flex: 1,
+                        child: ElevatedButton(
+                            // print(ele.id);
+                          onPressed: (){
+                            showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    insetPadding: EdgeInsets.only(top: 190,),
+                                    surfaceTintColor: Color(0xB0AFAFA3),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.only(
+                                        topRight: Radius.circular(20),
+                                        topLeft: Radius.circular(20),
+                                      ),
                                     ),
-                                  ),
-                                  title:
-                                  Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    // mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Text("Ajouter un Professeur", style: TextStyle(fontSize: 25),),
-                                      Spacer(),
-                                      InkWell(
-                                        child: Icon(Icons.close),
-                                        onTap: (){
-                                          Navigator.pop(context);
+                                    title:
+                                    Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      // mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        Text("Ajouter un Professeur", style: TextStyle(fontSize: 25),),
+                                        Spacer(),
+                                        InkWell(
+                                          child: Icon(Icons.close),
+                                          onTap: (){
+                                            Navigator.pop(context);
+                                          },
+                                        )
+                                      ],
+                                    ),
+
+                                    content: Container(
+                                      height: 450,
+                                      width: MediaQuery.of(context).size.width,
+                                      // padding: const EdgeInsets.all(25.0),
+                                      child: SingleChildScrollView(
+                                        child: Column(
+                                          // mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            SizedBox(height: 30),
+                                                  // MultiSelectDropDown(
+                                            //   // showClearIcon: true,
+                                            //   controller: _controller,
+                                            //   onOptionSelected: (options) {
+                                            //     debugPrint(options.toString());
+                                            //   },
+                                            //   options: const <ValueItem>[
+                                            //     ValueItem(label: 'Option 1', value: '1'),
+                                            //     ValueItem(label: 'Option 2', value: '2'),
+                                            //     ValueItem(label: 'Option 3', value: '3'),
+                                            //     ValueItem(label: 'Option 4', value: '4'),
+                                            //     ValueItem(label: 'Option 5', value: '5'),
+                                            //     ValueItem(label: 'Option 6', value: '6'),
+                                            //   ],
+                                            //   maxItems: 2,
+                                            //   disabledOptions: const [ValueItem(label: 'Option 1', value: '1')],
+                                            //   selectionType: SelectionType.multi,
+                                            //   chipConfig: const ChipConfig(wrapType: WrapType.wrap),
+                                            //   dropdownHeight: 300,
+                                            //   optionTextStyle: const TextStyle(fontSize: 16),
+                                            //   selectedOptionIcon: const Icon(Icons.check_circle),
+                                            // ),
+                                            // SizedBox(height: 20),
+
+                                      MultiSelectDialogField<Professeur>(
+                                      initialValue: selectedProfesseursCM,
+                                        selectedColor: Colors.green,
+                                        backgroundColor: MaterialStateColor.resolveWith((states) => Colors.white), // Couleur des lignes de données
+                                          barrierColor: MaterialStateColor.resolveWith((states) => Colors.black38), // Couleur des lignes de données
+                                        items: professeurs.map((professeur) {
+                                          // Itemvalues.add(professeur.id);
+                                          return MultiSelectItem<Professeur>(professeur, '${professeur.nom!} ${ professeur.prenom!}');
+                                        }).toList(),
+                                        onConfirm: (values) {
+                                          setState(() {
+                                            selectedProfesseursCM = values;
+                                            CMvalues.clear(); // Effacer les anciennes valeurs
+                                            CMvalues.addAll(values.map((professeur) => professeur.id).toList()); // Ajouter les nouvelles valeurs sélectionnées
+                                            print('ItemVal${CMvalues}');
+                                          });
                                         },
-                                      )
-                                    ],
-                                  ),
+                                        chipDisplay: MultiSelectChipDisplay<Professeur>(),
+                                        searchHint: 'Sélectionnez un ou plusieurs professeurs de CM',
+                                        decoration: BoxDecoration(
+                                          border: Border.all(color: Colors.white!),color: Colors.white,
+                                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                                        ),
+                                      ),
+                                      SizedBox(height: 20),
+                                              MultiSelectDialogField<Professeur>(
+                                              initialValue: selectedProfesseursTP,
+                                              selectedColor: Colors.green,
+                                              backgroundColor: MaterialStateColor.resolveWith((states) => Colors.white), // Couleur des lignes de données
+                                              barrierColor: MaterialStateColor.resolveWith((states) => Colors.black38), // Couleur des lignes de données
+                                              items: professeurs.map((professeur) {
+                                                // Itemvalues.add(professeur.id);
+                                                return MultiSelectItem<Professeur>(professeur, professeur.nom!);
+                                              }).toList(),
+                                              onConfirm: (values) {
+                                                setState(() {
+                                                  selectedProfesseursTP = values;
+                                                  TPvalues.clear(); // Effacer les anciennes valeurs
+                                                  TPvalues.addAll(values.map((professeur) => professeur.id).toList()); // Ajouter les nouvelles valeurs sélectionnées
+                                                  print('ItemVal${TPvalues}');
+                                                });
+                                              },
+                                              chipDisplay: MultiSelectChipDisplay<Professeur>(),
+                                              searchHint: 'Sélectionnez un ou plusieurs professeurs de CM',
+                                              decoration: BoxDecoration(
+                                                border: Border.all(color: Colors.white!),color: Colors.white,
+                                                borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                                              ),
+                                            ),
+                                            SizedBox(height: 20),
+                                           MultiSelectDialogField<Professeur>(
+                                              initialValue: selectedProfesseursTD,
+                                              selectedColor: Colors.green,
+                                              backgroundColor: MaterialStateColor.resolveWith((states) => Colors.white), // Couleur des lignes de données
+                                              barrierColor: MaterialStateColor.resolveWith((states) => Colors.black38), // Couleur des lignes de données
+                                              items: professeurs.map((professeur) {
+                                                // Itemvalues.add(professeur.id);
+                                                return MultiSelectItem<Professeur>(professeur, professeur.nom!);
+                                              }).toList(),
+                                              onConfirm: (values) {
+                                                setState(() {
+                                                  selectedProfesseursTD = values;
+                                                  TDvalues.clear(); // Effacer les anciennes valeurs
+                                                  TDvalues.addAll(values.map((professeur) => professeur.id).toList()); // Ajouter les nouvelles valeurs sélectionnées
+                                                  print('ItemVal${TDvalues}');
+                                                });
+                                              },
+                                              chipDisplay: MultiSelectChipDisplay<Professeur>(),
+                                              searchHint: 'Sélectionnez un ou plusieurs professeurs de CM',
+                                              decoration: BoxDecoration(
+                                                border: Border.all(color: Colors.white!),color: Colors.white,
+                                                borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                                              ),
+                                            ),
+                                            SizedBox(height: 30),
+                                            ElevatedButton(
+                                              onPressed: () async{
+                                                Navigator.of(context).pop();
 
-                                  content: Container(
-                                    height: 450,
-                                    width: MediaQuery.of(context).size.width,
-                                    // padding: const EdgeInsets.all(25.0),
-                                    child: SingleChildScrollView(
-                                      child: Column(
-                                        // mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          SizedBox(height: 30),
-                                                // MultiSelectDropDown(
-                                          //   // showClearIcon: true,
-                                          //   controller: _controller,
-                                          //   onOptionSelected: (options) {
-                                          //     debugPrint(options.toString());
-                                          //   },
-                                          //   options: const <ValueItem>[
-                                          //     ValueItem(label: 'Option 1', value: '1'),
-                                          //     ValueItem(label: 'Option 2', value: '2'),
-                                          //     ValueItem(label: 'Option 3', value: '3'),
-                                          //     ValueItem(label: 'Option 4', value: '4'),
-                                          //     ValueItem(label: 'Option 5', value: '5'),
-                                          //     ValueItem(label: 'Option 6', value: '6'),
-                                          //   ],
-                                          //   maxItems: 2,
-                                          //   disabledOptions: const [ValueItem(label: 'Option 1', value: '1')],
-                                          //   selectionType: SelectionType.multi,
-                                          //   chipConfig: const ChipConfig(wrapType: WrapType.wrap),
-                                          //   dropdownHeight: 300,
-                                          //   optionTextStyle: const TextStyle(fontSize: 16),
-                                          //   selectedOptionIcon: const Icon(Icons.check_circle),
-                                          // ),
-                                          // SizedBox(height: 20),
+                                                // fetchElems();
 
-                                    MultiSelectDialogField<Professeur>(
-                                    initialValue: selectedProfesseursCM,
-                                      selectedColor: Colors.green,
-                                      backgroundColor: MaterialStateColor.resolveWith((states) => Colors.white), // Couleur des lignes de données
-                                        barrierColor: MaterialStateColor.resolveWith((states) => Colors.black38), // Couleur des lignes de données
-                                      items: professeurs.map((professeur) {
-                                        // Itemvalues.add(professeur.id);
-                                        return MultiSelectItem<Professeur>(professeur, '${professeur.nom!} ${ professeur.prenom!}');
-                                      }).toList(),
-                                      onConfirm: (values) {
+
+
+                                                 addProfToElem(ele.id,CMvalues!,TPvalues,TDvalues);
+
+                                                setState(() {
+                                                  Navigator.pop(context);
+                                                   fetchProfs();
+                                                });
+                                              },
+                                              child: Text("Ajouter"),
+
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Color(0xff0fb2ea),
+                                                foregroundColor: Colors.white,
+                                                // elevation: 2,
+                                                minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
+                                                // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
+                                                //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
+                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                              ),
+                                            )
+                                          ],
+                                        ),
+
+
+                                      ),
+                                    ),
+
+                                  );
+                                });
+                          }, // Disable button functionality
+
+                          child: Text('Ajouter Prof'),
+                          style: ElevatedButton.styleFrom(
+                            surfaceTintColor: Colors.white,
+                            // side: BorderSide(color: Colors.black38),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            elevation: 5,
+                            padding: EdgeInsets.symmetric(horizontal: 15),
+                            backgroundColor: Colors.blue,
+                            foregroundColor: Colors.white,
+                            textStyle: TextStyle(fontWeight: FontWeight.bold),
+                            // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                          ),
+
+
+                        ),
+                      ),
+                    ],
+                  ),
+  
+                  // SizedBox(height: 10,),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Expanded(flex: 1,
+                        child: ElevatedButton(
+                            // print(ele.id);
+                          onPressed: (){
+                            AjoutGroup(context, ele);
+                          }, // Disable button functionality
+
+                          child: Text('Ajouter Groupe'),
+                          style: ElevatedButton.styleFrom(
+                            surfaceTintColor: Colors.white,
+                            // side: BorderSide(color: Colors.black38),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            elevation: 5,
+                            padding: EdgeInsets.symmetric(horizontal: 15),
+                            backgroundColor: Colors.blue,
+                            foregroundColor: Colors.white,
+                            textStyle: TextStyle(fontWeight: FontWeight.bold),
+                            // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                          ),
+
+
+                        ),
+                      ),
+                      Expanded(flex: 1,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                          surfaceTintColor: Colors.white,backgroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                                  title: Text("Confirmer la suppression"),
+                                  content: Text(
+                                      "Êtes-vous sûr de vouloir supprimer cet élément ?"),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      child: Text("ANNULER"),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                    TextButton(
+                                      child: Text(
+                                        "SUPPRIMER",
+                                        // style: TextStyle(color: Colors.red),
+                                      ),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+
+                                        fetchElems();
+                                        DeleteElems(EleID);
+
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text('Le Category a été Supprimer avec succès.')),
+                                        );
+
                                         setState(() {
-                                          selectedProfesseursCM = values;
-                                          CMvalues.clear(); // Effacer les anciennes valeurs
-                                          CMvalues.addAll(values.map((professeur) => professeur.id).toList()); // Ajouter les nouvelles valeurs sélectionnées
-                                          print('ItemVal${CMvalues}');
+                                          Navigator.pop(context);
+                                          fetchElems();
                                         });
                                       },
-                                      chipDisplay: MultiSelectChipDisplay<Professeur>(),
-                                      searchHint: 'Sélectionnez un ou plusieurs professeurs de CM',
-                                      decoration: BoxDecoration(
-                                        border: Border.all(color: Colors.white!),color: Colors.white,
-                                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                                      ),
                                     ),
-                                    SizedBox(height: 20),
-                                            MultiSelectDialogField<Professeur>(
-                                            initialValue: selectedProfesseursTP,
-                                            selectedColor: Colors.green,
-                                            backgroundColor: MaterialStateColor.resolveWith((states) => Colors.white), // Couleur des lignes de données
-                                            barrierColor: MaterialStateColor.resolveWith((states) => Colors.black38), // Couleur des lignes de données
-                                            items: professeurs.map((professeur) {
-                                              // Itemvalues.add(professeur.id);
-                                              return MultiSelectItem<Professeur>(professeur, professeur.nom!);
-                                            }).toList(),
-                                            onConfirm: (values) {
-                                              setState(() {
-                                                selectedProfesseursTP = values;
-                                                TPvalues.clear(); // Effacer les anciennes valeurs
-                                                TPvalues.addAll(values.map((professeur) => professeur.id).toList()); // Ajouter les nouvelles valeurs sélectionnées
-                                                print('ItemVal${TPvalues}');
-                                              });
-                                            },
-                                            chipDisplay: MultiSelectChipDisplay<Professeur>(),
-                                            searchHint: 'Sélectionnez un ou plusieurs professeurs de CM',
-                                            decoration: BoxDecoration(
-                                              border: Border.all(color: Colors.white!),color: Colors.white,
-                                              borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                                            ),
-                                          ),
-                                          SizedBox(height: 20),
-                                         MultiSelectDialogField<Professeur>(
-                                            initialValue: selectedProfesseursTD,
-                                            selectedColor: Colors.green,
-                                            backgroundColor: MaterialStateColor.resolveWith((states) => Colors.white), // Couleur des lignes de données
-                                            barrierColor: MaterialStateColor.resolveWith((states) => Colors.black38), // Couleur des lignes de données
-                                            items: professeurs.map((professeur) {
-                                              // Itemvalues.add(professeur.id);
-                                              return MultiSelectItem<Professeur>(professeur, professeur.nom!);
-                                            }).toList(),
-                                            onConfirm: (values) {
-                                              setState(() {
-                                                selectedProfesseursTD = values;
-                                                TDvalues.clear(); // Effacer les anciennes valeurs
-                                                TDvalues.addAll(values.map((professeur) => professeur.id).toList()); // Ajouter les nouvelles valeurs sélectionnées
-                                                print('ItemVal${TDvalues}');
-                                              });
-                                            },
-                                            chipDisplay: MultiSelectChipDisplay<Professeur>(),
-                                            searchHint: 'Sélectionnez un ou plusieurs professeurs de CM',
-                                            decoration: BoxDecoration(
-                                              border: Border.all(color: Colors.white!),color: Colors.white,
-                                              borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                                            ),
-                                          ),
-                                          SizedBox(height: 30),
-                                          ElevatedButton(
-                                            onPressed: () async{
-                                              Navigator.of(context).pop();
-
-                                              // fetchElems();
-
-
-
-                                               addProfToElem(ele.id,CMvalues!,TPvalues,TDvalues);
-
-                                              setState(() {
-                                                Navigator.pop(context);
-                                                 fetchProfs();
-                                              });
-                                            },
-                                            child: Text("Ajouter"),
-
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: Color(0xff0fb2ea),
-                                              foregroundColor: Colors.white,
-                                              // elevation: 2,
-                                              minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
-                                              // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
-                                              //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
-                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                                            ),
-                                          )
-                                        ],
-                                      ),
-
-
-                                    ),
-                                  ),
-
+                                  ],
                                 );
-                              });
-                        }, // Disable button functionality
+                              },
+                            );
+                          }, // Disable button functionality
 
-                        child: Text('Ajouter Prof'),
-                        style: ElevatedButton.styleFrom(
-                          surfaceTintColor: Colors.white,
-                          // side: BorderSide(color: Colors.black38),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          elevation: 5,
-                          padding: EdgeInsets.symmetric(horizontal: 15),
-                          backgroundColor: Colors.blue,
-                          foregroundColor: Colors.white,
-                          textStyle: TextStyle(fontWeight: FontWeight.bold),
-                          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                          child: Text('Supprimer'),
+                          style: ElevatedButton.styleFrom(
+                            surfaceTintColor: Colors.white,
+                            // side: BorderSide(color: Colors.black38),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            elevation: 5,
+                            padding: EdgeInsets.symmetric(horizontal: 20),
+                            backgroundColor: Colors.redAccent,
+                            foregroundColor: Colors.white,
+                            textStyle: TextStyle(fontWeight: FontWeight.bold),
+                            // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                          ),
+
+
                         ),
-
-
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                        surfaceTintColor: Colors.white,backgroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
-                                title: Text("Confirmer la suppression"),
-                                content: Text(
-                                    "Êtes-vous sûr de vouloir supprimer cet élément ?"),
-                                actions: <Widget>[
-                                  TextButton(
-                                    child: Text("ANNULER"),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                  ),
-                                  TextButton(
-                                    child: Text(
-                                      "SUPPRIMER",
-                                      // style: TextStyle(color: Colors.red),
-                                    ),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-
-                                      fetchElems();
-                                      DeleteElems(EleID);
-
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text('Le Category a été Supprimer avec succès.')),
-                                      );
-
-                                      setState(() {
-                                        Navigator.pop(context);
-                                        fetchElems();
-                                      });
-                                    },
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        }, // Disable button functionality
-
-                        child: Text('Supprimer'),
-                        style: ElevatedButton.styleFrom(
-                          surfaceTintColor: Colors.white,
-                          // side: BorderSide(color: Colors.black38),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          elevation: 5,
-                          padding: EdgeInsets.symmetric(horizontal: 20),
-                          backgroundColor: Colors.redAccent,
-                          foregroundColor: Colors.white,
-                          textStyle: TextStyle(fontWeight: FontWeight.bold),
-                          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                        ),
-
-
                       ),
                     ],
                   ),
@@ -1010,6 +1144,559 @@ class _ElementsState extends State<Elements> {
 
     );
   }
+
+
+  String selectedProfesseurCM = '';
+  String selectedProfesseurTP = '';
+  String selectedProfesseurTD = '';
+
+
+  Future<dynamic> AjoutGroup(BuildContext context, Elem ele) {
+    // Variables pour stocker les valeurs des champs de texte
+    TextEditingController cmController = TextEditingController();
+    TextEditingController tpTdController = TextEditingController();
+
+    // Variables pour stocker le nombre de groupes
+    int cmGroupCount = 0;
+    int tpTdGroupCount = 0;
+
+    List<Widget> dropdownCMs = [];
+    List<Widget> dropdownTPs = [];
+    List<Widget> dropdownTDs = [];
+
+    // Map pour stocker les sélections de groupes pour chaque professeur
+    Map<String, List<int>> cmSelections = {};
+    Map<String, List<int>> tpSelections = {};
+    Map<String, List<int>> tdSelections = {};
+
+    // Fonction pour générer les cases à cocher pour les CM
+    void generateCMCheckboxes() {
+      dropdownCMs.clear();
+      for (var prof in ele.ProCMId!) {
+        String profId = prof['_id'];
+        for(var g in ele.groupeCM!)
+        if(g.contains(profId))
+        cmSelections[profId] = [int.parse(g.split('-')[2])];
+
+        dropdownCMs.add(
+          Column(crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(flex: 1,
+                    child: DropdownButtonFormField<String>(
+                      items: ele.ProCMId!.map((prof) {
+                        return DropdownMenuItem<String>(
+                          value: prof['_id'],
+                          child: Text(prof['user']['nom'] ?? ''),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          for(var g in ele.groupeCM!){
+                            if(g.contains(profId))
+                          cmSelections[profId] = [int.parse(g.split('-')[2])];
+                          print("Dah${g.split('-')[2]}");
+                          print("Dah${cmSelections[profId]}");}
+                        });
+                      },
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        hintText: "Professeur CM",
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 10,),
+                  Expanded(flex: 1,
+                    child: Container(height: 60,
+                      child: SingleChildScrollView(scrollDirection: Axis.vertical,
+                        child: MultiSelectDialogField(
+                          items: List.generate(cmGroupCount, (index) {
+                            return MultiSelectItem<int>(index + 1, 'G${index + 1}');
+                          }),
+                          title: Text("Groupes CM"),
+                          selectedColor: Colors.green,dialogHeight: 100,backgroundColor: Colors.white,
+                          buttonText: Text("Groupes CM"),
+                          onConfirm: (results) {
+                            setState(() {
+                              cmSelections[profId] = List<int>.from(results);
+                            });
+                          },
+                          initialValue: cmSelections[profId]!,
+                          decoration: BoxDecoration(shape: BoxShape.rectangle,
+                            border: Border.all(color: Colors.white!),color: Colors.white,
+                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10,)
+            ],
+          ),
+        );
+      }
+    }
+
+    // Fonction pour générer les cases à cocher pour les TP/TD
+    // void generateTPCheckboxes() {
+    //   dropdownTPs.clear();
+    //   dropdownTDs.clear();
+    //   for (var prof in ele.ProTPId!) {
+    //     String profId = prof['_id'];
+    //     tpSelections[profId] = [];
+    //
+    //     List<Widget> checkboxes = [];
+    //     for (int i = 0; i < tpTdGroupCount; i++) {
+    //       int groupNumber = i + 1;
+    //       checkboxes.add(
+    //         Row(
+    //           children: [
+    //             Checkbox(
+    //               value: tpSelections[profId]!.contains(groupNumber),
+    //               onChanged: (value) {
+    //                 setState(() {
+    //                   if (value == true) {
+    //                     tpSelections[profId]!.add(groupNumber);
+    //                   } else {
+    //                     tpSelections[profId]!.remove(groupNumber);
+    //                   }
+    //                 });
+    //               },
+    //             ),
+    //             Text('TP$groupNumber'),
+    //           ],
+    //         ),
+    //       );
+    //     }
+    //     dropdownTPs.add(
+    //       Column(
+    //         crossAxisAlignment: CrossAxisAlignment.start,
+    //         children: [
+    //           DropdownButtonFormField<String>(
+    //             items: ele.ProTPId!.map((category) {
+    //               return DropdownMenuItem<String>(
+    //                 value: category['_id'],
+    //                 child: Text(category['user']['nom'] ?? ''),
+    //               );
+    //             }).toList(),
+    //             onChanged: (value) {
+    //               setState(() {
+    //                 tpSelections[profId] = [];
+    //               });
+    //             },
+    //             decoration: InputDecoration(
+    //               filled: true,
+    //               fillColor: Colors.white,
+    //               hintText: "Sélection d'un Professeur TP",
+    //               border: OutlineInputBorder(
+    //                 borderSide: BorderSide.none,
+    //                 borderRadius: BorderRadius.all(Radius.circular(10.0)),
+    //               ),
+    //             ),
+    //           ),
+    //           Row(children: checkboxes),
+    //         ],
+    //       ),
+    //     );
+    //   }
+    //
+    //   for (var prof in ele.ProTDId!) {
+    //     String profId = prof['_id'];
+    //     tdSelections[profId] = [];
+    //
+    //     List<Widget> checkboxes = [];
+    //     for (int i = 0; i < tpTdGroupCount; i++) {
+    //       int groupNumber = i + 1;
+    //       checkboxes.add(
+    //         Row(
+    //           children: [
+    //             Checkbox(
+    //               value: tdSelections[profId]!.contains(groupNumber),
+    //               onChanged: (value) {
+    //                 setState(() {
+    //                   if (value == true) {
+    //                     tdSelections[profId]!.add(groupNumber);
+    //                   } else {
+    //                     tdSelections[profId]!.remove(groupNumber);
+    //                   }
+    //                 });
+    //               },
+    //             ),
+    //             Text('TD$groupNumber'),
+    //           ],
+    //         ),
+    //       );
+    //     }
+    //     dropdownTDs.add(
+    //       Column(
+    //         crossAxisAlignment: CrossAxisAlignment.start,
+    //         children: [
+    //           DropdownButtonFormField<String>(
+    //             items: ele.ProTDId!.map((category) {
+    //               return DropdownMenuItem<String>(
+    //                 value: category['_id'],
+    //                 child: Text(category['user']['nom'] ?? ''),
+    //               );
+    //             }).toList(),
+    //             onChanged: (value) {
+    //               setState(() {
+    //                 tdSelections[profId] = [];
+    //               });
+    //             },
+    //             decoration: InputDecoration(
+    //               filled: true,
+    //               fillColor: Colors.white,
+    //               hintText: "Sélection d'un Professeur TD",
+    //               border: OutlineInputBorder(
+    //                 borderSide: BorderSide.none,
+    //                 borderRadius: BorderRadius.all(Radius.circular(10.0)),
+    //               ),
+    //             ),
+    //           ),
+    //           Row(children: checkboxes),
+    //         ],
+    //       ),
+    //     );
+    //   }
+    // }
+    void generateTPCheckboxes() {
+      dropdownTPs.clear();
+      dropdownTDs.clear();
+      for (var prof in ele.ProTPId!) {
+        String profId = prof['_id'];
+        for(var g in ele.groupeTP!)
+          if(g.contains(profId))
+            tpSelections[profId] = [int.parse(g.split('-')[2])];
+
+        dropdownTPs.add(
+          Column(crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(flex: 1,
+                    child:
+                    DropdownButtonFormField<String>(
+                      items: ele.ProTPId!.map((category) {
+                        return DropdownMenuItem<String>(
+                          value: category['_id'],
+                          child: Text(category['user']['nom'] ?? ''),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          // tpSelections[profId] = [];
+                          for(var g in ele.groupeTP!){
+                            if(g.contains(profId))
+                              tpSelections[profId] = [int.parse(g.split('-')[2])];
+                            print("TPP${g.split('-')[2]}");
+                            print("TPP${tpSelections[profId]}");}                        });
+                      },
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        hintText: "Sélection d'un Professeur TP",
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                        ),
+                      ),
+                    ),
+
+                  ),
+                  SizedBox(width: 10,),
+                  Expanded(flex: 1,
+                    child: Container(height: 60,
+                      child: SingleChildScrollView(scrollDirection: Axis.vertical,
+                        child: MultiSelectDialogField(
+                          items: List.generate(tpTdGroupCount, (index) {
+                            return MultiSelectItem<int>(index + 1, 'TP${index + 1}');
+                          }),
+                          title: Text("Groupes TP"),
+                          selectedColor: Colors.green,dialogHeight: 100,backgroundColor: Colors.white,
+                          buttonText: Text("Groupes TP"),
+                          onConfirm: (results) {
+                            setState(() {
+                              tpSelections[profId] = List<int>.from(results);
+                            });
+                          },
+                          initialValue: tpSelections[profId]!,
+                          decoration: BoxDecoration(shape: BoxShape.rectangle,
+                            border: Border.all(color: Colors.white!),color: Colors.white,
+                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10,)
+            ],
+          ),
+        );
+      }
+      for (var prof in ele.ProTDId!) {
+        String profId = prof['_id'];
+        // tdSelections[profId] = [];
+        for(var g in ele.groupeTD!)
+          if(g.contains(profId))
+            tdSelections[profId] = [int.parse(g.split('-')[2])];
+        dropdownTDs.add(
+          Column(crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(flex: 1,
+                    child:
+                    DropdownButtonFormField<String>(
+                      items: ele.ProTDId!.map((category) {
+                        return DropdownMenuItem<String>(
+                          value: category['_id'],
+                          child: Text(category['user']['nom'] ?? ''),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          // tdSelections[profId] = [];
+                          for(var g in ele.groupeTD!){
+                            if(g.contains(profId))
+                              tdSelections[profId] = [int.parse(g.split('-')[2])];
+                            print("TDD${g.split('-')[2]}");
+                            print("TDD${tdSelections[profId]}");}
+                        });
+                      },
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        hintText: "Sélection d'un Professeur TP",
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                        ),
+                      ),
+                    ),
+
+                  ),
+                  SizedBox(width: 10,),
+                  Expanded(flex: 1,
+                    child: Container(height: 60,
+                      child: SingleChildScrollView(scrollDirection: Axis.vertical,
+                        child: MultiSelectDialogField(
+                          items: List.generate(tpTdGroupCount, (index) {
+                            return MultiSelectItem<int>(index + 1, 'TD${index + 1}');
+                          }),
+                          title: Text("Groupes TD"),
+                          selectedColor: Colors.green,dialogHeight: 100,backgroundColor: Colors.white,
+                          buttonText: Text("Groupes TD"),
+                          onConfirm: (results) {
+                            setState(() {
+                              tdSelections[profId] = List<int>.from(results);
+                            });
+                          },
+                          initialValue: tdSelections[profId]!,
+                          decoration: BoxDecoration(shape: BoxShape.rectangle,
+                            border: Border.all(color: Colors.white!),color: Colors.white,
+                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10,)
+            ],
+          ),
+        );
+      }
+    }
+
+    // Fonction pour générer le JSON à partir des sélections
+    Map<String, dynamic> generateJson() {
+      List<Map<String, dynamic>> cmJson = [];
+      cmSelections.forEach((profId, groups) {
+        if (groups.isNotEmpty) {
+          cmJson.add({
+            'groupe': groups,
+            'professeur': profId,
+          });
+        }
+      });
+
+      List<Map<String, dynamic>> tpJson = [];
+      tpSelections.forEach((profId, groups) {
+        if (groups.isNotEmpty) {
+          tpJson.add({
+            'groupe': groups,
+            'professeur': profId,
+          });
+        }
+      });
+
+      List<Map<String, dynamic>> tdJson = [];
+      tdSelections.forEach((profId, groups) {
+        if (groups.isNotEmpty) {
+          tdJson.add({
+            'groupe': groups,
+            'professeur': profId,
+          });
+        }
+      });
+
+      return {
+        'CM': cmJson,
+        'TP': tpJson,
+        'TD': tdJson,
+      };
+    }
+
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          insetPadding: EdgeInsets.only(top: 50),
+          surfaceTintColor: Color(0xB0AFAFA3),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              topRight: Radius.circular(20),
+              topLeft: Radius.circular(20),
+            ),
+          ),
+          title: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("Ajouter un Groupe", style: TextStyle(fontSize: 25)),
+              Spacer(),
+              InkWell(
+                child: Icon(Icons.close),
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              )
+            ],
+          ),
+          content: Container(
+            height: 600,
+            width: MediaQuery.of(context).size.width,
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  SizedBox(height: 30),
+                  Row(
+                    children: [
+                      SizedBox(width: 20),
+                      Expanded(
+                        flex: 1,
+                        child: TextField(
+                          controller: cmController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            labelText: "NBG CM",
+                            focusedBorder: NBGBorder(),
+                            border: NBGBorder(),
+                            enabledBorder: NBGBorder(),
+                            disabledBorder: NBGBorder(),
+
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              cmGroupCount = int.tryParse(value) ?? 0;
+                              generateCMCheckboxes();
+                            });
+                          },
+                        ),
+                      ),
+                      SizedBox(width: 40),
+                      Expanded(
+                        flex: 1,
+                        child: TextField(
+                          controller: tpTdController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            labelText: "NBG TP/TD",
+                            focusedBorder: NBGBorder(),
+                            border: NBGBorder(),
+                            enabledBorder: NBGBorder(),
+                            disabledBorder: NBGBorder(),
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              tpTdGroupCount = int.tryParse(value) ?? 0;
+                              generateTPCheckboxes();
+                            });
+                          },
+                        ),
+                      ),
+                      SizedBox(width: 20),
+                    ],
+                  ),
+                  SizedBox(height: 30),
+                  Container(child: Text('Goupes CM',style: TextStyle(color: Colors.blueGrey,fontSize: 20)),),
+                  Divider(height: 10),
+                  SizedBox(height: 10),
+                  ...dropdownCMs, // Ajouter dynamiquement les DropdownButtonFormField CM
+                  SizedBox(height: 20),
+                  Container(child: Text('Goupes TP',style: TextStyle(color: Colors.blueGrey,fontSize: 20)),),
+                  Divider(height: 10),
+                  SizedBox(height: 10),
+                  ...dropdownTPs, // Ajouter dynamiquement les DropdownButtonFormField TP
+                  SizedBox(height: 20),
+                  Container(child: Text('Goupes TD',style: TextStyle(color: Colors.blueGrey,fontSize: 20)),),
+                  Divider(height: 10),
+                  SizedBox(height: 10),
+                  ...dropdownTDs, // Ajouter dynamiquement les DropdownButtonFormField TD
+                  SizedBox(height: 30),
+                  ElevatedButton(
+                    onPressed: () async {
+                      Map<String, dynamic> jsonPayload = generateJson();
+                      // Vous pouvez maintenant utiliser jsonPayload pour envoyer la requête
+                      // Exemple :
+                      // await sendRequest(jsonPayload);
+
+                      // generateJson()
+                      Navigator.of(context).pop();
+                      print('Abb${jsonPayload}');
+                      addGroupToElem(ele.id,generateJson());
+
+                      // addProfToElem avec les valeurs appropriées pour CMvalues, TPvalues, TDvalues
+                      setState(() {
+                        Navigator.pop(context);
+                        fetchProfs();
+                      });
+                    },
+                    child: Text("Ajouter"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xff0fb2ea),
+                      foregroundColor: Colors.white,
+                      minimumSize: Size(MediaQuery.of(context).size.width, MediaQuery.of(context).size.width / 7),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  OutlineInputBorder NBGBorder() => OutlineInputBorder(borderSide: BorderSide(color: Colors.black12, width: .2), gapPadding: 1, borderRadius: BorderRadius.all(Radius.circular(10.0)),);
 
   Row NbH(lab,val) {
     return Row(
@@ -1347,8 +2034,103 @@ class _ElementsState extends State<Elements> {
       print('Failed to add matiere to professeus. Status Code: ${response.statusCode}');
     }
   }
+  Future<void> addGroupToElem( id, Map<String, dynamic> body) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString("token")!;
+
+    final url = 'http://192.168.43.73:5000/element/$id/affectation';
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+    final response = await http.post(Uri.parse(url), headers: headers,
+      body: json.encode(body),
+    );
+
+    print("Status${response.statusCode}");
+    if (response.statusCode == 201) {
+      final responseData = json.decode(response.body);
+      setState(() {
+        Navigator.of(context).pop();
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                surfaceTintColor: Color(0xB0AFAFA3),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Text("Alerte de succès"),
+                    Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
+                  ],
+                ),
+                content: Text(
+                    "L\'element est ajouté avec succès"),
+
+                actions: [
+                  TextButton(
+                    child: Text("Ok"),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+
+                ],
+
+              );});
+      });
+
+      print("L\'element est ajouté avec succès");
 
 
+    } else {
+      setState(() {
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                surfaceTintColor: Color(0xB0AFAFA3),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Text("Alerte d\'erreur"),
+                    Icon(Icons.wrong_location_outlined,color: Colors.redAccent,)
+                  ],
+                ),
+                content: Text(jsonDecode(response.body)["message"]),
+
+              );});
+
+      });
+
+      print("SomeThing Went Wrong");
+      print('Failed to add matiere to professeus. Status Code: ${response.statusCode}');
+    }
+  }
+
+  List<Elem> filterItemsBySem(int? ele,filliere? filiere, List<Elem> allItems) {
+    if (ele == null) {
+      return allItems;
+    } else {
+      print("ElID:${ele}");
+      return allItems.where((emp) => emp.SemNum! == ele && emp.filName!.toLowerCase() == filiere!.name!.toLowerCase()).toList();
+    }
+  }
+
+  List<int> extractUniqueSemesters(List<Elem> elems) {
+    // List<Elem> Els = filterItemsByFil()
+    Set<int> uniqueSemesters = elems.map((elem) => elem.SemNum!).toSet();
+    return uniqueSemesters.toList();
+  }
+  List<Elem> filterItemsByFil(filliere? fil, List<Elem> allItems) {
+    if (fil == null) {
+      return allItems;
+    } else {
+      return allItems.where((ele) => ele!.filId == fil.id).toList();
+    }
+  }
 
 
 }
@@ -1478,9 +2260,9 @@ class Elem {
       ProTPId: json['professeurTP'] ?? [],
       ProTDId: json['professeurTD'] ?? [],
 
-      groupeCM: json['groupeCM'] ?? [],
-      groupeTP: json['groupeTP'] ?? [],
-      groupeTD: json['groupeTD'] ?? [],
+      groupeCM: json['CM'] ?? [],
+      groupeTP: json['TP'] ?? [],
+      groupeTD: json['TD'] ?? [],
       // ProCM: (json['info']['CM'] as List<dynamic>).map((e) => e.toString()).toList(),
       // ProTP: (json['info']['TP'] as List<dynamic>).map((e) => e.toString()).toList(),
       // ProTD: (json['info']['TD'] as List<dynamic>).map((e) => e.toString()).toList(),

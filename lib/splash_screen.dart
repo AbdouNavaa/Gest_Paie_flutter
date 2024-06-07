@@ -31,7 +31,7 @@ class _SplashScreenState extends State<SplashScreen> {
   bool countDown1 = true;
 
   void _navigateToNextScreen() async {
-    await Future.delayed(Duration(seconds: 5));
+    await Future.delayed(Duration(seconds: 500));
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => KeyboardVisibilityProvider(child: LoginSection())),

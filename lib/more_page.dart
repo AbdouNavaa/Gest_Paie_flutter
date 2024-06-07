@@ -217,54 +217,8 @@ class _MoreOptionsPageState extends State<MoreOptionsPage> {
                    ),
                  ),
                ),
-               Container(
-                 height: MediaQuery.of(context).size.height/ 15,
-                 width: MediaQuery.of(context).size.width,
-                 child: TextButton(
-                   style: TextButton.styleFrom(
-                       foregroundColor: widget.isDark? Colors.white : Colors.black87,//backgroundColor: Colors.white,
-                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
-                   onPressed: () {
-                     // Navigate to UsersPage
-                     Navigator.push(
-                         context, MaterialPageRoute(builder: (context) => Matieres()));
-                   },
-                   child: Row(
-                     mainAxisAlignment: MainAxisAlignment.start,
-                     children: [
-                       Icon(Icons.code, color: widget.isDark? Colors.green : Colors.black,),
-                       // Image.asset('assets/coding3.png',width: 25,),
-                       SizedBox(width: 10,),
-                       Text('Matieres'),
-                     ],
-                   ),
-                 ),
-               ),
                Divider(),
 
-               Container(
-                 height: MediaQuery.of(context).size.height/ 15,
-                 width: MediaQuery.of(context).size.width,
-                 child: TextButton(
-                   style: TextButton.styleFrom(
-                       foregroundColor: widget.isDark? Colors.white : Colors.black87,//backgroundColor: Colors.white,
-                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
-                   onPressed: () {
-                     // Navigate to CategoriesPage
-                     // Navigator.push(
-                     //     context, MaterialPageRoute(builder: (context) => AppState()));
-                     Navigator.push(
-                         context, MaterialPageRoute(builder: (context) => SettingsPage())); },
-                   child: Row(
-                     mainAxisAlignment: MainAxisAlignment.start,
-                     children: [
-                       Icon(Icons.settings, color: widget.isDark? Colors.green : Colors.black,),
-                       SizedBox(width: 10,),
-                       Text('Settings'),
-                     ],
-                   ),
-                 ),
-               ),
                Container(
                  height: MediaQuery.of(context).size.height/ 15,
                  width: MediaQuery.of(context).size.width,

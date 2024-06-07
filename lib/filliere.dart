@@ -239,7 +239,7 @@ Future<void> _loadFiliere() async {
                       ],
                       color: Colors.white,
                       borderRadius: BorderRadius.all(
-                        Radius.circular(isExpandedList[index] ? 20 : 20),
+                        Radius.circular(isExpandedList[index] ? 10 : 10),
                       ),
                     ),
                     child: SingleChildScrollView(scrollDirection: Axis.vertical,
@@ -648,7 +648,7 @@ Future<void> _loadFiliere() async {
             :Container(
           width: 60,
           decoration: BoxDecoration(
-            color: Colors.lightGreen,
+            color: Colors.indigo,
             borderRadius: BorderRadius.all(Radius.circular(10)),
             boxShadow: [
               BoxShadow(
@@ -661,7 +661,7 @@ Future<void> _loadFiliere() async {
           // margin: EdgeInsets.only(left: 90,right: 60),
           child:
           TextButton(
-            child: Icon(Icons.add, color: Colors.black,),
+            child: Icon(Icons.add, color: Colors.white,),
             onPressed: () {
               setState(() {
                 showFloat = true;

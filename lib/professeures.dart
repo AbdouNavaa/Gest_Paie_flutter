@@ -396,7 +396,7 @@ class _ProfesseuresState extends State<Professeures> {
       floatingActionButton: FloatingActionButton.extended(
         // heroTag: 'uniqueTag',
         tooltip: 'Ajouter un Professeur',
-        backgroundColor: Colors.lightGreen,
+        backgroundColor: Colors.indigo,
         label: Row(
           children: [
             Icon(Icons.cloud_download_outlined,color: Colors.white,),
@@ -975,7 +975,7 @@ class _AddProfMatState extends State<AddProfMat> {
   Widget build(BuildContext context) {
     return AlertDialog(
                 surfaceTintColor: Color(0xB0AFAFA3),
-        insetPadding: EdgeInsets.only(top: 280,),
+        insetPadding: EdgeInsets.only(top: 300,),
 // backgroundColor: Color(0xB0AFAFA3),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.only(

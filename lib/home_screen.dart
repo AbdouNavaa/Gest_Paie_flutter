@@ -54,10 +54,19 @@ class _HomeScreenState extends State<HomeScreen> {
   int coursNum = 0;
   int coursCN = 0;
   int coursPN = 0;
+ late List<CostsData> PieData ;
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    fetchStatistics().then((data) {
+      setState(() {
+        PieData.add(data); // Assigner la liste renvoyée par Useresseur à items
+      });
+    }).catchError((error) {
+      print('Erreur: $error');
+    });
     fetchUser().then((data) {
       setState(() {
         useres = data; // Assigner la liste renvoyée par Useresseur à items
@@ -468,141 +477,193 @@ class _HomeScreenState extends State<HomeScreen> {
                           ],
                         ),
                       if (widget.role == "responsable")
-                        Column(
-                          children: [
-                            Row(
-                              children: [
-                                _customCard(
-                                  imageUrl: "categ2.png",
-                                  item: "Categories",
-                                  height: 150,
-                                  width: 150,
-                                  duration: "${emplois?.length} Categories",
-                                  onPessed: (){
-                                    Navigator.push(
-                                        context, MaterialPageRoute(builder: (context) => Categories()));
-
-                                  },
-                                ),
-                                _customCard(
-                                  imageUrl: "coding3.png",
-                                  item: "Matieres",
-                                  height: 150,
-                                  width: 150,
-                                  duration: "${fillieres?.length} Matieres",
-                                  onPessed: (){
-                                    Navigator.push(
-                                        context, MaterialPageRoute(builder: (context) => Matieres()));
-
-                                  },
-                                ),
-
-
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                _customCard(
-                                  imageUrl: "cours3.png",
-                                  item: "Cours",
-                                  duration: "${coursNum} Cours",
-
-                                  height: 150,
-                                  width: 150,
-                                  // duration: "${this.coursNb} Cours",
-                                  onPessed: ()async{
-                                    SharedPreferences prefs = await SharedPreferences.getInstance();
-                                    String token = prefs.getString("token")!;
-                                    String role = prefs.getString("role")!;
-                                    var response = await http.get(
-                                      Uri.parse('http://192.168.43.73:5000/cours?isPaid=en attente'),
-                                       headers: {
-                                        'Content-Type': 'application/json',
-                                        'Authorization': 'Bearer $token'
-                                      },
-                                    );
-                                    // print(response.body);
-
-                                    if (response.statusCode == 200) {
-                                      List<dynamic> courses = json.decode(
-                                          response.body)['data']['coursLL'];
-                                      this.coursNum = json.decode(response.body)['data']['countLL'];
-                                      num heuresTV = json.decode(response.body)['data']['heuresTV'];
-                                      num sommeTV = json.decode(response.body)['data']['sommeTV'];
-                                      setState(() {
-                                        this.coursNum = json.decode(response.body)['data']['countLL'];
-
-                                      });
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(builder: (context) =>
-                                            CoursesPage(courses: courses,
-                                              coursNum: coursNum,
-                                              // heuresTV: heuresTV,
-                                              // sommeTV: sommeTV,
-                                              role: role,
-                                              paid: false,
-                                            )),
+                        SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  _customCard(
+                                    imageUrl: "cours3.png",
+                                    item: "Cours",
+                                    duration: "${coursNum} Cours",
+                                    height: 150,
+                                    width: 150,
+                                    onPessed: ()async{
+                                      SharedPreferences prefs = await SharedPreferences.getInstance();
+                                      String token = prefs.getString("token")!;
+                                      String role = prefs.getString("role")!;
+                                      var response = await http.get(
+                                        Uri.parse('http://192.168.43.73:5000/cours?isPaid=en attente'),
+                                        headers: {
+                                          'Content-Type': 'application/json',
+                                          'Authorization': 'Bearer $token'
+                                        },
                                       );
-                                    } else {
-                                      // Handle error
-                                      print('Failed to fetch prof courses. Status Code: ${response
-                                          .statusCode}');
-                                    }
-                                  },
-                                ),
-                                _customCard(
-                                  imageUrl: "paie2.jpg",
-                                  // imageUrl: "paie3.jpg",
-                                  item: "Paiements",
-                                  duration: "",
-                                  height: 150,
-                                  width: 150,
-                                  onPessed: (){
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text(' Ne fonctionne pas actuellement')),
-                                    );
-                                  },
-                                ),
+                                      // print(response.body);
+
+                                      if (response.statusCode == 200) {
+                                        List<dynamic> courses = json.decode(
+                                            response.body)['cours'];
+                                        // this.coursNum = json.decode(response.body)['data']['countLL'];
+                                        // num heuresTV = json.decode(response.body)['data']['heuresTV'];
+                                        // num sommeTV = json.decode(response.body)['data']['sommeTV'];
+                                        setState(() {
+                                          this.coursNum = json.decode(response.body)['cours'].length;
+                                          //
+                                        });
+                                        print('Mes Cours :${json.decode(response.body)['cours']}');
+                                        print("Mes CN${coursNum}");
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(builder: (context) =>
+                                              CoursesPage(courses: courses,
+                                                coursNum: coursNum,
+                                                // heuresTV: heuresTV,
+                                                paid: false,
+                                                // sommeTV: sommeTV,
+                                                role: role,)),
+                                        );
+                                      } else {
+                                        // Handle error
+                                        print('Failed to fetch prof courses. Status Code: ${response
+                                            .statusCode}');
+                                      }
+                                    },
+                                  ),
+
+                                  SizedBox(width: 15,),
+                                  _customCard(
+                                    imageUrl: "paie2.jpg",
+                                    // imageUrl: "paie3.jpg",
+                                    item: "Paiements",
+                                    duration: "",
+                                    height: 150,
+                                    width: 150,
+                                    onPessed: ()async{
+                                      SharedPreferences prefs = await SharedPreferences.getInstance();
+                                      String token = prefs.getString("token")!;
+                                      String role = prefs.getString("role")!;
+                                      var response = await http.get(
+                                        Uri.parse('http://192.168.43.73:5000/cours'),
+                                        headers: {
+                                          'Content-Type': 'application/json',
+                                          'Authorization': 'Bearer $token'
+                                        },
+                                      );
+                                      // print(response.body);
+
+                                      if (response.statusCode == 200) {
+                                        List<dynamic> courses = json.decode(
+                                            response.body)['cours'];
+                                        this.coursNum = json.decode(response.body)['cours'].length;
+                                        // print('Mes cours: ${json.decode(response.body)['cours']}');
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(builder: (context) => Paiements(courses: courses,)),
+                                        );
+                                      } else {
+                                        // Handle error
+                                        print('Failed to fetch prof courses. Status Code: ${response
+                                            .statusCode}');
+                                      }
+                                    },
+                                  ),
 
 
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                _customCard(
-                                  imageUrl: "settings2.png",
-                                  // imageUrl: "user1.png",
-                                  item: "Outils",
-                                  height: 150,
-                                  width: 150,
-                                  duration: "",
-                                  onPessed:  () async {
-                                    Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsPage()));
-                                  },
-                                ),
-                                _customCard(
-                                  imageUrl: "logout1.png",
-                                  // imageUrl: "user1.png",
-                                  item: "Se Déconnecter",
-                                  duration: "",
-                                  height: 150,
-                                  width: 150,
-                                  onPessed:  () async {
-                                    SharedPreferences prefs = await SharedPreferences.getInstance();
-                                    await prefs.setString('token', '');
-                                    Navigator.push(context,
-                                        MaterialPageRoute(builder: (context) => KeyboardVisibilityProvider(child: LoginSection())));
-                                    // MaterialPageRoute(builder: (context) => LoginSection()));
-                                  },
-                                ),
+                                ],
+                              ),
+
+                              SizedBox(height: 5,),
+                              Row(
+                                children: [
+                                  _customCard(
+                                    imageUrl: "emp4.png",
+                                    item: "Emploi",
+                                    duration: "${emplois?.length!} Emploi",
+                                    height: 150,
+                                    width: 150,
+                                    onPessed: (){
+                                      Navigator.push(
+                                          context, MaterialPageRoute(builder: (context) => Emploi()));
+
+                                    },
+                                  ),
 
 
-                              ],
-                            ),
+                                  SizedBox(width: 15,),
+                                  _customCard(
+                                    imageUrl: "grps4.jpg",
+                                    item: "Filières",
+                                    duration: "${fillieres?.length} Filières",
+                                    height: 150,
+                                    width: 150,
+                                    onPessed: (){
+                                      Navigator.push(
+                                          context, MaterialPageRoute(builder: (context) => Filliere()));
+                                      // context, MaterialPageRoute(builder: (context) => ()));
 
-                          ],
+                                    },
+                                  ),
+
+
+                                ],
+                              ),
+
+                              SizedBox(height: 5,),
+                              Row(
+                                children: [
+                                  _customCard(
+                                    imageUrl: "settings2.png",
+                                    // imageUrl: "more1.png",
+                                    item: "Categories",
+                                    duration: "",
+                                    height: 150,
+                                    width: 150,
+                                    onPessed: () {
+                                      // Navigate to CategoriesPage
+                                      Navigator.push(
+                                          context, MaterialPageRoute(builder: (context) => Categories()));
+                                    },
+                                  ),
+
+
+                                  SizedBox(width: 15,),
+                                  _customCard(
+                                    imageUrl: "coding1.jpg",
+                                    // imageUrl: "user1.png",
+                                    item: "Matieres",
+                                    duration: "",
+                                    height: 150,
+                                    width: 150,
+                                    onPessed:   () {
+                                      Navigator.push(context, MaterialPageRoute(builder: (context) => Elements()),);
+                                    },
+                                  ),
+
+
+                                ],
+                              ),
+
+                              Center(child:  _customCard(
+                                imageUrl: "logout1.png",
+                                // imageUrl: "user1.png",
+                                item: "Se Déconnecter",
+                                height: 150,
+                                width: 150,
+                                duration: "",
+                                onPessed:  () async {
+                                  SharedPreferences prefs = await SharedPreferences.getInstance();
+                                  await prefs.setString('token', '');
+                                  Navigator.push(context,
+                                      MaterialPageRoute(builder: (context) => KeyboardVisibilityProvider(child: LoginSection())));
+                                  // MaterialPageRoute(builder: (context) => LoginSection()));
+                                },
+                              ),)
+
+                            ],
+                          ),
                         ),
+
                       if (widget.role == "admin")
                         SingleChildScrollView(
                           child: Column(
@@ -791,7 +852,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   _customCard(
                                     imageUrl: "coding1.jpg",
                                     // imageUrl: "user1.png",
-                                    item: "Elements",
+                                    item: "Matieres",
                                     duration: "",
                                     height: 150,
                                     width: 150,
@@ -919,8 +980,12 @@ class _MyDrawerState extends State<MyDrawer> {
     print('hello, Role: $role , ProfName $name, Email $email , ProfId:$profId, Notif:$notif, CNS:$CNS');
   }
 
+  late List<CostsData> PieData ;
+
   @override
   void initState() {
+    // TODO: implement initState
+    super.initState();
     getPref();
     super.initState();
   }
@@ -934,14 +999,15 @@ class _MyDrawerState extends State<MyDrawer> {
             DrawerHeader(
 
               decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-                // gradient: LinearGradient(
+                // color: Colors.indigoAccent,
+                gradient: LinearGradient(
                 //   begin: Alignment.topLeft,
                 //   end: Alignment.bottomRight,
                 //   stops: [0.0, 2],
-                //   colors: [ Colors.blue,Colors.white],
+                colors: [Colors.indigoAccent.shade700, Colors.indigo.shade700],
+
                 //
-                // ),
+                ),
               ),
               child: Container(
                 alignment: Alignment.topLeft,
@@ -1248,7 +1314,7 @@ class _MyDrawerState extends State<MyDrawer> {
                     },
                   ),
                   //Divider(color: Theme.of(context).primaryColor, height: 1,),
-                  SizedBox(height: 280,),
+                  SizedBox(height: MediaQuery.of(context).size.height /2.7 ,),
                   ElevatedButton(
                     child: Text('Logout',style: TextStyle(fontSize: _drawerFontSize,color: Colors.white),),
                     onPressed: () async{
@@ -1259,11 +1325,194 @@ class _MyDrawerState extends State<MyDrawer> {
                       // MaterialPageRoute(builder: (context) => LoginSection()));
 
                     },
-                    style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor,padding: EdgeInsets.symmetric(horizontal: 90,vertical: 10)),
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.indigoAccent,padding: EdgeInsets.symmetric(horizontal: 90,vertical: 10)),
                   ),
 
                 ],
               ),
+            if (role == "responsable")
+              Column(
+                children: [
+                  ListTile(
+                    leading: Icon(Icons.home, size: _drawerIconSize, color: Colors.black,),
+                    // leading: Icon(Icons.dashboard_customize_outlined, size: _drawerIconSize, color: Colors.black,),
+                    title: Text('Acceuil', style: TextStyle(fontSize: 17, color: Colors.black),),
+                    onTap: (){
+                      Navigator.push(context, MaterialPageRoute(
+                          builder: (context) =>
+                          // ProfesseurInfoPage(
+                          //     id: id, email: email, role: role),
+                          // builder: (context) => LandingScreen(role: role,name: nom,), // Passer le rôle ici
+                          HomeScreen(role: role,name: name,email: email,)),);
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.featured_play_list_outlined,size: _drawerIconSize,color: Colors.black),
+                    title: Text('Matieres', style: TextStyle(fontSize: _drawerFontSize, color: Colors.black),
+                    ),
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => Elements()),);
+                    },
+                  ),
+                  //Divider(color: Theme.of(context).primaryColor, height: 1,),
+                  //Divider(color: Theme.of(context).primaryColor, height: 1,),
+                  ListTile(
+                    leading: Icon(Icons.bookmark_border, size: _drawerIconSize,color: Colors.black,),
+                    title: Text('Cours',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
+                    onTap: ()async{
+                      SharedPreferences prefs = await SharedPreferences.getInstance();
+                      String token = prefs.getString("token")!;
+                      String role = prefs.getString("role")!;
+                      var response = await http.get(
+                        Uri.parse('http://192.168.43.73:5000/cours?isPaid=en attente'),
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'Authorization': 'Bearer $token'
+                        },
+                      );
+                      // print(response.body);
+
+                      if (response.statusCode == 200) {
+                        List<dynamic> courses = json.decode(
+                            response.body)['cours'];
+                        // this.coursNum = json.decode(response.body)['data']['countLL'];
+                        // num heuresTV = json.decode(response.body)['data']['heuresTV'];
+                        // num sommeTV = json.decode(response.body)['data']['sommeTV'];
+                        // setState(() {
+                        this.coursNum = json.decode(response.body)['cours'].length;
+                        //
+                        // });
+                        print('Mes Cours :${json.decode(response.body)['cours']}');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) =>
+                              CoursesPage(courses: courses,
+                                coursNum: coursNum,
+                                paid: false,
+                                // heuresTV: heuresTV,
+                                // sommeTV: sommeTV,
+                                role: role,)),
+                        );
+                      } else {
+                        // Handle error
+                        print('Failed to fetch prof courses. Status Code: ${response
+                            .statusCode}');
+                      }
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.bookmark_remove_outlined, size: _drawerIconSize,color: Colors.black,),
+                    title: Text('Cours a paye',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
+                    onTap: ()async{
+                      SharedPreferences prefs = await SharedPreferences.getInstance();
+                      String token = prefs.getString("token")!;
+                      String role = prefs.getString("role")!;
+                      var response = await http.get(
+                        Uri.parse('http://192.168.43.73:5000/cours?isPaid=préparé'),
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'Authorization': 'Bearer $token'
+                        },
+                      );
+                      // print(response.body);
+
+                      if (response.statusCode == 200) {
+                        List<dynamic> courses = json.decode(
+                            response.body)['cours'];
+                        // this.coursNum = json.decode(response.body)['data']['countLL'];
+                        // num heuresTV = json.decode(response.body)['data']['heuresTV'];
+                        // num sommeTV = json.decode(response.body)['data']['sommeTV'];
+                        // setState(() {
+                        this.coursNum = json.decode(response.body)['cours'].length;
+                        //
+                        // });
+                        print('Mes Cours :${json.decode(response.body)['cours']}');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) =>
+                              CoursesPage(courses: courses,
+                                coursNum: coursNum,paid: true,
+                                // heuresTV: heuresTV,
+                                // sommeTV: sommeTV,
+                                role: role,)),
+                        );
+                      } else {
+                        // Handle error
+                        print('Failed to fetch prof courses. Status Code: ${response
+                            .statusCode}');
+                      }
+                    },
+                  ),
+                  ListTile(
+                      leading: Icon(Icons.payment_outlined, size: _drawerIconSize,color: Colors.black,),
+                      title: Text('Paiements',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
+                      onTap: ()async{
+                        SharedPreferences prefs = await SharedPreferences.getInstance();
+                        String token = prefs.getString("token")!;
+                        String role = prefs.getString("role")!;
+                        var response = await http.get(
+                          Uri.parse('http://192.168.43.73:5000/cours'),
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer $token'
+                          },
+                        );
+                        // print(response.body);
+
+                        if (response.statusCode == 200) {
+                          List<dynamic> courses = json.decode(
+                              response.body)['cours'];
+                          this.coursNum = json.decode(response.body)['cours'].length;
+                          // print('Mes cours: ${json.decode(response.body)['cours']}');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => Paiements(courses: courses,)),
+                          );
+                        } else {
+                          // Handle error
+                          print('Failed to fetch prof courses. Status Code: ${response
+                              .statusCode}');
+                        }
+                      }
+                  ),
+
+                  ListTile(
+                    leading: Icon(Icons.calendar_month, size: _drawerIconSize,color: Colors.black,),
+                    title: Text('Emplois',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
+                    onTap: () {
+                      Navigator.push( context, MaterialPageRoute(builder: (context) => Emploi()), );
+                    },
+                  ),
+                  //Divider(color: Theme.of(context).primaryColor, height: 1,),
+                  ListTile(
+                    leading: Icon(Icons.folder_special_outlined, size: _drawerIconSize,color: Colors.black),
+                    title: Text('Filières',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => Filliere()),);
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.read_more, size: _drawerIconSize,color: Colors.black),
+                    title: Text('Autres',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => MoreOptionsPage(username: name!,
+                          userRole: role!, userEmail: email!)));
+                    },
+                  ),
+                  SizedBox(height: MediaQuery.of(context).size.width / 8,),
+                  ElevatedButton(
+                    child: Text('Logout',style: TextStyle(fontSize: _drawerFontSize,color: Colors.white),),
+                    onPressed: () async{
+                      SharedPreferences prefs = await SharedPreferences.getInstance();
+                      await prefs.setString('token', '');
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => KeyboardVisibilityProvider(child: LoginSection())));
+                      // MaterialPageRoute(builder: (context) => LoginSection()));
+
+                    },
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.indigoAccent,padding: EdgeInsets.symmetric(horizontal: 90,vertical: 10)),
+                  ),
+                ],),
             if (role == "admin")
               Column(
                 children: [
@@ -1277,7 +1526,7 @@ class _MyDrawerState extends State<MyDrawer> {
                           // ProfesseurInfoPage(
                           //     id: id, email: email, role: role),
                           // builder: (context) => LandingScreen(role: role,name: nom,), // Passer le rôle ici
-                          MyCustomWidget()),);
+                          PieChartExample()),);
                     },
                   ),
                   ListTile(
@@ -1310,7 +1559,7 @@ class _MyDrawerState extends State<MyDrawer> {
                   ),
                   ListTile(
                     leading: Icon(Icons.featured_play_list_outlined,size: _drawerIconSize,color: Colors.black),
-                    title: Text('Elements', style: TextStyle(fontSize: _drawerFontSize, color: Colors.black),
+                    title: Text('Matieres', style: TextStyle(fontSize: _drawerFontSize, color: Colors.black),
                     ),
                     onTap: () {
                       Navigator.push(context, MaterialPageRoute(builder: (context) => Elements()),);
@@ -1506,7 +1755,7 @@ class _MyDrawerState extends State<MyDrawer> {
                     },
                   ),
                   ElevatedButton(
-                    child: Text('Logout',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
+                    child: Text('Logout',style: TextStyle(fontSize: _drawerFontSize,color: Colors.white),),
                     onPressed: () async{
                       SharedPreferences prefs = await SharedPreferences.getInstance();
                       await prefs.setString('token', '');
@@ -1515,7 +1764,7 @@ class _MyDrawerState extends State<MyDrawer> {
                       // MaterialPageRoute(builder: (context) => LoginSection()));
 
                     },
-                    style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor,padding: EdgeInsets.symmetric(horizontal: 90,vertical: 10)),
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.indigoAccent,padding: EdgeInsets.symmetric(horizontal: 90,vertical: 10)),
                   ),
                 ],)
           ],   ),   ),  ); }}

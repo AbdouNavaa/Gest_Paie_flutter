@@ -74,62 +74,80 @@ class _UsersState extends State<Users> {
   }
   TextEditingController _searchController = TextEditingController();
 
-  void _showFilterOptionsDialog(BuildContext context,val) {
+  List<String> selectedFilters = [];
+  Map<String, bool> filterOptions = {
+    'Nom': false,
+    'Prenom': false,
+    // 'Tous': false,
+  };
+
+  void _showFilterOptionsDialog(BuildContext context, String val) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return SimpleDialog(
-
-        surfaceTintColor: Color(0xB0AFAFA3),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
-          title: Text('Options de recherche'),
-          children: [
-            SimpleDialogOption(
-              onPressed: () {
-                _applyFilter('Nom',val);
-                Navigator.pop(context);
-              },
-              child: Text('Rechercher par Nom'),
-            ),
-            SimpleDialogOption(
-              onPressed: () {
-                _applyFilter('Prenom',val);
-                Navigator.pop(context);
-              },
-              child: Text('Rechercher par Prénom'),
-            ),
-            SimpleDialogOption(
-              onPressed: () {
-                _applyFilter('Tous',val);
-                Navigator.pop(context);
-              },
-              child: Text('Rechercher par nom et prénom'),
-            ),
-          ],
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return SimpleDialog(
+              surfaceTintColor: Color(0xB0AFAFA3),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              elevation: 1,
+              title: Text('Options de recherche'),
+              children: filterOptions.keys.map((String key) {
+                return CheckboxListTile(
+                  title: Text('Rechercher par $key'),
+                  value: filterOptions[key],
+                  onChanged: (bool? value) {
+                    setState(() {
+                      filterOptions[key] = value!;
+                      if (value) {
+                        selectedFilters.add(key);
+                        _applyFilters(selectedFilters, val);
+                             Navigator.pop(context);
+                        //
+                      } else {
+                        selectedFilters.remove(key);
+                      }
+                    });
+                  },
+                );
+              }).toList(),
+              // actions: [
+              //   TextButton(
+              //     onPressed: () {
+              //       _applyFilters(selectedFilters, val);
+              //       Navigator.pop(context);
+              //     },
+              //     child: Text('Appliquer'),
+              //   ),
+              // ],
+            );
+          },
         );
       },
     );
   }
 
-  Future<void> _applyFilter(String option,val) async {
-    List<User> Users = await fetchUser();
+  Future<void> _applyFilters(List<String> options, String val) async {
+    List<User> users = await fetchUser();
 
-      if(option == "Nom")
-      filteredItems = Users!.where((User) =>
-      User.name!.toLowerCase().contains(val.toLowerCase())).toList();
-
-    if(option == "Prenom")
-      filteredItems = Users!.where((User) =>
-          User.prenom!.toLowerCase().contains(val.toLowerCase())
-      ).toList();
-
-    if(option == "Tous")
-      filteredItems = Users!.where((User) =>
-      User.name!.toLowerCase().contains(val.toLowerCase()) ||
-          User.prenom!.toLowerCase().contains(val.toLowerCase())
-      ).toList();
-    // });
+    filteredItems = users.where((User user) {
+      bool matches = false;
+      if (options.contains('Nom')) {
+        matches = user.name!.toLowerCase().contains(val.toLowerCase());
+      }
+      if (options.contains('Prenom')) {
+        matches = matches || user.prenom!.toLowerCase().contains(val.toLowerCase());
+      }
+      // if (options.contains('Tous')) {
+      //   matches = matches || user.name!.toLowerCase().contains(val.toLowerCase()) ||
+      //       user.prenom!.toLowerCase().contains(val.toLowerCase());
+      // }
+      return matches;
+    }).toList();
   }
+
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController _name = TextEditingController();
@@ -258,7 +276,9 @@ class _UsersState extends State<Users> {
                   onPressed: () {
                     // Confirmer et traiter les cours sélectionnés
                     if (selectedUsers.length == 0){
-                      buildShowNullDialog(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Il n y a pas d\'elements selectionner'),action: SnackBarAction(label: 'Ok', onPressed: (){})),
+                      );
                     }
                     else{ activerOuDesactiverUser(selectedUsers);
                     // Remettre la liste de sélection à zéro
@@ -318,7 +338,9 @@ class _UsersState extends State<Users> {
                   onPressed: () {
                     // Navigator.pop(context);
                     if (selectedUsers.length == 0){
-                      buildShowNullDialog(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Il n y a pas d\'utilisateur selectionner'),action: SnackBarAction(label: 'Ok', onPressed: (){})),
+                      );
                     }else{
                       showDialog(
                         context: context,
@@ -454,7 +476,7 @@ class _UsersState extends State<Users> {
                                     ),
                                   ),
                                   child: PaginatedDataTable(
-                                    headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white),arrowHeadColor: Colors.black, // Couleur de la ligne d'en-tête
+                                    headingRowColor: MaterialStateColor.resolveWith((states) => Colors.black87),arrowHeadColor: Colors.black, // Couleur de la ligne d'en-tête
                                     columnSpacing: 10,dataRowHeight: 55,
                                     rowsPerPage: _rowsPerPage,
                                     showFirstLastButtons: _rowsPerPage >= 10 ? true: false,
@@ -466,15 +488,17 @@ class _UsersState extends State<Users> {
                                     },
                                     columns: [
                                       DataColumn(
-                                        label: Text('Active'),
+                                        label: Text('Active',
+                                            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white,)
+                                        ),
                                         onSort: (columnIndex, ascending) {
                                           // Code pour gérer la sélection ici
                                         },
                                       ),
-                                      DataColumn(label: Text('Nom')),
-                                      DataColumn(label: Text('E-mail')),
-                                      DataColumn(label: Text('Role')),
-                                      DataColumn(label: Text('Action')), // Nouvelle colonne pour le bouton Update
+                                      buildDataColumn('Nom'),
+                                      buildDataColumn('E-mail'),
+                                      buildDataColumn('Role'),
+                                      buildDataColumn('Action'),
                                     ],
                                     source: YourDataSource(filteredItems ?? items!, updateState, selectedUsers, context,_pickImage1,_image,_picker),
                                   ),
@@ -582,28 +606,6 @@ class _UsersState extends State<Users> {
 
   }
 
-  Future<dynamic> buildShowNullDialog(BuildContext context) {
-    return showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          surfaceTintColor: Color(0xB0AFAFA3),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
-                          title: Text("Alert d\'erreur",style: TextStyle(color: Colors.red.shade900),),
-                          content: Text(
-                              "Il faut sélectioner quelques elements"),
-                          actions: <Widget>[
-                            TextButton(
-                              child: Text("Réessayez"),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                          ],
-                        );
-                      },
-                    );
-  }
 
 
   Future<void> _importData(BuildContext context) async {
@@ -995,6 +997,12 @@ class _UsersState extends State<Users> {
       callback();
     });
   }
+
+  DataColumn buildDataColumn(val) => DataColumn(label: Text(val,style: TextStyle(
+    fontWeight: FontWeight.bold,
+    color: Colors.white, // Set header text color
+  ),));
+
 
 
 

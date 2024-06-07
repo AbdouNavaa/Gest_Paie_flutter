@@ -2,10 +2,14 @@
                  *** START***
 ****************************************** */
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:community_charts_flutter/community_charts_flutter.dart'
 as charts;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'filliere.dart';
+import 'package:http/http.dart' as http;
 
 enum POSITIONS { endDocked, centerFloat, endFloat, centerDocked }
 
@@ -353,6 +357,51 @@ Future<void> _loadFiliere() async {
 
 
 
+
+class CostsData {
+
+  final int users;
+  final int AU;
+  final int CT;
+  final int CEA;
+  final int CE;
+  final int PEA;
+  final int PE;
+
+  const CostsData( {required this.users,required  this.AU,required  this.CT,required  this.CEA,required  this.CE,required  this.PEA,required  this.PE});
+
+  factory CostsData.fromJson(Map<String, dynamic> json) {
+    return CostsData(
+      users: json['users'] ?? 0,
+      AU: json['active_users'] ?? 0,
+      CT: json['cours_total'] ?? 0,
+      CEA: json['cours_en_attente'] ?? 0,
+      CE: json['cours_effectue'] ?? 0,
+      PE: json['paiement_effectue'] ?? 0,
+      PEA: json['paiement_en_attente'] ?? 0,
+    );
+  }
+}
+
+Future<CostsData> fetchStatistics() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String token = prefs.getString("token")!;
+  final response = await http.get(Uri.parse('http://192.168.43.73:5000/paiement/statistique'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },);
+
+  print('jj${response.statusCode}');
+  if (response.statusCode == 201) {
+
+    Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+    print('hmgmgmg:${jsonResponse}');
+    return CostsData.fromJson(jsonDecode(response.body));
+  } else {
+    throw Exception('Failed to load statistics');
+  }
+}
 /// Data class to visualize.
 class _CostsData {
   final String category;
@@ -360,9 +409,8 @@ class _CostsData {
 
   const _CostsData(this.category, this.cost);
 }
-
 class PieChartExample extends StatefulWidget {
-  const PieChartExample({super.key});
+  const PieChartExample({super.key, });
 
   @override
   _PieChartExampleState createState() => _PieChartExampleState();
@@ -370,6 +418,7 @@ class PieChartExample extends StatefulWidget {
 
 class _PieChartExampleState extends State<PieChartExample> {
   // Chart configs.
+  final List<CostsData> data =[];
   bool _animate = true;
   bool _defaultInteractions = true;
   double _arcRatio = 0.8;
@@ -378,128 +427,90 @@ class _PieChartExampleState extends State<PieChartExample> {
   charts.BehaviorPosition _legendPosition = charts.BehaviorPosition.bottom;
 
   // Data to render.
-  final List<_CostsData> _data = [
-    const _CostsData('housing', 1000),
-    const _CostsData('food', 500),
-    const _CostsData('health', 200),
-    const _CostsData('trasport', 100),
-  ];
-
+@override
+  void initState() {
+  fetchStatistics().then((dat) {
+    setState(() {
+      data.add(dat); // Assigner la liste renvoyée par Useresseur à items
+      print('hmgmgmg:${data}');
+    });
+  }).catchError((error) {
+    print('Erreur: $error');
+  });
+    // TODO: implement initState
+    super.initState();
+  }
+   List<_CostsData> _data = [];
   @override
   Widget build(BuildContext context) {
-    final _colorPalettes =
+  for(var course in data)
+  _data = [
+    // _CostsData('Users', course.users),
+      _CostsData('Active User', course.AU),
+      _CostsData('Cours Total', course.CT),
+      _CostsData('Cours Effectue', course.CE),
+      _CostsData('Cours En Attente', course.CEA),
+      _CostsData('Paiement Effectue', course.PE),
+      _CostsData('Paiement En Attente', course.PEA),
+    ];
+  final _colorPalettes =
     charts.MaterialPalette.getOrderedPalettes(this._data.length);
-    return ListView(
-      padding: const EdgeInsets.all(8),
-      children: <Widget>[
-        SizedBox(
-          height: 300,
-          // MUST specify the type T, see https://github.com/google/charts/issues/668#issuecomment-943556524.
-          child: charts.PieChart<String>(
-            // Pie chart can only render one series.
-          /*seriesList=*/ [
-          charts.Series<_CostsData, String>(
-          id: 'Sales-1',
-          colorFn: (_, idx) => _colorPalettes[idx!].shadeDefault,
-          domainFn: (_CostsData sales, _) => sales.category,
-          measureFn: (_CostsData sales, _) => sales.cost,
-          data: this._data,
-          // Set a label accessor to control the text of the arc label.
-          labelAccessorFn: (_CostsData row, _) =>
-          '${row.category}: ${row.cost}',
-        ),
-      ],
-      animate: this._animate,
-      defaultRenderer: charts.ArcRendererConfig(
-        arcRatio: this._arcRatio,
-        arcRendererDecorators: [
-          charts.ArcLabelDecorator(labelPosition: this._arcLabelPosition)
+    return Scaffold(backgroundColor: Colors.white,
+      body: Row(
+        children: [
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.only(top: 100,),
+              children: <Widget>[
+                Container(
+                  height: 400,
+                  // width: 560,
+                  // MUST specify the type T, see https://github.com/google/charts/issues/668#issuecomment-943556524.
+                  child: charts.PieChart<String>(
+                    // Pie chart can only render one series.
+                  /*seriesList=*/ [
+                    charts.Series<_CostsData, String>(
+                      id: 'Sales-1',
+                      colorFn: (_, idx) => _colorPalettes[idx!].shadeDefault,
+                      domainFn: (_CostsData sales, _) => sales.category,
+                      measureFn: (_CostsData sales, _) => sales.cost,
+                      data: this._data,
+                      // Set a label accessor to control the text of the arc label.
+                      labelAccessorFn: (_CostsData row, _) =>
+                      '${row.cost}',insideLabelStyleAccessorFn: (datum, index) => charts.TextStyleSpec(fontSize: 20),
+                    ),
+                              ],
+                              animate: this._animate,
+                              defaultRenderer: charts.ArcRendererConfig(
+                arcRatio: this._arcRatio,
+                arcRendererDecorators: [
+                  charts.ArcLabelDecorator(labelPosition: this._arcLabelPosition)
+                ],
+                              ),
+                              behaviors: [
+                // Add title.
+                // charts.ChartTitle(
+                //   'Dummy costs breakup',
+                //   behaviorPosition: this._titlePosition,
+                // ),
+                // Add legend. ("Datum" means the "X-axis" of each data point.)
+                charts.DatumLegend(
+                  position: this._legendPosition,
+                  desiredMaxColumns: 2,
+                ),
+
+                              ],
+                            ),
+                            ),
+            const Divider(),
+            // ..._controlWidgets(),
+            ],
+            ),
+          ),
         ],
       ),
-      behaviors: [
-        // Add title.
-        charts.ChartTitle(
-          'Dummy costs breakup',
-          behaviorPosition: this._titlePosition,
-        ),
-        // Add legend. ("Datum" means the "X-axis" of each data point.)
-        charts.DatumLegend(
-          position: this._legendPosition,
-          desiredMaxRows: 2,
-        ),
-      ],
-    ),
-    ),
-    const Divider(),
-    ..._controlWidgets(),
-    ],
     );
   }
 
   /// Widgets to control the chart appearance and behavior.
-  List<Widget> _controlWidgets() => <Widget>[
-    SwitchListTile.adaptive(
-      title: const Text('animate'),
-      onChanged: (bool val) => setState(() => this._animate = val),
-      value: this._animate,
-    ),
-    SwitchListTile(
-      title: const Text('defaultInteractions'),
-      onChanged: (bool val) =>
-          setState(() => this._defaultInteractions = val),
-      value: this._defaultInteractions,
-    ),
-    const ListTile(title: Text('Arc width ratio w.r.t. radius:')),
-    Slider(
-      divisions: 10,
-      onChanged: (double val) => setState(() => this._arcRatio = val),
-      value: this._arcRatio,
-      label: '${this._arcRatio}',
-    ),
-    ListTile(
-      title: const Text('arcLabelPosition:'),
-      trailing: DropdownButton<charts.ArcLabelPosition>(
-        value: this._arcLabelPosition,
-        onChanged: (charts.ArcLabelPosition? newVal) {
-          if (newVal != null) {
-            setState(() => this._arcLabelPosition = newVal);
-          }
-        },
-        items: [
-          for (final val in charts.ArcLabelPosition.values)
-            DropdownMenuItem(value: val, child: Text('$val'))
-        ],
-      ),
-    ),
-    ListTile(
-      title: const Text('titlePosition:'),
-      trailing: DropdownButton<charts.BehaviorPosition>(
-        value: this._titlePosition,
-        onChanged: (charts.BehaviorPosition? newVal) {
-          if (newVal != null) {
-            setState(() => this._titlePosition = newVal);
-          }
-        },
-        items: [
-          for (final val in charts.BehaviorPosition.values)
-            DropdownMenuItem(value: val, child: Text('$val'))
-        ],
-      ),
-    ),
-    ListTile(
-      title: const Text('legendPosition:'),
-      trailing: DropdownButton<charts.BehaviorPosition>(
-        value: this._legendPosition,
-        onChanged: (charts.BehaviorPosition? newVal) {
-          if (newVal != null) {
-            setState(() => this._legendPosition = newVal);
-          }
-        },
-        items: [
-          for (final val in charts.BehaviorPosition.values)
-            DropdownMenuItem(value: val, child: Text('$val'))
-        ],
-      ),
-    ),
-  ];
 }

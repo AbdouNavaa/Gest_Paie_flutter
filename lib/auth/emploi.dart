@@ -41,7 +41,6 @@ class _EmploiState extends State<Emploi> {
   // List<Semestre> SemList = [];
   // List<Semestre> SemList1 = [];
   List<Elem> elLis = [];
-  List<Matiere> matiereList = [];
   List<filliere> filList = [];
 
 
@@ -327,7 +326,7 @@ int? selectedSem ;
                                         Navigator.pop(context);
                                       });
                                       ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text('Le Category a été Supprimer avec succès.')),
+                                        SnackBar(content: Text('L\'emploi a été Supprimer avec succès.')),
                                       );
                                     },
                                   ),
@@ -537,7 +536,7 @@ int? selectedSem ;
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Expanded(flex: 1,
+                                  Flexible(
                                     child: Container(
                                       // width: MediaQuery.of(context).size.width /3,
                                       height: 60,
@@ -579,7 +578,7 @@ int? selectedSem ;
                                       ),
                                     ),
                                   ),
-                                  Expanded(flex: 1,
+                                  Flexible(
                                     child: Container(
                                       height: 60,
                                       // width: MediaQuery.of(context).size.width / 3,
@@ -733,6 +732,35 @@ int? selectedSem ;
                                       Sat?buildDayDataTable('Samedi', filteredItems ?? items!): Container(),
                                       // SizedBox(height: 10,),
                                       San?buildDayDataTable('Dimanche', filteredItems ?? items!): Container(),
+                                      selectedEmploiIds.isNotEmpty?
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          if (selectedEmploiIds.isNotEmpty) {
+                                            deleteSelectedEmplois();
+
+                                            setState(() {
+                                              Navigator.pop(context);
+                                            });
+                                          } else {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(content: Text('Il n y a pas d\'elements selectionner'),action: SnackBarAction(label: 'Ok', onPressed: (){})),
+                                            );
+                                          }
+                                        },
+
+                                        child: Text('Supprimer'),
+                                        style: ElevatedButton.styleFrom(
+                                          surfaceTintColor: Colors.white,
+                                          // side: BorderSide(color: Colors.black38),
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                          elevation: 5,
+                                          padding: EdgeInsets.symmetric(horizontal: 25),
+                                          backgroundColor: Colors.red,
+                                          foregroundColor: Colors.white,
+                                          textStyle: TextStyle(fontWeight: FontWeight.bold),
+                                          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                                        ),
+                                      ):Container(),
                                     ],
                                   ),
 
@@ -863,7 +891,7 @@ int? selectedSem ;
             :Container(
           width: 60,
           decoration: BoxDecoration(
-            color: Colors.green,
+            color: Colors.indigo,
             borderRadius: BorderRadius.all(Radius.circular(10)),
             boxShadow: [
               BoxShadow(
@@ -896,8 +924,8 @@ int? selectedSem ;
 
   ButtonStyle buildStyleFrom(bool bol) {
     return TextButton.styleFrom(
-        backgroundColor: bol ? Colors.white : Colors.white12,
-        foregroundColor: bol ? Colors.indigo : Colors.black87,
+        backgroundColor: bol ? Colors.indigo : Colors.white12,
+        foregroundColor: bol ? Colors.white : Colors.black87,
         textStyle: TextStyle(fontWeight: FontWeight.w500, fontSize: 15),
         padding: EdgeInsets.only(top: 3, bottom: 3),minimumSize: Size.fromWidth(80),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10)),side: BorderSide(color: Colors.black12,width: 1))
@@ -905,7 +933,7 @@ int? selectedSem ;
   }
 
 
-
+  List<String> selectedEmploiIds = [];
   Container buildDayDataTable(String day ,List<emploi> items) {
     List<DataRow> dayRows = [];
 
@@ -927,7 +955,18 @@ int? selectedSem ;
         //   ),
         // );
         dayRows.add(
-          DataRow(color: MaterialStateColor.resolveWith((states) => Colors.black87),
+          DataRow(
+            color: MaterialStateColor.resolveWith((states) => Colors.black87),
+            selected: selectedEmploiIds.contains(emp.id),
+            onSelectChanged: (selected) {
+              setState(() {
+                if (selected!) {
+                  selectedEmploiIds.add(emp.id);
+                } else {
+                  selectedEmploiIds.remove(emp.id);
+                }
+              });
+            },
             cells: [
               DataCell(Container(child:
               Text(emp.startTime!, style: TextStyle(color: Colors.white)),)
@@ -961,10 +1000,10 @@ int? selectedSem ;
           DataRow(
             cells: [
                DataCell(Text(emp.mat!.toString().capitalize!, style: TextStyle(color: Colors.black))),
-              DataCell(Container()
-              ),
-              DataCell(Container()
-              ),
+              DataCell(Container()),
+              DataCell(Container()),
+
+
             ],
           ),
         );
@@ -1092,6 +1131,36 @@ return showDialog(
     } else {
       print('Aucun fichier sélectionné');
     }
+  }
+
+  void deleteSelectedEmplois() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString("token")!;
+    print(token);
+
+    for (var id in selectedEmploiIds) {
+      var response = await http.delete(
+        Uri.parse('http://192.168.43.73:5000/emploi' + "/$id"),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      var jsonResponse = jsonDecode(response.body);
+      print(response.statusCode);
+      if (response.statusCode == 200) {
+        print('Deleted $id');
+
+      } else {
+        print('Failed to delete $id');
+      }
+    }
+
+    fetchemploi();
+    setState(() {
+      selectedEmploiIds.clear();
+    });
   }
 
 
@@ -1302,7 +1371,7 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
                     Expanded(flex: 1,
                       child: ElevatedButton(
                         onPressed: submitForms,
-                        child: Text("Ajouter tous"),
+                        child: Text("Creer tous"),
                         style: ElevatedButton.styleFrom(
                           surfaceTintColor: Colors.white,
                           // side: BorderSide(color: Colors.black38),
@@ -1502,35 +1571,6 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
 
 
         SizedBox(height: 15),
-        // DropdownButtonFormField<Professeur>(
-        //   value: formData.selectedProfesseur,
-        //   items: professeurList.map((prof) {
-        //     return DropdownMenuItem<Professeur>(
-        //       value: prof,
-        //       child: Text(prof.nom! ),
-        //     );
-        //   }).toList(),
-        //   onChanged: (value) async{
-        //     setState(() {
-        //       formData.selectedProfesseur = value;
-        //       // formData.selectedSem = null; // Reset the selected matière
-        //       // formData.selectedElem = null;
-        //       // updateElemList(formData.selectedProfesseur,formData.selectedElem);
-        //
-        //     });
-        //   },
-        //   decoration: InputDecoration(
-        //     filled: true,
-        //     fillColor: Colors.white,
-        //     hintText: "selection d'un Professeur",
-        //
-        //     border: OutlineInputBorder(
-        //       borderSide: BorderSide.none,gapPadding: 1,
-        //       borderRadius: BorderRadius.all(Radius.circular(10.0)),
-        //     ),
-        //   ),
-        // ),
-        // SizedBox(height: 10),
         Row(
           children: [
             Flexible(
@@ -1601,38 +1641,37 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
                 ),
               ),
             ),
-            if (formData._selectedType != null)
-              SizedBox(width: 10),
-            Flexible(
-              child: DropdownButtonFormField<String>(
-                value: formData.selectedGroup,disabledHint: Text('Groupe'),
-                items: formData.filteredGroups.map((group) {
-                  return DropdownMenuItem<String>(
-                    value: group,//abdou
-                    child: Text('${formData.groupName}${getProfName(group)[2]}'),
-                    // child: Text('${getProfesseurIdFromName(getProfName(group)[0])}-${formData.groupName}${getProfName(group)[2]}'),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    formData.selectedGroup = value;
-                  });
-                },
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.white,
-                  hintText: "Sélectionner un groupe",
-                  labelText: 'Groupe',labelStyle: TextStyle(color: Colors.blueGrey,fontWeight: FontWeight.w600),
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                  ),
-                ),
-              ),
-            ),
+
           ],
         ),
 
+        SizedBox(height: 15),
+        if (formData._selectedType != null)
+        DropdownButtonFormField<String>(
+          value: formData.selectedGroup,disabledHint: Text('Groupe'),
+          items: formData.filteredGroups.map((group) {
+            return DropdownMenuItem<String>(
+              value: group,//abdou
+              child: Text('${getProfesseurIdFromName(group.split('-')[0])} ${formData.groupName}${getProfName(group)[2]}'),
+              // child: Text('${getProfesseurIdFromName(getProfName(group)[0])}-${formData.groupName}${getProfName(group)[2]}'),
+            );
+          }).toList(),
+          onChanged: (value) {
+            setState(() {
+              formData.selectedGroup = value;
+            });
+          },
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.white,
+            hintText: "Sélectionner un groupe",
+            labelText: 'Groupe',labelStyle: TextStyle(color: Colors.blueGrey,fontWeight: FontWeight.w600),
+            border: OutlineInputBorder(
+              borderSide: BorderSide.none,
+              borderRadius: BorderRadius.all(Radius.circular(10.0)),
+            ),
+          ),
+        ),
         SizedBox(height: 15),
         Row(
           children: [
@@ -1718,9 +1757,40 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
       // Traitez chaque formulaire ici, par exemple, envoyez-le à votre API
       FormModel formData = formDataList[i];
       print('SelectedGp:${formData.selectedGroup}');
-      Navigator.pop(context);
       addEmp(formData._selectedType,formData._selectedNbh,formData._date.text,formData._selectedNum,
           formData.selectedElem!.id,formData.selectedGroup!);
+      setState(() {
+        Navigator.of(context).pop();
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                surfaceTintColor: Color(0xB0AFAFA3),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Text("Alerte de succès"),
+                    Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
+                  ],
+                ),
+                content: Text(
+                    "Les emplois sont ajoutés avec succès"),
+
+                actions: [
+                  TextButton(
+                    child: Text("Ok"),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pop();
+                    },
+                  ),
+
+                ],
+
+              );});
+      });
+
       // Ajoutez votre logique pour traiter les données du formulaire
       // formData.name, formData.description, etc.
       // Envoyez les données à votre API, sauvegardez-les dans la base de données, etc.
@@ -1758,37 +1828,7 @@ class _AddEmploiScreenState extends State<AddEmploiScreen> {
     print(response.statusCode);
     if (response.statusCode == 201) {
 
-      setState(() {
-        Navigator.of(context).pop();
-        showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                surfaceTintColor: Color(0xB0AFAFA3),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
-                title: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Text("Alerte de succès"),
-                    Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
-                  ],
-                ),
-                content: Text(
-                    "L\'emploi est ajouté avec succès"),
-
-                actions: [
-                  TextButton(
-                    child: Text("Ok"),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-
-                ],
-
-              );});
-      });
-
+print('Emploi ajoute');
 
     }
     else {
@@ -1962,9 +2002,9 @@ class Eles {
       filName: json['filiere'],
       catId: json['categorie_id'],
       prix: json['prix'],
-      groupeCM: json['groupeCM'] ?? [],
-      groupeTP: json['groupeTP'] ?? [],
-      groupeTD: json['groupeTD'] ?? [],
+      groupeCM: json['CM'] ?? [],
+      groupeTP: json['TP'] ?? [],
+      groupeTD: json['TD'] ?? [],
       professeurCM: json['professeurCM'] ?? [],
       professeurTP: json['professeurTP'] ?? [],
       professeurTD: json['professeurTD'] ?? [],
