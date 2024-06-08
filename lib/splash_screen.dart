@@ -31,7 +31,7 @@ class _SplashScreenState extends State<SplashScreen> {
   bool countDown1 = true;
 
   void _navigateToNextScreen() async {
-    await Future.delayed(Duration(seconds: 500));
+    await Future.delayed(Duration(seconds: 5));
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => KeyboardVisibilityProvider(child: LoginSection())),
@@ -63,43 +63,35 @@ class _SplashScreenState extends State<SplashScreen> {
           color: Colors.white10,
           width: double.infinity,
           child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Container(
-                  height: 400,
-                  child: HeaderWidget(400, false, ''),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                Center(
+                // Container(
+                //   height: 400,
+                //   child: HeaderWidget(400, false, ''),
+                // ),
+                // SizedBox(
+                //   height: 20,
+                // ),
+                CircleAvatar(backgroundColor: Colors.blue,maxRadius: 80,
                   child: AnimatedOpacity(
                     opacity: 1.0,
                     duration: Duration(seconds: 2),
-                    child: Column(
-                      children: [
-                        SizedBox(height: 10,),
-                        Text(
-                          "GP",
-                          style: GoogleFonts.abhayaLibre(
-                            color: Colors.black,
-                            fontSize: 70.0,
-                            fontStyle: FontStyle.italic,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 2.0,
-                          ),
-                        ),   ],
+                    child: Text(
+                      "GP",
+                      style: GoogleFonts.abhayaLibre(
+                        color: Colors.white,
+                        fontSize: 70.0,
+                        fontStyle: FontStyle.italic,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 2.0,
+                      ),
                     ),
                   ),
                 ),
-                Text(
-                  "Count down timer",
-                  style: TextStyle(fontSize: 25),
-                ),
-                Container(
-                    margin: EdgeInsets.only(top: 30, bottom: 30),
-                    child: buildTime1()),
+
+                // SizedBox(height: 100,),
+                // CircularProgressIndicator(color: Colors.blue,),
               ]),
         ),
       ),

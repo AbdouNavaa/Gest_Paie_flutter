@@ -732,36 +732,7 @@ int? selectedSem ;
                                       Sat?buildDayDataTable('Samedi', filteredItems ?? items!): Container(),
                                       // SizedBox(height: 10,),
                                       San?buildDayDataTable('Dimanche', filteredItems ?? items!): Container(),
-                                      selectedEmploiIds.isNotEmpty?
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          if (selectedEmploiIds.isNotEmpty) {
-                                            deleteSelectedEmplois();
-
-                                            setState(() {
-                                              Navigator.pop(context);
-                                            });
-                                          } else {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(content: Text('Il n y a pas d\'elements selectionner'),action: SnackBarAction(label: 'Ok', onPressed: (){})),
-                                            );
-                                          }
-                                        },
-
-                                        child: Text('Supprimer'),
-                                        style: ElevatedButton.styleFrom(
-                                          surfaceTintColor: Colors.white,
-                                          // side: BorderSide(color: Colors.black38),
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                          elevation: 5,
-                                          padding: EdgeInsets.symmetric(horizontal: 25),
-                                          backgroundColor: Colors.red,
-                                          foregroundColor: Colors.white,
-                                          textStyle: TextStyle(fontWeight: FontWeight.bold),
-                                          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                                        ),
-                                      ):Container(),
-                                    ],
+                                         ],
                                   ),
 
                               ),
@@ -776,7 +747,66 @@ int? selectedSem ;
             ),
           ],
         ),
-        floatingActionButton: showFloat ?
+        floatingActionButton:
+        selectedEmploiIds.isNotEmpty?
+        TextButton(
+          onPressed: () {
+            if (selectedEmploiIds.isNotEmpty) {
+
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    // surfaceTintColor: Color(0xB0AFAFA3),
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                    title: Text("Confirmer la suppression",style: TextStyle(fontSize: 20)),
+                    content: Text("Êtiez-vous sûr de vouloir supprimer cet élément ?"),
+                    actions: <Widget>[
+                      TextButton(
+                        child: Text("ANNULER"),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      TextButton(
+                        child: Text(
+                          "SUPPRIMER",
+                          style: TextStyle(color: Colors.red),
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          deleteSelectedEmplois();
+                          // DeleteCours(course['_id']);
+                          setState(() {
+                            Navigator.pop(context);
+                          });
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Les emplois ont été Supprimer avec succès.')),
+                          );
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            }
+          },
+
+          child: Icon(Icons.delete_outlined,size: 40,),
+          style: TextButton.styleFrom(
+            surfaceTintColor: Colors.white,
+            // side: BorderSide(color: Colors.black38),
+            // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            elevation: 5,
+            // padding: EdgeInsets.symmetric(horizontal: 25),
+            foregroundColor: Colors.red,
+            backgroundColor: Colors.white,
+            textStyle: TextStyle(fontWeight: FontWeight.bold),
+            // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+          ),
+        ):
+        showFloat ?
         Container(
           width: 260,
           decoration: BoxDecoration(

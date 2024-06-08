@@ -40,8 +40,8 @@ class _PaiementsState extends State<Paiements> {
   double somme = 0;
 
 
-  DateTime defaultDateDeb = DateTime(2024, 5, 1);
-  DateTime defaultDateFin = DateTime(2024, 5, 31);
+  DateTime defaultDateDeb = DateTime(2024, 6, 1);
+  DateTime defaultDateFin = DateTime(2024, 6, 30);
 
   bool taper = false;
 
@@ -50,8 +50,6 @@ class _PaiementsState extends State<Paiements> {
     // TODO: implement initState
     super.initState();
     widget.courses;
-    // groupCoursesByProfesseur();
-    // calculateProfesseurTotals();
     fetchProfs().then((data) {
       setState(() {
         professeurList = data; // Assigner la liste renvoyée par emploiesseur à items
@@ -60,13 +58,7 @@ class _PaiementsState extends State<Paiements> {
       print('Erreur: $error');
     });
 
-    fetchPaie().then((data) {
-      setState(() {
-        filteredItems = data; // Assigner la liste renvoyée par Categoryesseur à items
-      });
-    }).catchError((error) {
-      print('Erreur: $error');
-    });
+
 
     // Initialise les dates par défaut
     widget.dateDeb = defaultDateDeb;
@@ -76,15 +68,16 @@ class _PaiementsState extends State<Paiements> {
     ( _selectedDateDeb != null ||_selectedDateFin != null) ? groupCoursesByProfesseur(widget.dateDeb!, widget.dateFin!)
         :
     groupCoursesByProfesseur(_selectedDateDeb, _selectedDateFin);
+    Result();
   }
 
-  List<Paies>? filteredItems;
-  void DeletePaie(id) async{
+  List<dynamic>? filteredItems;
+  void Result() async{
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token")!;
     print(token);
 
-    var response = await http.delete(Uri.parse('http://192.168.43.73:5000/paiement/$id' ),
+    var response = await http.get(Uri.parse('http://192.168.43.73:5000/cours/monthly-by-professeur' ),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -93,16 +86,15 @@ class _PaiementsState extends State<Paiements> {
     );
 
     var jsonResponse = jsonDecode(response.body);
-    print(response.statusCode);
+    print('object1:${response.statusCode}');
     if(response.statusCode ==200){
-      fetchPaie().then((data) {
+      Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+      List<dynamic> Data = jsonResponse['result'];
         setState(() {
-          filteredItems = data;
+          filteredItems = Data;
         });
-      }).catchError((error) {
-        print('Erreur lors de la récupération des Matieres: $error');
-      });
 
+        print('object:${filteredItems}');
     }
 
   }
@@ -169,6 +161,7 @@ class _PaiementsState extends State<Paiements> {
   //   }
   // }
 
+  List<String> selectedCoursIds = [];
 
   DateTime? _selectedDateDeb;
   DateTime? _selectedDateFin;
@@ -341,7 +334,7 @@ class _PaiementsState extends State<Paiements> {
               child: Column(
                 children: [
                   Container(
-                    width: MediaQuery.of(context).size.width,
+                    width: MediaQuery.of(context).size.width -10,
                     decoration: BoxDecoration(
                       // color: Colors.indigo.shade500,
                       color: Colors.black87,
@@ -360,113 +353,89 @@ class _PaiementsState extends State<Paiements> {
                       headingRowHeight: 50,
                       columnSpacing: 10,
                       dataRowHeight: 50,
-                      headingTextStyle: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white, // Set header text color
+                      dataTextStyle: TextStyle(
+                          fontWeight: FontWeight.w400,
+                          color: Colors.black,fontSize: 14 // Set header text color
                       ),
+                      headingTextStyle: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,fontSize: 14 // Set header text color
+                      ),
+
                       // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
                       columns: [
                         DataColumn(label: Text('Professeur')),
-                        DataColumn(label: Text('Banque')),
-                        DataColumn(label: Text('Compte')),
-                        DataColumn(label: Text('VH')),
+                        DataColumn(label: Text('Nb. Cours')),
+                        DataColumn(label: Text('Nb. Heures')),
+                        // DataColumn(label: Text('VH')),
                         // DataColumn(label: Text('NbC')),
                         DataColumn(label: Text('MT')),
                         // DataColumn(label: Text('Action')),
-                        DataColumn(
-                          label: Text('Action'),
-                          onSort: (columnIndex, ascending) {
-                            // Code pour gérer la sélection ici
-                          },
-                        ),
+                        // DataColumn(
+                        //   label: Text('Action'),
+                        //   onSort: (columnIndex, ascending) {
+                        //     // Code pour gérer la sélection ici
+                        //   },
+                        // ),
                       ],
                       rows:
-                      professeurData.entries.map(
-                              (entry) {
-                            String profId = entry.key;
-                            Map<String, dynamic> profData = entry.value;
+                      // professeurData.entries.map(
+                      //         (entry) {
+                      //       String profId = entry.key;
+                      //       Map<String, dynamic> profData = entry.value;
+                      //
+                      //
+                      //       return DataRow(
+                      //         selected: selectedCoursIds.contains(profId),
+                      //         onSelectChanged: (selected) {
+                      //           setState(() {
+                      //             if (selected!) {
+                      //               selectedCoursIds.add(profId);
+                      //             } else {
+                      //               selectedCoursIds.remove(profId);
+                      //             }
+                      //           });
+                      //         },  // mouseCursor: MaterialStateMouseCursor.clickable,
+                      //         cells: [
+                      //           DataCell(
+                      //               Container(width: 65,margin: EdgeInsets.only(left: 5),
+                      //                   child: Text(profData['professeur'].toString().capitalize!))),
+                      //           DataCell(Text(getProfesseurIdFromName(profId).banque.toString())),
+                      //           DataCell(Container(width: 75,child: Text(getProfesseurIdFromName(profId).compte.toString()))),
+                      //           DataCell(Text(profData['th_total'].toString())),
+                      //           // DataCell(Text(profData['NbC'].toString())),
+                      //           DataCell(Text(profData['somme_total'].toString())),
+                      //         ],
+                      //       );
+                      //
+                      //     }).toList(),
 
+                      [
+                        for (var index = 0; index < (filteredItems?.length ?? 0); index++)
+                        DataRow(
 
-                            return DataRow(
-                              cells: [
-                                DataCell(
-                                    Container(width: 65,margin: EdgeInsets.only(left: 5),
-                                        child: Text(profData['professeur'].toString().capitalize!))),
-                                DataCell(Text(getProfesseurIdFromName(profId).banque.toString())),
-                                DataCell(Container(width: 75,child: Text(getProfesseurIdFromName(profId).compte.toString()))),
-                                DataCell(Text(profData['th_total'].toString())),
-                                // DataCell(Text(profData['NbC'].toString())),
-                                DataCell(Text(profData['somme_total'].toString())),
-                                // DataCell(
-                                //   Container(
-                                //     width: 35,
-                                //     child: TextButton(
-                                //       onPressed: () {
-                                //         _selectedDateDeb == null || _selectedDateFin == null ?
-                                //         AddPaie(profId, widget.dateDeb, widget.dateFin)
-                                //         :AddPaie(profId, _selectedDateDeb, _selectedDateFin);
-                                //         print(profId);
-                                //         setState(() {
-                                //           Navigator.of(context).pop();
-                                //           showDialog(
-                                //               context: context,
-                                //               builder: (BuildContext context) {
-                                //                 return AlertDialog(
-                                //                   surfaceTintColor: Color(0xB0AFAFA3),
-                                //                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
-                                //                   title: Row(
-                                //                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                //                     children: [
-                                //                       Text("Alert de Succes"),
-                                //                       Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
-                                //                     ],
-                                //                   ),
-                                //                   content: Text(
-                                //                       "Le paiement est en Cours il faut que son Profeseur va Confirmer"),
-                                //
-                                //                   actions: [
-                                //                     TextButton(
-                                //                       child: Text("Ok"),
-                                //                       onPressed: () {
-                                //                         Navigator.of(context).pop();
-                                //                       },
-                                //                     ),
-                                //
-                                //                   ],
-                                //
-                                //                 );});
-                                //         });
-                                //         print('Id: ${profId} De: ${widget.dateDeb} Vers: ${widget.dateFin}');
-                                //       },// Disable button functionality
-                                //
-                                //       child: Icon(Icons.panorama_fish_eye, color: Colors.black54),
-                                //       style: TextButton.styleFrom(
-                                //         primary: Colors.white,
-                                //         elevation: 0,
-                                //         // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
-                                //       ),
-                                //     ),
-                                //   ),
-                                // ),
-                                DataCell(
-                                  Checkbox(
-                                    value: selectedPayments.contains(profId),
-                                    onChanged: (value) {
-                                      setState(() {
-                                        if (value != null && value) {
-                                          selectedPayments.add(profId);
-                                        } else {
-                                          selectedPayments.remove(profId);
-                                        }
-                                      });
-                                    },
-                                  ),
-                                ),
-                              ],
-                            );
+                          cells: [
+                            DataCell(Text('${filteredItems?[index]['nom'].toString().capitalize} ${filteredItems?[index]['prenom'].toString().capitalize}',style: TextStyle(
+                              color: Colors.black,
+                            ),),
+                            ),
+                            DataCell(Text('${filteredItems?[index]['nbc'].toString().toUpperCase()}',style: TextStyle(
+                              color: Colors.black,
+                            ),),),
+                            DataCell(
+                              Center(child: Text('${filteredItems?[index]['nbh']}',style: TextStyle(
+                                color: Colors.black,
+                              ),)),
+                            ),
+                            DataCell(
+                              Center(child: Text('${filteredItems?[index]['somme']}',style: TextStyle(
+                                color: Colors.black,
+                              ),)),
+                            ),
+                          ],
+                        ),
 
-                          }).toList(),
-
+                      ]
 
                     ),
                   ),
@@ -504,134 +473,8 @@ class _PaiementsState extends State<Paiements> {
               ),
             ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    // Sélectionnez tous les paiements
-                    selectedPayments = professeurData.keys.toList();
-                    taper = !taper;
-                  });
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Text('Sélectionner tous', style: TextStyle(fontSize: 13),),
-                    Icon(taper ? Icons.check_box_outlined :Icons.check_box_outline_blank_outlined),
-                  ],
-                ),
-
-                style: TextButton.styleFrom(
-                  surfaceTintColor: Colors.white,shadowColor: Colors.black,
-                  foregroundColor: Colors.white,
-                  // side: BorderSide(color: Colors.black38),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  elevation: 5,
-                  // padding: EdgeInsets.only(left: 20,right: 20),
-                  backgroundColor: Colors.green,
-                  //   foregroundColor: Colors.black,
-                  textStyle: TextStyle(fontWeight: FontWeight.bold),
-                  // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                ),
-
-              ),
-              SizedBox(child: Container(color: Colors.black38,width: 1,),height: 30,),
-              TextButton(
-                onPressed: () {
-                  // Confirmer et ajouter les paiements sélectionnés
-                  if (selectedPayments.length == 0){
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      // SnackBar(content: Text('Il n y a pas de paiements selectionner',),backgroundColor: Colors.green),
-                      SnackBar(content: Text('Il n y a pas de paiements selectionner',),action: SnackBarAction(label: 'Ok', onPressed: (){})),
-                    );
-                  }
-
-                  else{
-                    print('Deb${widget.dateDeb}');
-                    _selectedDateDeb == null || _selectedDateFin == null ?
-                    AddPaie(selectedPayments, widget.dateDeb!, widget.dateFin!,):
-                    AddPaie(selectedPayments, _selectedDateDeb!, _selectedDateFin!);
-                    // Remettre la liste de sélection à zéro
-                    // setState(() {
-                    //   // selectedPayments = [];
-                    //   print('Deb1${selectedPayments}');
-                    //
-                    //   Navigator.of(context).pop();
-                    // });
-                    setState(() {
-                      selectedPayments = [];
-                      Navigator.of(context).pop();
-                      showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              surfaceTintColor: Color(0xB0AFAFA3),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
-                              title: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  Text("Alerte de succès"),
-                                  Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
-                                ],
-                              ),
-                              content: Text(
-                                  "l\'operation est effectuée avec succès"),
-                              actions: [
-                                TextButton(
-                                  child: Text("Ok"),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                ),
-
-                              ],
-                            );});
-                    });
-                  }
-
-
-                },
-                child: Text('Confirmer la sélection'),
-                style: TextButton.styleFrom(
-                  surfaceTintColor: Colors.white,shadowColor: Colors.black,
-                  foregroundColor: Colors.white,
-                  // side: BorderSide(color: Colors.black38),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  elevation: 5,
-                  // padding: EdgeInsets.only(left: 20,right: 20),
-                  backgroundColor: Colors.blueAccent,
-                  //   foregroundColor: Colors.black,
-                  textStyle: TextStyle(fontWeight: FontWeight.bold),
-                  // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                ),
-
-              ),
-            ],
-          ),
 
           Padding(padding: EdgeInsets.all(10)),
-          ElevatedButton(
-            onPressed: ()  {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => EtatPaiemens(courses: widget.courses)));
-
-            },
-            child: Text('Les Etats'),
-            style: ElevatedButton.styleFrom(
-              surfaceTintColor: Colors.white,
-              foregroundColor: Colors.black,
-              side: BorderSide(color: Colors.black38),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              elevation: 5,
-              padding: EdgeInsets.symmetric(horizontal: 35),
-              backgroundColor: Colors.white,
-              //   foregroundColor: Colors.black,
-              textStyle: TextStyle(fontWeight: FontWeight.bold),
-              // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-            ),
-
-          ),
 
 
           // Padding(padding: EdgeInsets.all(60)),
@@ -639,7 +482,86 @@ class _PaiementsState extends State<Paiements> {
       ),
 
       // bottomNavigationBar: BottomNav(),
+      floatingActionButton: selectedCoursIds.isNotEmpty?
+      TextButton(
+        onPressed: () {
+          // Confirmer et ajouter les paiements sélectionnés
+          if (selectedCoursIds.isNotEmpty){
+            // if (selectedPayments.length == 0){
+            //   ScaffoldMessenger.of(context).showSnackBar(
+            //     // SnackBar(content: Text('Il n y a pas de paiements selectionner',),backgroundColor: Colors.green),
+            //     SnackBar(content: Text('Il n y a pas de paiements selectionner',),action: SnackBarAction(label: 'Ok', onPressed: (){})),
+            //   );
+            // }
+            //
+            // else{
+            print('Deb${widget.dateDeb}');
+            _selectedDateDeb == null || _selectedDateFin == null ?
+            AddPaie(selectedCoursIds, widget.dateDeb!, widget.dateFin!,):
+            AddPaie(selectedCoursIds, _selectedDateDeb!, _selectedDateFin!);
+            setState(() {
+              selectedCoursIds = [];
+              Navigator.of(context).pop();
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      surfaceTintColor: Color(0xB0AFAFA3),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                      title: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Text("Alerte de succès"),
+                          Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
+                        ],
+                      ),
+                      content: Text(
+                          "l\'operation est effectuée avec succès"),
+                      actions: [
+                        TextButton(
+                          child: Text("Ok"),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
 
+                      ],
+                    );});
+            });
+          }
+
+
+        },
+        child: Icon(Icons.send,size: 30,),
+        style: TextButton.styleFrom(
+          surfaceTintColor: Colors.white,shadowColor: Colors.black,
+          foregroundColor: Colors.white,
+          // side: BorderSide(color: Colors.black38),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          elevation: 5,
+          // padding: EdgeInsets.only(left: 20,right: 20),
+          backgroundColor: Colors.blueAccent,
+          //   foregroundColor: Colors.black,
+          textStyle: TextStyle(fontWeight: FontWeight.bold),
+          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+        ),
+
+      ):
+      TextButton(
+        onPressed: ()  {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => EtatPaiemens()));
+
+        },
+        child: Icon(Icons.sticky_note_2,size: 40,),
+        style: TextButton.styleFrom(
+          surfaceTintColor: Colors.white,
+          foregroundColor: Colors.indigo,
+          elevation: 5,
+          textStyle: TextStyle(fontWeight: FontWeight.bold),
+          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+        ),
+
+      ),
     );
 
   }
@@ -647,7 +569,7 @@ class _PaiementsState extends State<Paiements> {
 }
 
 class EtatPaiemens extends StatefulWidget {
-  final List<dynamic> courses;
+  // final List<dynamic> courses;
 
   // final String ProfId;
   // final String ProfName;
@@ -655,7 +577,7 @@ class EtatPaiemens extends StatefulWidget {
   DateTime? dateFin;
 // Calculate the sums for filtered courses
 
-  EtatPaiemens({required this.courses,}) {}
+  // EtatPaiemens({required this.courses,}) {}
 
   @override
   State<EtatPaiemens> createState() => _EtatPaiemensState();
@@ -671,7 +593,7 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    widget.courses;
+    // widget.courses;
     // groupCoursesByProfesseur();
     // calculateProfesseurTotals();
     fetchProfs().then((data) {
@@ -697,7 +619,7 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
     widget.dateFin = defaultDateFin;
 
     // Groupe les cours en utilisant les dates par défaut
-    groupCoursesByProfesseur(widget.dateDeb, widget.dateFin);
+    // groupCoursesByProfesseur(widget.dateDeb, widget.dateFin);
   }
 
   List<Paies>? filteredItems;
@@ -734,62 +656,9 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
 
   List<Professeur> professeurList = [];
 
-  Professeur getProfesseurIdFromName(String id) {
-    // Assuming you have a list of professeurs named 'professeursList'
-    final professeur = professeurList.firstWhere((prof) => '${prof.id}' == id,
-        orElse: () =>
-            Professeur(id: '', user: '',));
-    print("Profs${professeurList}");
-    return professeur; // Return the ID if found, otherwise an empty string
-
-  }
-
-  void groupCoursesByProfesseur(DateTime? Deb, DateTime? Fin) {
-    professeurData
-        .clear(); // Efface les données existantes à chaque nouvel appel
-
-    totalType = 0;
-    somme = 0;
-    for (var course in widget.courses) {
-      String profId = course['professeur'];
-      DateTime courseDate = DateTime.parse(course['date'].toString());
 
 
-      if (course['isSigned'] != "en attente" &&
-          course['isPaid'] != "effectué" && course['isPaid'] != "préparé" &&
-          (Deb == null || courseDate.isAfter(Deb!.toLocal())) &&
-          (Fin == null ||
-              courseDate.isBefore(Fin!.toLocal().add(Duration(days: 1))))) {
-        if (!professeurData.containsKey(profId)) {
-          // Initialiser les données du professeur
-          professeurData[profId] = {
-            'professeur': course['professeur'],
-            'email': course['email'],
-            'th_total': 0.0,
-            'somme_total': 0.0,
-          };
-        }
 
-        // Mettre à jour les valeurs pour 'th_total' et 'somme_total'
-        professeurData[profId]!['th_total'] +=
-            double.parse(course['th'].toString());
-        totalType += double.parse(course['th'].toString());
-        professeurData[profId]!['somme_total'] +=
-            double.parse(course['somme'].toString());
-        somme += double.parse(course['somme'].toString());
-      }
-      // }
-    }
-
-    // Filtrer les professeurs avec 'th_total' égal à 0
-    if (Deb != null || Fin != null) {
-      professeurData.removeWhere((key, value) => value['th_total'] == 0.0);
-    }
-  }
-
-
-  DateTime? _selectedDateDeb;
-  DateTime? _selectedDateFin;
   int currentPage = 1;
   int coursesPerPage = 5;
   String searchQuery = '';

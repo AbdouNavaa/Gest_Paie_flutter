@@ -171,6 +171,7 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
     return false; // Course doesn't meet criteria
   }
 
+  List<String> selectedCoursIds = [];
 
 
   @override
@@ -192,7 +193,37 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
                     Navigator.pop(context);
                   }, child: Icon(Icons.arrow_back_ios,color: Colors.black,size: 20,)),
                 // SizedBox(width: 50,),
-                Text("Cours à Signé",style: TextStyle(fontSize: 20),),
+                showSearch?
+                Container(width: MediaQuery.of(context).size.width/3*2,
+                  margin: EdgeInsets.symmetric(horizontal: 0, vertical: 4),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.white.withOpacity(.85),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.3),
+                        spreadRadius: 2,
+                        blurRadius: 5,
+                        offset: Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: TextField(style: TextStyle(color: Colors.black),
+                    onChanged: (value) {
+                      setState(() {
+                        searchQuery = value;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.search, color: Colors.grey),
+                      hintText: 'Rechercher ',
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    ),
+                  ),
+                ):Text("Cours à Signé",style: TextStyle(fontSize: 20),),
+                showSearch?
+                SizedBox():
                 SizedBox(width: 120,),
                 Container(
                   width: 50,
@@ -211,36 +242,7 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
           ),
           Divider(),
 
-          showSearch?
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.3),
-                  spreadRadius: 2,
-                  blurRadius: 5,
-                  offset: Offset(0, 3),
-                ),
-              ],
-            ),
-            child: TextField(style: TextStyle(color: Colors.black),
-              onChanged: (value) {
-                setState(() {
-                  searchQuery = value;
-                });
-              },
-              decoration: InputDecoration(
-                prefixIcon: Icon(Icons.search, color: Colors.grey),
-                hintText: 'Rechercher ',
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              ),
-            ),
-          ):
-          SizedBox(height: 10,),
+
 
 
 
@@ -374,31 +376,36 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
 
           Expanded(
             child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
+              scrollDirection: Axis.vertical,
               child: Column(
                 children: [
                   Container(
-                    width: MediaQuery.of(context).size.width + 50,
+                    width: MediaQuery.of(context).size.width -10,
+                    // height: MediaQuery.of(context).size.height -100,
                     decoration: BoxDecoration(
                         color: Colors.black87,
-                        borderRadius: BorderRadius.all(Radius.circular(15))
+                        borderRadius: BorderRadius.all(Radius.circular(5))
                     ),
                     child: DataTable(
                       headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white10),
                       dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
                       showCheckboxColumn: true,
                       showBottomBorder: true,
-                      horizontalMargin: 1,
+                      // horizontalMargin: 1,
                       headingRowHeight: 50,
-                      columnSpacing: 18,
+                      columnSpacing: 10,
                       dataRowHeight: 50,
+                      dataTextStyle: TextStyle(
+                          fontWeight: FontWeight.w400,
+                          color: Colors.black,fontSize: 14 // Set header text color
+                      ),
                       headingTextStyle: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white, // Set header text color
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,fontSize: 14 // Set header text color
                       ),
                       // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
                       columns: [
-                        DataColumn(label: Text('Signe')),
+                        // DataColumn(label: Text('Signe')),
                         // DataColumn(label: Text('Payé')),
                         DataColumn(label: Text('Matiere')),
                         DataColumn(label: Text('Date')),
@@ -412,88 +419,38 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
                         index++)
                           if (courseFitsCriteria(widget.courses[index]))
                             DataRow(
-                              onLongPress: () =>
+                              selected: selectedCoursIds.contains(widget.courses[index]['_id']),
+                              onSelectChanged: (selected) {
+                                setState(() {
+                                  if (selected!) {
+                                    selectedCoursIds.add(widget.courses[index]['_id']);
+                                  } else {
+                                    selectedCoursIds.remove(widget.courses[index]['_id']);
+                                  }
+                                });
+                              },
+                                                            onLongPress: () =>
                                   _showCourseDetails(context, widget.courses[index]),
                               cells: [
 
                                 // DataCell(
-                                //     widget.courses[index]['isSigned'] == "effectué"? Icon(Icons.check_box_outlined,size: 27):CupertinoSwitch(
-                                //       activeColor: Colors.black26,
-                                //       value:  widget.courses[index]['isSigned'] == "effectué"? true: false,
-                                //       onChanged: (value) async {
-                                //
-                                //
-                                //
-                                //         setState(() {
-                                //           widget.courses[index]['isSigned'] = value;
-                                //         });
-                                //
-                                //         Navigator.of(context).pop();
-                                //
-                                //         // final updatedDate = DateFormat('yyyy-MM-ddthH:mm').parse(widget.courses[index]['date']).toUtc();
-                                //
-                                //         // final matiereName = widget.courses[index]['somme'];
-                                //         // final matiereId = getMatiereIdFromName(matiereName);
-                                //         singeCours(
-                                //             widget.courses[index]['_id'],
-                                //             value
-                                //         );
-                                //
-                                //         setState(() {
-                                //           Navigator.of(context).pop();
-                                //           showDialog(
-                                //               context: context,
-                                //               builder: (BuildContext context) {
-                                //                 return AlertDialog(
-                                //                   surfaceTintColor: Color(0xB0AFAFA3),
-                                //                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
-                                //                   title: Row(
-                                //                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                //                     children: [
-                                //                       Text("Alerte de succès"),
-                                //                       Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
-                                //                     ],
-                                //                   ),
-                                //                   content: Text(
-                                //                       "Le Cours est signe avec succes"),
-                                //
-                                //                   actions: [
-                                //                     TextButton(
-                                //                       child: Text("Ok"),
-                                //                       onPressed: () {
-                                //                         Navigator.of(context).pop();
-                                //                       },
-                                //                     ),
-                                //
-                                //                   ],
-                                //
-                                //                 );});
-                                //         });
-                                //
-                                //       },
-                                //     )
+                                //   Checkbox(
+                                //     value: selectedCourses.contains(widget.courses[index]['_id']),
+                                //     onChanged: (value) {
+                                //       setState(() {
+                                //         if (value != null && value) {
+                                //           selectedCourses.add(widget.courses[index]['_id']);
+                                //         } else {
+                                //           selectedCourses.remove(widget.courses[index]['_id']);
+                                //         }
+                                //       });
+                                //     },
+                                //   ),
                                 // ),
-                                DataCell(
-                                  Checkbox(
-                                    value: selectedCourses.contains(widget.courses[index]['_id']),
-                                    onChanged: (value) {
-                                      setState(() {
-                                        if (value != null && value) {
-                                          selectedCourses.add(widget.courses[index]['_id']);
-                                        } else {
-                                          selectedCourses.remove(widget.courses[index]['_id']);
-                                        }
-                                      });
-                                    },
-                                  ),
-                                ),
 
-                                DataCell(Container(
-                                  width: 60,
-                                  child: Text('${widget.courses[index]['matiere'].toString().capitalize}',style: TextStyle(
-                                    color: Colors.black,
-                                  ),),
-                                ),
+                                DataCell(Text('${widget.courses[index]['code'].toString().toUpperCase()}',style: TextStyle(
+                                  color: Colors.black,
+                                ),),
                                     onTap: () =>
                                         _showCourseDetails(context, widget.courses[index])),
                                 DataCell(
@@ -571,108 +528,8 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
             ),
           ),
           // Divider(color: Colors.black26,),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Expanded(flex: 1,
-                child: TextButton(
-                  onPressed: () {
-                    setState(() {
-                      // Sélectionnez tous les cours
-                      selectedCourses = widget.courses.map((course) => course['_id']).toList();
-                      taper = !taper;
-                    });
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Text('Sélectionner tous', style: TextStyle(fontSize: 13),),
-                      Icon(taper ? Icons.check_box_outlined :Icons.check_box_outline_blank_outlined),
-                    ],
-                  ),
-                  style: TextButton.styleFrom(
-                    surfaceTintColor: Colors.white,
-                    foregroundColor: Colors.black,
-                    // side: BorderSide(color: Colors.black38),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    elevation: 5,
-                    padding: EdgeInsets.symmetric(horizontal: 15),
-                    backgroundColor: Colors.white,
-                    //   foregroundColor: Colors.black,
-                    textStyle: TextStyle(fontWeight: FontWeight.bold),
-                    // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                  ),
-
-                ),
-              ),
-              Expanded(flex: 1,
-                child: TextButton(
-                  onPressed: () {
-                    if (selectedCourses.length == 0){
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Il n y a pas de Cours selectionner'),action: SnackBarAction(label: 'Ok', onPressed: (){})),
-                      );
-                    }
-                    else{
-                      singeCoursMultiple(selectedCourses);
-                      // Remettre la liste de sélection à zéro
-                      setState(() {
-                        selectedCourses = [];
-                        Navigator.of(context).pop();
-                        showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                surfaceTintColor: Color(0xB0AFAFA3),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
-                                title: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    Text("Alerte de succès"),
-                                    Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
-                                  ],
-                                ),
-                                content: Text(
-                                    "l\'operation est effectuée avec succès"),
-                                actions: [
-                                  TextButton(
-                                    child: Text("Ok"),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                  ),
-
-                                ],
-                              );});
-                      });}
-
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Text('Signer', style: TextStyle(fontSize: 13),),
-                      Icon(Icons.add_task),
-                    ],
-                  ),
-                  style: TextButton.styleFrom(
-                    surfaceTintColor: Colors.white,
-                    foregroundColor: Colors.black,
-                    // side: BorderSide(color: Colors.black38),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    elevation: 5,
-                    padding: EdgeInsets.symmetric(horizontal: 15),
-                    backgroundColor: Colors.white,
-                    //   foregroundColor: Colors.black,
-                    textStyle: TextStyle(fontWeight: FontWeight.bold),
-                    // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                  ),
-
-                ),
-              ),
-            ],
-          ),
           Padding(padding: EdgeInsets.all(105)),
-
+          
 
           Visibility(
             visible: widget.courses.length > coursesPerPage,
@@ -730,6 +587,31 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
         ],
       ),
 
+      floatingActionButton: selectedCoursIds.isNotEmpty?
+      TextButton(
+        onPressed: () {
+          if (selectedCoursIds.isNotEmpty) {
+            singeCoursMultiple(selectedCoursIds);
+
+            setState(() {
+              Navigator.pop(context);
+            });
+          }
+        },
+
+        child: Icon(Icons.add_task,size: 30),
+        style: TextButton.styleFrom(
+          surfaceTintColor: Colors.white,
+          // side: BorderSide(color: Colors.black38),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          elevation: 5,
+          // padding: EdgeInsets.symmetric(horizontal: 25),
+            foregroundColor: Colors.indigo,
+          backgroundColor: Colors.white,
+          textStyle: TextStyle(fontWeight: FontWeight.bold),
+          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+        ),
+      ):Container(),
       // floatingActionButton: FloatingActionButton.extended(
       //   // heroTag: 'uniqueTag',
       //   tooltip: 'Ajouter une Cours',backgroundColor: Colors.white,

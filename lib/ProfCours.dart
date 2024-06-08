@@ -185,8 +185,38 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                     Navigator.pop(context);
                   }, child: Icon(Icons.arrow_back_ios,color: Colors.black,size: 20,)),
                 // SizedBox(width: 50,),
-                Text("Mes Cours",style: TextStyle(fontSize: 20),),
-                SizedBox(width: 150,),
+                showSearch?
+                Container(width: MediaQuery.of(context).size.width/3*2,
+                  margin: EdgeInsets.symmetric(horizontal: 0, vertical: 4),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.white.withOpacity(.85),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.3),
+                        spreadRadius: 2,
+                        blurRadius: 5,
+                        offset: Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: TextField(style: TextStyle(color: Colors.black),
+                    onChanged: (value) {
+                      setState(() {
+                        searchQuery = value;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.search, color: Colors.grey),
+                      hintText: 'Rechercher ',
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    ),
+                  ),
+                ):Text("Mes Cours",style: TextStyle(fontSize: 20),),
+                showSearch?
+                SizedBox()
+                :SizedBox(width: 150,),
                 Container(
                   width: 50,
                   height: 50,
@@ -204,36 +234,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
           ),
           Divider(),
 
-          showSearch?
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.3),
-                  spreadRadius: 2,
-                  blurRadius: 5,
-                  offset: Offset(0, 3),
-                ),
-              ],
-            ),
-            child: TextField(style: TextStyle(color: Colors.black),
-              onChanged: (value) {
-                setState(() {
-                  searchQuery = value;
-                });
-              },
-              decoration: InputDecoration(
-                prefixIcon: Icon(Icons.search, color: Colors.grey),
-                hintText: 'Rechercher ',
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              ),
-            ),
-          ):
-          SizedBox(height: 10,),
+
 
 
 
@@ -365,11 +366,11 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                 child: Column(
                   children: [
                     Container(
-                      width: MediaQuery.of(context).size.width + 50,
+                      width: MediaQuery.of(context).size.width -10,
                       decoration: BoxDecoration(
                           color: Colors.black87,
                           // color: Colors.black,
-                          borderRadius: BorderRadius.all(Radius.circular(15))
+                          borderRadius: BorderRadius.all(Radius.circular(5))
                       ),
                       child: DataTable(
 
@@ -380,11 +381,15 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                         horizontalMargin: 1,
                         // headingRowColor: MaterialStateColor.resolveWith((states) => Colors.lightBlueAccent.shade100), // Couleur de la ligne d'en-tête
                         headingRowHeight: 50,
-                        columnSpacing: 18,
+                        columnSpacing: 4,
                         dataRowHeight: 60,
+                        dataTextStyle: TextStyle(
+                            fontWeight: FontWeight.w400,
+                            color: Colors.black,fontSize: 14 // Set header text color
+                        ),
                         headingTextStyle: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white, // Set header text color
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,fontSize: 14 // Set header text color
                         ),
                         // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
                         columns: [
@@ -419,7 +424,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                                   ),
                                   DataCell(Container(
                                     width: 60,
-                                    child: Text('${widget.courses[index]['matiere'].toString().capitalize}',style: TextStyle(
+                                    child: Text('${widget.courses[index]['code'].toString().toUpperCase()}',style: TextStyle(
                                       color: Colors.black,
                                     ),),
                                   ),

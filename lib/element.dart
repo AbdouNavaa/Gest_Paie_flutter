@@ -399,44 +399,57 @@ class _ElementsState extends State<Elements> {
                             height: 500,
                             child: SingleChildScrollView(
                               scrollDirection: Axis.vertical,
-                              child: Theme(
-                                data: ThemeData(
-                                  // Modifiez les couleurs de DataTable ici
-                                  dataTableTheme: DataTableThemeData(
-                                    dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white), // Couleur des lignes de données
-                                    headingRowColor: MaterialStateColor.resolveWith((states) => Colors.black87), // Couleur de la ligne d'en-tête
-
-
-                                  ),
+                              child: Container(width: MediaQuery.of(context).size.width -5,
+                                decoration: BoxDecoration(
+                                  // color: widget.courses.length > 0 ? Colors.white10:Colors.white,
+                                  //   color: Colors.black87,
+                                    borderRadius: BorderRadius.all(Radius.circular(5))
                                 ),
-                                child: PaginatedDataTable(
-                                  columnSpacing: 10,dataRowHeight: 55,
-                                  rowsPerPage: _rowsPerPage,
-                                  showFirstLastButtons: _rowsPerPage >= 10 ? true: false,
-                                  availableRowsPerPage: [5, 7,9,10, 20],
-                                  // header: Text('hekko'),
+                                child: Theme(
+                                  data: ThemeData(
+                                    // Modifiez les couleurs de DataTable ici
+                                    dataTableTheme: DataTableThemeData(
+                                      dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white), // Couleur des lignes de données
+                                      headingRowColor: MaterialStateColor.resolveWith((states) => Colors.black87), // Couleur de la ligne d'en-tête
+                                      dataTextStyle: TextStyle(
+                                          fontWeight: FontWeight.w400,
+                                          color: Colors.black,fontSize: 13 // Set header text color
+                                      ),
+                                      headingTextStyle: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,fontSize: 13 // Set header text color
+                                      ),
+                                    ),
+                                  ),
+                                  child: PaginatedDataTable(
+                                    columnSpacing: 10,dataRowHeight: 55,
+                                    rowsPerPage: _rowsPerPage,
+                                    showFirstLastButtons: _rowsPerPage >= 10 ? true: false,
+                                    availableRowsPerPage: [5, 7,9,10, 20],
+                                    // header: Text('hekko'),
 
-                                  onRowsPerPageChanged: (value) {
-                                    setState(() {
-                                      _rowsPerPage = value ?? _rowsPerPage;
-                                    });
-                                  },
-                                  columns: [
-                                    buildDataColumn('Sem'),
-                                    buildDataColumn('Code'),
-                                    buildDataColumn('Matiere'),
-                                    buildDataColumn('Fillliere'),
-                                    buildDataColumn('H.CM'),
-                                    buildDataColumn('H.TP'),
-                                    buildDataColumn('H.TD'),
-                                    buildDataColumn('Action'),
-                                  ],
-                                  source: YourDataSource(filteredItems ?? items!,
-                                    onTapCallback: (index) {
-                                      _showElemDetails(context, (filteredItems ?? items!)[index],(filteredItems ?? items!)[index].id); // Appel de showMatDetails avec l'objet Matiere correspondant
-                                      // onPressed: () =>_showElemDetails(context, ele,ele.id),// Disable button functionality
+                                    onRowsPerPageChanged: (value) {
+                                      setState(() {
+                                        _rowsPerPage = value ?? _rowsPerPage;
+                                      });
+                                    },
+                                    columns: [
+                                      buildDataColumn('Sem'),
+                                      buildDataColumn('Code'),
+                                      buildDataColumn('Matiere'),
+                                      buildDataColumn('Fillliere'),
+                                      // buildDataColumn('H.CM'),
+                                      // buildDataColumn('H.TP'),
+                                      // buildDataColumn('H.TD'),
+                                      buildDataColumn('Action'),
+                                    ],
+                                    source: YourDataSource(filteredItems ?? items!,
+                                      onTapCallback: (index) {
+                                        _showElemDetails(context, (filteredItems ?? items!)[index],(filteredItems ?? items!)[index].id); // Appel de showMatDetails avec l'objet Matiere correspondant
+                                        // onPressed: () =>_showElemDetails(context, ele,ele.id),// Disable button functionality
 
-                                    },),
+                                      },),
+                                  ),
                                 ),
                               ),
 
@@ -750,7 +763,7 @@ class _ElementsState extends State<Elements> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Groupes CM :',
+                        Text('CMs :',
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w400,
@@ -769,36 +782,56 @@ class _ElementsState extends State<Elements> {
                       ],
                     ),
                   ),
+                  SizedBox(height: 15),
+                  Container(width: MediaQuery.of(context).size.width,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('TPs :',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w400,
+                            fontStyle: FontStyle.italic,
+                            // color: Colors.lightBlue
+                          ),),
+                        for (var prof in ele.groupeTP!)
+                          Text(
+                            'TP${prof.toString().split('-')[2]}-${getProfIdFromName(prof.toString().split('-')[0]).capitalize }',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
                   // ElemProfs(context,'Professeur(e/s) de CM:' ,ele.ProCMId!),
+                  SizedBox(height: 15),
+                  Container(width: MediaQuery.of(context).size.width,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('TDs :',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w400,
+                            fontStyle: FontStyle.italic,
+                            // color: Colors.lightBlue
+                          ),),
+                        for (var prof in ele.groupeTD!)
+                          Text(
+                            'TD${prof.toString().split('-')[2]}-${getProfIdFromName(prof.toString().split('-')[0]).capitalize }',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
 
-                  SizedBox(height: 15),
-                  // Container(width: MediaQuery.of(context).size.width,
-                  //   child: Column(
-                  //     crossAxisAlignment: CrossAxisAlignment.start,
-                  //     children: [
-                  //       Text("groupeCM",
-                  //         style: TextStyle(
-                  //           fontSize: 20,
-                  //           fontWeight: FontWeight.w400,
-                  //           fontStyle: FontStyle.italic,
-                  //           // color: Colors.lightBlue
-                  //         ),),
-                  //       for (var prof in ele.groupeCM!)
-                  //         Text(
-                  //           '-${getProfIdFromName(getProfId(prof)).capitalize }',
-                  //           style: TextStyle(
-                  //             fontSize: 20,
-                  //             fontWeight: FontWeight.w400,
-                  //             fontStyle: FontStyle.italic,
-                  //           ),
-                  //         ),
-                  //     ],
-                  //   ),
-                  // ),
-                  SizedBox(height: 15),
-                  ElemProfs(context,'Professeur(e/s) de TP:' ,ele.ProTPId!),
-                  SizedBox(height: 15),
-                  ElemProfs(context,'Professeur(e/s) de TD:' ,ele.ProTDId!),
                   SizedBox(height: 15,),
                   NbH('NBH du CM:',ele.HCM),
                   SizedBox(height: 15,),
@@ -1045,7 +1078,7 @@ class _ElementsState extends State<Elements> {
   
                   // SizedBox(height: 10,),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(flex: 1,
                         child: ElevatedButton(
@@ -1061,7 +1094,7 @@ class _ElementsState extends State<Elements> {
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                             elevation: 5,
                             padding: EdgeInsets.symmetric(horizontal: 15),
-                            backgroundColor: Colors.blue,
+                            backgroundColor: Colors.indigo,
                             foregroundColor: Colors.white,
                             textStyle: TextStyle(fontWeight: FontWeight.bold),
                             // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
@@ -1214,14 +1247,14 @@ class _ElementsState extends State<Elements> {
                   ),
                   SizedBox(width: 10,),
                   Expanded(flex: 1,
-                    child: Container(height: 60,
+                    child: Container(height: 65,
                       child: SingleChildScrollView(scrollDirection: Axis.vertical,
                         child: MultiSelectDialogField(
                           items: List.generate(cmGroupCount, (index) {
                             return MultiSelectItem<int>(index + 1, 'G${index + 1}');
                           }),
                           title: Text("Groupes CM"),
-                          selectedColor: Colors.green,dialogHeight: 100,backgroundColor: Colors.white,
+                          selectedColor: Colors.green,dialogHeight: 200,backgroundColor: Colors.white,
                           buttonText: Text("Groupes CM"),
                           onConfirm: (results) {
                             setState(() {
@@ -1422,7 +1455,7 @@ class _ElementsState extends State<Elements> {
                             return MultiSelectItem<int>(index + 1, 'TP${index + 1}');
                           }),
                           title: Text("Groupes TP"),
-                          selectedColor: Colors.green,dialogHeight: 100,backgroundColor: Colors.white,
+                          selectedColor: Colors.green,dialogHeight: 200,backgroundColor: Colors.white,
                           buttonText: Text("Groupes TP"),
                           onConfirm: (results) {
                             setState(() {
@@ -1497,7 +1530,7 @@ class _ElementsState extends State<Elements> {
                             return MultiSelectItem<int>(index + 1, 'TD${index + 1}');
                           }),
                           title: Text("Groupes TD"),
-                          selectedColor: Colors.green,dialogHeight: 100,backgroundColor: Colors.white,
+                          selectedColor: Colors.green,dialogHeight: 200,backgroundColor: Colors.white,
                           buttonText: Text("Groupes TD"),
                           onConfirm: (results) {
                             setState(() {
@@ -2146,17 +2179,17 @@ class YourDataSource extends DataTableSource {
 
     final item = _items[index];
     return DataRow(cells: [
-      DataCell(Container(width: 20, child: Text("S${item.SemNum!}"))),
-      DataCell(Container(width: 80,
+      DataCell(Container(width: 15, child: Text("S${item.SemNum!}"))),
+      DataCell(Container(width: 45,
           child: Text(item.code!.split('-')[1].toUpperCase()!))),
-      DataCell(Container(width: 80,
+      DataCell(Container(width: 70,
           child: Text(item.nameMat!.capitalize!))),
 
-      DataCell(Container(width: 30, child: Text(item.filName!.toUpperCase()))),
-      DataCell(Container(width: 30, child: Text(item.HCM!.toString()))),
+      DataCell(Container(width: 20, child: Text(item.filName!.toUpperCase()))),
+      // DataCell(Container(width: 15, child: Text(item.HCM!.toString()))),
 
-      DataCell(Container(width: 30, child: Text(item.HTP!.toString()))),
-      DataCell(Container(width: 30, child: Text(item.HTD!.toString()))),
+      // DataCell(Container(width: 15, child: Text(item.HTP!.toString()))),
+      // DataCell(Container(width: 15, child: Text(item.HTD!.toString()))),
 
 
       DataCell(

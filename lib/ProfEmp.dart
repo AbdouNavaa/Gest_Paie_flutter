@@ -187,7 +187,7 @@ class _EmploiPageState extends State<EmploiPage> {
                   decoration: BoxDecoration(
                     // color: Colors.indigo.shade500,
                     // color: Colors.black87,
-                      borderRadius: BorderRadius.all(Radius.circular(30))
+                      borderRadius: BorderRadius.all(Radius.circular(10))
                   ),
                   child: DataTable(
                     // showCheckboxColumn: true,
@@ -195,7 +195,8 @@ class _EmploiPageState extends State<EmploiPage> {
                     headingRowHeight: 50,
                     columnSpacing: 15,
                     dataRowHeight: 60,
-                    headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white10),
+                    headingRowColor: MaterialStateColor.resolveWith((states) => Colors.indigo),
+                    // headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white10),
                     dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
                     horizontalMargin: 10,
 
@@ -206,7 +207,7 @@ class _EmploiPageState extends State<EmploiPage> {
                     columns: [
                       DataColumn(label: Container(width: 80,
                         child: Text(day.toString().capitalize! ,
-                          style: TextStyle(color: Colors.black87,fontSize: 20,fontWeight: FontWeight.w500),
+                          style: TextStyle(color: Colors.white,fontSize: 20,fontWeight: FontWeight.w500),
                         ),
                       ),),
                       DataColumn(label: Text('')),

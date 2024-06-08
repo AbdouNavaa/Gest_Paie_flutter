@@ -184,10 +184,11 @@ class _ProfesseurDetailsScreenState extends State<ProfesseurDetailsScreen> {
                     radius: 50,
                     backgroundColor: Colors.white,
                     backgroundImage:
-                    _image != null
-                        ? FileImage(_image!)
-                        : (_photoUrl != null? NetworkImage(_photoUrl!.toString()) :
-                    AssetImage('assets/user1.png'))
+                    // _image != null
+                    //     ? FileImage(_image!)
+                    //     : (_photoUrl != null? NetworkImage(_photoUrl!.toString()) :
+                    AssetImage('assets/user1.png')
+                    // )
                   as ImageProvider,
                   ),
                 ),

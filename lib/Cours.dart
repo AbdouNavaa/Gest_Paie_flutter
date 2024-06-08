@@ -234,8 +234,39 @@ class _CoursesPageState extends State<CoursesPage> {
     return false; // Course doesn't meet criteria
   }
 
-
+  List<String> selectedCoursIds = [];
 bool showFloat = false;
+
+  void deleteSelectedEmplois() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString("token")!;
+    print(token);
+
+    for (var id in selectedCoursIds) {
+      var response = await http.delete(
+        Uri.parse('http://192.168.43.73:5000/cours' + "/$id"),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      var jsonResponse = jsonDecode(response.body);
+      print(response.statusCode);
+      if (response.statusCode == 200) {
+        print('Deleted $id');
+
+      } else {
+        print('Failed to delete $id');
+      }
+    }
+
+    fetchemploi();
+    setState(() {
+      selectedCoursIds.clear();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     // Call the method to calculate totalType
@@ -338,8 +369,8 @@ bool showFloat = false;
                   child: TextButton(
                     child: Row(
                       children: [
-                        Icon(Icons.auto_mode_sharp, color: Colors.black,),
-                        Text('auto-Create',style: TextStyle(color: Colors.black),),
+                        Icon(Icons.refresh_outlined, color: Colors.black,),
+                        Text('Auto',style: TextStyle(color: Colors.black),),
                       ],
                     ),
                     onPressed: () => auto(),
@@ -462,11 +493,11 @@ bool showFloat = false;
                         child: Column(
                           children: [
                             Container(
-                              width: MediaQuery.of(context).size.width +50,
+                              width: MediaQuery.of(context).size.width -10,
                               decoration: BoxDecoration(
                                   // color: widget.courses.length > 0 ? Colors.white10:Colors.white,
                                   color: Colors.black87,
-                                  borderRadius: BorderRadius.all(Radius.circular(20))
+                                  borderRadius: BorderRadius.all(Radius.circular(5))
                               ),
                               child: DataTable(
                                 showCheckboxColumn: true,
@@ -482,7 +513,11 @@ bool showFloat = false;
                                 dataRowHeight: 60,
                                 headingTextStyle: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.white, // Set header text color
+                                  color: Colors.white,fontSize: 13 // Set header text color
+                                ),
+                                dataTextStyle: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.black,fontSize: 13 // Set header text color
                                 ),
                                 columns: [
                                   // if ( showSigned)
@@ -517,7 +552,16 @@ bool showFloat = false;
                                       if ((!showSigned || widget.courses[index]['isSigned'] == "effectué") &&
                                           (!showPaid || widget.courses[index]['isPaid'] == "effectué" || widget.courses[index]['isPaid'] == 'préparé'))
                                         DataRow(
-                                          // mouseCursor: MaterialStateMouseCursor.clickable,
+                                          selected: selectedCoursIds.contains(widget.courses[index]['_id']),
+                                          onSelectChanged: (selected) {
+                                            setState(() {
+                                              if (selected!) {
+                                                selectedCoursIds.add(widget.courses[index]['_id']);
+                                              } else {
+                                                selectedCoursIds.remove(widget.courses[index]['_id']);
+                                              }
+                                            });
+                                          },  // mouseCursor: MaterialStateMouseCursor.clickable,
                                           onLongPress: () =>
                                               _showCourseDetails(context, widget.courses[index]),
 
@@ -744,7 +788,64 @@ bool showFloat = false;
         ],
       ),
 
-      floatingActionButton:
+      floatingActionButton:selectedCoursIds.isNotEmpty?
+      TextButton(
+        onPressed: () {
+          if (selectedCoursIds.isNotEmpty) {
+
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  // surfaceTintColor: Color(0xB0AFAFA3),
+                  backgroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                  title: Text("Confirmer la suppression",style: TextStyle(fontSize: 20)),
+                  content: Text("Êtiez-vous sûr de vouloir supprimer cet élément ?"),
+                  actions: <Widget>[
+                    TextButton(
+                      child: Text("ANNULER"),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                    TextButton(
+                      child: Text(
+                        "SUPPRIMER",
+                        style: TextStyle(color: Colors.red),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        deleteSelectedEmplois();
+                        // DeleteCours(course['_id']);
+                        setState(() {
+                          Navigator.pop(context);
+                        });
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Le Category a été Supprimer avec succès.')),
+                        );
+                      },
+                    ),
+                  ],
+                );
+              },
+            );
+          } 
+        },
+
+        child: Icon(Icons.delete_outlined,size: 40,),
+        style: TextButton.styleFrom(
+          surfaceTintColor: Colors.white,
+          // side: BorderSide(color: Colors.black38),
+          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          elevation: 5,
+          // padding: EdgeInsets.symmetric(horizontal: 25),
+          foregroundColor: Colors.red,
+          backgroundColor: Colors.white,
+          textStyle: TextStyle(fontWeight: FontWeight.bold),
+          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+        ),
+      ):
       Container(
         width: 60,
         decoration: BoxDecoration(

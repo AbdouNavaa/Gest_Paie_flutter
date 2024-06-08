@@ -1307,6 +1307,60 @@ class _MyDrawerState extends State<MyDrawer> {
                     },
                   ),
                   ListTile(
+                    leading: Icon(Icons.payment_outlined,size: _drawerIconSize,color: Colors.black),
+                    title: Text('Etat de Paiements', style: TextStyle(fontSize: _drawerFontSize, color: Colors.black),
+                    ),
+                    onTap: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => EtatPaiemens()));
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.payment_outlined,size: _drawerIconSize,color: Colors.black),
+                    title: Text('Paiements', style: TextStyle(fontSize: _drawerFontSize, color: Colors.black),
+                    ),
+                    onTap:()async{
+                      // try {
+                      SharedPreferences prefs = await SharedPreferences.getInstance();
+                      String token = prefs.getString("token")!;
+                      String id = prefs.getString("id")!;
+                      String nomComplet = prefs.getString("nom")!;
+                      String nom = nomComplet;
+
+                      var url = Uri.parse('http://192.168.43.73:5000/paiement/${profId}/professeur');
+
+                      var responseInitialise = await http.post(
+                        url,
+                        headers: {
+                          'Authorization': 'Bearer $token',
+                          'Content-Type': 'application/json', // Ajoutez le type de contenu
+                        },
+                        body: jsonEncode({}), // Encodez votre corps en JSON
+                      );
+
+
+                      if (responseInitialise.statusCode == 200) {
+                        Map<String, dynamic> jsonResponse = jsonDecode(responseInitialise.body);
+                        paies = jsonResponse['paiements'];
+                        setState(() {
+                          coursPN = paies.length;
+                        });
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) =>
+                              ProfPaies(paies: paies,
+                                ProfId: id,
+                                Id:  profId!,
+                                ProfName: nom,)),
+                        );
+                        print('Paiements avec status "initialisé": ${paies.length}');
+                      } else {
+                        print('Request for "initialisé" failed with status: ${responseInitialise.statusCode}');
+                      }
+
+
+                    },
+                  ),
+                  ListTile(
                     leading: Icon(Icons.calendar_month, size: _drawerIconSize,color: Colors.black,),
                     title: Text('Mon Emploi',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
                     onTap:() async {
@@ -1517,9 +1571,9 @@ class _MyDrawerState extends State<MyDrawer> {
               Column(
                 children: [
                   ListTile(
-                    leading: Icon(Icons.home, size: _drawerIconSize, color: Colors.black,),
+                    leading: Icon(Icons.bar_chart, size: _drawerIconSize, color: Colors.black,),
                     // leading: Icon(Icons.dashboard_customize_outlined, size: _drawerIconSize, color: Colors.black,),
-                    title: Text('Acceuil', style: TextStyle(fontSize: 17, color: Colors.black),),
+                    title: Text('Statustique', style: TextStyle(fontSize: 17, color: Colors.black),),
                     onTap: (){
                       Navigator.push(context, MaterialPageRoute(
                           builder: (context) =>
@@ -1530,7 +1584,7 @@ class _MyDrawerState extends State<MyDrawer> {
                     },
                   ),
                   ListTile(
-                    leading: Icon(Icons.home, size: _drawerIconSize, color: Colors.black,),
+                    leading: Icon(Icons.home_outlined, size: _drawerIconSize, color: Colors.black,),
                     // leading: Icon(Icons.dashboard_customize_outlined, size: _drawerIconSize, color: Colors.black,),
                     title: Text('Acceuil', style: TextStyle(fontSize: 17, color: Colors.black),),
                     onTap: (){
@@ -1729,6 +1783,14 @@ class _MyDrawerState extends State<MyDrawer> {
                               .statusCode}');
                         }
                       }
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.sticky_note_2_outlined,size: _drawerIconSize,color: Colors.black),
+                    title: Text('Etat de Paiements', style: TextStyle(fontSize: _drawerFontSize, color: Colors.black),
+                    ),
+                    onTap: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => EtatPaiemens()));
+                    },
                   ),
 
                   ListTile(
