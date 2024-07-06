@@ -120,20 +120,6 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
   }
 
 
-  String getMatiereIdFromName(String matiereName) {
-    final matiere = matieresList.firstWhere((matiere) => matiere.name == matiereName);
-    if (matiere != null) {
-      return matiere.id;
-    }
-    return "";
-  }
-  List<Matiere> matieresList = [];
-  // Future<void> fetchMats() async {
-  //   List<Matiere> matieres = await fetchMatiere();
-  //   setState(() {
-  //     matieresList = matieres;
-  //   });
-  // }
   @override
   void initState() {
     // TODO: implement initState
@@ -410,8 +396,8 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
                         DataColumn(label: Text('Matiere')),
                         DataColumn(label: Text('Date')),
                         DataColumn(label: Text('Eq.CM')),
-                        DataColumn(label: Text('Prix')),
-                        DataColumn(label: Text('Action')),
+                        DataColumn(label: Text('Type')),
+                        DataColumn(label: Text('Détails')),
                       ],
                       rows: [
                         for (var index = (currentPage - 1) * coursesPerPage;
@@ -432,22 +418,6 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
                                                             onLongPress: () =>
                                   _showCourseDetails(context, widget.courses[index]),
                               cells: [
-
-                                // DataCell(
-                                //   Checkbox(
-                                //     value: selectedCourses.contains(widget.courses[index]['_id']),
-                                //     onChanged: (value) {
-                                //       setState(() {
-                                //         if (value != null && value) {
-                                //           selectedCourses.add(widget.courses[index]['_id']);
-                                //         } else {
-                                //           selectedCourses.remove(widget.courses[index]['_id']);
-                                //         }
-                                //       });
-                                //     },
-                                //   ),
-                                // ),
-
                                 DataCell(Text('${widget.courses[index]['code'].toString().toUpperCase()}',style: TextStyle(
                                   color: Colors.black,
                                 ),),
@@ -468,7 +438,7 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
                                   ),),
                                 ),
                                 DataCell(
-                                  Text('${widget.courses[index]['somme']}',style: TextStyle(
+                                  Text('${widget.courses[index]['type']}',style: TextStyle(
                                     color: Colors.black,
                                   ),),
                                 ),
@@ -522,7 +492,27 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
                       ],
                     ),
                   ),
+                  widget.courses.length > 0?
+                  Container(
+                    width: MediaQuery.of(context).size.width -10,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      // color: widget.courses.length > 0 ? Colors.white10:Colors.white,
+                        color: Colors.black87,
+                        borderRadius: BorderRadius.only(bottomLeft:Radius.circular(5),bottomRight:Radius.circular(5),)
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(flex: 2,child: Text(' Total', style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold))),
 
+                        (widget.dateDeb != null && widget.dateFin != null)?
+                        Expanded(flex: 2,child: Center(child: Text('${coursesNum} Cours',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold))))
+                            :Expanded(flex: 2,child: Text('${widget.courses.length} Cours',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),))       ,
+                        Expanded(flex: 2,child: Text('${totalType} Heures',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),)),
+                        Expanded(flex: 2,child: Text('${somme} MRU',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold)))
+                      ],
+                    ),
+                  ):Container(),
                 ],
               ),
             ),
@@ -599,15 +589,15 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
           }
         },
 
-        child: Icon(Icons.add_task,size: 30),
+        child: Icon(Icons.check,size: 30),
         style: TextButton.styleFrom(
           surfaceTintColor: Colors.white,
           // side: BorderSide(color: Colors.black38),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           elevation: 5,
           // padding: EdgeInsets.symmetric(horizontal: 25),
-            foregroundColor: Colors.indigo,
-          backgroundColor: Colors.white,
+          backgroundColor: Colors.indigo,
+          foregroundColor: Colors.white,
           textStyle: TextStyle(fontWeight: FontWeight.bold),
           // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
         ),
@@ -638,7 +628,7 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
 
         builder: (BuildContext context){
           return Container(
-            height: 640,
+            height: 580,
             padding: const EdgeInsets.all(25.0),
             child: SingleChildScrollView(scrollDirection: Axis.vertical,
               child: Column(
@@ -685,37 +675,10 @@ class _ProfCoursesNonSigneState extends State<ProfCoursesNonSigne> {
                   SizedBox(height: 25),
                   rowInfos('Montant Total:',course['somme']),
                   SizedBox(height: 25),
-                  rowInfos('Signed:',course['isSigned'] == "effectué"? 'Effectué': 'Non'),
+                  rowInfos('Signé:',course['isSigned'] == "effectué"? 'Effectué': 'Non'),
                   SizedBox(height: 25),
                   rowInfos('Payé:',course['isPaid'] == "effectué"||course['isPaid'] == "préparé"? 'Effectué': 'En attente'),
-                  SizedBox(height: 25,),
-                  ElevatedButton(
-                    onPressed: () async{
-                      setState(() {
-                        Navigator.pop(context);
-                      });
-                      return showDialog(
-                        context: context,
-                        builder: (context) {
-                          return UpdateProfCoursDialog(courses: course, ProfId: course['professeur'],);
-                        },
-                      );
-                    },// Disable button functionality
-
-                    child: Text('Modifier'),
-                    style: ElevatedButton.styleFrom(
-                      surfaceTintColor: Colors.white,
-                      // side: BorderSide(color: Colors.black38),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      elevation: 5,
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
-                      textStyle: TextStyle(fontWeight: FontWeight.bold),
-                      // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                    ),
-                  ),
-                ],
+                  ],
               ),
             ),
           );
@@ -790,7 +753,6 @@ class _UpdateProfCoursDialogState extends State<UpdateProfCoursDialog> {
   Category? selectedCategory;
   dynamic? selectedMat;
   List<dynamic> matieres = [];
-  List<Matiere> matiereList = [];
   DateTime? selectedDateTime;
   List<Category> categories = [];
   bool _selectedSigne = false;
@@ -805,7 +767,6 @@ class _UpdateProfCoursDialogState extends State<UpdateProfCoursDialog> {
   void initState()  {
     super.initState();
     // fetchProfMat();
-    fetchMats();
     _date.text = DateFormat('yyyy/MM/dd HH:mm').format(DateTime.parse(widget.courses['date'])).toString();
     // _selectedSigne = widget.courses['isSigned'];
     mat = widget.courses['matiere'];
@@ -858,17 +819,6 @@ class _UpdateProfCoursDialogState extends State<UpdateProfCoursDialog> {
   //     matieres = professorMatieres;
   //   });
   // }
-  Future<void> fetchMats() async {
-    List<Matiere> fetchedMats = await fetchMatiere();
-    setState(() {
-      matiereList = fetchedMats;
-    });
-  }
-  String getMatiereIdFromName(String name) {
-    // Assuming you have a list of matieres named 'matieresList'
-    final matiere = matiereList.firstWhere((mat) => mat.name == name, orElse: () => Matiere(id: '', name: '',  categorieId: '', categorie_name: '', code: '',));
-    return matiere?.id ?? ''; // Return the ID if found, otherwise an empty string
-  }
 
 
   String _selectedType = 'CM';
@@ -1081,8 +1031,6 @@ class _UpdateProfCoursDialogState extends State<UpdateProfCoursDialog> {
                 // updateProfCours(widget.courses['_id'],widget.ProfId,selectedMat!['_id']!, widget.courses['CM'], date,bool.parse(_isSigned.text));
               } else {
                 // Changes made, get the updated IDs
-                String updatedMatId = await getMatiereIdFromName(mat); // Get updated matière ID
-                print('updatedMatId: $updatedMatId');
                 // updateProfCours(widget.courses['_id'], widget.ProfId, updatedMatId, widget.courses['CM'], date, bool.parse(_isSigned.text));
               }
               ScaffoldMessenger.of(context).showSnackBar(

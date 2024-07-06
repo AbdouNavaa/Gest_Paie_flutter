@@ -39,7 +39,6 @@ class _ElementsState extends State<Elements> {
 
 
 
-  Matiere? selectedMat; // initialiser le type sélectionné à null
   Category? selectedCateg; // initialiser le type sélectionné à null
 
   // Future<Map<String, dynamic>> types =await  fetchProfessorInfo() ;
@@ -441,7 +440,7 @@ class _ElementsState extends State<Elements> {
                                       // buildDataColumn('H.CM'),
                                       // buildDataColumn('H.TP'),
                                       // buildDataColumn('H.TD'),
-                                      buildDataColumn('Action'),
+                                      buildDataColumn('Détails'),
                                     ],
                                     source: YourDataSource(filteredItems ?? items!,
                                       onTapCallback: (index) {
@@ -2185,7 +2184,7 @@ class YourDataSource extends DataTableSource {
       DataCell(Container(width: 70,
           child: Text(item.nameMat!.capitalize!))),
 
-      DataCell(Container(width: 20, child: Text(item.filName!.toUpperCase()))),
+      DataCell(Container(width: 30, child: Text(item.filName!.toUpperCase()))),
       // DataCell(Container(width: 15, child: Text(item.HCM!.toString()))),
 
       // DataCell(Container(width: 15, child: Text(item.HTP!.toString()))),

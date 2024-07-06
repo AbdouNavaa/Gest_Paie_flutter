@@ -57,6 +57,7 @@ class _EmploiPageState extends State<EmploiPage> {
 
       setState(() {
         emplois = allEmplois;
+        print('MonEmp:${emplois}');
       });
     } else {
       throw Exception('Failed to load emplois');

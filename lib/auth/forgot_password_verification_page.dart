@@ -25,6 +25,7 @@ class _ForgotPasswordVerificationPageState extends State<ForgotPasswordVerificat
   TextEditingController _token = TextEditingController();
   TextEditingController _pass = TextEditingController();
   TextEditingController _conf = TextEditingController();
+  bool isPass = false;
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +39,7 @@ class _ForgotPasswordVerificationPageState extends State<ForgotPasswordVerificat
               Container(
                 height: _headerHeight,
                 child: HeaderWidget(
-                    _headerHeight, true, 'assets/supnum.png'),
+                    _headerHeight, true, 'assets/supnum.png',50),
               ),
               SafeArea(
                 child: Container(
@@ -98,18 +99,24 @@ class _ForgotPasswordVerificationPageState extends State<ForgotPasswordVerificat
                             SizedBox(height: 10.0),
                           TextFormField(
                             controller: _token,
-                            decoration: ThemeHelper().textInputDecoration("Token", ""),
+                            decoration: ThemeHelper().textInputDecoration("Token", "",Icons.token_outlined,),
                           ),
                             SizedBox(height: 10.0),
                           TextFormField(
                             controller: _pass,
-                            decoration: ThemeHelper().textInputDecoration("Mot de Passe", ""),
+                            obscureText: isPass,
+                            decoration: ThemeHelper().textInputDecoration("Mot de Passe", "",Icons.remove_red_eye_outlined,() {setState(() {
+                              isPass = !isPass;
+                            });},),
                           ),
                             SizedBox(height: 10.0),
                             Container(
                               child: TextFormField(
                                 controller: _conf,
-                                decoration: ThemeHelper().textInputDecoration("Confirmation de mot de passe", ""),
+                                obscureText: isPass,
+                                decoration: ThemeHelper().textInputDecoration("Confirmation de mot de passe", "",Icons.remove_red_eye_outlined,() {setState(() {
+                                  isPass = !isPass;
+                                });},),
                               ),
                               decoration: ThemeHelper().inputBoxDecorationShaddow(),
                             ),

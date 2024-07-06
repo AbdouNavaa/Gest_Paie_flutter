@@ -30,28 +30,20 @@ void main() {
   );
 }
 
-
-
-
 class MyApp extends StatelessWidget {
   Color _primaryColor = Color(0xFF756C6C);
 
-  // Color _accentColor = HexColor('#5AD3BC');
   @override
   Widget build(BuildContext context) {
     final themeChanger = Provider.of<ThemeChanger>(context);
     return MaterialApp(
-    //  theme: themeChanger.themeData, // Utilisez le thème actuel
 
       theme: ThemeData(
         brightness: Brightness.light,
-        // primaryColor: _primaryColor,
-        // hintColor: _accentColor,
         scaffoldBackgroundColor: Colors.white,
-        // primarySwatch: Colors.grey,
       ),
-      darkTheme: ThemeData(
-        brightness: Brightness.dark,
+      darkTheme: ThemeData(scaffoldBackgroundColor: Colors.white,
+        brightness: Brightness.light,primaryColor: MaterialStateColor.resolveWith((states) =>  Colors.black12)
       ),  debugShowCheckedModeBanner: false,
       routes: {
         '/': (context) => SplashScreen(),

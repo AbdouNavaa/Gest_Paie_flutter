@@ -113,10 +113,11 @@ class _ProfilePageState extends State<ProfilePage> {
                   radius: 50,
                   backgroundColor: Colors.white,
                   backgroundImage:
-                  _image != null
-                      ? FileImage(_image!)
-                      : (_photoUrl != null? NetworkImage("http://192.168.43.73:5000/uploads/images/Design12.webp.webp") :
-                  AssetImage('assets/user1.png'))
+                  // _image != null
+                  //     ? FileImage(_image!):
+                // (_photoUrl != null? NetworkImage("http://192.168.43.73:5000/uploads/images/Design12.webp.webp") :
+                  AssetImage('assets/user1.png')
+            // )
                   as ImageProvider,
                 ),
                 Align(

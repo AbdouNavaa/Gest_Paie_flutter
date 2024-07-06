@@ -7,11 +7,13 @@ class HeaderWidget extends StatefulWidget {
   final double _height;
   final bool _showIcon;
   final String _image;
+  final double _rad;
 
-  const HeaderWidget(this._height, this._showIcon, this._image, {Key? key}) : super(key: key);
+
+  const HeaderWidget(this._height, this._showIcon, this._image,this._rad, {Key? key, }) : super(key: key);
 
   @override
-  _HeaderWidgetState createState() => _HeaderWidgetState(_height, _showIcon, _image);
+  _HeaderWidgetState createState() => _HeaderWidgetState(_height, _showIcon, _image,);
 }
 
 class _HeaderWidgetState extends State<HeaderWidget> {
@@ -23,7 +25,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
   bool _showIcon;
   String image;
 
-  _HeaderWidgetState(this._height, this._showIcon, this.image);
+  _HeaderWidgetState(this._height, this._showIcon, this.image,);
 
   @override
   Widget build(BuildContext context) {
@@ -35,113 +37,92 @@ class _HeaderWidgetState extends State<HeaderWidget> {
     return Container(
       child: Stack(
         children: [
-          ClipPath(
-            child: Container(
-              decoration: new BoxDecoration(
-                gradient: new LinearGradient(
-                    colors: [
-                      _primaryColor,
-                      _accentColor,
-                    ],
-                    begin: const FractionalOffset(0.0, 0.0),
-                    end: const FractionalOffset(1.0, 0.0),
-                    stops: [0.0, 1.0],
-                    tileMode: TileMode.clamp
+        Stack(
+          children: [
+            ClipPath(
+              child: Container(
+                decoration: new BoxDecoration(
+                  gradient: new LinearGradient(
+                      colors: [
+                        _primaryColor,
+                        _accentColor,
+                      ],
+                      begin: const FractionalOffset(0.0, 0.0),
+                      end: const FractionalOffset(1.0, 0.0),
+                      stops: [0.0, 1.0],
+                      tileMode: TileMode.clamp
+                  ),
                 ),
               ),
-            ),
-            clipper: new ShapeClipper(
-                [
-                  Offset(width / 5, _height),
-                  Offset(width / 10 * 5, _height - 60),
-                  Offset(width / 5 * 4, _height + 20),
-                  Offset(width, _height - 18)
-                ]
-            ),
-          ),
-          ClipPath(
-            child: Container(
-              decoration: new BoxDecoration(
-                gradient: new LinearGradient(
-                    colors: [
-                      _primaryColor,
-                      _accentColor,
-                    ],
-                    begin: const FractionalOffset(100.0, 100.0),
-                    end: const FractionalOffset(100, 100.0),
-                    stops: [0.0, 1.0],
-                    tileMode: TileMode.clamp
-                ),
+              clipper: new ShapeClipper(
+                  [
+                    Offset(width / 5, _height),
+                    Offset(width / 10 * 5, _height - 60),
+                    Offset(width / 5 * 4, _height + 20),
+                    Offset(width, _height - 18)
+                  ]
               ),
             ),
-            clipper: new ShapeClipper(
-                [
-                  Offset(width / 3, _height + 20),
-                  Offset(width / 10 * 8, _height - 60),
-                  Offset(width / 5 * 4, _height - 60),
-                  Offset(width, _height - 20)
-                ]
-            ),
-          ),
-          ClipPath(
-            child: Container(
-              decoration: new BoxDecoration(
-                gradient: new LinearGradient(
-                    colors: [
-                      _primaryColor,
-                      _accentColor,
-                    ],
-                    begin: const FractionalOffset(0.0, 0.0),
-                    end: const FractionalOffset(1.0, 0.0),
-                    stops: [0.0, 1.0],
-                    tileMode: TileMode.clamp
+            ClipPath(
+              child: Container(
+                decoration: new BoxDecoration(
+                  gradient: new LinearGradient(
+                      colors: [
+                        _primaryColor,
+                        _accentColor,
+                      ],
+                      begin: const FractionalOffset(100.0, 100.0),
+                      end: const FractionalOffset(100, 100.0),
+                      stops: [0.0, 1.0],
+                      tileMode: TileMode.clamp
+                  ),
                 ),
               ),
+              clipper: new ShapeClipper(
+                  [
+                    Offset(width / 3, _height + 20),
+                    Offset(width / 10 * 8, _height - 60),
+                    Offset(width / 5 * 4, _height - 60),
+                    Offset(width, _height - 20)
+                  ]
+              ),
             ),
-            clipper: new ShapeClipper(
-                [
-                  Offset(width / 5, _height),
-                  Offset(width / 2, _height - 40),
-                  Offset(width / 5 * 4, _height - 80),
-                  Offset(width, _height - 20)
-                ]
+            ClipPath(
+              child: Container(
+                decoration: new BoxDecoration(
+                  gradient: new LinearGradient(
+                      colors: [
+                        _primaryColor,
+                        _accentColor,
+                      ],
+                      begin: const FractionalOffset(0.0, 0.0),
+                      end: const FractionalOffset(1.0, 0.0),
+                      stops: [0.0, 1.0],
+                      tileMode: TileMode.clamp
+                  ),
+                ),
+              ),
+              clipper: new ShapeClipper(
+                  [
+                    Offset(width / 5, _height),
+                    Offset(width / 2, _height - 40),
+                    Offset(width / 5 * 4, _height - 80),
+                    Offset(width, _height - 20)
+                  ]
+              ),
             ),
-          ),
-          Visibility(
-            visible: _showIcon,
-            child: Container(
-              height: _height - 40,
-              child: Center(
-                child: Container(
-                  width: 100,
-                  height: 100,
 
-                  margin: EdgeInsets.all(20),
-                  padding: EdgeInsets.only(
-                    left: 5.0,
-                    top: 5.0,
-                    right: 5.0,
-                    bottom: 5.0,
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    // borderRadius: BorderRadius.circular(40),
-                    border: Border.all(width: 1, color: Colors.white),
-                    color: Colors.white
-                  ),
-                  // Image.asset('assets/supnum.png',width: 30,),
-                  child: Image.asset(
-                    image,
-                    // color: Colors.white,
-                      width: 80,
-                      fit: BoxFit.cover,
-                  ),
-                ),
-              ),
+          ],
+        ),
+          Center(
+            child:  CircleAvatar(
+              radius: widget._rad,
+              backgroundColor: Colors.white,
+              backgroundImage:
+              AssetImage(image)
             ),
           ),
-
-        ],
+        ]
       ),
     );
   }

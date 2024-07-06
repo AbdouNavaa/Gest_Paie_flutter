@@ -37,7 +37,8 @@ class Paiements extends StatefulWidget {
 
 class _PaiementsState extends State<Paiements> {
   double totalType = 0;
-  double somme = 0;
+  int somme = 0;
+  int nbc = 0;
 
 
   DateTime defaultDateDeb = DateTime(2024, 6, 1);
@@ -118,6 +119,7 @@ class _PaiementsState extends State<Paiements> {
     professeurData.clear(); // Efface les données existantes à chaque nouvel appel
 
     totalType = 0;
+    nbc = 0;
     somme = 0;
     for (var course in widget.courses) {
       String profId = course['professeur'];
@@ -134,17 +136,18 @@ class _PaiementsState extends State<Paiements> {
               'professeur': ("${course['nom']} ${course['prenom']}").capitalize,
               'email': course['email'],
               'th_total': 0.0,
-              'somme_total': 0.0,
-              'NbC': 0.0,
+              'somme_total': 0,
+              'NbC': 0,
             };
           }
 
           // Mettre à jour les valeurs pour 'th_total' et 'somme_total'
           professeurData[profId]!['th_total'] += double.parse(course['th'].toString());
           totalType += double.parse(course['th'].toString());
-          professeurData[profId]!['somme_total'] += double.parse(course['somme'].toString());
-          somme += double.parse(course['somme'].toString());
-          professeurData[profId]!['NbC'] += professeurData.length;
+          professeurData[profId]!['somme_total'] += int.parse(course['somme'].toString());
+          somme += int.parse(course['somme'].toString());
+          nbc += 1;
+          professeurData[profId]!['NbC'] += 1;
         }
       // }
     }
@@ -155,11 +158,6 @@ class _PaiementsState extends State<Paiements> {
 
     }
   }
-  // void AddPaieMultiple(List<String> selectedPayments, DateTime dateDeb, DateTime dateFin, num? nbh,num? nbc,num? mt,) {
-  //   for (String profId in selectedPayments) {
-  //     AddPaie(profId, dateDeb, dateFin,nbh,nbc,mt);
-  //   }
-  // }
 
   List<String> selectedCoursIds = [];
 
@@ -338,10 +336,7 @@ class _PaiementsState extends State<Paiements> {
                     decoration: BoxDecoration(
                       // color: Colors.indigo.shade500,
                       color: Colors.black87,
-                      borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(20.0),
-                        topLeft: Radius.circular(20.0),
-                      ),
+                      borderRadius: BorderRadius.all(Radius.circular(10.0),),
                     ),
                     // margin: EdgeInsets.only(left: 10),
                     child: DataTable(
@@ -365,8 +360,8 @@ class _PaiementsState extends State<Paiements> {
                       // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
                       columns: [
                         DataColumn(label: Text('Professeur')),
-                        DataColumn(label: Text('Nb. Cours')),
-                        DataColumn(label: Text('Nb. Heures')),
+                        DataColumn(label: Text('Nb Cours')),
+                        DataColumn(label: Text('Nb Heures')),
                         // DataColumn(label: Text('VH')),
                         // DataColumn(label: Text('NbC')),
                         DataColumn(label: Text('MT')),
@@ -379,96 +374,59 @@ class _PaiementsState extends State<Paiements> {
                         // ),
                       ],
                       rows:
-                      // professeurData.entries.map(
-                      //         (entry) {
-                      //       String profId = entry.key;
-                      //       Map<String, dynamic> profData = entry.value;
-                      //
-                      //
-                      //       return DataRow(
-                      //         selected: selectedCoursIds.contains(profId),
-                      //         onSelectChanged: (selected) {
-                      //           setState(() {
-                      //             if (selected!) {
-                      //               selectedCoursIds.add(profId);
-                      //             } else {
-                      //               selectedCoursIds.remove(profId);
-                      //             }
-                      //           });
-                      //         },  // mouseCursor: MaterialStateMouseCursor.clickable,
-                      //         cells: [
-                      //           DataCell(
-                      //               Container(width: 65,margin: EdgeInsets.only(left: 5),
-                      //                   child: Text(profData['professeur'].toString().capitalize!))),
-                      //           DataCell(Text(getProfesseurIdFromName(profId).banque.toString())),
-                      //           DataCell(Container(width: 75,child: Text(getProfesseurIdFromName(profId).compte.toString()))),
-                      //           DataCell(Text(profData['th_total'].toString())),
-                      //           // DataCell(Text(profData['NbC'].toString())),
-                      //           DataCell(Text(profData['somme_total'].toString())),
-                      //         ],
-                      //       );
-                      //
-                      //     }).toList(),
+                      professeurData.entries.map(
+                              (entry) {
+                            String profId = entry.key;
+                            Map<String, dynamic> profData = entry.value;
 
-                      [
-                        for (var index = 0; index < (filteredItems?.length ?? 0); index++)
-                        DataRow(
 
-                          cells: [
-                            DataCell(Text('${filteredItems?[index]['nom'].toString().capitalize} ${filteredItems?[index]['prenom'].toString().capitalize}',style: TextStyle(
-                              color: Colors.black,
-                            ),),
-                            ),
-                            DataCell(Text('${filteredItems?[index]['nbc'].toString().toUpperCase()}',style: TextStyle(
-                              color: Colors.black,
-                            ),),),
-                            DataCell(
-                              Center(child: Text('${filteredItems?[index]['nbh']}',style: TextStyle(
-                                color: Colors.black,
-                              ),)),
-                            ),
-                            DataCell(
-                              Center(child: Text('${filteredItems?[index]['somme']}',style: TextStyle(
-                                color: Colors.black,
-                              ),)),
-                            ),
-                          ],
-                        ),
+                            return DataRow(
+                              selected: selectedCoursIds.contains(profId),
+                              onSelectChanged: (selected) {
+                                setState(() {
+                                  if (selected!) {
+                                    selectedCoursIds.add(profId);
+                                  } else {
+                                    selectedCoursIds.remove(profId);
+                                  }
+                                });
+                              },  // mouseCursor: MaterialStateMouseCursor.clickable,
+                              cells: [
+                                DataCell(
+                                    Container(width: 65,margin: EdgeInsets.only(left: 5),
+                                        child: Text(profData['professeur'].toString().capitalize!))),
+                                // DataCell(Text(getProfesseurIdFromName(profId).banque.toString())),
+                                // DataCell(Container(width: 75,child: Text(getProfesseurIdFromName(profId).compte.toString()))),
+                                DataCell(Text(profData['NbC'].toString())),
+                                DataCell(Text(profData['th_total'].toString())),
+                                DataCell(Text(profData['somme_total'].toString())),
+                              ],
+                            );
 
-                      ]
+                          }).toList(),
+
 
                     ),
                   ),
+                  professeurData.length > 0?
                   Container(
-                    width: MediaQuery.of(context).size.width +35,
-                    height: 30,
+                    width: MediaQuery.of(context).size.width -10,
+                    height: 48,
                     decoration: BoxDecoration(
-                      // color: Colors.blue.shade100,
-                      borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(20.0),
-                        bottomRight: Radius.circular(20.0),
-                      ),
+                      // color: widget.courses.length > 0 ? Colors.white10:Colors.white,
+                        color: Colors.black87,
+                        borderRadius: BorderRadius.only(bottomLeft:Radius.circular(5),bottomRight:Radius.circular(5),)
                     ),
-                    // margin: EdgeInsets.only(left: 10,top: 20),
                     child: Row(
                       children: [
-                        Text('Totals', style: TextStyle(fontWeight: FontWeight.bold),),
+                        Expanded(flex: 2,child: Text(' Total', style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold))),
 
-                        SizedBox(width: 232,),
-                        (widget.dateDeb != null && widget.dateFin != null)?
-                        Text('${totalType}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
-                            :Text('${totalType}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),),
-
-                        SizedBox(width: 11,),
-
-                        (widget.dateDeb != null && widget.dateFin != null)?
-                        Container(child: Text('${somme}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400)))
-                            :Text('${somme}',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w400),)
-
+                          Expanded(flex: 2,child: Text('${nbc} Cours',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),)),
+                          Expanded(flex: 2,child: Text('${totalType} Heures',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),)),
+                        Expanded(flex: 2,child: Text('${somme} MRU',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold)))
                       ],
-                    )
-                  ),
-
+                    ),
+                  ):Container(),
                 ],
               ),
             ),
@@ -540,7 +498,7 @@ class _PaiementsState extends State<Paiements> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           elevation: 5,
           // padding: EdgeInsets.only(left: 20,right: 20),
-          backgroundColor: Colors.blueAccent,
+          backgroundColor: Colors.indigo,
           //   foregroundColor: Colors.black,
           textStyle: TextStyle(fontWeight: FontWeight.bold),
           // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
@@ -552,13 +510,18 @@ class _PaiementsState extends State<Paiements> {
           Navigator.push(context, MaterialPageRoute(builder: (context) => EtatPaiemens()));
 
         },
-        child: Icon(Icons.sticky_note_2,size: 40,),
+        child: Row(mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('États',style:TextStyle(fontSize: 20,)),
+          Icon(Icons.sticky_note_2,size: 25,),
+        ],
+      ),
         style: TextButton.styleFrom(
-          surfaceTintColor: Colors.white,
-          foregroundColor: Colors.indigo,
+          foregroundColor: Colors.white,
+          backgroundColor: Colors.black87,
           elevation: 5,
           textStyle: TextStyle(fontWeight: FontWeight.bold),
-          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
         ),
 
       ),
@@ -773,11 +736,11 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
               children: [
                 SingleChildScrollView(scrollDirection: Axis.horizontal,
                   child: Container(
-                    // width: MediaQuery.of(context).size.width ,
+                    width: MediaQuery.of(context).size.width - 10,
                     decoration: BoxDecoration(
                       color: Colors.black,
                       borderRadius: BorderRadius.all(
-                        Radius.circular(20.0),
+                        Radius.circular(10),
                       ),
                     ),
                     // margin: EdgeInsets.only(left: 10),
@@ -789,21 +752,18 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                       dataRowColor: MaterialStateColor.resolveWith((
                           states) => Colors.white),
                       headingRowHeight: 50,
-                      columnSpacing: 8,
+                      dataTextStyle: TextStyle(
+                          fontWeight: FontWeight.w400,
+                          color: Colors.black,fontSize: 13// Set header text color
+                      ),
                       headingTextStyle: TextStyle(
-                          fontWeight: FontWeight.bold, color: Colors.white),
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,fontSize: 13 // Set header text color
+                      ),
+
+                      columnSpacing: 8,
                       dataRowHeight: 50,
-                      columns: [
-                        DataColumn(label: Text('De')),
-                        DataColumn(label: Text('Au')),
-                        DataColumn(label: Text('Prof')),
-                        DataColumn(label: Text('Banq')),
-                        DataColumn(label: Text('NBC')),
-                        DataColumn(label: Text('NBH')),
-                        DataColumn(label: Text('MT')),
-                        DataColumn(label: Text('Confirm')),
-                        DataColumn(label: Text('Action')),
-                      ],
+                      columns: TableColumns(),
                       rows: rowsTable(
                           context, 'en attente', showPaid, Colors.blueGrey),
                     ),
@@ -823,11 +783,11 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
               children: [
                 SingleChildScrollView(scrollDirection: Axis.horizontal,
                   child: Container(
-                    // width: MediaQuery.of(context).size.width ,
+                    width: MediaQuery.of(context).size.width - 10,
                     decoration: BoxDecoration(
                       color: Colors.black,
                       borderRadius: BorderRadius.all(
-                        Radius.circular(20.0),
+                        Radius.circular(10),
                       ),
                     ),
                     // margin: EdgeInsets.only(left: 10),
@@ -839,21 +799,18 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                       dataRowColor: MaterialStateColor.resolveWith((
                           states) => Colors.white),
                       headingRowHeight: 50,
+                      dataTextStyle: TextStyle(
+                          fontWeight: FontWeight.w400,
+                          color: Colors.black,fontSize: 13// Set header text color
+                      ),
                       headingTextStyle: TextStyle(
-                          fontWeight: FontWeight.bold, color: Colors.white),
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,fontSize: 13 // Set header text color
+                      ),
+
                       columnSpacing: 8,
                       dataRowHeight: 50,
-                      columns: [
-                        DataColumn(label: Text('De')),
-                        DataColumn(label: Text('Au')),
-                        DataColumn(label: Text('Prof')),
-                        DataColumn(label: Text('Banq')),
-                        DataColumn(label: Text('NBC')),
-                        DataColumn(label: Text('NBH')),
-                        DataColumn(label: Text('MT')),
-                        DataColumn(label: Text('Confirm')),
-                        DataColumn(label: Text('Action')),
-                      ],
+                      columns: TableColumns(),
 
                       rows: rowsTable(
                           context, 'refusé', showRef, Colors.redAccent),
@@ -868,44 +825,39 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
           Expanded(
             child: Column(
               children: [
-                SingleChildScrollView(scrollDirection: Axis.horizontal,
-                  child: Container(
-                    // width: MediaQuery.of(context).size.width ,
-                    decoration: BoxDecoration(
-                      color: Colors.black,
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(20.0),
-                      ),
+                Container(
+                  width: MediaQuery.of(context).size.width - 10,
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(10),
                     ),
-                    // margin: EdgeInsets.only(left: 10),
-                    child: DataTable(
-                      showCheckboxColumn: true,
-                      showBottomBorder: true,
-                      headingRowColor: MaterialStateColor.resolveWith((
-                          states) => Colors.white10),
-                      dataRowColor: MaterialStateColor.resolveWith((
-                          states) => Colors.white),
-                      headingRowHeight: 50,
-                      headingTextStyle: TextStyle(
-                          fontWeight: FontWeight.bold, color: Colors.white),
-                      columnSpacing: 8,
-                      dataRowHeight: 50,
-                      columns: [
-                        DataColumn(label: Text('De')),
-                        DataColumn(label: Text('Au')),
-                        DataColumn(label: Text('Prof')),
-                        DataColumn(label: Text('Banq')),
-                        DataColumn(label: Text('NBC')),
-                        DataColumn(label: Text('NBH')),
-                        DataColumn(label: Text('MT')),
-                        DataColumn(label: Text('Confirm')),
-                        DataColumn(label: Text('Action')),
-                      ],
-                      rows: rowsTable(
-                          context, 'accepté', showConf, Colors.green),
+                  ),
+                  // margin: EdgeInsets.only(left: 10),
+                  child: DataTable(
+                    showCheckboxColumn: true,
+                    showBottomBorder: true,
+                    headingRowColor: MaterialStateColor.resolveWith((
+                        states) => Colors.white10),
+                    dataRowColor: MaterialStateColor.resolveWith((
+                        states) => Colors.white),
+                    headingRowHeight: 50,
+                    dataTextStyle: TextStyle(
+                      fontWeight: FontWeight.w400,
+                      color: Colors.black,fontSize: 13// Set header text color
+                  ),
+                    headingTextStyle: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,fontSize: 13 // Set header text color
                     ),
 
+                    columnSpacing: 8,
+                    dataRowHeight: 50,
+                    columns: TableColumns(),
+                    rows: rowsTable(
+                        context, 'accepté', showConf, Colors.green),
                   ),
+
                 ),
               ],
             ),
@@ -984,32 +936,51 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
         ),
       ) :
       showConf ?
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      Column(
+        mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          TextButton(
-            onPressed: () async {
-              await savePdf();
-            },
-            child: Text('Télécharger PDF'),
-            style: TextButton.styleFrom(
-              side: BorderSide(color: Colors.black26),
-              padding: EdgeInsets.only(left: 20, right: 20),
-              foregroundColor: Colors.black,
-              textStyle: TextStyle(fontWeight: FontWeight.bold),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TextButton(
+                onPressed: () async {
+                  await savePdf();
+                },
+                child: Text('Télécharger PDF'),
+                style: TextButton.styleFrom(
+                  side: BorderSide(color: Colors.black26),
+                  padding: EdgeInsets.only(left: 20, right: 20),
+                  foregroundColor: Colors.black,
+                  textStyle: TextStyle(fontWeight: FontWeight.bold),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                ),
+              ),
+              SizedBox(width: 20,),
+              TextButton(
+                onPressed: () async {
+                  await saveExcel();
+                },
+                child: Text('Télécharger Excel'),
+                style: TextButton.styleFrom(
+                  side: BorderSide(color: Colors.black26),
+                  padding: EdgeInsets.only(left: 20, right: 20),
+                  foregroundColor: Colors.black,
+                  textStyle: TextStyle(fontWeight: FontWeight.bold),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                ),
+              ),
+            ],
           ),
-          SizedBox(width: 20,),
           TextButton(
             onPressed: () async {
-              await saveExcel();
+              await term();
             },
-            child: Text('Télécharger Excel'),
+            child: Text('Términer'),
             style: TextButton.styleFrom(
               side: BorderSide(color: Colors.black26),
-              padding: EdgeInsets.only(left: 20, right: 20),
+              padding: EdgeInsets.only(left: 30, right: 30),
               foregroundColor: Colors.black,
               textStyle: TextStyle(fontWeight: FontWeight.bold),
               shape: RoundedRectangleBorder(
@@ -1020,6 +991,20 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
       ) : Container(),
 
     );
+  }
+
+  List<DataColumn> TableColumns() {
+    return [
+                      DataColumn(label: Text('De')),
+                      DataColumn(label: Text('Au')),
+                      DataColumn(label: Text('Professeur')),
+                      // DataColumn(label: Text('Banq')),
+                      DataColumn(label: Text('NBC')),
+                      DataColumn(label: Text('NBH')),
+                      DataColumn(label: Text('MT')),
+                      // DataColumn(label: Text('Confirm')),
+                      DataColumn(label: Text('Details')),
+                    ];
   }
 
   ButtonStyle buildStyleFrom(bol) {
@@ -1044,7 +1029,7 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
       'Professeur',
       'Banque',
       'Numero compte',
-      'Nombre de Cours',
+      // 'Nombre de Cours',
       'Volume horaire',
       'Montant (MRU)',
     ];
@@ -1053,9 +1038,9 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
       border: pw.TableBorder.all(color: PdfColors.white),
       columnWidths: {
         0: pw.IntrinsicColumnWidth(flex: 2),
-        1: pw.IntrinsicColumnWidth(flex: 1),
+        1: pw.IntrinsicColumnWidth(flex: 1.5),
         2: pw.IntrinsicColumnWidth(flex: 2),
-        3: pw.IntrinsicColumnWidth(),
+        // 3: pw.IntrinsicColumnWidth(),
         4: pw.IntrinsicColumnWidth(),
         5: pw.IntrinsicColumnWidth(),
       },
@@ -1120,17 +1105,7 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                   ),
                 ),
               ),
-              pw.Container(
-                padding: const pw.EdgeInsets.all(5),
-                alignment: pw.Alignment.center,
-                child: pw.Text(
-                  filteredItems![index].nbc.toString(),
-                  style: pw.TextStyle(
-                    color: PdfColors.black,
-                    fontSize: 10,
-                  ),
-                ),
-              ),
+
               pw.Container(
                 padding: const pw.EdgeInsets.all(5),
                 alignment: pw.Alignment.center,
@@ -1155,7 +1130,7 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
               ),
             ],
           ),
-        pw.TableRow(
+        pw.TableRow(decoration: pw.BoxDecoration(color: PdfColors.black,),
           children: [
             pw.Container(
               padding: const pw.EdgeInsets.all(5),
@@ -1163,8 +1138,9 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
               child: pw.Text(
                 'Montant Total ',
                 style: pw.TextStyle(
-                  color: PdfColors.black,
+                  color: PdfColors.white,
                   fontSize: 10,
+                    fontWeight: pw.FontWeight.bold
                 ),
               ),
             ),
@@ -1191,25 +1167,26 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                 ),
               ),
             ),
-            pw.Container(
-              padding: const pw.EdgeInsets.all(5),
-              alignment: pw.Alignment.center,
-              child: pw.Text(
-                Nbcs.toString(),
-                style: pw.TextStyle(
-                  color: PdfColors.black,
-                  fontSize: 10,
-                ),
-              ),
-            ),
+            // pw.Container(
+            //   padding: const pw.EdgeInsets.all(5),
+            //   alignment: pw.Alignment.center,
+            //   child: pw.Text(
+            //     Nbcs.toString(),
+            //     style: pw.TextStyle(
+            //       color: PdfColors.black,
+            //       fontSize: 10,
+            //     ),
+            //   ),
+            // ),
             pw.Container(
               padding: const pw.EdgeInsets.all(5),
               alignment: pw.Alignment.center,
               child: pw.Text(
                 totalTypes.toString(),
                 style: pw.TextStyle(
-                  color: PdfColors.black,
+                  color: PdfColors.white,
                   fontSize: 10,
+                    fontWeight: pw.FontWeight.bold
                 ),
               ),
             ),
@@ -1219,8 +1196,9 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
               child: pw.Text(
                 sommes.toString(),
                 style: pw.TextStyle(
-                  color: PdfColors.black,
+                  color: PdfColors.white,
                   fontSize: 10,
+                  fontWeight: pw.FontWeight.bold
                 ),
               ),
             ),
@@ -1246,7 +1224,7 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
       DefautFin = filteredItems![index].toDate;
       totalTypes = totalTypes + filteredItems![index].nbh!;
       sommes += filteredItems![index].totalMontant!;
-      Nbcs = filteredItems!.length;
+      // Nbcs = filteredItems!.length;
       print('tt${totalTypes}');
     }
     }
@@ -1331,7 +1309,7 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
       DefautFin = filteredItems![index].toDate;
       totalTypes = totalTypes + filteredItems![index].th!;
       sommes +=filteredItems![index].totalMontant!;
-      Nbcs =filteredItems!.length;
+      // Nbcs =filteredItems!.length;
       print('tt${totalTypes}');
 
     }
@@ -1346,7 +1324,7 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
     // sheetObject.updateCell(excel.CellIndex.indexByColumnRow(columnIndex: 0,rowIndex: 3),
     //     excel.CellStyle(backgroundColorHex: 'AA022000',fontColorHex: 'FF000023'));
     sheetObject.sheetName;
-    sheetObject.appendRow(['Professeur', 'Banque', 'Numero compte', 'Nombre de Cours', 'Volume horaire', 'Montant (MRU)'],);
+    sheetObject.appendRow(['Professeur', 'Banque', 'Numero compte','Volume horaire', 'Montant (MRU)'],);
 
     // Ajoutez les données
     for (var index = 0; index < (filteredItems?.length ?? 0); index++){
@@ -1354,20 +1332,71 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
         filteredItems![index].nomComp.toString().capitalize,
         filteredItems![index].banq.toString(),
         filteredItems![index].comp.toString(),
-        filteredItems![index].nbc.toString(),
+        // filteredItems![index].nbc.toString(),
         filteredItems![index].nbh.toString(),
         filteredItems![index].totalMontant.toString(),
       ]);
     }
 
     // Ajoutez la ligne pour le total
-    sheetObject.appendRow(['Montant Total', '', '', Nbcs.toString(),totalTypes.toString(), sommes.toString()]);
+    sheetObject.appendRow(['Montant Total', '', '', totalTypes.toString(), sommes.toString()]);
 
     // Convertissez le fichier Excel en données binaires
     final List<int>? excelBytes = excelDoc.save();
 
     return Uint8List.fromList(excelBytes!);
   }
+  Future<void> term() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString("token")!;
+    print(token);
+
+    final response = await http.get(
+      Uri.parse('http://192.168.43.73:5000/paiement/termine/'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+    // print("Categ:${response.statusCode}");
+    if (response.statusCode == 200) {
+      setState(() {
+        Navigator.of(context).pop();
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                surfaceTintColor: Color(0xB0AFAFA3),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Text("Alerte de succès"),
+                    Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
+                  ],
+                ),
+                content: Text(
+                    "Tous les paiement confirmees sont terminer"),
+                actions: [
+                  TextButton(
+                    child: Text("Ok"),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+
+                ],
+              );});
+      });
+
+
+    } else {
+      // If the server did not return a 200 OK response,
+      // then throw an exception.
+      throw Exception('Failed to load Category');
+    }
+  }
+
 
   Future<void> saveExcel() async {
     // Appelez la fonction generateExcel pour obtenir le contenu du fichier Excel
@@ -1430,14 +1459,16 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                                DataCell(Text('${DateFormat('dd-MM ').format(DateTime.parse(filteredItems![index].toDate.toString()).toLocal())}',style: TextStyle(
                                  color: Colors.black,
                                ),)),
-                               DataCell(Text('${filteredItems![index].nomComp.toString().capitalize} '
-                                 ,style: TextStyle(
-                                 color: Colors.black,
-                               ),)),
-                               DataCell(Text('${filteredItems![index].banq.toString().toUpperCase()} '
-                                 ,style: TextStyle(
-                                 color: Colors.black,
-                               ),)),
+                               DataCell(Container(width: 90,
+                                 child: Text('${filteredItems![index].nomComp.toString().capitalize} '
+                                   ,style: TextStyle(
+                                   color: Colors.black,
+                                 ),),
+                               )),
+                               // DataCell(Text('${filteredItems![index].banq.toString().toUpperCase()} '
+                               //   ,style: TextStyle(
+                               //   color: Colors.black,
+                               // ),)),
                                DataCell(Center(
                                  child: Text('${filteredItems![index].nbc}',style: TextStyle(
                                    color: Colors.black,
@@ -1453,8 +1484,8 @@ class _EtatPaiemensState extends State<EtatPaiemens> {
                                    color: Colors.black,
                                  ),),
                                )),
-                               DataCell(Text( conf =='en attente' ? 'En Cours' : conf.toString()!.capitalize!, style: TextStyle(fontWeight: FontWeight.bold,color: myColor),),
-                               ),
+                               // DataCell(Text( conf =='en attente' ? 'En Cours' : conf.toString()!.capitalize!, style: TextStyle(fontWeight: FontWeight.bold,color: myColor),),
+                               // ),
                                DataCell(
                                  buildTextButton(context, index),
                                ),

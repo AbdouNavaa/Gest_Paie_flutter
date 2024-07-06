@@ -2087,10 +2087,8 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
   bool showProf = false;
 
   Eles? selectedElem;
-  Matiere? selectedMat;
   Professeur? selectedProfesseur;
   List<Professeur> professeurs = [];
-  List<Matiere> matieres = [];
   DateTime? selectedDateTime;
 
   bool isChanged =false;
@@ -2101,7 +2099,6 @@ class _UpdateEmploiScreenState extends State<UpdateEmploiScreen> {
   List<Eles> elList = [];
   List<Eles> elList1 = [];
   List<Eles> elList2 = [];
-  List<Matiere> matiereList = [];
   List<filliere> filList = [];
   String getFilIdFromName(String id) {
     // Assuming you have a list of professeurs named 'professeursList'

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -205,159 +206,60 @@ class _PaieState extends State<ProfPaies> {
 
           // Padding(padding: EdgeInsets.all(20)),
 
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(1.0),
-              child: Column(
-                children: [
-                  Container(
-                    width: MediaQuery.of(context).size.width ,
-                    decoration: BoxDecoration(
-                      color: Colors.black87,
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(20.0),
+          for (var index = 0; index < (widget.paies?.length ?? 0); index++)
+            Container(width: 310,height: 215,color: Colors.white,margin: EdgeInsets.only(top: 10),
+              child: Card(color: Colors.white,shadowColor: Colors.black,surfaceTintColor: Colors.white,elevation: 8,
+                child: SingleChildScrollView(scrollDirection: Axis.vertical,
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(width: 310,height: 50,decoration: BoxDecoration(borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(10),
+                        topRight: Radius.circular(10),
+                      ),color: Colors.black),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Text('Du: ${DateFormat('dd/MM/yyyy ').format(DateTime.parse(widget.paies![index]["fromDate"].toString()).toLocal())}',
+                              style: WhiteStyle(),
+                            ),
+                            Text('Au: ${DateFormat('dd/MM/yyyy ').format(DateTime.parse(widget.paies![index]["toDate"].toString()).toLocal())}',
+                              style: WhiteStyle(),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    // margin: EdgeInsets.only(left: 10),
-                    child: DataTable(
-                      showCheckboxColumn: true,
-                      showBottomBorder: true,
-                      headingRowHeight: 50,
 
-                      headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white10),
-                      dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
-                      columnSpacing: 8,headingTextStyle: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),
-                      dataRowHeight: 50,
-                      columns: [
-                        DataColumn(label: Text('Du')),
-                        DataColumn(label: Text('Au')),
-                        DataColumn(label: Text('NBC')),
-                        DataColumn(label: Text('NBH')),
-                        DataColumn(label: Text('MT')),
-                        DataColumn(label: Text('Statut')),
-                        // DataColumn(label: Text('confirmation')),
-                        // DataColumn(label: Text('Action')),
-                      ],
-                      rows: [
-                        for (var index = 0; index < (widget.paies?.length ?? 0); index++)
-                        // for (var categ in filteredItems!)
-                          DataRow(
-                              cells: [
-                                DataCell(Text('${DateFormat('dd/MM ').format(DateTime.parse(widget.paies![index]["fromDate"].toString()).toLocal())}',style: TextStyle(
-                                  color: Colors.black,
-                                ),)),
-                                DataCell(Text('${DateFormat('dd/MM ').format(DateTime.parse(widget.paies![index]["toDate"].toString()).toLocal())}',style: TextStyle(
-                                  color: Colors.black,
-                                ),)),
-                                DataCell(Center(
-                                  child: Text('${widget.paies![index]["nbc"]}',style: TextStyle(
-                                    color: Colors.black,
-                                  ),),
-                                )),
-                                DataCell(Text('${widget.paies![index]["nbh"].toString()}',style: TextStyle(
-                                  color: Colors.black,
-                                ),)),
-                                DataCell(Text('${widget.paies![index]["somme"].toString()}',style: TextStyle(
-                                  color: Colors.black,
-                                ),)),
-                                DataCell(Text('${widget.paies![index]["status"].toString().capitalizeFirst}',style: TextStyle(
-                                  color: Colors.black,
-                                ),)),
-                                // DataCell(Text('${widget.paies![index]["confirmation"].toString()}',style: TextStyle(
-                                //   color: Colors.black,
-                                // ),)),
+                      SizedBox(height: 10),
+                      Row(mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Text('Nombre de Cours: ${widget.paies![index]["nbc"]}',
+                            style: MyStyle(),
+                          ),
+                        ],),
+                      SizedBox(height: 10),
+                      Row(mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Text('Nombre d\'heures: ${widget.paies![index]["nbh"]}',
+                            style: MyStyle(),
+                          ),
+                        ],),
+                      SizedBox(height: 10),
+                      Row(mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Text('Montant Total: ${widget.paies![index]["somme"]}', style: MyStyle(),
+                          ),
+                        ],),
+                      SizedBox(height: 10),
+                      Row(mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Text('Confirmation: ${widget.paies![index]["confirmation"]!.toString().capitalize}', style: MyStyle(),
+                          ),
+                        ],),
 
-
-                              ]),
-                      ],
-                    ),
-
+                    ],
                   ),
-                ],
-              ),
-            ),
-          )
-          //     :Expanded(
-          //   child: Container(
-          //     decoration: BoxDecoration(
-          //       color: Colors.white,
-          //       borderRadius: BorderRadius.only(
-          //         topLeft: Radius.circular(20),
-          //         topRight: Radius.circular(20),
-          //       ),
-          //     ),
-          //     child: Padding(
-          //       padding: const EdgeInsets.all(1.0),
-          //       child: SingleChildScrollView(
-          //         scrollDirection: Axis.horizontal,
-          //         child: Container(
-          //           decoration: BoxDecoration(
-          //             color: Colors.white12,
-          //             borderRadius: BorderRadius.all(
-          //               Radius.circular(20.0),
-          //             ),
-          //           ),
-          //           margin: EdgeInsets.only(left: 10),
-          //           child: DataTable(
-          //             showCheckboxColumn: true,
-          //             showBottomBorder: true,
-          //             horizontalMargin: 1,
-          //             headingRowHeight: 50,
-          //             columnSpacing: 18,
-          //             dataRowHeight: 50,
-          //             headingTextStyle: TextStyle(
-          //               fontWeight: FontWeight.bold,
-          //               color: Colors.black, // Set header text color
-          //             ),
-          //             // headingRowColor: MaterialStateColor.resolveWith((states) => Color(0xff0fb2ea)), // Set row background color
-          //             columns: [
-          //               DataColumn(label: Text('Enseignant')),
-          //               DataColumn(label: Text('Volume horaire')),
-          //               DataColumn(label: Text('Montant')),
-          //             ],
-          //             rows: [
-          //                   DataRow(
-          //                     cells: [
-          //                       DataCell(Text('${widget.ProfName}',style: TextStyle(
-          //                         color: Colors.black,
-          //                       ),),///hmmm
-          //                       ),
-          //                       DataCell(
-          //                         Text('${totalType.toStringAsFixed(2)}',style: TextStyle(
-          //                           color: Colors.black,
-          //                         ),),
-          //                       ),
-          //                       DataCell(
-          //                         Text('${somme.toStringAsFixed(2)}',style: TextStyle(
-          //                           color: Colors.black,
-          //                         ),),
-          //                       ),
-          //                     ],
-          //                   ),
-          //                   DataRow(
-          //                     cells: [
-          //                       DataCell(Text('Montant Totale (MRU)',style: TextStyle(
-          //                         color: Colors.black,
-          //                       ),),///hmmm
-          //                       ),
-          //                       DataCell(
-          //                         Text(''),
-          //                       ),
-          //                       DataCell(
-          //                         Text('${somme.toStringAsFixed(2)}',style: TextStyle(
-          //                         color: Colors.black,
-          //                       ),),
-          //                       ),
-          //                     ],
-          //                   ),
-          //             ],
-          //           ),
-          //         ),
-          //       ),
-          //     ),
-          //   ),
-          // ),
-
+                ),),
+            )
 
 
 
@@ -367,5 +269,22 @@ class _PaieState extends State<ProfPaies> {
 
     );
 
+  }
+  TextStyle WhiteStyle() {
+    return GoogleFonts.abhayaLibre(
+      color: Colors.white,
+      fontSize: 20.0,
+      fontStyle: FontStyle.italic,
+      fontWeight: FontWeight.bold,
+    );
+  }
+
+  TextStyle MyStyle() {
+    return GoogleFonts.abhayaLibre(
+      color: Colors.black,
+      fontSize: 20.0,
+      fontStyle: FontStyle.italic,
+      fontWeight: FontWeight.bold,
+    );
   }
 }

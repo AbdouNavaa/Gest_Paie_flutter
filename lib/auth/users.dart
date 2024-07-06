@@ -244,191 +244,6 @@ class _UsersState extends State<Users> {
             ),
             Divider(),
 
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Flexible(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        // Sélectionnez tous les cours
-                        selectedUsers = filteredItems!;
-                      });
-                    },
-                    child: Text('Sélectionner tous', style: TextStyle(fontSize: 13),),
-                    style: ElevatedButton.styleFrom(
-                      // surfaceTintColor: Colors.indigo,
-                      foregroundColor: Colors.white,
-                      // side: BorderSide(color: Colors.black38),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      elevation: 5,
-                      padding: EdgeInsets.only(left: 10,right: 10),
-                      backgroundColor: Colors.indigoAccent,
-                      //   foregroundColor: Colors.black,
-                      textStyle: TextStyle(fontWeight: FontWeight.bold),
-                      // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                    ),
-
-                  ),
-                ),
-                Flexible(
-                child: TextButton(
-                  onPressed: () {
-                    // Confirmer et traiter les cours sélectionnés
-                    if (selectedUsers.length == 0){
-                      ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Il n y a pas d\'elements selectionner'),action: SnackBarAction(label: 'Ok', onPressed: (){})),
-                      );
-                    }
-                    else{ activerOuDesactiverUser(selectedUsers);
-                    // Remettre la liste de sélection à zéro
-                    setState(() {
-                      selectedUsers = [];
-                      Navigator.of(context).pop();
-                      showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              surfaceTintColor: Color(0xB0AFAFA3),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
-                              title: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  Text("Alerte de succès"),
-                                  Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
-                                ],
-                              ),
-                              content: Text(
-                                  "l\'operation est effectuée avec succès"),
-                              actions: [
-                                TextButton(
-                                  child: Text("Ok"),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                ),
-
-                              ],
-                            );});
-                    });}
-                  },
-                  child: Row(
-                    children: [
-                      Text('Activation', style: TextStyle(fontSize: 13),),
-                      Icon(Icons.check_box_outline_blank_outlined),
-                    ],
-                  ),
-                  style: TextButton.styleFrom(
-                    surfaceTintColor: Colors.white,
-                    foregroundColor: Colors.black,
-                    // side: BorderSide(color: Colors.black38),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    elevation: 5,
-                    padding: EdgeInsets.symmetric(horizontal: 15),
-                    backgroundColor: Colors.white,
-                    //   foregroundColor: Colors.black,
-                    textStyle: TextStyle(fontWeight: FontWeight.bold),
-                    // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                  ),
-
-                ),
-                ),
-                Flexible(
-                child: TextButton(
-                  onPressed: () {
-                    // Navigator.pop(context);
-                    if (selectedUsers.length == 0){
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Il n y a pas d\'utilisateur selectionner'),action: SnackBarAction(label: 'Ok', onPressed: (){})),
-                      );
-                    }else{
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            surfaceTintColor: Color(0xB0AFAFA3),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
-                            title: Text("Confirmer la suppression"),
-                            content: Text(
-                                "Êtiez-vous sûr de vouloir supprimer ces éléments ?"),
-                            actions: <Widget>[
-                              TextButton(
-                                child: Text("ANNULER"),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                              ),
-                              TextButton(
-                                child: Text(
-                                  "SUPPRIMER",
-                                  // style: TextStyle(color: Colors.red),
-                                ),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                  // Confirmer et traiter les cours sélectionnés
-                                  SupprimerUsers(selectedUsers);
-                                  // Remettre la liste de sélection à zéro
-                                  setState(() {
-                                    selectedUsers = [];
-                                    showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return AlertDialog(
-                                            surfaceTintColor: Color(0xB0AFAFA3),
-                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
-                                            title: Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                              children: [
-                                                Text("Alerte de succès"),
-                                                Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
-                                              ],
-                                            ),
-                                            content: Text(
-                                                "l\'operation est effectuée avec succès"),
-                                            actions: [
-                                              TextButton(
-                                                child: Text("Ok"),
-                                                onPressed: () {
-                                                  Navigator.of(context).pop();
-                                                },
-                                              ),
-
-                                            ],
-                                          );});
-                                  });
-                                },
-
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    }
-
-                  }, // Disable button functionality
-                  child: Row(
-                    children: [
-                      Text('Supprimer', style: TextStyle(fontSize: 13),),
-                      Icon(Icons.delete_outline_outlined),
-                    ],
-                  ),
-                  style: TextButton.styleFrom(
-                    surfaceTintColor: Colors.white,
-                    foregroundColor: Colors.black,
-                    // side: BorderSide(color: Colors.black38),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    elevation: 5,
-                    padding: EdgeInsets.symmetric(horizontal: 15),
-                    backgroundColor: Colors.white,
-                    //   foregroundColor: Colors.black,
-                    textStyle: TextStyle(fontWeight: FontWeight.bold),
-                    // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                  ),
-
-                ),
-                ),
-              ],
-            ),
 
             Expanded(
               child: Container(
@@ -517,8 +332,157 @@ class _UsersState extends State<Users> {
             ),
           ],
         ),
-        floatingActionButton:
-        showFloat?
+        floatingActionButton:selectedUsers.isNotEmpty ?
+        Container(
+          width: 220,
+          height: 50,
+
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 5,
+              ),
+            ],
+          ),
+
+          margin: EdgeInsets.only(left: 50,right: 50),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // SizedBox(width: 18,),
+              TextButton(
+                onPressed: () {
+                  // Confirmer et traiter les cours sélectionnés
+                  if (selectedUsers.length == 0){
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Il n y a pas d\'elements selectionner'),action: SnackBarAction(label: 'Ok', onPressed: (){})),
+                    );
+                  }
+                  else{ activerOuDesactiverUser(selectedUsers);
+                  // Remettre la liste de sélection à zéro
+                  setState(() {
+                    selectedUsers = [];
+                    Navigator.of(context).pop();
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            surfaceTintColor: Color(0xB0AFAFA3),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                            title: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Text("Alerte de succès"),
+                                Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
+                              ],
+                            ),
+                            content: Text(
+                                "l\'operation est effectuée avec succès"),
+                            actions: [
+                              TextButton(
+                                child: Text("Ok"),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+
+                            ],
+                          );});
+                  });}
+                },
+                child: Row(
+                  children: [
+                    Text('Activation', style: TextStyle(fontSize: 13),),
+                    Icon(Icons.check_box_outlined),
+                  ],
+                ),
+                style: TextButton.styleFrom(
+                  surfaceTintColor: Colors.white,
+                  foregroundColor: Colors.black,
+                  // side: BorderSide(color: Colors.black38),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  elevation: 5,
+                  padding: EdgeInsets.symmetric(horizontal: 15),
+                  backgroundColor: Colors.white,
+                  //   foregroundColor: Colors.black,
+                  textStyle: TextStyle(fontWeight: FontWeight.bold),
+                  // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                ),
+
+              ),
+              TextButton(
+                onPressed: () {
+                  if (selectedUsers.isNotEmpty) {
+
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          // surfaceTintColor: Color(0xB0AFAFA3),
+                          backgroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                          title: Text("Confirmer la suppression",style: TextStyle(fontSize: 20)),
+                          content: Text("Êtiez-vous sûr de vouloir supprimer ces éléments ?"),
+                          actions: <Widget>[
+                            TextButton(
+                              child: Text("ANNULER"),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                            TextButton(
+                              child: Text(
+                                "SUPPRIMER",
+                                style: TextStyle(color: Colors.red),
+                              ),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                SupprimerUsers(selectedUsers);
+                                // DeleteCours(course['_id']);
+                                setState(() {
+                                  Navigator.pop(context);
+                                });
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Le Category a été Supprimer avec succès.')),
+                                );
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  }
+                },
+                child: Row(
+                  children: [
+                    Text('Supprimer', style: TextStyle(fontSize: 13),),
+                    Icon(Icons.delete_outline_outlined),
+                  ],
+                ),
+                style: TextButton.styleFrom(
+                  surfaceTintColor: Colors.white,
+                  foregroundColor: Colors.black,
+                  // side: BorderSide(color: Colors.black38),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  elevation: 5,
+                  padding: EdgeInsets.symmetric(horizontal: 15),
+                  backgroundColor: Colors.white,
+                  //   foregroundColor: Colors.black,
+                  textStyle: TextStyle(fontWeight: FontWeight.bold),
+                  // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                ),
+
+              ),
+
+
+            ],
+          ),
+        )
+            :        showFloat?
         Container(
           width: 300,
 
@@ -1151,30 +1115,24 @@ class YourDataSource extends DataTableSource {
   @override
   DataRow? getRow(int index) {
     final item = _items[index];
-    return DataRow(cells: [
+    return DataRow(
+        selected: selectedUsers.contains(item),
+        onSelectChanged: (value) {
+          updateStateCallback(() {
+            if (value != null && value) {
+              selectedUsers.add(item);
+            } else {
+              selectedUsers.remove(item);
+            }
+          });
+        },
+        cells: [
       DataCell(
-        Row(
-          children: [
-            Checkbox(
-              value: selectedUsers.contains(item),
-              activeColor: Colors.green,
-              onChanged: (value) {
-                updateStateCallback(() {
-                  if (value != null && value) {
-                    selectedUsers.add(item);
-                  } else {
-                    selectedUsers.remove(item);
-                  }
-                });
-              },
-            ),
-            Text(
-              item.isActive! ? 'Actif' : 'Inactif',
-              style: TextStyle(
-                color: item.isActive! ? Colors.green : Colors.red,
-              ),
-            ),
-          ],
+        Text(
+          item.isActive! ? 'Actif' : 'Inactif',
+          style: TextStyle(
+            color: item.isActive! ? Colors.green : Colors.red,
+          ),
         ),
       ),
       DataCell(Text('${item.name} ${item.prenom}')),

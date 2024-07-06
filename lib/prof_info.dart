@@ -47,13 +47,7 @@ class _ProfesseurDetailsScreenState extends State<ProfesseurDetailsScreen> {
   void initState() {
     super.initState();
     print(widget.profId);
-    fetchMatiere().then((data) {
-      setState(() {
-        matiereList = data; // Assigner la liste renvoyée par emploiesseur à items
-      });
-    }).catchError((error) {
-      print('Erreur: $error');
-    });
+
     fetchProfesseurDetail(widget.profId);
 
     _loadPhotoUrl();
@@ -68,14 +62,6 @@ class _ProfesseurDetailsScreenState extends State<ProfesseurDetailsScreen> {
 
   Map<String, dynamic>? professeurData;
   List<dynamic> matieres = [];
-  List<Matiere> matiereList = [];
-  Matiere getMatIdFromName(String id) {
-    // Assuming you have a list of professeurs named 'professeursList'
-    final mat = matiereList.firstWhere((prof) => '${prof.id}' == id, orElse: () =>Matiere(id: '', name: '',  categorieId: '', categorie_name: '', code: '',));
-    // print(professeur.name);
-    return mat; // Return the ID if found, otherwise an empty string
-
-  }
 
   Future<void> fetchProfesseurDetail(String id) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

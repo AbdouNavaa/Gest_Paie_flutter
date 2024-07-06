@@ -394,8 +394,8 @@ bool showFloat = false;
                               return AlertDialog(
                                 surfaceTintColor: Color(0xB0AFAFA3),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
-                                title: Center(child: Text("Alerte")),
-                                content: Container(height: 100,
+                                title: Center(child: Text("Information",style: TextStyle(color: Colors.yellow.shade800),)),
+                                content: Container(height: 70,
                                   child: Column(
                                     children: [
                                       Row(
@@ -489,7 +489,7 @@ bool showFloat = false;
                       ),
                       // margin: EdgeInsets.only(left: 3),
                       child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
+                        scrollDirection: Axis.vertical,
                         child: Column(
                           children: [
                             Container(
@@ -573,7 +573,8 @@ bool showFloat = false;
                                                 Container(
                                                   margin: EdgeInsets.only(left: 5),
                                                   width: 20,color: Colors.white,
-                                                  child: Icon( widget.courses[index]['isSigned'] =="effectué"?  Icons.task_alt
+                                                  child:
+                                                  Icon( widget.courses[index]['isSigned'] =="effectué"?  Icons.task_alt
                                                       :widget.courses[index]['isSigned'] =="annulé"?  Icons.highlight_remove_sharp
                                                       :Icons.panorama_fish_eye,
                                                     color: widget.courses[index]['isSigned'] =="effectué" ? Colors.green: Colors.black54,
@@ -646,32 +647,31 @@ bool showFloat = false;
                                           ],
                                         ),
 
-                                  // DataRow(
-                                  //     color:MaterialStateColor.resolveWith((states) => Colors.white),
-                                  //
-                                  //     cells: [
-                                  //       DataCell(Text('Total', style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),)),
-                                  //       DataCell(Text('')),
-                                  //       DataCell((widget.dateDeb != null && widget.dateFin != null)?
-                                  //       Center(child: Text('${coursesNum} Cours',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold)))
-                                  //           :Text('${widget.courses.length} Cours',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),)
-                                  //       ),
-                                  //       DataCell(Text('')),
-                                  //       DataCell(
-                                  //           Text('${totalType}',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),)
-                                  //       ),
-                                  //
-                                  //
-                                  //       DataCell(
-                                  //           Text('${somme}',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold))
-                                  //       ),
-                                  //
-                                  //       DataCell(Text('')),
-                                  //     ])
 
                                 ],
                               ),
                             ),
+                            widget.courses.length > 0?
+                            Container(
+                              width: MediaQuery.of(context).size.width -10,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                  // color: widget.courses.length > 0 ? Colors.white10:Colors.white,
+                                  color: Colors.black87,
+                                  borderRadius: BorderRadius.only(bottomLeft:Radius.circular(5),bottomRight:Radius.circular(5),)
+                              ),
+                              child: Row(
+                                children: [
+                                Expanded(flex: 2,child: Text(' Total', style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold))),
+
+                                (widget.dateDeb != null && widget.dateFin != null)?
+                              Expanded(flex: 2,child: Center(child: Text('${coursesNum} Cours',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold))))
+                                  :Expanded(flex: 2,child: Text('${widget.courses.length} Cours',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),))       ,
+                                  Expanded(flex: 2,child: Text('${totalType} Heures',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),)),
+                                  Expanded(flex: 2,child: Text('${somme} MRU',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold)))
+                                ],
+                              ),
+                            ):Container(),
 
 
 
@@ -1192,7 +1192,7 @@ bool showFloat = false;
                             context,
                             MaterialPageRoute(builder: (context) => UpdateCoursScreen(empId: course['_id'], start: course['startTime'], date: DateFormat('dd/MM/yyyy ').format(
                               DateTime.parse(course['date'].toString()).toLocal(),),Prof: "${course['nom']} ${course['prenom']}",
-                              EM:course['matiere'], EP:"${course['nom']} ${course['prenom']}", TN: course['type'], th: course['nbh'], GN: '', MId: course['element'], PId: course['professeur'],)),
+                              EM:course['matiere'], EP:"${course['nom']} ${course['prenom']}", TN: course['type'], th: course['nbh'], GN: course['groupe'], MId: course['element'], PId: course['professeur'],)),
                           );
                         });
                       },// Disable button functionality
@@ -1466,8 +1466,8 @@ bool showFloat = false;
                               ],
                             ),
                               style: ElevatedButton.styleFrom(
-                                foregroundColor: showSigned?  Colors.lightGreenAccent: Colors.white,
-                                backgroundColor: Colors.green.shade700,
+                                foregroundColor:   Colors.white,
+                                backgroundColor: showSigned?Colors.indigo.shade700:Colors.green.shade700,
                                 elevation: 5,
                                 padding: EdgeInsets.only(left: 30, right: 30),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -1492,8 +1492,9 @@ bool showFloat = false;
                               ],
                             ),
                             style: ElevatedButton.styleFrom(
-                              foregroundColor: showSigned?  Colors.lightGreenAccent: Colors.white,
-                              backgroundColor: Colors.green.shade700,
+
+                              foregroundColor:   Colors.white,
+                              backgroundColor: showPaid?Colors.indigo.shade700:Colors.green.shade700,
                               elevation: 5,
                               padding: EdgeInsets.only(left: 30, right: 30),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -1677,7 +1678,6 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
   filliere? selectedFil;
   int? selectedSem;
   Eles? selectedElem;
-  Matiere? selectedMat;
   Professeur? selectedProfesseur;
   List<Professeur> professeurs = [];
   DateTime? selectedDateTime;
@@ -1731,7 +1731,6 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
   List<Eles> elList = [];
   List<Eles> elList2 = [];
   List<Eles> elList1 = [];
-  List<Matiere> matiereList = [];
   List<filliere> filList = [];
   List<int> semestersList = [];
 
@@ -1830,13 +1829,6 @@ class _AddCoursScreenState extends State<AddCoursScreen> {
         print('Erreur: $error');
       });
 
-      fetchMatiere().then((data) {
-        setState(() {
-          matiereList = data; // Assigner la liste renvoyée par emploiesseur à items
-        });
-      }).catchError((error) {
-        print('Erreur: $error');
-      });
 
 
     }).catchError((error) {
@@ -2681,7 +2673,10 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
   num selectedNbhValue = 1.5;
   List<String> typeNames = ['CM', 'TP', 'TD']; // Liste des noms uniques de types
   List<double> nbhValues = [1.5, 2];
+  String? selectedGroup;
+  List<dynamic> filteredGroups = [];
 
+  bool showGroup = false;
   bool showType = false;
   bool showNum = false;
   bool showTime = false;
@@ -2702,7 +2697,6 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
 
 
   List<Professeur> professeurList = [];
-  List<Matiere> matiereList = [];
   List<filliere> filList = [];
   String getFilIdFromName(String id) {
     // Assuming you have a list of professeurs named 'professeursList'
@@ -2778,6 +2772,32 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
   //   return element!; // Return the ID if found, otherwise an empty string
   //
   // }
+  void updateFilteredGroups(selectedType,selectedProfesseur,selectedElem) {
+    if (selectedType != null && selectedProfesseur != null) {
+      List<dynamic> groups;
+      List<dynamic> professors;
+      if (selectedType == 'CM') {
+        groups = selectedElem!.groupeCM ?? [];
+        professors = selectedElem?.professeurCM ?? [];
+      } else if (selectedType == 'TP') {
+        groups = selectedElem?.groupeTP ?? [];
+        professors = selectedElem?.professeurTP ?? [];
+      } else {
+        groups = selectedElem?.groupeTD ?? [];
+        professors = selectedElem?.professeurTD ?? [];
+      }
+
+      // Filter groups by professor ID
+      String profId = selectedProfesseur?.id ?? '';
+      print('ProfID:${profId}');
+      filteredGroups = groups.where((group) {
+        return professors.any((prof) => prof == profId && group.contains(prof));
+      }).toList();
+      print("Groups:${filteredGroups}");
+    } else {
+      filteredGroups = [];
+    }
+  }
 
   filliere? selectedFil;
   int? selectedSem;
@@ -2991,8 +3011,7 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
                 // _buildTypesInput(),
                 Row(
                   children: [
-                    Container(
-                      width: 147.5,
+                    Expanded(
                       child: DropdownButtonFormField<String>(
                         value: selectedTypeName,
                         items: typeNames.map((typeName) {
@@ -3005,7 +3024,9 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
                           setState(() {
                             selectedTypeName = value ?? 'CM';
                             showType = true;
-                            // showElem = true;
+                            showGroup = true;
+                            selectedGroup = null;
+                            updateFilteredGroups(selectedTypeName,selectedProfesseur,selectedElem);
                           });
                         },
                         decoration: InputDecoration(
@@ -3022,31 +3043,61 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
                       ),
                     ),
                     SizedBox(width: 10),
-                    Container(
-                      width: 147.5,
-                      child: DropdownButtonFormField<num>(
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide.none,gapPadding: 1,
-                            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    if (selectedTypeName != null)
+                      Expanded(flex: 1,
+                        child: Container(
+                          child: DropdownButtonFormField<String>(
+                            value: selectedGroup,
+                            hint: Text('G${widget.GN.split('-')[2]}'),
+                            items: filteredGroups.map((group) {
+                              return DropdownMenuItem<String>(
+                                value: group,//abdou
+                                child: Text(selectedTypeName == "CM"?'G${group.split('-')[2]}':selectedTypeName == "TP"?'TP${group.split('-')[2]}':'TD${group.split('-')[2]}'),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                selectedGroup = value;
+                                showGroup = true;
+                              });
+                            },
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Colors.white,
+                              hintText: "Sélectionner un groupe",
+                              border: OutlineInputBorder(
+                                borderSide: BorderSide.none,
+                                borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                              ),
+                            ),
                           ),
                         ),
-                        value: selectedNbhValue,
-                        items: nbhValues.map((nbhValue) {
-                          return DropdownMenuItem<num>(
-                            child: Text(nbhValue.toString()),
-                            value: nbhValue,
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            selectedNbhValue = value ?? 1.5;
-                            showNum = true;
-                          });
-                        },
                       ),
+                    SizedBox(width: 10),
+                    Expanded(
+                    child: DropdownButtonFormField<num>(
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide.none,gapPadding: 1,
+                          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                        ),
+                      ),
+                      value: selectedNbhValue,
+                      items: nbhValues.map((nbhValue) {
+                        return DropdownMenuItem<num>(
+                          child: Text(nbhValue.toString()),
+                          value: nbhValue,
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          selectedNbhValue = value ?? 1.5;
+                          showNum = true;
+                        });
+                      },
+                    ),
                     ),
                   ],
                 ),
@@ -3104,37 +3155,6 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
 
 
 
-                SizedBox(height: 10),
-
-                // DropdownButtonFormField<String>(
-                //   value: signe,
-                //   items: [
-                //     DropdownMenuItem<String>(
-                //       child: Text('True'),
-                //       value: "effectué",
-                //     ),
-                //     DropdownMenuItem<String>(
-                //       child: Text('False'),
-                //       value: "en attente",
-                //     ),
-                //   ],
-                //   onChanged: (value) {
-                //     setState(() {
-                //       signe = value!;
-                //     });
-                //   },
-                //   decoration: InputDecoration(
-                //     filled: true,
-                //     fillColor: Colors.white,
-                //     hintText: "Est Signe",
-                //
-                //     border: OutlineInputBorder(
-                //       borderSide: BorderSide.none,gapPadding: 1,
-                //       borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                //     ),
-                //   ),
-                //
-                // ),
 
                 SizedBox(height:20),
                 ElevatedButton(
@@ -3158,12 +3178,13 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
                     num nbh = showNum ? selectedNbhValue : widget.th;
                     String elem = showElem ? selectedElem!.id : widget.MId;
                     String prof = showProf ? selectedProfesseur!.id : widget.PId;
+                    String gp = showGroup ? selectedGroup! : widget.GN;
                     UpdatCours(
                         widget.empId,
                         type,
                         nbh,date,
                         time
-                        ,elem,prof,
+                        ,elem,prof,gp
                     );
 
 
@@ -3198,7 +3219,7 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
   }
 
 
-  Future<void> UpdatCours (id,String TN,num th,DateTime date,String time, String ElemId,String ProfId) async {
+  Future<void> UpdatCours (id,String TN,num th,DateTime date,String time, String ElemId,String ProfId,groupe) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString("token")!;
     final url = 'http://192.168.43.73:5000/cours/'  + '/$id';
@@ -3214,7 +3235,7 @@ class _UpdateCoursScreenState extends State<UpdateCoursScreen> {
       "startTime": time,
       "element": ElemId,
       "professeur": ProfId,
-      // "isSigned": isSigned,
+      "groupe": groupe,
     };
 
     if (date != null) {

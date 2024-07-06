@@ -4,17 +4,30 @@ import 'package:flutter/material.dart';
 
 class ThemeHelper{
 
-  InputDecoration textInputDecoration([String lableText="", String hintText = ""]){
+  InputDecoration textInputDecoration([String lableText="", String hintText = "",IconData? icon,VoidCallback? onPress]){
     return InputDecoration(
       labelText: lableText,
       hintText: hintText,
-      fillColor: Color(0xFFFFFFFF),
-      filled: true,
-      contentPadding: EdgeInsets.fromLTRB(20, 10, 20, 10),
-      // focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(5.0), borderSide: BorderSide(color: Colors.grey)),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0), borderSide: BorderSide(color: Colors.grey.shade400)),
-      errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0), borderSide: BorderSide(color: Colors.red, width: 2.0)),
-      focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(100.0), borderSide: BorderSide(color: Colors.red, width: 2.0)),
+        prefixIcon: IconButton(
+          icon: Icon(
+            icon,
+            color: Colors.black12.withOpacity(.3),
+          ),
+          onPressed:onPress,
+        ),
+        border: InputBorder.none,
+        hintMaxLines: 1,
+        // hintText: hintText,
+        iconColor: Colors.black12,
+        hintStyle: TextStyle(
+          fontSize: 14,
+          color: Colors.black12.withOpacity(.5),
+        ),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8),borderSide: BorderSide(color: Colors.black12,),),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8),borderSide: BorderSide(color: Colors.black12,),),
+        errorBorder: UnderlineInputBorder(borderRadius: BorderRadius.circular(15),borderSide: BorderSide(color: Colors.redAccent,),),
+        focusedErrorBorder: UnderlineInputBorder(borderRadius: BorderRadius.circular(15),borderSide: BorderSide(color: Colors.redAccent,),),
+        contentPadding: EdgeInsets.symmetric(vertical: 18)
     );
   }
 
@@ -32,7 +45,7 @@ class ThemeHelper{
   }
 
   BoxDecoration buttonBoxDecoration(BuildContext context, [String color1 = "", String color2 = ""]) {
-    Color c1 = Colors.blue;
+    Color c1 = Colors.indigo;
     Color c2 = Colors.white;
     // if (color1.isEmpty == false) {
     //   c1 = color1;

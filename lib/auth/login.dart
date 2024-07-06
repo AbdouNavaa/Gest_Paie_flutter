@@ -144,7 +144,8 @@ class _LoginSectionState extends State<LoginSection>
                 // isKeyboadVisible? SizedBox() :
                 Container(
                   height: 300,
-                  child: HeaderWidget(300, false, ''),
+                  child: HeaderWidget(300, true, 'assets/supnum.png',70),
+                  // child: HeaderWidget(300, false, ''),
                 ),
                 Expanded(
                   flex: 4,
@@ -671,9 +672,9 @@ Future<int?> CoursNS(id, String token) async {
   // SharedPreferences prefs = await SharedPreferences.getInstance();
   // String token = prefs.getString("token")!;
 
-  var url = Uri.parse('http://192.168.43.73:5000/cours/non-signe-professeur/${id}/');
+  var url = Uri.parse('http://192.168.43.73:5000/cours?professeur=${id}&isSigned=en attente');
 
-  var responseInitialise = await http.post(
+  var responseInitialise = await http.get(
     url,
     headers: {
       'Authorization': 'Bearer $token',

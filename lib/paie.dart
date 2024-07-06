@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -150,262 +151,249 @@ class _PaieState extends State<Paie> {
 
           Divider(),
           // showPaid?
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(1.0),
-              child: Column(
+              for (var index = 0; index < (widget.paies?.length ?? 0); index++)
+          Container(width: 310,height: 215,color: Colors.white,margin: EdgeInsets.only(top: 10),
+            child: Card(color: Colors.white,shadowColor: Colors.black,surfaceTintColor: Colors.white,elevation: 8,
+              child: SingleChildScrollView(scrollDirection: Axis.vertical,
+                child: Column(crossAxisAlignment: CrossAxisAlignment.center,mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    width: MediaQuery.of(context).size.width ,
-                    decoration: BoxDecoration(
-                      color: Colors.black87,
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(20.0),
+                  Container(width: 310,height: 50,decoration: BoxDecoration(borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(10),
+                      topRight: Radius.circular(10),
+                  ),color: Colors.black),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Text('Du: ${DateFormat('dd/MM/yyyy ').format(DateTime.parse(widget.paies![index]["fromDate"].toString()).toLocal())}',
+                        style: WhiteStyle(),
                       ),
+                      Text('Au: ${DateFormat('dd/MM/yyyy ').format(DateTime.parse(widget.paies![index]["toDate"].toString()).toLocal())}',
+                        style: WhiteStyle(),
+                      ),
+                    ],
+                  ),
                     ),
-                    // margin: EdgeInsets.only(left: 10),
-                    child: DataTable(
-                      showCheckboxColumn: true,
-                      showBottomBorder: true,
 
-                      headingRowColor: MaterialStateColor.resolveWith((states) => Colors.white10),
-                      dataRowColor: MaterialStateColor.resolveWith((states) => Colors.white),
-                      headingRowHeight: 50,
-                      columnSpacing: 8,headingTextStyle: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),
-                      dataRowHeight: 50,
-                      columns: [
-                        DataColumn(label: Text('Du')),
-                        DataColumn(label: Text('Au')),
-                        DataColumn(label: Text('NBC')),
-                        DataColumn(label: Text('NBH')),
-                        DataColumn(label: Text('MT')),
-                        // DataColumn(label: Text('Statut')),
-                        DataColumn(label: Text('Confirmation')),
-                        // DataColumn(label: Text('Action')),
-                      ],
-                      rows: [
-                        for (var index = 0; index < (widget.paies?.length ?? 0); index++)
-                        // for (var categ in filteredItems!)
-                          DataRow(
-                              cells: [
-                                DataCell(Text('${DateFormat('dd/MM ').format(DateTime.parse(widget.paies![index]["fromDate"].toString()).toLocal())}',style: TextStyle(
-                                  color: Colors.black,
-                                ),)),
-                                DataCell(Text('${DateFormat('dd/MM ').format(DateTime.parse(widget.paies![index]["toDate"].toString()).toLocal())}',style: TextStyle(
-                                  color: Colors.black,
-                                ),)),
-                                DataCell(Text('${widget.paies![index]["nbc"]}',style: TextStyle(
-                                  color: Colors.black,
-                                ),)),
-                                DataCell(Text('${widget.paies![index]["nbh"].toString()}',style: TextStyle(
-                                  color: Colors.black,
-                                ),)),
-                                DataCell(Text('${widget.paies![index]["somme"].toString()}',style: TextStyle(
-                                  color: Colors.black,
-                                ),)),
-                                // DataCell(Text('${widget.paies![index]["status"].toString()}',style: TextStyle(
-                                //   color: Colors.black,
-                                // ),)),
-                                // DataCell(Text('${widget.paies![index]["confirmation"].toString()}',style: TextStyle(
-                                //   color: Colors.black,
-                                // ),)),
-                                DataCell(
-                                  Row(
+                  SizedBox(height: 10),
+                    Row(mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                    Text('Nombre de Cours: ${widget.paies![index]["nbc"]}',
+                      style: MyStyle(),
+                    ),
+                  ],),
+                  SizedBox(height: 10),
+                    Row(mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                    Text('Nombre d\'heures: ${widget.paies![index]["nbh"]}',
+                      style: MyStyle(),
+                    ),
+                  ],),
+                  SizedBox(height: 10),
+                    Row(mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                    Text('Montant Total: ${widget.paies![index]["somme"]}', style: MyStyle(),
+                    ),
+                  ],),
+
+                  SizedBox(height: 5),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  surfaceTintColor: Color(0xB0AFAFA3),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                                  title: Row(
                                     children: [
-                                      Container(
-                                        width: 35,
-                                        child: TextButton(
-                                          onPressed: () {
-                                            showDialog(
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return AlertDialog(
-                                                  surfaceTintColor: Color(0xB0AFAFA3),
-                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
-                                                  title: Row(
-                                                    children: [
-                                                      Text("Refusé"),
-                                                      SizedBox(width: 90,),
-                                                      Icon(Icons.thumb_down_off_alt_outlined, color: Colors.redAccent.shade200,)
-                                                    ],
-                                                  ),
-                                                  content: Container(height: 200,
-                                                    child: Column(
-                                                      children: [
-                                                        Container(height: 40,
-                                                          child: Text(
-                                                              "Êtes-vous sûr de vouloir refuser ce paiement ?"),
-                                                        ),
-                                                        TextFormField(
-                                                          controller: _message,
-                                                          maxLines: 5,
-                                                          decoration: InputDecoration(border: OutlineInputBorder(borderSide: BorderSide(color: Colors.red.shade100))),
-                                                          // initialValue: 'Message de Refusion',
-                                                        )
-
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  actions: <Widget>[
-                                                    TextButton(
-                                                      child: Text("Annuler",style: TextStyle(color: Colors.red)),
-                                                      // child: Text("Non"),
-                                                      onPressed: () {
-                                                        Navigator.of(context).pop();
-                                                      },
-                                                    ),
-                                                    TextButton(
-                                                      child: Text(
-                                                        "Envoyer",
-                                                        style: TextStyle(color: Colors.green),
-                                                      ),
-                                                      onPressed: () {
-                                                        Navigator.of(context).pop();
-
-                                                        // fetchCategory();
-                                                        print('Hello${widget.paies![index]["_id"]},${_message.text}');
-                                                        Refuse(widget.paies![index]["_id"],_message.text);
-                                                        setState(() {
-                                                          Navigator.of(context).pop();
-                                                          showDialog(
-                                                              context: context,
-                                                              builder: (BuildContext context) {
-                                                                return AlertDialog(
-                                                                  surfaceTintColor: Color(0xB0AFAFA3),
-                                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
-                                                                  title: Row(
-                                                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                                                    children: [
-                                                                      Text("Alerte de succès"),
-                                                                      Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
-                                                                    ],
-                                                                  ),
-                                                                  content: Text(
-                                                                      "Le paiement est refusé"),
-
-                                                                  actions: [
-                                                                    TextButton(
-                                                                      child: Text("Ok"),
-                                                                      onPressed: () {
-                                                                        Navigator.of(context).pop();
-                                                                      },
-                                                                    ),
-
-                                                                  ],
-
-                                                                );});
-                                                        });
-
-                                                      },
-                                                    ),
-                                                  ],
-                                                );
-                                              },
-                                            );
-                                          }, // Disable button functionality
-                                          child: Icon(Icons.thumb_down_alt_outlined, color: Colors.red,),
-
+                                      Text("Refusé"),
+                                      SizedBox(width: 90,),
+                                      Icon(Icons.thumb_down_off_alt_outlined, color: Colors.redAccent.shade200,)
+                                    ],
+                                  ),
+                                  content: Container(height: 200,
+                                    child: Column(
+                                      children: [
+                                        Container(height: 40,
+                                          child: Text(
+                                              "Êtes-vous sûr de vouloir refuser ce paiement ?"),
                                         ),
+                                        TextFormField(
+                                          controller: _message,
+                                          maxLines: 5,
+                                          decoration: InputDecoration(border: OutlineInputBorder(borderSide: BorderSide(color: Colors.red.shade100))),
+                                          // initialValue: 'Message de Refusion',
+                                        )
+
+                                      ],
+                                    ),
+                                  ),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      child: Text("Annuler",style: TextStyle(color: Colors.red)),
+                                      // child: Text("Non"),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                    TextButton(
+                                      child: Text(
+                                        "Envoyer",
+                                        style: TextStyle(color: Colors.green),
                                       ),
-                                      Container(
-                                        width: 35,
-                                        child: TextButton(
-                                          onPressed: () {
-                                            showDialog(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+
+                                        // fetchCategory();
+                                        print('Hello${widget.paies![index]["_id"]},${_message.text}');
+                                        Refuse(widget.paies![index]["_id"],_message.text);
+                                        setState(() {
+                                          Navigator.of(context).pop();
+                                          showDialog(
                                               context: context,
                                               builder: (BuildContext context) {
                                                 return AlertDialog(
                                                   surfaceTintColor: Color(0xB0AFAFA3),
                                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
                                                   title: Row(
+                                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                                     children: [
-                                                      Text("Confirmation"),
-                                                     SizedBox(width: 80,),
-                                                      Icon(Icons.thumb_up_alt_outlined, color: Colors.lightGreen,)
+                                                      Text("Alerte de succès"),
+                                                      Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
                                                     ],
                                                   ),
                                                   content: Text(
-                                                      "Êtes-vous sûr de vouloir confirmer ce paiement ?"),
-                                                  actions: <Widget>[
+                                                      "Le paiement est refusé"),
+
+                                                  actions: [
                                                     TextButton(
-                                                      child: Text("Annuler",style: TextStyle(color: Colors.red)),
-                                                      // child: Text("Non"),
+                                                      child: Text("Ok"),
                                                       onPressed: () {
                                                         Navigator.of(context).pop();
                                                       },
                                                     ),
-                                                    TextButton(
-                                                      child: Text(
-                                                        "Confirmer",
-                                                        style: TextStyle(color: Colors.green),
-                                                      ),
-                                                      onPressed: () {
-                                                        Navigator.of(context).pop();
 
-                                                        // fetchCategory();
-                                                        Confirm(widget.paies![index]["_id"]);
-                                                        // print(filteredItems?[index].id!);
-                                                        // Navigator.of(context).pop();
-                                                        setState(() {
-                                                          Navigator.of(context).pop();
-                                                          showDialog(
-                                                              context: context,
-                                                              builder: (BuildContext context) {
-                                                                return AlertDialog(
-                                                                  surfaceTintColor: Color(0xB0AFAFA3),
-                                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
-                                                                  title: Row(
-                                                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                                                    children: [
-                                                                      Text("Alerte de succès"),
-                                                                      Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
-                                                                    ],
-                                                                  ),
-                                                                  content: Text(
-                                                                      "Le paiement est confirmé"),
-
-                                                                  actions: [
-                                                                    TextButton(
-                                                                      child: Text("Ok"),
-                                                                      onPressed: () {
-                                                                        Navigator.of(context).pop();
-                                                                      },
-                                                                    ),
-
-                                                                  ],
-
-                                                                );});
-                                                        });
-
-                                                      },
-                                                    ),
                                                   ],
-                                                );
-                                              },
-                                            );
-                                          }, // Disable button functionality
-                                          child: Icon(Icons.thumb_up_alt_outlined, color: Colors.lightGreen,),
 
-                                        ),
-                                      ),
+                                                );});
+                                        });
 
-                                    ],
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          }, // Disable button functionality
+                          child: Text('Refusé',style: WhiteStyle(),),
+                          style: ElevatedButton.styleFrom(backgroundColor: Colors.red,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10)))),
+
+                        ),
+
+                             ),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(titlePadding: EdgeInsets.all(1),
+                                  surfaceTintColor: Color(0xB0AFAFA3),insetPadding: EdgeInsets.only(top: 100,left: 25,right: 25),
+                                  titleTextStyle: GoogleFonts.abhayaLibre( color: Colors.white,
+                                    fontSize: 20.0,
+                                    fontStyle: FontStyle.italic,
+                                    fontWeight: FontWeight.bold,),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                                  title: Container(height: 50,
+                                    decoration: BoxDecoration(
+                                    color: Colors.green,
+                                    borderRadius: BorderRadius.only(topLeft: Radius.circular(10),topRight: Radius.circular(10))
                                   ),
-                                ),
-                                // DataCell(Container(width: 105,
-                                //     child: Text('${categ.description}',)),),
+                                    child: Row(mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text("Confirmation"),
+                                        Icon(Icons.check_circle_outline_outlined,size: 30,color: Colors.white),
+                                      ],
+                                    ),
+                                  ),
+                                  content: Text("Êtes-vous sûr de vouloir confirmer ce paiement ?"),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      child: Text("Annuler",style: TextStyle(color: Colors.red)),
+                                      // child: Text("Non"),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                    TextButton(
+                                      child: Text(
+                                        "Confirmer",
+                                        style: TextStyle(color: Colors.green),
+                                      ),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+
+                                        // fetchCategory();
+                                        Confirm(widget.paies![index]["_id"]);
+                                        // print(filteredItems?[index].id!);
+                                        // Navigator.of(context).pop();
+                                        setState(() {
+                                          Navigator.of(context).pop();
+                                          showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return AlertDialog(
+                                                  surfaceTintColor: Color(0xB0AFAFA3),
+                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                                                  title: Row(
+                                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                    children: [
+                                                      Text("Alerte de succès"),
+                                                      Icon(Icons.fact_check_outlined,color: Colors.lightGreen,)
+                                                    ],
+                                                  ),
+                                                  content: Text(
+                                                      "Le paiement est confirmé"),
+
+                                                  actions: [
+                                                    TextButton(
+                                                      child: Text("Ok"),
+                                                      onPressed: () {
+                                                        Navigator.of(context).pop();
+                                                      },
+                                                    ),
+
+                                                  ],
+
+                                                );});
+                                        });
+
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          }, // Disable button functionality
+                          child: Text('Confirmer',style: WhiteStyle(),),
+
+                          style: ElevatedButton.styleFrom(backgroundColor: Colors.green,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.only(bottomRight: Radius.circular(10)))),
+                        ),
+
+                      ),
 
 
-                              ]),
-                      ],
-                    ),
-
+                    ],
                   ),
                 ],
-              ),
-            ),
+                            ),
+              ),),
           )
-              // :Container()
 
 
 
@@ -416,5 +404,23 @@ class _PaieState extends State<Paie> {
 
     );
 
+  }
+
+  TextStyle WhiteStyle() {
+    return GoogleFonts.abhayaLibre(
+                          color: Colors.white,
+                          fontSize: 20.0,
+                          fontStyle: FontStyle.italic,
+                          fontWeight: FontWeight.bold,
+                        );
+  }
+
+  TextStyle MyStyle() {
+    return GoogleFonts.abhayaLibre(
+            color: Colors.black,
+            fontSize: 20.0,
+            fontStyle: FontStyle.italic,
+            fontWeight: FontWeight.bold,
+          );
   }
 }

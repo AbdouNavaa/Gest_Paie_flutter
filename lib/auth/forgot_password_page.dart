@@ -44,7 +44,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             children: [
               Container(
                 height: _headerHeight,
-                child: HeaderWidget(_headerHeight, true, 'assets/supnum.png'),
+                child: HeaderWidget(_headerHeight, true, 'assets/supnum.png',50),
               ),
               SafeArea(
                 child: Container(
@@ -96,7 +96,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             Container(
                               child: TextFormField(
                                 controller: _emailController,
-                                decoration: ThemeHelper().textInputDecoration("Email", "Enter your email"),
+                                decoration: ThemeHelper().textInputDecoration("Email", "Enter your email",Icons.email_outlined,),
                                 validator: (val){
                                   if(val!.isEmpty){
                                     return "Email can't be empty";

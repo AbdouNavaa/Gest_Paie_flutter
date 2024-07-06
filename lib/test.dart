@@ -456,8 +456,25 @@ class _PieChartExampleState extends State<PieChartExample> {
   final _colorPalettes =
     charts.MaterialPalette.getOrderedPalettes(this._data.length);
     return Scaffold(backgroundColor: Colors.white,
-      body: Row(
+      body: Column(
         children: [
+          SizedBox(height: 30,),
+          Container(
+            height: 50,
+            child: Row(
+              children: [
+                TextButton(onPressed: (){
+                  Navigator.pop(context);
+                }, child: Icon(Icons.arrow_back_ios,color: Colors.black,size: 20,)),
+                // SizedBox(width: 40,),
+                Text("Statistiques",style: TextStyle(fontSize: 20),),
+
+
+
+              ],
+            ),
+          ),
+          Divider(),
           Expanded(
             child: ListView(
               padding: const EdgeInsets.only(top: 100,),
@@ -477,7 +494,7 @@ class _PieChartExampleState extends State<PieChartExample> {
                       data: this._data,
                       // Set a label accessor to control the text of the arc label.
                       labelAccessorFn: (_CostsData row, _) =>
-                      '${row.cost}',insideLabelStyleAccessorFn: (datum, index) => charts.TextStyleSpec(fontSize: 20),
+                      '${row.cost}',insideLabelStyleAccessorFn: (datum, index) => charts.TextStyleSpec(fontSize: 20,),
                     ),
                               ],
                               animate: this._animate,

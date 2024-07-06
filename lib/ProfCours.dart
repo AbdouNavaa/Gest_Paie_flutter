@@ -398,8 +398,8 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                           DataColumn(label: Text('Matière')),
                           DataColumn(label: Text('Date')),
                           DataColumn(label: Text('Eq.CM')),
-                          DataColumn(label: Text('MT')),
-                          DataColumn(label: Text('Action')),
+                          DataColumn(label: Text('Type')),
+                          DataColumn(label: Text('Details')),
                         ],
                         rows: [
                           for (var index = (currentPage - 1) * coursesPerPage;
@@ -445,29 +445,25 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                                     ),),
                                   ),
                                   DataCell(
-                                    Text('${widget.courses[index]['somme']}',style: TextStyle(
+                                    Text('${widget.courses[index]['type']}',style: TextStyle(
                                       color: Colors.black,
                                     ),),
                                   ),
                                   DataCell(
 
-                                      Row(
-                                        children: [
-                                          Container(
-                                            width: 35,
-                                            child: TextButton(
-                                              onPressed: () =>_showCourseDetails(context, widget.courses[index]),// Disable button functionality
+                                      Container(
+                                        width: 35,
+                                        child: TextButton(
+                                          onPressed: () =>_showCourseDetails(context, widget.courses[index]),// Disable button functionality
 
-                                              child: Icon(Icons.more_horiz, color: Colors.black54),
-                                              style: TextButton.styleFrom(
-                                                primary: Colors.white,
-                                                elevation: 0,
-                                                // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
-                                              ),
-                                            ),
-
+                                          child: Icon(Icons.more_horiz, color: Colors.black54),
+                                          style: TextButton.styleFrom(
+                                            primary: Colors.white,
+                                            elevation: 0,
+                                            // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))
                                           ),
-                                        ],
+                                        ),
+
                                       )
                                   ),
                                 ],
@@ -497,7 +493,27 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                         ],
                       ),
                     ),
-                  ],
+                    widget.courses.length > 0?
+                    Container(
+                      width: MediaQuery.of(context).size.width -10,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        // color: widget.courses.length > 0 ? Colors.white10:Colors.white,
+                          color: Colors.black87,
+                          borderRadius: BorderRadius.only(bottomLeft:Radius.circular(5),bottomRight:Radius.circular(5),)
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(flex: 2,child: Text(' Total', style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold))),
+
+                          (widget.dateDeb != null && widget.dateFin != null)?
+                          Expanded(flex: 2,child: Center(child: Text('${coursesNum} Cours',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold))))
+                              :Expanded(flex: 2,child: Text('${widget.courses.length} Cours',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),))       ,
+                          Expanded(flex: 2,child: Text('${totalType} Heures',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),)),
+                          Expanded(flex: 2,child: Text('${somme} MRU',style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold)))
+                        ],
+                      ),
+                    ):Container(),      ],
                 ),
               ),
             ),
@@ -573,7 +589,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
 
         builder: (BuildContext context){
           return Container(
-            height: 630,
+            height: 580,
             padding: const EdgeInsets.all(25.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -592,7 +608,7 @@ class _ProfCoursesPageState extends State<ProfCoursesPage> {
                     )
                   ],
                 ),
-                SizedBox(height: 50),
+                SizedBox(height: 30),
                 rowInfos('Matiere:',course['matiere'].toString().capitalize),
                 SizedBox(height: 25),
                 rowInfos('Date:',DateFormat('dd MMMM yyyy ').format(DateTime.parse(course['date'].toString()).toLocal())),
@@ -706,7 +722,6 @@ class _UpdateProfCoursDialogState extends State<UpdateProfCoursDialog> {
   Category? selectedCategory;
   dynamic? selectedMat;
   List<dynamic> matieres = [];
-  List<Matiere> matiereList = [];
   DateTime? selectedDateTime;
   List<Category> categories = [];
   bool _selectedSigne = false;
@@ -719,7 +734,6 @@ class _UpdateProfCoursDialogState extends State<UpdateProfCoursDialog> {
   void initState()  {
     super.initState();
     // fetchProfMat();
-    fetchMats();
     _date.text = DateFormat('yyyy/MM/dd HH:mm').format(DateTime.parse(widget.courses['date'])).toString();
     // _selectedSigne = widget.courses['isSigned'];
     mat = widget.courses['matiere'];
@@ -770,17 +784,6 @@ class _UpdateProfCoursDialogState extends State<UpdateProfCoursDialog> {
   //     matieres = professorMatieres;
   //   });
   // }
-  Future<void> fetchMats() async {
-    List<Matiere> fetchedMats = await fetchMatiere();
-    setState(() {
-      matiereList = fetchedMats;
-    });
-  }
-  String getMatiereIdFromName(String name) {
-    // Assuming you have a list of matieres named 'matieresList'
-    final matiere = matiereList.firstWhere((mat) => mat.name == name, orElse: () => Matiere(id: '', name: '',  categorieId: '', categorie_name: '', code: '',));
-    return matiere?.id ?? ''; // Return the ID if found, otherwise an empty string
-  }
 
 
 
@@ -925,8 +928,8 @@ class _UpdateProfCoursDialogState extends State<UpdateProfCoursDialog> {
                 // updateProfCours(widget.courses['_id'],widget.ProfId,selectedMat!['_id']!, widget.courses['CM'], date,bool.parse(_isSigned.text));
               } else {
                 // Changes made, get the updated IDs
-                String updatedMatId = await getMatiereIdFromName(mat); // Get updated matière ID
-                print('updatedMatId: $updatedMatId');
+                // String updatedMatId = await getMatiereIdFromName(mat); // Get updated matière ID
+                // print('updatedMatId: $updatedMatId');
                 // updateProfCours(widget.courses['_id'], widget.ProfId, updatedMatId, widget.courses['CM'], date, bool.parse(_isSigned.text));
               }
               ScaffoldMessenger.of(context).showSnackBar(

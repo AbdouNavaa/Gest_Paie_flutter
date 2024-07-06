@@ -73,7 +73,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 // SizedBox(
                 //   height: 20,
                 // ),
-                CircleAvatar(backgroundColor: Colors.blue,maxRadius: 80,
+                CircleAvatar(backgroundColor: Colors.indigo.shade500,maxRadius: 80,
                   child: AnimatedOpacity(
                     opacity: 1.0,
                     duration: Duration(seconds: 2),

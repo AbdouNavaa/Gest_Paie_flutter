@@ -130,6 +130,17 @@ class _HomeScreenState extends State<HomeScreen> {
         // ,
         actions: [
 
+          IconButton(icon:Icon(Icons.output_outlined),
+            onPressed: () async{
+              SharedPreferences prefs = await SharedPreferences.getInstance();
+              await prefs.setString('token', '');
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => KeyboardVisibilityProvider(child: LoginSection())));
+              // MaterialPageRoute(builder: (context) => LoginSection()));
+
+            },
+
+          )
         ],
       )
           ,
@@ -215,7 +226,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       _customCard(
                                         imageUrl: "cours2.png",
                                         item: "Cours Non Signé",
-                                        height: 180,
+                                        height: 160,
                                         width: 160,
                                         duration: "${widget.CNS} Cours",
                                         onPessed: ()async{
@@ -278,7 +289,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       _customCard(
                                         imageUrl: "paie1.png",
                                         item: "Paiements Non Confirmés",
-                                        height: 180,
+                                        height: 160,
                                         width: 160,
                                         duration: "${widget.notif} Paies",
                                         onPessed: ()async{
@@ -306,7 +317,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             setState(() {
                                               widget.notif = paies.length;
                                             });
-                                            print(paies);
+                                            // print('paies:${paies}');
 
                                             Navigator.push(
                                               context,
@@ -347,7 +358,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 _customCard(
                                   imageUrl: "cours3.png",
                                   item: "Mes Cours",
-                                  height: 180,
+                                  height: 160,
                                   width: 160,
                                   duration: "${coursCN} Cours",
                                   onPessed: ()async{
@@ -392,7 +403,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 _customCard(
                                   imageUrl: "paie2.jpg",
                                   item: "Paiements",
-                                  height: 180,
+                                  height: 160,
                                   width: 160,
                                   duration: "${coursPN} Paiements",
                                   onPessed: ()async{
@@ -442,33 +453,33 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ],
                             ),
-                            Row(
+                            Row(mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 _customCard(
                                   imageUrl: "emp2.png",
                                   // imageUrl: "user1.png",
                                   item: "Mon Emploi",
-                                  height: 180,
+                                  height: 160,
                                   width: 160,        duration: "",
                                   onPessed:  () async {
                                     Navigator.push(context, MaterialPageRoute(builder: (context) => EmploiPage(profId: widget.profId!,)));
                                   },
                                 ),
-                                _customCard(
-                                  imageUrl: "logout1.png",
-                                  // imageUrl: "user1.png",
-                                  item: "Se Déconnecter",
-                                  height: 180,
-                                  width: 160,
-                                  duration: "",
-                                  onPessed:  () async {
-                                    SharedPreferences prefs = await SharedPreferences.getInstance();
-                                    await prefs.setString('token', '');
-                                    Navigator.push(context,
-                                        MaterialPageRoute(builder: (context) => KeyboardVisibilityProvider(child: LoginSection())));
-                                    // MaterialPageRoute(builder: (context) => LoginSection()));
-                                  },
-                                ),
+                                // _customCard(
+                                //   imageUrl: "logout1.png",
+                                //   // imageUrl: "user1.png",
+                                //   item: "Se Déconnecter",
+                                //   height: 180,
+                                //   width: 160,
+                                //   duration: "",
+                                //   onPessed:  () async {
+                                //     SharedPreferences prefs = await SharedPreferences.getInstance();
+                                //     await prefs.setString('token', '');
+                                //     Navigator.push(context,
+                                //         MaterialPageRoute(builder: (context) => KeyboardVisibilityProvider(child: LoginSection())));
+                                //     // MaterialPageRoute(builder: (context) => LoginSection()));
+                                //   },
+                                // ),
 
 
                               ],
@@ -700,10 +711,56 @@ class _HomeScreenState extends State<HomeScreen> {
 
                                 ],
                               ),
+                              SizedBox(height: 5,),
+                              Row(
+                                children: [
+                                  _customCard(
+                                    imageUrl: "grps4.jpg",
+                                    item: "Filières",
+                                    duration: "${fillieres?.length} Filières",
+                                    height: 150,
+                                    width: 150,
+                                    onPessed: (){
+                                      Navigator.push(
+                                          context, MaterialPageRoute(builder: (context) => Filliere()));
+                                      // context, MaterialPageRoute(builder: (context) => ()));
+
+                                    },
+                                  ),
+
+                                  SizedBox(width: 15,),
+                                  _customCard(
+                                    imageUrl: "coding1.jpg",
+                                    // imageUrl: "user1.png",
+                                    item: "Matieres",
+                                    duration: "",
+                                    height: 150,
+                                    width: 150,
+                                    onPessed:   () {
+                                      Navigator.push(context, MaterialPageRoute(builder: (context) => Elements()),);
+                                    },
+                                  ),
+
+
+                                ],
+                              ),
 
                               SizedBox(height: 5,),
                               Row(
                                 children: [
+                                  _customCard(
+                                    imageUrl: "emp4.png",
+                                    item: "Emploi",
+                                    duration: "${emplois?.length!} Emploi",
+                                    height: 150,
+                                    width: 150,
+                                    onPessed: (){
+                                      Navigator.push(
+                                          context, MaterialPageRoute(builder: (context) => Emploi()));
+
+                                    },
+                                  ),
+                                  SizedBox(width: 15,),
                                   _customCard(
                                     imageUrl: "cours3.png",
                                     item: "Cours",
@@ -715,8 +772,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                       String token = prefs.getString("token")!;
                                       String role = prefs.getString("role")!;
                                       var response = await http.get(
-                                        Uri.parse('http://192.168.43.73:5000/cours?isPaid=en attente'),
-                                         headers: {
+                                        Uri.parse('http://192.168.43.73:5000/cours'),
+                                        // Uri.parse('http://192.168.43.73:5000/cours?isPaid=en attente'),
+                                        headers: {
                                           'Content-Type': 'application/json',
                                           'Authorization': 'Bearer $token'
                                         },
@@ -726,12 +784,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                       if (response.statusCode == 200) {
                                         List<dynamic> courses = json.decode(
                                             response.body)['cours'];
-                                        // this.coursNum = json.decode(response.body)['data']['countLL'];
-                                        // num heuresTV = json.decode(response.body)['data']['heuresTV'];
-                                        // num sommeTV = json.decode(response.body)['data']['sommeTV'];
                                         setState(() {
                                           this.coursNum = json.decode(response.body)['cours'].length;
-                                          //
                                         });
                                         print('Mes Cours :${json.decode(response.body)['cours']}');
                                         print("Mes CN${coursNum}");
@@ -752,9 +806,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                       }
                                     },
                                   ),
+                                ],
+                              ),
 
-                                  SizedBox(width: 15,),
-                                  _customCard(
+                              SizedBox(height: 5,),
+                              Row(
+                                children: [
+                                 _customCard(
                                     imageUrl: "paie2.jpg",
                                     // imageUrl: "paie3.jpg",
                                     item: "Paiements",
@@ -790,80 +848,27 @@ class _HomeScreenState extends State<HomeScreen> {
                                       }
                                     },
                                   ),
-
-
-                                ],
-                              ),
-
-                              SizedBox(height: 5,),
-                              Row(
-                                children: [
-                                  _customCard(
-                                    imageUrl: "emp4.png",
-                                    item: "Emploi",
-                                    duration: "${emplois?.length!} Emploi",
-                                    height: 150,
-                                    width: 150,
-                                    onPessed: (){
-                                      Navigator.push(
-                                          context, MaterialPageRoute(builder: (context) => Emploi()));
-
-                                    },
-                                  ),
-
-
                                   SizedBox(width: 15,),
+
                                   _customCard(
-                                    imageUrl: "grps4.jpg",
-                                    item: "Filières",
-                                    duration: "${fillieres?.length} Filières",
-                                    height: 150,
-                                    width: 150,
-                                    onPessed: (){
-                                      Navigator.push(
-                                          context, MaterialPageRoute(builder: (context) => Filliere()));
-                                      // context, MaterialPageRoute(builder: (context) => ()));
-
-                                    },
-                                  ),
-
-
-                                ],
-                              ),
-
-                              SizedBox(height: 5,),
-                              Row(
-                                children: [
-                                  _customCard(
-                                    imageUrl: "settings2.png",
+                                    imageUrl: "categ2.png",
                                     // imageUrl: "more1.png",
-                                    item: "Autres",
+                                    item: "Categories",
                                     duration: "",
                                     height: 150,
                                     width: 150,
-                                    onPessed:  () async {
-                                      Navigator.push(context, MaterialPageRoute(builder: (context) =>
-                                          MoreOptionsPage(username: widget.name!, userRole: widget.role!, userEmail: widget.email!)));
+                                    onPessed: () {
+                                      // Navigate to CategoriesPage
+                                      Navigator.push(
+                                          context, MaterialPageRoute(builder: (context) => Categories()));
                                     },
                                   ),
-
-
-                                  SizedBox(width: 15,),
-                                  _customCard(
-                                    imageUrl: "coding1.jpg",
-                                    // imageUrl: "user1.png",
-                                    item: "Matieres",
-                                    duration: "",
-                                    height: 150,
-                                    width: 150,
-                                    onPessed:   () {
-                                      Navigator.push(context, MaterialPageRoute(builder: (context) => Elements()),);
-                                    },
-                                  ),
-
-
                                 ],
                               ),
+
+
+
+
 
 
                             ],
@@ -1456,7 +1461,7 @@ class _MyDrawerState extends State<MyDrawer> {
                   ),
                   ListTile(
                     leading: Icon(Icons.bookmark_remove_outlined, size: _drawerIconSize,color: Colors.black,),
-                    title: Text('Cours a paye',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
+                    title: Text('Cours a Paié',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
                     onTap: ()async{
                       SharedPreferences prefs = await SharedPreferences.getInstance();
                       String token = prefs.getString("token")!;
@@ -1570,19 +1575,19 @@ class _MyDrawerState extends State<MyDrawer> {
             if (role == "admin")
               Column(
                 children: [
-                  ListTile(
-                    leading: Icon(Icons.bar_chart, size: _drawerIconSize, color: Colors.black,),
-                    // leading: Icon(Icons.dashboard_customize_outlined, size: _drawerIconSize, color: Colors.black,),
-                    title: Text('Statustique', style: TextStyle(fontSize: 17, color: Colors.black),),
-                    onTap: (){
-                      Navigator.push(context, MaterialPageRoute(
-                          builder: (context) =>
-                          // ProfesseurInfoPage(
-                          //     id: id, email: email, role: role),
-                          // builder: (context) => LandingScreen(role: role,name: nom,), // Passer le rôle ici
-                          PieChartExample()),);
-                    },
-                  ),
+                  // ListTile(
+                  //   leading: Icon(Icons.bar_chart, size: _drawerIconSize, color: Colors.black,),
+                  //   // leading: Icon(Icons.dashboard_customize_outlined, size: _drawerIconSize, color: Colors.black,),
+                  //   title: Text('Statustique', style: TextStyle(fontSize: 17, color: Colors.black),),
+                  //   onTap: (){
+                  //     Navigator.push(context, MaterialPageRoute(
+                  //         builder: (context) =>
+                  //         // ProfesseurInfoPage(
+                  //         //     id: id, email: email, role: role),
+                  //         // builder: (context) => LandingScreen(role: role,name: nom,), // Passer le rôle ici
+                  //         PieChartExample()),);
+                  //   },
+                  // ),
                   ListTile(
                     leading: Icon(Icons.home_outlined, size: _drawerIconSize, color: Colors.black,),
                     // leading: Icon(Icons.dashboard_customize_outlined, size: _drawerIconSize, color: Colors.black,),
@@ -1612,7 +1617,7 @@ class _MyDrawerState extends State<MyDrawer> {
                     },
                   ),
                   ListTile(
-                    leading: Icon(Icons.featured_play_list_outlined,size: _drawerIconSize,color: Colors.black),
+                    leading: Icon(Icons.code,size: _drawerIconSize,color: Colors.black),
                     title: Text('Matieres', style: TextStyle(fontSize: _drawerFontSize, color: Colors.black),
                     ),
                     onTap: () {
@@ -1629,7 +1634,8 @@ class _MyDrawerState extends State<MyDrawer> {
                       String token = prefs.getString("token")!;
                       String role = prefs.getString("role")!;
                       var response = await http.get(
-                        Uri.parse('http://192.168.43.73:5000/cours?isPaid=en attente'),
+                        Uri.parse('http://192.168.43.73:5000/cours'),
+                        // Uri.parse('http://192.168.43.73:5000/cours?isPaid=en attente'),
                         headers: {
                           'Content-Type': 'application/json',
                           'Authorization': 'Bearer $token'
@@ -1665,49 +1671,50 @@ class _MyDrawerState extends State<MyDrawer> {
                       }
                     },
                   ),
-                  ListTile(
-                    leading: Icon(Icons.bookmark_remove_outlined, size: _drawerIconSize,color: Colors.black,),
-                    title: Text('Cours a paye',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
-                    onTap: ()async{
-                      SharedPreferences prefs = await SharedPreferences.getInstance();
-                      String token = prefs.getString("token")!;
-                      String role = prefs.getString("role")!;
-                      var response = await http.get(
-                        Uri.parse('http://192.168.43.73:5000/cours?isPaid=préparé'),
-                        headers: {
-                          'Content-Type': 'application/json',
-                          'Authorization': 'Bearer $token'
-                        },
-                      );
-                      // print(response.body);
-
-                      if (response.statusCode == 200) {
-                        List<dynamic> courses = json.decode(
-                            response.body)['cours'];
-                        // this.coursNum = json.decode(response.body)['data']['countLL'];
-                        // num heuresTV = json.decode(response.body)['data']['heuresTV'];
-                        // num sommeTV = json.decode(response.body)['data']['sommeTV'];
-                        // setState(() {
-                        this.coursNum = json.decode(response.body)['cours'].length;
-                        //
-                        // });
-                        print('Mes Cours :${json.decode(response.body)['cours']}');
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) =>
-                              CoursesPage(courses: courses,
-                                coursNum: coursNum,paid: true,
-                                // heuresTV: heuresTV,
-                                // sommeTV: sommeTV,
-                                role: role,)),
-                        );
-                      } else {
-                        // Handle error
-                        print('Failed to fetch prof courses. Status Code: ${response
-                            .statusCode}');
-                      }
-                    },
-                  ),
+                  // ListTile(
+                  //   leading: Icon(Icons.bookmark_remove_outlined, size: _drawerIconSize,color: Colors.black,),
+                  //   title: Text('Cours a paye',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
+                  //   onTap: ()async{
+                  //     SharedPreferences prefs = await SharedPreferences.getInstance();
+                  //     String token = prefs.getString("token")!;
+                  //     String role = prefs.getString("role")!;
+                  //     var response = await http.get(
+                  //       Uri.parse('http://192.168.43.73:5000/cours?isPaid=préparé'),
+                  //       // Uri.parse('http://192.168.43.73:5000/cours?isPaid=préparé'),
+                  //       headers: {
+                  //         'Content-Type': 'application/json',
+                  //         'Authorization': 'Bearer $token'
+                  //       },
+                  //     );
+                  //     // print(response.body);
+                  //
+                  //     if (response.statusCode == 200) {
+                  //       List<dynamic> courses = json.decode(
+                  //           response.body)['cours'];
+                  //       // this.coursNum = json.decode(response.body)['data']['countLL'];
+                  //       // num heuresTV = json.decode(response.body)['data']['heuresTV'];
+                  //       // num sommeTV = json.decode(response.body)['data']['sommeTV'];
+                  //       // setState(() {
+                  //       this.coursNum = json.decode(response.body)['cours'].length;
+                  //       //
+                  //       // });
+                  //       print('Mes Cours :${json.decode(response.body)['cours']}');
+                  //       Navigator.push(
+                  //         context,
+                  //         MaterialPageRoute(builder: (context) =>
+                  //             CoursesPage(courses: courses,
+                  //               coursNum: coursNum,paid: true,
+                  //               // heuresTV: heuresTV,
+                  //               // sommeTV: sommeTV,
+                  //               role: role,)),
+                  //       );
+                  //     } else {
+                  //       // Handle error
+                  //       print('Failed to fetch prof courses. Status Code: ${response
+                  //           .statusCode}');
+                  //     }
+                  //   },
+                  // ),
                   // ListTile(
                   //   leading: Icon(Icons.bookmark_added_outlined, size: _drawerIconSize,color: Colors.black,),
                   //   title: Text('Cours  paye',style: TextStyle(fontSize: _drawerFontSize,color: Colors.black),),
@@ -1786,7 +1793,7 @@ class _MyDrawerState extends State<MyDrawer> {
                   ),
                   ListTile(
                     leading: Icon(Icons.sticky_note_2_outlined,size: _drawerIconSize,color: Colors.black),
-                    title: Text('Etat de Paiements', style: TextStyle(fontSize: _drawerFontSize, color: Colors.black),
+                    title: Text('États de Paiements', style: TextStyle(fontSize: _drawerFontSize, color: Colors.black),
                     ),
                     onTap: (){
                       Navigator.push(context, MaterialPageRoute(builder: (context) => EtatPaiemens()));

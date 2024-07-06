@@ -39,8 +39,6 @@ class _ProfesseuresState extends State<Professeures> {
 
   List<Professeur>? filteredItems;
 
-  Matiere? selectedMat;
-  List<Matiere> matieres = [];
   Category? selectedCategory;
   List<Category> categories = [];
   Future<void> fetchCategories() async {
@@ -48,19 +46,6 @@ class _ProfesseuresState extends State<Professeures> {
     setState(() {
       categories = fetchedCategories;
     });
-  }
-  Future<void> updateMatiereList() async {
-    if (selectedCategory != null) {
-      List<Matiere> fetchedmatieres = await fetchMatieresByCategory(selectedCategory!.id);
-      setState(() {
-        matieres = fetchedmatieres;
-      });
-    } else {
-      List<Matiere> fetchedmatieres = await fetchMatiere();
-      setState(() {
-        matieres = fetchedmatieres;
-      });
-    }
   }
 
   void DeleteProf(id) async{
@@ -84,26 +69,6 @@ class _ProfesseuresState extends State<Professeures> {
       });
     }
 
-  }
-  Future<List<Matiere>> fetchMatieresByCategory(String categoryId) async {
-    String apiUrl = 'http://192.168.43.73:5000/categorie/$categoryId/matieres';
-
-    try {
-      final response = await http.get(Uri.parse(apiUrl));
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> responseData = json.decode(response.body);
-        final List<dynamic> matieresData = responseData['matieres'];
-        // print(categoryId);
-        // print(matieresData);
-        List<Matiere> matieres = matieresData.map((data) => Matiere.fromJson(data)).toList();
-        // print(matieres);
-        return matieres;
-      } else {
-        throw Exception('Failed to fetch matières by category');
-      }
-    } catch (error) {
-      throw Exception('Error: $error');
-    }
   }
 
   Future<void> fetchProfDatails(id) async {
@@ -135,7 +100,6 @@ class _ProfesseuresState extends State<Professeures> {
     }
   }
 
-  List<Matiere> matiereList = [];
   List<User> users = [];
   List<Professeur> profs = [];
 
@@ -152,20 +116,6 @@ class _ProfesseuresState extends State<Professeures> {
       print('Erreur: $error');
     });
 
-    fetchMatiere().then((data) {
-      setState(() {
-        matiereList = data; // Assigner la liste renvoyée par emploiesseur à items
-      });
-    }).catchError((error) {
-      print('Erreur: $error');
-    });
-    // fetchProfs().then((data) {
-    //   setState(() {
-    //     profs = data; // Assigner la liste renvoyée par emploiesseur à items
-    //   });
-    // }).catchError((error) {
-    //   print('Erreur: $error');
-    // });
     fetchUser().then((data) {
       setState(() {
         users = data; // Assigner la liste renvoyée par emploiesseur à items
@@ -177,18 +127,6 @@ class _ProfesseuresState extends State<Professeures> {
     fetchCategories();
   }
 
-  String getMatIdFromName(String id) {
-    final professeur = matiereList.firstWhere((prof) => '${prof.id}' == id, orElse: () =>Matiere(id: '', name: 'blbla', categorieId: '', categorie_name: '', code: '',));
-    // print('MatID: ${matiereList}');
-    return professeur.name; // Return the ID if found, otherwise an empty string
-
-  }
-  // Professeur getProfInfos(String id) {
-  //   final professeur = profs.firstWhere((prof) => '${prof.id}' == id, orElse: () =>Professeur(id: ''));
-  //   // print('MatID: ${matiereList}');
-  //   return professeur; // Return the ID if found, otherwise an empty string
-  //
-  // }
   String? getProfBanq(String name) {
     final user = filteredItems!.firstWhere((user) => '${user.nom}' == name, orElse: () =>Professeur(id: 'id'));
     // print('MatID: ${matiereList}');
@@ -202,18 +140,6 @@ class _ProfesseuresState extends State<Professeures> {
     // print(professeur.name);
     return professeur; // Return the ID if found, otherwise an empty string
 
-  }
-  String getMatIdFromNames(String elements) {
-    List<dynamic> ids = elements.split(', '); // Sépare la chaîne en une liste d'IDs
-
-    // Traitez chaque ID individuellement ici
-    String result = '';
-    for (var id in ids) {
-      result += getMatIdFromName((id)) + '   '; // Traitez chaque ID avec getMatIdFromName
-    }
-
-    // print(result);
-    return result.isNotEmpty ? result.substring(0, result.length - 2) : '';
   }
 
   TextEditingController _searchController = TextEditingController();
@@ -514,10 +440,7 @@ class _ProfesseuresState extends State<Professeures> {
                   rowInfos("Nom:","${prof['user']['nom'].toString().capitalize} ${prof['user']['prenom'].toString().capitalize}"),
                   SizedBox(height: 25),
                   rowInfos("Email:","${prof['user']['email']}"),
-                  // rowInfos("Email:","${getUserInfo(prof['user']).email}"),
-                  // SizedBox(height: 25),
-                  // rowInfos("Mobile:","${getUserInfo(prof['user']).mobile}"),
-
+                  // rowInfos("Mobile:","${prof['user']['mobile']}"),
                   SizedBox(height: 25),
                   rowInfos("Banque:","${prof['banque']}"),
 
@@ -603,239 +526,243 @@ class _ProfesseuresState extends State<Professeures> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      ElevatedButton(
-                        onPressed: (){
-                          showDialog(
-                              context: context,
-                              builder: (context) {
-                                return AlertDialog(
-                                  insetPadding: EdgeInsets.only(top: 190,),
-                                  surfaceTintColor: Color(0xB0AFAFA3),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.only(
-                                      topRight: Radius.circular(20),
-                                      topLeft: Radius.circular(20),
-                                    ),
-                                  ),
-                                  title:
-                                  Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    // mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Text("Modifier Profile", style: TextStyle(fontSize: 25),),
-                                      Spacer(),
-                                      InkWell(
-                                        child: Icon(Icons.close),
-                                        onTap: (){
-                                          Navigator.pop(context);
-                                        },
-                                      )
-                                    ],
-                                  ),
-
-                                  content: Container(
-                                    height: 450,
-                                    width: MediaQuery.of(context).size.width,
-                                    // padding: const EdgeInsets.all(25.0),
-                                    child: SingleChildScrollView(
-                                      child: Column(
-                                        // mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          //hmmm
-                                          SizedBox(height: 40),
-                                          TextFormField(
-                                            controller: _mobile,
-                                            keyboardType: TextInputType.text,
-                                            // maxLines: 3,
-                                            decoration: InputDecoration(
-                                                filled: true,
-
-                                                // fillColor: Color(0xA3B0AF1),
-                                                fillColor: Colors.white,
-                                                hintText: "Mobile",
-                                                border: OutlineInputBorder(
-                                                    borderSide: BorderSide.none,gapPadding: 1,
-                                                    borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                                          ),
-
-                                          SizedBox(height: 30),
-                                          TextFormField(
-                                            controller: _account,
-                                            decoration: InputDecoration(
-                                                filled: true,
-
-                                                // fillColor: Color(0xA3B0AF1),
-                                                fillColor: Colors.white,
-                                                hintText: "Compte",
-                                                border: OutlineInputBorder(
-                                                    borderSide: BorderSide.none,gapPadding: 1,
-                                                    borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-                                          ),
-
-                                          SizedBox(height: 30),
-                                          DropdownButtonFormField<String>(
-                                            value: _Banque,
-
-
-                                            items: [
-                                              DropdownMenuItem<String>(
-                                                child: Text('BMCI'),
-                                                value: 'BMCI',
-                                              ),
-                                              DropdownMenuItem<String>(
-                                                child: Text('BNM'),
-                                                value: 'BNM',
-                                              ),
-                                              DropdownMenuItem<String>(
-                                                child: Text('ORABANK'),
-                                                value: 'ORABANK',
-                                              ),
-                                            ],
-                                            onChanged: (value) {
-                                              setState(() {
-                                                _Banque = value!;
-                                              });
-                                            },
-                                            decoration: InputDecoration(
-                                              filled: true,
-                                              fillColor: Colors.white,
-                                              border: OutlineInputBorder(
-                                                borderSide: BorderSide.none,gapPadding: 1,
-                                                borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                                              ),
-                                            ),
-                                          ),
-
-                                          SizedBox(height: 30),
-                                          ElevatedButton(
-                                            onPressed: () async{
-                                              Navigator.of(context).pop();
-
-                                              fetchProfs();
-
-                                              String professeurId = prof['_id']; // Remplacez par l'ID de votre professeur
-                                              Map<String, dynamic> updatedData = {
-
-                                                  'mobile': _mobile.text, // Remplacez par la nouvelle valeur
-                                                  'accountNumero': _account.text, // Remplacez par la nouvelle valeur
-                                                  'banque': _Banque, // Remplacez par la nouvelle valeur
-                                              };
-
-                                              await updateProfesseurInfo(professeurId, updatedData);
-
-                                              setState(() {
-                                                Navigator.pop(context);
-                                              //  fetchProfs();
-                                                   });
-                                            },
-                                            child: Text("Modifier"),
-
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: Color(0xff0fb2ea),
-                                              foregroundColor: Colors.white,
-                                              elevation: 10,
-                                              minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
-                                              // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
-                                              //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
-                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                                            ),
-                                          )
-                                        ],
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: (){
+                            showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    insetPadding: EdgeInsets.only(top: 190,),
+                                    surfaceTintColor: Color(0xB0AFAFA3),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.only(
+                                        topRight: Radius.circular(20),
+                                        topLeft: Radius.circular(20),
                                       ),
-
-
                                     ),
-                                  ),
-
+                                    title:
+                                    Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      // mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        Text("Modifier Profile", style: TextStyle(fontSize: 25),),
+                                        Spacer(),
+                                        InkWell(
+                                          child: Icon(Icons.close),
+                                          onTap: (){
+                                            Navigator.pop(context);
+                                          },
+                                        )
+                                      ],
+                                    ),
+                        
+                                    content: Container(
+                                      height: 450,
+                                      width: MediaQuery.of(context).size.width,
+                                      // padding: const EdgeInsets.all(25.0),
+                                      child: SingleChildScrollView(
+                                        child: Column(
+                                          // mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            //hmmm
+                                            SizedBox(height: 40),
+                                            TextFormField(
+                                              controller: _mobile,
+                                              keyboardType: TextInputType.text,
+                                              // maxLines: 3,
+                                              decoration: InputDecoration(
+                                                  filled: true,
+                        
+                                                  // fillColor: Color(0xA3B0AF1),
+                                                  fillColor: Colors.white,
+                                                  hintText: "Mobile",
+                                                  border: OutlineInputBorder(
+                                                      borderSide: BorderSide.none,gapPadding: 1,
+                                                      borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                                            ),
+                        
+                                            SizedBox(height: 30),
+                                            TextFormField(
+                                              controller: _account,
+                                              decoration: InputDecoration(
+                                                  filled: true,
+                        
+                                                  // fillColor: Color(0xA3B0AF1),
+                                                  fillColor: Colors.white,
+                                                  hintText: "Compte",
+                                                  border: OutlineInputBorder(
+                                                      borderSide: BorderSide.none,gapPadding: 1,
+                                                      borderRadius: BorderRadius.all(Radius.circular(10.0)))),
+                                            ),
+                        
+                                            SizedBox(height: 30),
+                                            DropdownButtonFormField<String>(
+                                              value: _Banque,
+                        
+                        
+                                              items: [
+                                                DropdownMenuItem<String>(
+                                                  child: Text('BMCI'),
+                                                  value: 'BMCI',
+                                                ),
+                                                DropdownMenuItem<String>(
+                                                  child: Text('BNM'),
+                                                  value: 'BNM',
+                                                ),
+                                                DropdownMenuItem<String>(
+                                                  child: Text('ORABANK'),
+                                                  value: 'ORABANK',
+                                                ),
+                                              ],
+                                              onChanged: (value) {
+                                                setState(() {
+                                                  _Banque = value!;
+                                                });
+                                              },
+                                              decoration: InputDecoration(
+                                                filled: true,
+                                                fillColor: Colors.white,
+                                                border: OutlineInputBorder(
+                                                  borderSide: BorderSide.none,gapPadding: 1,
+                                                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                                                ),
+                                              ),
+                                            ),
+                        
+                                            SizedBox(height: 30),
+                                            ElevatedButton(
+                                              onPressed: () async{
+                                                Navigator.of(context).pop();
+                        
+                                                fetchProfs();
+                        
+                                                String professeurId = prof['_id']; // Remplacez par l'ID de votre professeur
+                                                Map<String, dynamic> updatedData = {
+                        
+                                                    'mobile': _mobile.text, // Remplacez par la nouvelle valeur
+                                                    'accountNumero': _account.text, // Remplacez par la nouvelle valeur
+                                                    'banque': _Banque, // Remplacez par la nouvelle valeur
+                                                };
+                        
+                                                await updateProfesseurInfo(professeurId, updatedData);
+                        
+                                                setState(() {
+                                                  Navigator.pop(context);
+                                                //  fetchProfs();
+                                                     });
+                                              },
+                                              child: Text("Modifier"),
+                        
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Color(0xff0fb2ea),
+                                                foregroundColor: Colors.white,
+                                                elevation: 10,
+                                                minimumSize:  Size( MediaQuery.of(context).size.width , MediaQuery.of(context).size.width/7),
+                                                // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width /5,
+                                                //     right: MediaQuery.of(context).size.width /5,bottom: 20,top: 20),
+                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                        
+                        
+                                      ),
+                                    ),
+                        
+                                  );
+                                });
+                          }, // Disable button functionality
+                        
+                          child: Text('Modifier'),
+                          style: ElevatedButton.styleFrom(
+                            surfaceTintColor: Colors.white,
+                            // side: BorderSide(color: Colors.black38),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            elevation: 5,
+                            padding: EdgeInsets.symmetric(horizontal: 25),
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                            textStyle: TextStyle(fontWeight: FontWeight.bold),
+                            // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                          ),
+                        
+                        ),
+                      ),
+                      // ElevatedButton(
+                      //   onPressed:() {
+                      //   Navigator.pop(context);
+                      //     _AddProfMatriere(context,prof['_id']!);
+                      //
+                      //   setState(() {
+                      //     fetchProfs();
+                      //   });
+                      //     },
+                      //
+                      //   child: Text('Ajout Mat'),
+                      //   style: ElevatedButton.styleFrom(
+                      //     surfaceTintColor: Colors.white,
+                      //     // side: BorderSide(color: Colors.black38),
+                      //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      //     elevation: 5,
+                      //     padding: EdgeInsets.symmetric(horizontal: 15),
+                      //     backgroundColor: Colors.blue,
+                      //     foregroundColor: Colors.white,
+                      //     textStyle: TextStyle(fontWeight: FontWeight.bold),
+                      //     // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                      //   ),
+                      //
+                      // ),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                          surfaceTintColor: Color(0xB0AFAFA3),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
+                                  title: Text("Confirmer la suppression"),
+                                  content: Text("Êtes-vous sûr de vouloir supprimer cet élément ?"),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      child: Text("ANNULER"),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                    TextButton(
+                                      child: Text("SUPPRIMER"),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                        
+                                        DeleteProf(prof['professeur']['_id']!);
+                                        setState(() {
+                                          Navigator.pop(context);
+                                        });
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text('Le Professeur a été Supprimer avec succès.')),
+                                        );
+                                      },
+                                    ),
+                                  ],
                                 );
-                              });
-                        }, // Disable button functionality
-
-                        child: Text('Modifier'),
-                        style: ElevatedButton.styleFrom(
-                          surfaceTintColor: Colors.white,
-                          // side: BorderSide(color: Colors.black38),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          elevation: 5,
-                          padding: EdgeInsets.symmetric(horizontal: 25),
-                          backgroundColor: Colors.green,
-                          foregroundColor: Colors.white,
-                          textStyle: TextStyle(fontWeight: FontWeight.bold),
-                          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                        ),
-
-                      ),
-                      ElevatedButton(
-                        onPressed:() {
-                        Navigator.pop(context);
-                          _AddProfMatriere(context,prof['_id']!);
-
-                        setState(() {
-                          fetchProfs();
-                        });
+                              },
+                            );
                           },
-
-                        child: Text('Ajout Mat'),
-                        style: ElevatedButton.styleFrom(
-                          surfaceTintColor: Colors.white,
-                          // side: BorderSide(color: Colors.black38),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          elevation: 5,
-                          padding: EdgeInsets.symmetric(horizontal: 15),
-                          backgroundColor: Colors.blue,
-                          foregroundColor: Colors.white,
-                          textStyle: TextStyle(fontWeight: FontWeight.bold),
-                          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                        ),
-
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                        surfaceTintColor: Color(0xB0AFAFA3),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10),),elevation: 1,
-                                title: Text("Confirmer la suppression"),
-                                content: Text("Êtes-vous sûr de vouloir supprimer cet élément ?"),
-                                actions: <Widget>[
-                                  TextButton(
-                                    child: Text("ANNULER"),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                  ),
-                                  TextButton(
-                                    child: Text("SUPPRIMER"),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-
-                                      DeleteProf(prof['professeur']['_id']!);
-                                      setState(() {
-                                        Navigator.pop(context);
-                                      });
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text('Le Professeur a été Supprimer avec succès.')),
-                                      );
-                                    },
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                        child: Text('Supprimer'),
-                        style: ElevatedButton.styleFrom(
-                          // surfaceTintColor: Colors.white,
-                          // side: BorderSide(color: Colors.black38),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          elevation: 5,
-                          padding: EdgeInsets.symmetric(horizontal: 20),
-                          backgroundColor: Colors.redAccent,
-                          foregroundColor: Colors.white,
-                          textStyle: TextStyle(fontWeight: FontWeight.bold),
-                          // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                          child: Text('Supprimer'),
+                          style: ElevatedButton.styleFrom(
+                            // surfaceTintColor: Colors.white,
+                            // side: BorderSide(color: Colors.black38),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            elevation: 5,
+                            padding: EdgeInsets.symmetric(horizontal: 20),
+                            backgroundColor: Colors.redAccent,
+                            foregroundColor: Colors.white,
+                            textStyle: TextStyle(fontWeight: FontWeight.bold),
+                            // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                          ),
                         ),
                       ),
                     ],
